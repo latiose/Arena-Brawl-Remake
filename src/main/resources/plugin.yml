@@ -1,6 +1,15 @@
-name: Arena brawl
-version: '${version}'
-
-main: org.latios.arenaBrawl.ArenaBrawl
+name: ArenaBrawl
+version: '1.0'
+main: org.latios.arenaBrawl.ArenaBrawlPlugin
 api-version: '26.2'
 load: POSTWORLD
+commands:
+  party:
+    description: Manage your party
+    usage: /party <invite|accept|leave> [player]
+  queue:
+    description: Leave or join the queue
+    usage: /queue <join|leave>
+  abilities:
+    description: Select your abilities
+    usage: /abilities
