@@ -4,14 +4,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
-import org.latios.arenaBrawl.game.Game;
+import org.latios.arenaBrawl.game.Match;
 
 public class ScoreboardManager {
 
-    private HealthUtils healthUtils;
+    private PlayerHealthManager playerHealthManager;
 
-    public ScoreboardManager(HealthUtils healthUtils) {
-        this.healthUtils = healthUtils;
+    public ScoreboardManager(PlayerHealthManager playerHealthManager) {
+        this.playerHealthManager = playerHealthManager;
     }
     public Scoreboard createMatchScoreboard() {
         Scoreboard board = org.bukkit.Bukkit.getScoreboardManager().getNewScoreboard();
@@ -20,14 +20,14 @@ public class ScoreboardManager {
         return board;
     }
 
-    public void assignToPlayers(Game game) {
-        for (Player player : game.getAllPlayers()) {
-            player.setScoreboard(game.getScoreboard());
+    public void assignToPlayers(Match match) {
+        for (Player player : match.getAllPlayers()) {
+            player.setScoreboard(match.getScoreboard());
         }
     }
 
-    public void updateHealthDisplay(Game game) {
-        Scoreboard board = game.getScoreboard();
+    public void updateHealthDisplay(Match match) {
+        Scoreboard board = match.getScoreboard();
         Objective obj = board.getObjective("health_display");
         if (obj == null) return;
 
@@ -36,12 +36,12 @@ public class ScoreboardManager {
         }
 
         int line = 0;
-        for (Player player : game.getRed()) {
-            obj.getScore("§c" + player.getName() + ": " + (int) healthUtils.getHealth(player) + " HP")
+        for (Player player : match.getRed()) {
+            obj.getScore("§c" + player.getName() + ": " + (int) playerHealthManager.getHealth(player) + " HP")
                     .setScore(line--);
         }
-        for (Player player : game.getBlue()) {
-            obj.getScore("§9" + player.getName() + ": " + (int) healthUtils.getHealth(player) + " HP")
+        for (Player player : match.getBlue()) {
+            obj.getScore("§9" + player.getName() + ": " + (int) playerHealthManager.getHealth(player) + " HP")
                     .setScore(line--);
         }
     }

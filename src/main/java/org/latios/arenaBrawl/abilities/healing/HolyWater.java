@@ -7,19 +7,19 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.HealthUtils;
+import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
 public class HolyWater implements Ability {
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
-    private final HealthUtils healthManager;
+    private final PlayerHealthManager healthManager;
 
     private static final double SELF_HEAL = 300;
     private static final double ALLY_HEAL = 50;
 
-    public HolyWater(CooldownManager cooldownManager, TeamManager teamManager, HealthUtils healthManager) {
+    public HolyWater(CooldownManager cooldownManager, TeamManager teamManager, PlayerHealthManager healthManager) {
         this.cost = new CooldownCost(cooldownManager, "holywater", 30000);
         this.teamManager = teamManager;
         this.healthManager = healthManager;

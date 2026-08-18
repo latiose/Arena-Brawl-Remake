@@ -2,7 +2,6 @@ package org.latios.arenaBrawl.game;
 
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.units.qual.A;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.general.*;
@@ -24,12 +23,13 @@ public class ArenaManager {
     private final ScoreboardManager scoreboardManager;
     private final org.bukkit.plugin.Plugin plugin;
     private final EnergyManager energyManager;
-    private final HealthUtils healthUtils;
+    private final PlayerHealthManager playerHealthManager;
     private final HungerManager hungerManager;
+    private final MatchManager matchManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
-                        org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, HealthUtils healthUtils,HungerManager hungerManager) {
+                        org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, PlayerHealthManager playerHealthManager, HungerManager hungerManager, MatchManager matchManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -39,8 +39,9 @@ public class ArenaManager {
         this.scoreboardManager = scoreboardManager;
         this.energyManager = energyManager;
         this.plugin = plugin;
-        this.healthUtils = healthUtils;
+        this.playerHealthManager = playerHealthManager;
         this.hungerManager = hungerManager;
+        this.matchManager = matchManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -50,10 +51,10 @@ public class ArenaManager {
         teamManager.setTeam(p4, Team.BLUE);
 
         List<Player> allPlayers = List.of(p1, p2, p3, p4);
-        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager,energyManager,healthUtils);
+        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager,energyManager, playerHealthManager);
 
         for (Player player : allPlayers) {
-            healthUtils.setMaxHealth(player, MATCH_MAX_HEALTH);
+            playerHealthManager.setMaxHealth(player, MATCH_MAX_HEALTH);
             usageManager.resetPlayer(player);
             energyManager.reset(player);
             hungerManager.reset(player);
@@ -67,11 +68,14 @@ public class ArenaManager {
             AbilityKit.giveDefaultKit(player,abilityManager);
         }
 
-        var game = new Game(List.of(p1, p2), List.of(p3, p4), scoreboardManager.createMatchScoreboard());
-        scoreboardManager.assignToPlayers(game);
-        scoreboardManager.updateHealthDisplay(game);
+        var match = new Match(List.of(p1, p2), List.of(p3, p4), scoreboardManager.createMatchScoreboard());
+        scoreboardManager.assignToPlayers(match);
+        scoreboardManager.updateHealthDisplay(match);
 
-        new MatchScoreboardTask(game, scoreboardManager).runTaskTimer(plugin, 0L, 10L);
+        var task = new MatchScoreboardTask(match, scoreboardManager).runTaskTimer(plugin, 0L, 10L);
+        matchManager.registerMatch(match, task);
+
+        new MatchScoreboardTask(match, scoreboardManager).runTaskTimer(plugin, 0L, 10L);
 
         World arenaWorld = org.bukkit.Bukkit.getWorld("arena_world");
 
@@ -80,5 +84,7 @@ public class ArenaManager {
         p2.teleport(ArenaLocation.redSpawn2(arenaWorld));
         p3.teleport(ArenaLocation.blueSpawn1(arenaWorld));
         p4.teleport(ArenaLocation.blueSpawn2(arenaWorld));
+
+
     }
 }

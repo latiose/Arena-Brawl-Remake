@@ -5,9 +5,6 @@ import org.latios.arenaBrawl.abilities.offensive.FireballAbility;
 import org.latios.arenaBrawl.abilities.offensive.GroundSlam;
 import org.latios.arenaBrawl.abilities.ultimate.ShieldWall;
 import org.latios.arenaBrawl.abilities.utility.ShadowStep;
-import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.HealthUtils;
-import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -29,9 +26,9 @@ public class AbilityRegistry {
     private void registerDefaults() {
         register(AbilitySlot.OFFENSIVE, "fireball", deps -> new FireballAbility(deps.energyManager()));
         register(AbilitySlot.UTILITY, "shadowstep", deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager()));
-        register(AbilitySlot.SUPPORT, "holywater", deps -> new HolyWater(deps.cooldownManager(),deps.teamManager(),deps.healthUtils()));
+        register(AbilitySlot.SUPPORT, "holywater", deps -> new HolyWater(deps.cooldownManager(),deps.teamManager(),deps.playerHealthManager()));
         register(AbilitySlot.ULTIMATE, "shieldwall", deps -> new ShieldWall(deps.cooldownManager(), deps.usageManager()));
-        register(AbilitySlot.OFFENSIVE, "groundslam", deps -> new GroundSlam(deps.teamManager(), deps.energyManager(),deps.healthUtils()));
+        register(AbilitySlot.OFFENSIVE, "groundslam", deps -> new GroundSlam(deps.teamManager(), deps.energyManager(),deps.playerHealthManager()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");

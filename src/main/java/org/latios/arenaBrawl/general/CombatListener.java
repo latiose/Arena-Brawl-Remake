@@ -7,24 +7,24 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 import org.latios.arenaBrawl.abilities.AbilitySlot;
 import org.latios.arenaBrawl.abilities.ultimate.ShieldWall;
 import org.latios.arenaBrawl.team.TeamManager;
-import org.latios.arenaBrawl.general.AbilityItemKeys;
 
 public class CombatListener implements Listener {
 
     private final TeamManager teamManager;
     private final AbilityManager abilityManager;
-    private final HealthUtils healthManager;
+    private final PlayerHealthManager healthManager;
 
-    public CombatListener(TeamManager teamManager, AbilityManager abilityManager, HealthUtils healthUtils) {
+    public CombatListener(TeamManager teamManager, AbilityManager abilityManager, PlayerHealthManager playerHealthManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
-        this.healthManager = healthUtils;
+        this.healthManager = playerHealthManager;
     }
 
     @EventHandler
@@ -88,4 +88,6 @@ public class CombatListener implements Listener {
             event.setCancelled(true);
         }
     }
+
+
 }
