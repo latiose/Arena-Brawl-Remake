@@ -1,0 +1,6 @@
+name: Arena brawl
+version: '${version}'
+
+main: org.latios.arenaBrawl.ArenaBrawl
+api-version: '26.2'
+load: POSTWORLD
