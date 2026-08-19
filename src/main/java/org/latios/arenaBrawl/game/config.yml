@@ -1,0 +1,7 @@
+worlds:
+  arena: "arena"
+  lobby: "lobby"
+lobby-spawn:
+  x: 0
+  y: 100
+  z: 0

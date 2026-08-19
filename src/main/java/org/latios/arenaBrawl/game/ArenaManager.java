@@ -4,6 +4,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
+import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.team.Team;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -14,6 +15,7 @@ public class ArenaManager {
 
     private static final double MATCH_MAX_HEALTH = 2000.0;
 
+    private final ArenaLocation arenaLocation;
     private final TeamManager teamManager;
     private final AbilityManager abilityManager;
     private final AbilityRegistry abilityRegistry;
@@ -26,10 +28,13 @@ public class ArenaManager {
     private final PlayerHealthManager playerHealthManager;
     private final HungerManager hungerManager;
     private final MatchManager matchManager;
+    private final ShieldManager shieldManager;
+    private final DebuffManager debuffManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
-                        org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, PlayerHealthManager playerHealthManager, HungerManager hungerManager, MatchManager matchManager) {
+                        org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, PlayerHealthManager playerHealthManager, HungerManager hungerManager, MatchManager matchManager,ArenaLocation arenaLocation,ShieldManager shieldManager,
+    DebuffManager debuffManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -42,6 +47,9 @@ public class ArenaManager {
         this.playerHealthManager = playerHealthManager;
         this.hungerManager = hungerManager;
         this.matchManager = matchManager;
+        this.arenaLocation = arenaLocation;
+        this.shieldManager = shieldManager;
+        this.debuffManager = debuffManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -51,7 +59,7 @@ public class ArenaManager {
         teamManager.setTeam(p4, Team.BLUE);
 
         List<Player> allPlayers = List.of(p1, p2, p3, p4);
-        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager,energyManager, playerHealthManager);
+        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager,energyManager, shieldManager, debuffManager,playerHealthManager);
 
         for (Player player : allPlayers) {
             playerHealthManager.setMaxHealth(player, MATCH_MAX_HEALTH);
@@ -77,13 +85,19 @@ public class ArenaManager {
 
         new MatchScoreboardTask(match, scoreboardManager).runTaskTimer(plugin, 0L, 10L);
 
-        World arenaWorld = org.bukkit.Bukkit.getWorld("arena_world");
+        if (arenaLocation.getArenaWorld() == null) {
+            for (Player player : allPlayers) {
+                player.sendMessage("§cError: cannot load arena");
+            }
+            plugin.getLogger().severe("Match aborted: arena world is null.");
+            return; // don't start the match without a valid world
+        }
 
 
-        p1.teleport(ArenaLocation.redSpawn1(arenaWorld));
-        p2.teleport(ArenaLocation.redSpawn2(arenaWorld));
-        p3.teleport(ArenaLocation.blueSpawn1(arenaWorld));
-        p4.teleport(ArenaLocation.blueSpawn2(arenaWorld));
+        p1.teleport(arenaLocation.redSpawn1());
+        p2.teleport(arenaLocation.redSpawn2());
+        p3.teleport(arenaLocation.blueSpawn1());
+        p4.teleport(arenaLocation.blueSpawn2());
 
 
     }

@@ -6,6 +6,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
+import org.latios.arenaBrawl.general.ShieldManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,15 +16,16 @@ public class ShieldWall implements Ability {
 
     private static final double DAMAGE_REDUCTION = 0.70;
     private static final long DURATION_MILLIS = 10_000;
-    private static final long CHARGE_TIME_MILLIS = 60_000;
+    private static final long CHARGE_TIME_MILLIS = 45_000;
 
     private final AbilityCost cost;
     private final CooldownManager cooldownManager;
-    private final Map<UUID, Long> activeUntil = new HashMap<>();
+    private final ShieldManager shieldManager;
 
-    public ShieldWall(CooldownManager cooldownManager, UsageManager usageManager) {
+    public ShieldWall(CooldownManager cooldownManager, UsageManager usageManager, ShieldManager shieldManager) {
         this.cooldownManager = cooldownManager;
         this.cost = new UltimateCost(cooldownManager, usageManager, "shieldwall");
+        this.shieldManager = shieldManager;
     }
 
     @Override
@@ -39,17 +41,8 @@ public class ShieldWall implements Ability {
 
     @Override
     public void activate(Player player) {
-        activeUntil.put(player.getUniqueId(), System.currentTimeMillis() + DURATION_MILLIS);
+        shieldManager.applyShield(player, DAMAGE_REDUCTION, DURATION_MILLIS);
         player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 40, 0.5, 1, 0.5);
-    }
-
-    public double getDamageReduction(Player player) {
-        Long expiresAt = activeUntil.get(player.getUniqueId());
-        if (expiresAt == null) return 0.0;
-        if (System.currentTimeMillis() > expiresAt) {
-            activeUntil.remove(player.getUniqueId());
-            return 0.0;
-        }
-        return DAMAGE_REDUCTION;
+        player.sendMessage("§b¡Shield Wall activado! Recibes 70% menos daño durante 10s.");
     }
 }

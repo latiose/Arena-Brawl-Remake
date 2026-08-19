@@ -7,12 +7,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+
 import org.bukkit.persistence.PersistentDataType;
-import org.latios.arenaBrawl.abilities.Ability;
+
 import org.latios.arenaBrawl.abilities.AbilityManager;
-import org.latios.arenaBrawl.abilities.AbilitySlot;
-import org.latios.arenaBrawl.abilities.ultimate.ShieldWall;
+
 import org.latios.arenaBrawl.team.TeamManager;
 
 public class CombatListener implements Listener {
@@ -20,13 +19,14 @@ public class CombatListener implements Listener {
     private final TeamManager teamManager;
     private final AbilityManager abilityManager;
     private final PlayerHealthManager healthManager;
+    private final ShieldManager shieldManager;
 
-    public CombatListener(TeamManager teamManager, AbilityManager abilityManager, PlayerHealthManager playerHealthManager) {
+    public CombatListener(TeamManager teamManager, AbilityManager abilityManager, PlayerHealthManager playerHealthManager, ShieldManager shieldManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.healthManager = playerHealthManager;
+        this.shieldManager = shieldManager;
     }
-
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player victim)) return;
@@ -66,14 +66,10 @@ public class CombatListener implements Listener {
             return;
         }
 
-        Ability ultimate = abilityManager.getAbility(victim, AbilitySlot.ULTIMATE);
-        if (ultimate instanceof ShieldWall shieldWall) {
-            double reduction = shieldWall.getDamageReduction(victim);
-            if (reduction > 0) {
-                damageAmount *= (1 - reduction);
-            }
+        double reduction = shieldManager.getDamageReduction(victim);
+        if (reduction > 0) {
+            damageAmount *= (1 - reduction);
         }
-
         healthManager.damage(victim, damageAmount);
     }
 
