@@ -4,6 +4,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
+import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.team.Team;
@@ -30,11 +31,12 @@ public class ArenaManager {
     private final MatchManager matchManager;
     private final ShieldManager shieldManager;
     private final DebuffManager debuffManager;
+    private final ArmorTierManager armorTierManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
                         org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, PlayerHealthManager playerHealthManager, HungerManager hungerManager, MatchManager matchManager,ArenaLocation arenaLocation,ShieldManager shieldManager,
-    DebuffManager debuffManager) {
+    DebuffManager debuffManager,ArmorTierManager armorTierManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -50,6 +52,7 @@ public class ArenaManager {
         this.arenaLocation = arenaLocation;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
+        this.armorTierManager = armorTierManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -74,6 +77,7 @@ public class ArenaManager {
             }
 
             AbilityKit.giveDefaultKit(player,abilityManager);
+            armorTierManager.equipCosmeticArmor(player);
         }
 
         var match = new Match(List.of(p1, p2), List.of(p3, p4), scoreboardManager.createMatchScoreboard());

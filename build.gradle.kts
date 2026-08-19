@@ -6,10 +6,13 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://ci.lib.co.nz/")
+    maven("https://mvn.lib.co.nz/public")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.+")
+    implementation(group = "me.libraryaddict.disguises", name = "libsdisguises", version = "11.0.13")
 }
 
 java {

@@ -9,7 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -19,11 +21,12 @@ public class DebuffManager {
 
     private final Map<UUID, ActiveDebuff> activeDebuffs = new HashMap<>();
     private final Map<UUID, BossBar> bossBars = new HashMap<>();
+    private final List<DebuffListener> listeners = new ArrayList<>();
 
-    /**
-     * Attempts to apply a debuff. Does nothing if the player already has one active.
-     * Returns true if the debuff was applied, false if it was blocked.
-     */
+    public void registerListener(DebuffListener listener) {
+        listeners.add(listener);
+    }
+
     public boolean tryApply(Player player, DebuffType type, long durationMillis) {
         if (hasActiveDebuff(player)) {
             return false;
@@ -36,15 +39,17 @@ public class DebuffManager {
         bar.setProgress(1.0);
         bossBars.put(player.getUniqueId(), bar);
 
+        for (DebuffListener listener : listeners) {
+            listener.onApplied(player, type);
+        }
+
         return true;
     }
 
     public boolean hasActiveDebuff(Player player) {
         ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
         if (debuff == null) return false;
-
-        long elapsed = System.currentTimeMillis() - debuff.startedAt();
-        return elapsed < debuff.durationMillis();
+        return System.currentTimeMillis() - debuff.startedAt() < debuff.durationMillis();
     }
 
     public boolean hasDebuff(Player player, DebuffType type) {
@@ -52,9 +57,6 @@ public class DebuffManager {
         return debuff != null && debuff.type() == type && hasActiveDebuff(player);
     }
 
-    /**
-     * Called periodically to update the boss bar progress and clear expired debuffs.
-     */
     public void tick(Player player) {
         ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
         if (debuff == null) return;
@@ -74,16 +76,22 @@ public class DebuffManager {
         }
     }
 
+    /** Removes the active debuff, whether it expired naturally or was broken early. */
     public void clear(Player player) {
-        activeDebuffs.remove(player.getUniqueId());
+        ActiveDebuff debuff = activeDebuffs.remove(player.getUniqueId());
         BossBar bar = bossBars.remove(player.getUniqueId());
         if (bar != null) {
             bar.removeAll();
         }
 
-        for (PotionEffect effect : player.getActivePotionEffects()) {
-            if (effect.getType() != PotionEffectType.SPEED || effect.getType() != PotionEffectType.INVISIBILITY) {
-                player.removePotionEffect(effect.getType());
+        if (debuff != null) {
+            for (DebuffListener listener : listeners) {
+                listener.onExpired(player, debuff.type());
+            }
+            for (PotionEffect effect : player.getActivePotionEffects()) {
+                if (effect.getType() != PotionEffectType.SPEED && effect.getType() != PotionEffectType.INVISIBILITY) {
+                    player.removePotionEffect(effect.getType());
+                }
             }
         }
     }

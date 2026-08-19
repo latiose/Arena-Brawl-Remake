@@ -7,6 +7,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -15,14 +16,15 @@ public class HolyWater implements Ability {
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
-
+    private final DebuffManager debuffManager;
     private static final double SELF_HEAL = 300;
     private static final double ALLY_HEAL = 50;
 
-    public HolyWater(CooldownManager cooldownManager, TeamManager teamManager, PlayerHealthManager healthManager) {
+    public HolyWater(CooldownManager cooldownManager, TeamManager teamManager, PlayerHealthManager healthManager,DebuffManager debuffManager) {
         this.cost = new CooldownCost(cooldownManager, "holywater", 30000);
         this.teamManager = teamManager;
         this.healthManager = healthManager;
+        this.debuffManager = debuffManager;
     }
 
     @Override
@@ -47,8 +49,12 @@ public class HolyWater implements Ability {
         }
 
         healthManager.heal(player, SELF_HEAL);
+        debuffManager.clear(player);
+        player.sendMessage("§aYour holy water healed your for " + SELF_HEAL + " health!");
         if (closestAlly != null) {
             healthManager.heal(closestAlly, ALLY_HEAL);
+            debuffManager.clear(closestAlly);
+            closestAlly.sendMessage("§a"+ player.getName() + "'s holy water healed your for " + ALLY_HEAL + " health!");
         }
 
         player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 10);

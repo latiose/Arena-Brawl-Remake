@@ -16,7 +16,7 @@ public class ShieldWall implements Ability {
 
     private static final double DAMAGE_REDUCTION = 0.70;
     private static final long DURATION_MILLIS = 10_000;
-    private static final long CHARGE_TIME_MILLIS = 45_000;
+    private static final long CHARGE_TIME_MILLIS = 60_000;
 
     private final AbilityCost cost;
     private final CooldownManager cooldownManager;
@@ -43,6 +43,5 @@ public class ShieldWall implements Ability {
     public void activate(Player player) {
         shieldManager.applyShield(player, DAMAGE_REDUCTION, DURATION_MILLIS);
         player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 40, 0.5, 1, 0.5);
-        player.sendMessage("§b¡Shield Wall activado! Recibes 70% menos daño durante 10s.");
     }
 }

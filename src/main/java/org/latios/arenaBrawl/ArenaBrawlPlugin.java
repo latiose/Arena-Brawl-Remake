@@ -8,10 +8,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.EnergyRegenTask;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
-import org.latios.arenaBrawl.debuffs.DebuffManager;
-import org.latios.arenaBrawl.debuffs.DebuffTickTask;
-import org.latios.arenaBrawl.debuffs.ImmobilizeListener;
-import org.latios.arenaBrawl.debuffs.StunListener;
+import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
+import org.latios.arenaBrawl.debuffs.*;
 import org.latios.arenaBrawl.game.ArenaLocation;
 import org.latios.arenaBrawl.game.ArenaManager;
 import org.latios.arenaBrawl.game.MatchDisconnectListener;
@@ -55,6 +53,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private ArenaLocation arenaLocation;
     private RatingManager ratingManager;
     private DebuffManager debuffManager;
+    private ArmorTierManager armorTierManager;
     @Override
     public void onEnable() {
         instance = this;
@@ -62,7 +61,9 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         // Managers
         this.shieldManager = new ShieldManager();
         this.debuffManager = new DebuffManager();
+        debuffManager.registerListener(new PolymorphEffectListener());
         this.ratingManager = new RatingManager(this);
+        this.armorTierManager = new ArmorTierManager(ratingManager);
         getCommand("rating").setExecutor(new RatingCommand(ratingManager));
         this.abilityPersistenceManager = new AbilityPersistenceManager(this);
         this.energyManager = new EnergyManager();
@@ -101,20 +102,20 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 cooldownManager,
                 usageManager,
                 scoreboardManager,
-                this, energyManager, playerHealthManager, hungerManager, matchManager, arenaLocation, shieldManager,debuffManager
+                this, energyManager, playerHealthManager, hungerManager, matchManager, arenaLocation, shieldManager,debuffManager,armorTierManager
         );
 
         this.queueManager = new QueueManager(partyManager, arenaManager);
         // Listeners
         getServer().getPluginManager().registerEvents(
-                new AbilityTriggerListener(abilityManager), this
+                new AbilityTriggerListener(abilityManager,debuffManager), this
         );
         getServer().getPluginManager().registerEvents(
                 new InventoryLockListener(), this
         );
 
         getServer().getPluginManager().registerEvents(
-                new CombatListener(teamManager, abilityManager, playerHealthManager,shieldManager), this
+                new CombatListener(teamManager, abilityManager, playerHealthManager,shieldManager,debuffManager), this
         );
         getServer().getPluginManager().registerEvents(
                 new AbilitySelectionLoadListener(abilitySelectionManager), this
@@ -139,6 +140,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new HungerTask(hungerManager,matchManager).runTaskTimer(this, 20L, 20L);
         new AbilityDisplayTask(abilityManager).runTaskTimer(this, 0L, 20L);
         new DebuffTickTask(debuffManager).runTaskTimer(this, 0L, 2L);
+        new PolymorphHealTask(debuffManager, playerHealthManager).runTaskTimer(this, 20L, 20L);
 
         // Commands
         getCommand("party").setExecutor(new PartyCommand(partyManager));

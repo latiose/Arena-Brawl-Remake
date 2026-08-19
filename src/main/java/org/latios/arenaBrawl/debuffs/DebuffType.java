@@ -3,7 +3,8 @@ package org.latios.arenaBrawl.debuffs;
 
 public enum DebuffType {
     IMMOBILIZE("Immobilize"),
-    STUN("Stun");
+    STUN("Stun"),
+    POLYMORPH("Polymorph");
 
     private final String displayName;
 

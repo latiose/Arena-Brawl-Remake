@@ -1,6 +1,9 @@
+// abilities/impl/PolymorphAbility.java
 package org.latios.arenaBrawl.abilities.utility;
 
+import org.bukkit.Effect;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
@@ -13,7 +16,7 @@ import org.latios.arenaBrawl.team.TeamManager;
 
 public class Polymorph implements Ability {
 
-    private static final long IMMOBILIZE_DURATION_MILLIS = 8_000;
+    private static final long DURATION_MILLIS = 8_000;
     private static final double RANGE = 20.0;
 
     private final AbilityCost cost;
@@ -48,16 +51,17 @@ public class Polymorph implements Ability {
         }
 
         if (closestEnemy == null) {
-            player.sendMessage("§cNo enemy in range!.");
+            player.sendMessage("§cNo enemy in range.");
             return;
         }
 
-        boolean applied = debuffManager.tryApply(closestEnemy, DebuffType.IMMOBILIZE, IMMOBILIZE_DURATION_MILLIS);
+        boolean applied = debuffManager.tryApply(closestEnemy, DebuffType.POLYMORPH, DURATION_MILLIS);
 
         if (applied) {
-            closestEnemy.getWorld().spawnParticle(Particle.CRIT, closestEnemy.getLocation(), 20);
-            player.sendMessage("§aYou have turned " + closestEnemy.getName() + " into a sheep!");
-            closestEnemy.sendMessage("§cYou have been turned into a sheep by " + player.getName() + "!");
+            closestEnemy.getWorld().spawnParticle(Particle.POOF, closestEnemy.getLocation(), 25);
+            closestEnemy.getWorld().playSound(closestEnemy.getLocation(), Sound.ENTITY_SHEEP_AMBIENT, 1.0f, 1.0f);
+            player.sendMessage("§aYou have morhped " + closestEnemy.getName() + " into a sheep!");
+            closestEnemy.sendMessage("§c" + player.getName() + " has turned you into a sheep!");
         }
     }
 }

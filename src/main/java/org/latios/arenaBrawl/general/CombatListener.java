@@ -12,6 +12,8 @@ import org.bukkit.persistence.PersistentDataType;
 
 import org.latios.arenaBrawl.abilities.AbilityManager;
 
+import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.team.TeamManager;
 
 public class CombatListener implements Listener {
@@ -20,12 +22,14 @@ public class CombatListener implements Listener {
     private final AbilityManager abilityManager;
     private final PlayerHealthManager healthManager;
     private final ShieldManager shieldManager;
+    private final DebuffManager debuffManager;
 
-    public CombatListener(TeamManager teamManager, AbilityManager abilityManager, PlayerHealthManager playerHealthManager, ShieldManager shieldManager) {
+    public CombatListener(TeamManager teamManager, AbilityManager abilityManager, PlayerHealthManager playerHealthManager, ShieldManager shieldManager,DebuffManager debuffManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.healthManager = playerHealthManager;
         this.shieldManager = shieldManager;
+        this.debuffManager = debuffManager;
     }
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
@@ -62,6 +66,10 @@ public class CombatListener implements Listener {
                 damageAmount = 10;
                 victim.playHurtAnimation(0);
             }
+            if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+                    && debuffManager.hasDebuff(attacker, DebuffType.POLYMORPH)) {
+                debuffManager.clear(attacker); // successfully landing a melee hit breaks Polymorph early
+            }
         } else {
             return;
         }
@@ -70,6 +78,8 @@ public class CombatListener implements Listener {
         if (reduction > 0) {
             damageAmount *= (1 - reduction);
         }
+
+
         healthManager.damage(victim, damageAmount);
     }
 

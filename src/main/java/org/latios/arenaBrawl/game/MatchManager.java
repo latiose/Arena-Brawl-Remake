@@ -107,7 +107,7 @@ public class MatchManager {
             // Uses the loser's own rating against the opponent team's average
             double loss = ratingManager.calculateLoss(ratingManager.getRating(loser), winnersAvg);
             ratingManager.applyDelta(loser, loss);
-            loser.sendMessage(String.format("§aYour new rating is %.2f (+%.2f)", ratingManager.getRating(loser), loss));
+            loser.sendMessage(String.format("§aYour new rating is %.2f (-%.2f)", ratingManager.getRating(loser), loss));
         }
     }
 

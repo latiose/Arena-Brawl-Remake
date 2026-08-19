@@ -5,13 +5,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.debuffs.DebuffType;
 
 public class AbilityTriggerListener implements Listener {
 
     private final AbilityManager abilityManager;
 
-    public AbilityTriggerListener(AbilityManager abilityManager) {
+    private final DebuffManager debuffManager;
+    public AbilityTriggerListener(AbilityManager abilityManager,DebuffManager debuffManager) {
         this.abilityManager = abilityManager;
+        this.debuffManager = debuffManager;
     }
 
     @EventHandler
@@ -22,7 +26,15 @@ public class AbilityTriggerListener implements Listener {
         }
 
         Player player = event.getPlayer();
+        if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)) {
+            player.sendMessage("§cYou are polymorphed and cannot use abilities!");
+            return;
+        }
 
+        if (debuffManager.hasDebuff(player, DebuffType.STUN)) {
+            player.sendMessage("§cYou are stunned and cannot use abilities!");
+            return;
+        }
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK
                 && event.getClickedBlock() != null

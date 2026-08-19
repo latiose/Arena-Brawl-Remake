@@ -3,6 +3,7 @@ version: '1.0'
 main: org.latios.arenaBrawl.ArenaBrawlPlugin
 api-version: '26.2'
 load: POSTWORLD
+softdepend: [LibsDisguises]
 commands:
   party:
     description: Manage your party
