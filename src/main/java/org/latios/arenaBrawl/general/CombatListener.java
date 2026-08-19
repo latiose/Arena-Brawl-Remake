@@ -42,34 +42,43 @@ public class CombatListener implements Listener {
         }
 
         double damageAmount;
+        Player attacker = null;
+        String abilityName = "Melee";
 
         if (event instanceof EntityDamageByEntityEvent entityEvent) {
-            Player attacker = resolveAttacker(entityEvent);
+            attacker = resolveAttacker(entityEvent);
             if (attacker == null) return;
             if (attacker.equals(victim) || teamManager.isAlly(attacker, victim)) return;
 
             damageAmount = event.getDamage();
 
-
             if (entityEvent.getDamager() instanceof Projectile projectile) {
                 Double customDamage = projectile.getPersistentDataContainer().get(
                         AbilityItemKeys.PROJECTILE_DAMAGE, PersistentDataType.DOUBLE
                 );
+                String sourceAbility = projectile.getPersistentDataContainer().get(
+                        AbilityItemKeys.PROJECTILE_SOURCE_ABILITY, PersistentDataType.STRING
+                );
+
                 if (customDamage != null) {
                     damageAmount = customDamage;
-                    victim.playHurtAnimation(0);
+                }
+                if (sourceAbility != null) {
+                    abilityName = sourceAbility;
                 }
             }
 
             if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
                     || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) {
                 damageAmount = 10;
-                victim.playHurtAnimation(0);
+                abilityName = "Melee";
             }
+
             if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
                     && debuffManager.hasDebuff(attacker, DebuffType.POLYMORPH)) {
-                debuffManager.clear(attacker); // successfully landing a melee hit breaks Polymorph early
+                debuffManager.clear(attacker);
             }
+
         } else {
             return;
         }
@@ -79,8 +88,22 @@ public class CombatListener implements Listener {
             damageAmount *= (1 - reduction);
         }
 
-
         healthManager.damage(victim, damageAmount);
+
+        playDamageFeedback(victim);
+        if(!abilityName.equals("Melee")) {
+            attacker.sendMessage(String.format(
+                    "§7[%s] §fYou dealt §c%.1f §fdamage to §e%s", abilityName, damageAmount, victim.getName()
+            ));
+            victim.sendMessage(String.format(
+                    "§7[%s] §e%s §fdealt §c%.1f §fdamage to you", abilityName, attacker.getName(), damageAmount
+            ));
+        }
+    }
+
+    private void playDamageFeedback(Player victim) {
+        victim.playHurtAnimation(0);
+        victim.getWorld().playSound(victim.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_HURT, 1f, 1f);
     }
 
     private Player resolveAttacker(EntityDamageByEntityEvent event) {
