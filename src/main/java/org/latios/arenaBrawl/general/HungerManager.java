@@ -5,8 +5,8 @@ import org.bukkit.entity.Player;
 public class HungerManager {
 
     public static final int MAX_HUNGER = 20;
-    public static final int LOSS_WHILE_SPRINTING = 1;
-    public static final int REGEN_WHILE_IDLE = 3;
+    public static final int LOSS_WHILE_SPRINTING = 2;
+    public static final int REGEN_WHILE_IDLE = 6;
 
     public void tick(Player player) {
         int current = player.getFoodLevel();

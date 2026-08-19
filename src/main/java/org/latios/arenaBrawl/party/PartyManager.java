@@ -57,7 +57,6 @@ public class PartyManager {
         party.removeMember(player);
         parties.remove(player.getUniqueId());
 
-        // Si el líder se va y quedan miembros, disuelve la party entera (simple y predecible)
         if (party.isLeader(player)) {
             for (UUID memberId : party.getMembers()) {
                 parties.remove(memberId);
@@ -65,6 +64,10 @@ public class PartyManager {
         }
     }
 
+    public boolean isLeader(Player player) {
+        Party party = getParty(player);
+        return party.isLeader(player);
+    }
     public boolean isFull(Party party) {
         return party.size() >= MAX_PARTY_SIZE;
     }

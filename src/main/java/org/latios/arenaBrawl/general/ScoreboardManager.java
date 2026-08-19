@@ -15,7 +15,7 @@ public class ScoreboardManager {
     }
     public Scoreboard createMatchScoreboard() {
         Scoreboard board = org.bukkit.Bukkit.getScoreboardManager().getNewScoreboard();
-        Objective obj = board.registerNewObjective("health_display", "dummy", "§c❤ Vida");
+        Objective obj = board.registerNewObjective("health_display", "dummy", "§c❤ HP");
         obj.setDisplaySlot(DisplaySlot.SIDEBAR);
         return board;
     }

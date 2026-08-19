@@ -9,7 +9,7 @@ import java.util.UUID;
 public class EnergyManager {
 
     public static final double MAX_ENERGY = 100.0;
-    public static final double REGEN_PER_SECOND = 10.0;
+    public static final double REGEN_PER_SECOND = 2.0;
 
     private final Map<UUID, Double> energy = new HashMap<>();
 

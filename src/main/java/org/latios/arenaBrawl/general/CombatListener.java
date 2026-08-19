@@ -53,12 +53,14 @@ public class CombatListener implements Listener {
                 );
                 if (customDamage != null) {
                     damageAmount = customDamage;
+                    victim.playHurtAnimation(0);
                 }
             }
 
             if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
                     || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) {
                 damageAmount = 10;
+                victim.playHurtAnimation(0);
             }
         } else {
             return;

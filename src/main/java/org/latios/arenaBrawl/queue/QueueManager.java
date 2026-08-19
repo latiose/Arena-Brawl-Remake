@@ -33,7 +33,7 @@ public class QueueManager {
         Party party = partyManager.getParty(player);
         List<UUID> toQueue = new ArrayList<>();
 
-        if (party != null) {
+        if (party != null && partyManager.isLeader(player)) {
             for (UUID memberId : party.getMembers()) {
                 if (queuedPlayers.contains(memberId)) return false;
                 toQueue.add(memberId);

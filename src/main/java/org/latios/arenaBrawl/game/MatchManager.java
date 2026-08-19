@@ -84,11 +84,9 @@ public class MatchManager {
         player.setGameMode(GameMode.SURVIVAL);
         player.getInventory().clear();
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-
         player.setFoodLevel(20);
         player.setLevel(0);
         player.setExp(0f);
-
         player.teleport(lobbySpawn);
     }
 
