@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.abilities.healing;
 
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
@@ -34,7 +35,7 @@ public class HolyWater implements Ability {
     public AbilityCost getCost() { return cost; }
 
     @Override
-    public void activate(Player player) {
+    public boolean activate(Player player) {
         Player closestAlly = null;
         double closestDistance = Double.MAX_VALUE;
 
@@ -46,6 +47,7 @@ public class HolyWater implements Ability {
                     closestAlly = nearbyPlayer;
                 }
             }
+
         }
 
         healthManager.heal(player, SELF_HEAL);
@@ -57,6 +59,8 @@ public class HolyWater implements Ability {
             closestAlly.sendMessage("§a"+ player.getName() + "'s holy water healed your for " + ALLY_HEAL + " health!");
         }
 
-        player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 10);
+        player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 50);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 1.0f, 1.0f);
+        return true;
     }
 }

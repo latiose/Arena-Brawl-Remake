@@ -25,6 +25,7 @@ public class AbilityManager {
     public void tryActivate(Player player, AbilitySlot slot) {
         Map<AbilitySlot, Ability> abilities = playerAbilities.get(player.getUniqueId());
         if (abilities == null || !abilities.containsKey(slot)) {
+            player.sendMessage("§cYou have no ability assigned to that slot.");
             return;
         }
 
@@ -32,13 +33,16 @@ public class AbilityManager {
         AbilityCost cost = ability.getCost();
 
         if (!cost.canPay(player)) {
-            player.sendMessage("§cCan't use " + ability.getName()
+            player.sendMessage("§cYou can't use " + ability.getName()
                     + " yet (" + cost.describeRemaining(player) + ")");
             return;
         }
 
-        ability.activate(player);
-        cost.pay(player);
+        boolean success = ability.activate(player);
+
+        if (success) {
+            cost.pay(player);
+        }
     }
 
     public Ability getAbility(Player player, AbilitySlot slot) {

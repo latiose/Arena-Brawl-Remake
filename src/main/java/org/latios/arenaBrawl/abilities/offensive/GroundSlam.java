@@ -1,39 +1,45 @@
 package org.latios.arenaBrawl.abilities.offensive;
 
+
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
-import org.latios.arenaBrawl.abilities.cost.EnergyCost;
-import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.PlayerHealthManager;
+import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.team.TeamManager;
 
 public class GroundSlam implements Ability {
 
+    private static final double DAMAGE = 6.0;
+
     private final AbilityCost cost;
     private final TeamManager teamManager;
-    private static final double ENERGY_COST = 100.0;
-    private final PlayerHealthManager playerHealthManager;
-    public GroundSlam(TeamManager teamManager, EnergyManager energyManager, PlayerHealthManager playerHealthManager) {
-        this.cost = new EnergyCost(energyManager, ENERGY_COST);
+    private final CombatService combatService;
+
+    public GroundSlam(CooldownManager cooldownManager, TeamManager teamManager, CombatService combatService) {
+        this.cost = new CooldownCost(cooldownManager, "ground_slam", 10000);
         this.teamManager = teamManager;
-        this.playerHealthManager = playerHealthManager;
+        this.combatService = combatService;
     }
 
     @Override
-    public String getName() { return "Ground slam"; }
+    public String getName() { return "Ground Slam"; }
 
     @Override
     public AbilityCost getCost() { return cost; }
 
     @Override
-    public void activate(Player player) {
+    public boolean activate(Player player) {
+        boolean hitSomeone = false;
         for (Entity nearby : player.getNearbyEntities(4, 3, 4)) {
             if (nearby instanceof Player target && teamManager.isEnemy(player, target)) {
-                playerHealthManager.damage(target, 250);
+                combatService.applyAbilityDamage(player, target, DAMAGE, getName());
                 target.setVelocity(target.getVelocity().setY(0.5));
+                hitSomeone = true;
             }
         }
+        return hitSomeone;
     }
 }

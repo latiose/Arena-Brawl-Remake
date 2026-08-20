@@ -26,7 +26,7 @@ public class FireballAbility implements Ability {
     public AbilityCost getCost() { return cost; }
 
     @Override
-    public void activate(Player player) {
+    public boolean activate(Player player) {
         Fireball fireball = player.launchProjectile(Fireball.class);
         fireball.setYield(0f);
         fireball.setIsIncendiary(false);
@@ -37,5 +37,6 @@ public class FireballAbility implements Ability {
         fireball.getPersistentDataContainer().set(
                 AbilityItemKeys.PROJECTILE_SOURCE_ABILITY, PersistentDataType.STRING, getName()
         );
+        return true;
     }
 }

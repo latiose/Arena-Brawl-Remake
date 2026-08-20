@@ -36,7 +36,7 @@ public class Polymorph implements Ability {
     public AbilityCost getCost() { return cost; }
 
     @Override
-    public void activate(Player player) {
+    public boolean activate(Player player) {
         Player closestEnemy = null;
         double closestDistance = Double.MAX_VALUE;
 
@@ -52,7 +52,7 @@ public class Polymorph implements Ability {
 
         if (closestEnemy == null) {
             player.sendMessage("§cNo enemy in range.");
-            return;
+            return false;
         }
 
         boolean applied = debuffManager.tryApply(closestEnemy, DebuffType.POLYMORPH, DURATION_MILLIS);
@@ -63,5 +63,6 @@ public class Polymorph implements Ability {
             player.sendMessage("§aYou have morhped " + closestEnemy.getName() + " into a sheep!");
             closestEnemy.sendMessage("§c" + player.getName() + " has turned you into a sheep!");
         }
+        return true;
     }
 }

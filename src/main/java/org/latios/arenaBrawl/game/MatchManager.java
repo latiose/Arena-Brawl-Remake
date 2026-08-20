@@ -13,6 +13,7 @@ import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.HungerManager;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.ScoreboardManager;
+import org.latios.arenaBrawl.lobby.LobbyKit;
 import org.latios.arenaBrawl.rating.RatingManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -115,14 +116,18 @@ public class MatchManager {
         activeMatches.remove(player.getUniqueId());
         teamManager.clear(player);
         debuffManager.clear(player);
+        abilityManager.clearAbilities(player);
+
         if (!player.isOnline()) return;
-        player.setGameMode(GameMode.SURVIVAL);
-        player.getInventory().clear();
+
+        player.setGameMode(org.bukkit.GameMode.ADVENTURE);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         player.setFoodLevel(20);
         player.setLevel(0);
         player.setExp(0f);
         player.teleport(lobbySpawn);
+
+        LobbyKit.giveLobbyKit(player);
     }
 
     public boolean isInMatch(Player player) {

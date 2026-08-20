@@ -7,15 +7,17 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
+import org.latios.arenaBrawl.game.MatchManager;
 
 public class AbilityTriggerListener implements Listener {
 
     private final AbilityManager abilityManager;
-
+    private final MatchManager matchManager;
     private final DebuffManager debuffManager;
-    public AbilityTriggerListener(AbilityManager abilityManager,DebuffManager debuffManager) {
+    public AbilityTriggerListener(AbilityManager abilityManager,DebuffManager debuffManager, MatchManager matchManager) {
         this.abilityManager = abilityManager;
         this.debuffManager = debuffManager;
+        this.matchManager = matchManager;
     }
 
     @EventHandler
@@ -25,7 +27,12 @@ public class AbilityTriggerListener implements Listener {
             return;
         }
 
+
         Player player = event.getPlayer();
+
+        if (!matchManager.isInMatch(player)) {
+            return; // abilities only work inside an active match
+        }
         if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)) {
             player.sendMessage("§cYou are polymorphed and cannot use abilities!");
             return;

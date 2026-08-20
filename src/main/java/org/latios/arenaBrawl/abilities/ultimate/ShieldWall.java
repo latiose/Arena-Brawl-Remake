@@ -40,8 +40,9 @@ public class ShieldWall implements Ability {
     }
 
     @Override
-    public void activate(Player player) {
+    public boolean activate(Player player) {
         shieldManager.applyShield(player, DAMAGE_REDUCTION, DURATION_MILLIS);
         player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 40, 0.5, 1, 0.5);
+        return true;
     }
 }

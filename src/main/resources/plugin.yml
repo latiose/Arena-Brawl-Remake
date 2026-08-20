@@ -14,9 +14,9 @@ commands:
   abilities:
     description: Select your abilities
     usage: /abilities
-    rating:
-      description: Shows a player's rating
-      usage: /rating <name>
+  rating:
+    description: Shows a player's rating
+    usage: /rating <name>
   leaderboard:
     description: Shows the top 10 highest rated players
     usage: /leaderboard

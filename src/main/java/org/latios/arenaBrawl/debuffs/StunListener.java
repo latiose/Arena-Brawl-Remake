@@ -8,7 +8,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class StunListener implements Listener {
+public class StunListener implements DebuffListener {
 
     private final DebuffManager debuffManager;
 

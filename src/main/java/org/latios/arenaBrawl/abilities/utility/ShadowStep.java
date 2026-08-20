@@ -36,20 +36,23 @@ public class ShadowStep implements Ability {
     @Override
     public AbilityCost getCost() { return cost; }
 
+
+
     @Override
-    public void activate(Player player) {
+    public boolean activate(Player player) {
         Player target = findEnemyTarget(player);
 
         if (target == null) {
-            player.sendMessage("§cNo enemy in range");
-            return;
+            player.sendMessage("§cNo enemy in your crosshair.");
+            return false;
         }
 
         Location teleportLocation = calculateBehindLocation(player, target);
         player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation(), 20, 0.3, 0.5, 0.3);
         player.teleport(teleportLocation);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,60,2));
         player.getWorld().spawnParticle(Particle.SMOKE, teleportLocation, 20, 0.3, 0.5, 0.3);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,60,2));
+        return true;
     }
 
 

@@ -1,4 +1,4 @@
-// debuffs/DebuffManager.java
+
 package org.latios.arenaBrawl.debuffs;
 
 import org.bukkit.Bukkit;
@@ -17,10 +17,12 @@ import java.util.UUID;
 
 public class DebuffManager {
 
-    private record ActiveDebuff(DebuffType type, long startedAt, long durationMillis) {}
+    private record ActiveDebuff(DebuffType type, long startedAt, long durationMillis) {
+    }
 
     private final Map<UUID, ActiveDebuff> activeDebuffs = new HashMap<>();
     private final Map<UUID, BossBar> bossBars = new HashMap<>();
+    private final Map<UUID, Double> accumulatedDamage = new HashMap<>();
     private final List<DebuffListener> listeners = new ArrayList<>();
 
     public void registerListener(DebuffListener listener) {
@@ -33,6 +35,7 @@ public class DebuffManager {
         }
 
         activeDebuffs.put(player.getUniqueId(), new ActiveDebuff(type, System.currentTimeMillis(), durationMillis));
+        accumulatedDamage.put(player.getUniqueId(), 0.0);
 
         BossBar bar = Bukkit.createBossBar(type.getDisplayName(), BarColor.RED, BarStyle.SOLID);
         bar.addPlayer(player);
@@ -57,6 +60,19 @@ public class DebuffManager {
         return debuff != null && debuff.type() == type && hasActiveDebuff(player);
     }
 
+    /**
+     * Adds damage to the accumulated total for the player's active debuff.
+     * Returns true if the accumulated damage reached the given threshold (caller should then clear the debuff).
+     */
+    public boolean addAccumulatedDamage(Player player, double amount, double breakThreshold) {
+        if (!hasActiveDebuff(player)) return false;
+
+        double total = accumulatedDamage.getOrDefault(player.getUniqueId(), 0.0) + amount;
+        accumulatedDamage.put(player.getUniqueId(), total);
+
+        return total >= breakThreshold;
+    }
+
     public void tick(Player player) {
         ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
         if (debuff == null) return;
@@ -76,9 +92,9 @@ public class DebuffManager {
         }
     }
 
-    /** Removes the active debuff, whether it expired naturally or was broken early. */
     public void clear(Player player) {
         ActiveDebuff debuff = activeDebuffs.remove(player.getUniqueId());
+        accumulatedDamage.remove(player.getUniqueId());
         BossBar bar = bossBars.remove(player.getUniqueId());
         if (bar != null) {
             bar.removeAll();

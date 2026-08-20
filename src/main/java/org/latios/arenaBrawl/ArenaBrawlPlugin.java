@@ -18,6 +18,8 @@ import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.gui.AbilityMenuCommand;
 import org.latios.arenaBrawl.gui.AbilitySelectorGUI;
 import org.latios.arenaBrawl.gui.AbilitySelectorListener;
+import org.latios.arenaBrawl.lobby.LobbyItemListener;
+import org.latios.arenaBrawl.lobby.LobbyJoinListener;
 import org.latios.arenaBrawl.party.PartyCommand;
 import org.latios.arenaBrawl.party.PartyManager;
 import org.latios.arenaBrawl.queue.QueueCommand;
@@ -54,6 +56,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private RatingManager ratingManager;
     private DebuffManager debuffManager;
     private ArmorTierManager armorTierManager;
+    private CombatService combatService;
+
     @Override
     public void onEnable() {
         instance = this;
@@ -61,7 +65,11 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         // Managers
         this.shieldManager = new ShieldManager();
         this.debuffManager = new DebuffManager();
+
         debuffManager.registerListener(new PolymorphEffectListener());
+        //debuffManager.registerListener(new ImmobilizeListener(debuffManager));
+        debuffManager.registerListener( new StunListener(debuffManager));
+        debuffManager.registerListener( new SlowListener(debuffManager));
         this.ratingManager = new RatingManager(this);
         this.armorTierManager = new ArmorTierManager(ratingManager);
         getCommand("rating").setExecutor(new RatingCommand(ratingManager));
@@ -75,6 +83,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.hungerManager = new HungerManager();
         this.partyManager = new PartyManager();
         this.abilityRegistry = new AbilityRegistry();
+        this.combatService = new CombatService(playerHealthManager,shieldManager,debuffManager);
         this.abilitySelectionManager = new AbilitySelectionManager(abilityRegistry, abilityPersistenceManager);
         this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager);
         this.arenaLocation = new ArenaLocation(this);
@@ -108,14 +117,14 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.queueManager = new QueueManager(partyManager, arenaManager);
         // Listeners
         getServer().getPluginManager().registerEvents(
-                new AbilityTriggerListener(abilityManager,debuffManager), this
+                new AbilityTriggerListener(abilityManager,debuffManager,matchManager), this
         );
         getServer().getPluginManager().registerEvents(
                 new InventoryLockListener(), this
         );
 
         getServer().getPluginManager().registerEvents(
-                new CombatListener(teamManager, abilityManager, playerHealthManager,shieldManager,debuffManager), this
+                new CombatListener(teamManager, abilityManager, playerHealthManager,shieldManager,debuffManager,combatService), this
         );
         getServer().getPluginManager().registerEvents(
                 new AbilitySelectionLoadListener(abilitySelectionManager), this
@@ -129,10 +138,18 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new MatchDisconnectListener(matchManager, playerHealthManager), this
         );
         getServer().getPluginManager().registerEvents(new ImmobilizeListener(debuffManager), this);
-        getServer().getPluginManager().registerEvents(new StunListener(debuffManager), this);
+      //  getServer().getPluginManager().registerEvents(new StunListener(debuffManager), this);
+
         for (Player online : Bukkit.getOnlinePlayers()) {
             abilitySelectionManager.loadForPlayer(online);
         }
+        getServer().getPluginManager().registerEvents(
+                new MobSpawnListener(), this
+        );
+        getServer().getPluginManager().registerEvents(new LobbyJoinListener(), this);
+        getServer().getPluginManager().registerEvents(
+                new LobbyItemListener(queueManager, abilitySelectorGUI), this
+        );
 
         // Tasks
         new BaseSpeedTask().runTaskTimer(this, 0L, 10L);
