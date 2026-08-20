@@ -12,8 +12,10 @@ import org.bukkit.persistence.PersistentDataType;
 
 import org.latios.arenaBrawl.abilities.AbilityManager;
 
+import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
+import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
 public class CombatListener implements Listener {
@@ -24,15 +26,19 @@ public class CombatListener implements Listener {
     private final ShieldManager shieldManager;
     private final DebuffManager debuffManager;
     private final CombatService combatService;
+    private final CooldownManager cooldownManager;
+    private final MatchManager matchManager;
 
     public CombatListener(TeamManager teamManager, AbilityManager abilityManager, PlayerHealthManager playerHealthManager, ShieldManager shieldManager,DebuffManager debuffManager,
-                          CombatService combatService) {
+                          CombatService combatService, CooldownManager cooldownManager, MatchManager matchManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.healthManager = playerHealthManager;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
         this.combatService = combatService;
+        this.cooldownManager = cooldownManager;
+        this.matchManager = matchManager;
     }
 
 
@@ -49,42 +55,49 @@ public class CombatListener implements Listener {
         if (!(event instanceof EntityDamageByEntityEvent entityEvent)) return;
 
         Player attacker = resolveAttacker(entityEvent);
+
         if (attacker == null) return;
+
+        if(!matchManager.isInMatch(attacker) || !matchManager.isInMatch(victim)) {return;}
         if (attacker.equals(victim) || teamManager.isAlly(attacker, victim)) return;
 
-        double damageAmount = event.getDamage();
-        String abilityName = "Melee";
+        if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+                || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) {
+
+            if (cooldownManager.isOnCooldown(attacker, "melee_hit")) {
+                return;
+            }
+
+            if (debuffManager.hasDebuff(attacker, DebuffType.POLYMORPH)) {
+                debuffManager.clear(attacker);
+            }
+
+            combatService.applyAbilityDamage(attacker, victim, 10.0, "Melee");
+            cooldownManager.setCooldown(attacker, "melee_hit", 500);
+            return;
+        }
+
 
         if (entityEvent.getDamager() instanceof Projectile projectile) {
+            Boolean isAoe = projectile.getPersistentDataContainer().has(
+                    AbilityItemKeys.PROJECTILE_AOE_RADIUS, PersistentDataType.DOUBLE
+            );
+            if (isAoe) return;
+
             Double customDamage = projectile.getPersistentDataContainer().get(
                     AbilityItemKeys.PROJECTILE_DAMAGE, PersistentDataType.DOUBLE
             );
             String sourceAbility = projectile.getPersistentDataContainer().get(
                     AbilityItemKeys.PROJECTILE_SOURCE_ABILITY, PersistentDataType.STRING
             );
-            if (customDamage != null) damageAmount = customDamage;
-            if (sourceAbility != null) abilityName = sourceAbility;
+
+            double damageAmount = customDamage != null ? customDamage : event.getDamage();
+            String abilityName = sourceAbility != null ? sourceAbility : "Unknown";
+
+            combatService.applyAbilityDamage(attacker, victim, damageAmount, abilityName);
         }
-
-        if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
-                || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) {
-
-            float attackStrength = attacker.getAttackCooldown(); // 0.0 (just swung) to 1.0 (fully charged)
-
-            if (attackStrength < 1.0f) {
-                return; // vanilla-style: block the hit entirely if the swing wasn't fully charged
-            }
-
-            damageAmount = 10;
-            abilityName = "Melee";
-
-            if (debuffManager.hasDebuff(attacker, DebuffType.POLYMORPH)) {
-                debuffManager.clear(attacker);
-            }
-        }
-
-        combatService.applyAbilityDamage(attacker, victim, damageAmount, abilityName);
     }
+
 
     private void playDamageFeedback(Player victim) {
         victim.playHurtAnimation(0);

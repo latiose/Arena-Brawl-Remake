@@ -123,6 +123,7 @@ public class MatchManager {
         player.setGameMode(org.bukkit.GameMode.ADVENTURE);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         player.setFoodLevel(20);
+        healthManager.setMaxHealth(player, 20.0);
         player.setLevel(0);
         player.setExp(0f);
         player.teleport(lobbySpawn);

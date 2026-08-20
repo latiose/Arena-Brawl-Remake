@@ -2,6 +2,7 @@ package org.latios.arenaBrawl.abilities.utility;
 
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -52,6 +53,7 @@ public class ShadowStep implements Ability {
         player.teleport(teleportLocation);
         player.getWorld().spawnParticle(Particle.SMOKE, teleportLocation, 20, 0.3, 0.5, 0.3);
         player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,60,2));
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
         return true;
     }
 

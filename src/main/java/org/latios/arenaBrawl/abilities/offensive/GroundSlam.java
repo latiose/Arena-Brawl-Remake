@@ -1,31 +1,32 @@
 package org.latios.arenaBrawl.abilities.offensive;
 
-
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
-import org.latios.arenaBrawl.abilities.CooldownManager;
-import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
+import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
 public class GroundSlam implements Ability {
 
-    private static final double DAMAGE = 6.0;
-
     private final AbilityCost cost;
     private final TeamManager teamManager;
+    private static final double ENERGY_COST = 100.0;
+    private static final double DAMAGE = 2000;
+
     private final CombatService combatService;
 
-    public GroundSlam(CooldownManager cooldownManager, TeamManager teamManager, CombatService combatService) {
-        this.cost = new CooldownCost(cooldownManager, "ground_slam", 10000);
+    public GroundSlam(TeamManager teamManager, EnergyManager energyManager, CombatService combatService) {
+        this.cost = new EnergyCost(energyManager, ENERGY_COST);
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
 
     @Override
-    public String getName() { return "Ground Slam"; }
+    public String getName() { return "Ground slam"; }
 
     @Override
     public AbilityCost getCost() { return cost; }

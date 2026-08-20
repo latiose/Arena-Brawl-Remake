@@ -31,7 +31,7 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "holywater", deps -> new HolyWater(deps.cooldownManager(),deps.teamManager(),deps.playerHealthManager(), deps.debuffManager()));
         register(AbilitySlot.ULTIMATE, "shieldwall",
                 deps -> new ShieldWall(deps.cooldownManager(), deps.usageManager(), deps.shieldManager()));
-        register(AbilitySlot.OFFENSIVE, "groundslam", deps -> new GroundSlam(deps.teamManager(), deps.energyManager(),deps.playerHealthManager()));
+        register(AbilitySlot.OFFENSIVE, "groundslam", deps -> new GroundSlam(deps.teamManager(), deps.energyManager(),deps.combatService()));
         register(AbilitySlot.UTILITY, "polymorph",
                 deps -> new Polymorph(deps.cooldownManager(), deps.teamManager(), deps.debuffManager()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");

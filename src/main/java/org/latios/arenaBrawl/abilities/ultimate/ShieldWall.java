@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.abilities.ultimate;
 
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
@@ -43,6 +44,7 @@ public class ShieldWall implements Ability {
     public boolean activate(Player player) {
         shieldManager.applyShield(player, DAMAGE_REDUCTION, DURATION_MILLIS);
         player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 40, 0.5, 1, 0.5);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 1.0f);
         return true;
     }
 }

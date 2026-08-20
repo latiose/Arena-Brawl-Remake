@@ -22,6 +22,8 @@ public class VanillaHungerBlockListener implements Listener {
         if (!matchManager.isInMatch(player)) {
             event.setCancelled(true);
         }
+        if(event.getFoodLevel() % 2 == 1)  event.setCancelled(true);
+
     }
 
     @EventHandler

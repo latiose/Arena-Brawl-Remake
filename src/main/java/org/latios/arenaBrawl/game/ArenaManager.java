@@ -32,11 +32,12 @@ public class ArenaManager {
     private final ShieldManager shieldManager;
     private final DebuffManager debuffManager;
     private final ArmorTierManager armorTierManager;
+    private final CombatService combatService;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
                         org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, PlayerHealthManager playerHealthManager, HungerManager hungerManager, MatchManager matchManager,ArenaLocation arenaLocation,ShieldManager shieldManager,
-    DebuffManager debuffManager,ArmorTierManager armorTierManager) {
+    DebuffManager debuffManager,ArmorTierManager armorTierManager, CombatService combatService) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -53,6 +54,7 @@ public class ArenaManager {
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
         this.armorTierManager = armorTierManager;
+        this.combatService = combatService;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -62,7 +64,7 @@ public class ArenaManager {
         teamManager.setTeam(p4, Team.BLUE);
 
         List<Player> allPlayers = List.of(p1, p2, p3, p4);
-        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager,energyManager, shieldManager, debuffManager,playerHealthManager);
+        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager,energyManager, shieldManager, debuffManager,playerHealthManager,combatService);
 
         for (Player player : allPlayers) {
             playerHealthManager.setMaxHealth(player, MATCH_MAX_HEALTH);

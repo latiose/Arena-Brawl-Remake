@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.abilities;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.ShieldManager;
@@ -15,5 +16,6 @@ public record AbilityDependencies(
         EnergyManager energyManager,
         ShieldManager shieldManager,
         DebuffManager debuffManager,
-        PlayerHealthManager playerHealthManager
+        PlayerHealthManager playerHealthManager,
+        CombatService combatService
 ) {}

@@ -111,7 +111,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 cooldownManager,
                 usageManager,
                 scoreboardManager,
-                this, energyManager, playerHealthManager, hungerManager, matchManager, arenaLocation, shieldManager,debuffManager,armorTierManager
+                this, energyManager, playerHealthManager, hungerManager, matchManager, arenaLocation, shieldManager,debuffManager,armorTierManager,combatService
         );
 
         this.queueManager = new QueueManager(partyManager, arenaManager);
@@ -124,10 +124,16 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         );
 
         getServer().getPluginManager().registerEvents(
-                new CombatListener(teamManager, abilityManager, playerHealthManager,shieldManager,debuffManager,combatService), this
+                new CombatListener(teamManager, abilityManager, playerHealthManager,shieldManager,debuffManager,combatService,cooldownManager,matchManager), this
         );
         getServer().getPluginManager().registerEvents(
                 new AbilitySelectionLoadListener(abilitySelectionManager), this
+        );
+        getServer().getPluginManager().registerEvents(
+                new NaturalRegenListener(), this
+        );
+        getServer().getPluginManager().registerEvents(
+                new ProjectileAoeListener(teamManager, combatService), this
         );
         getServer().getPluginManager().registerEvents(
                 new AbilitySelectorListener(abilityRegistry, abilitySelectionManager, abilitySelectorGUI), this);
@@ -146,7 +152,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(
                 new MobSpawnListener(), this
         );
-        getServer().getPluginManager().registerEvents(new LobbyJoinListener(), this);
+        getServer().getPluginManager().registerEvents(new LobbyJoinListener(matchManager,  teamManager,
+                 abilityManager,  debuffManager), this);
         getServer().getPluginManager().registerEvents(
                 new LobbyItemListener(queueManager, abilitySelectorGUI), this
         );
@@ -155,7 +162,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new BaseSpeedTask().runTaskTimer(this, 0L, 10L);
         new EnergyRegenTask(energyManager,matchManager).runTaskTimer(this, 20L, 4L);
         new HungerTask(hungerManager,matchManager).runTaskTimer(this, 20L, 20L);
-        new AbilityDisplayTask(abilityManager).runTaskTimer(this, 0L, 20L);
+        new AbilityDisplayTask(abilityManager).runTaskTimer(this, 0L, 2L);
         new DebuffTickTask(debuffManager).runTaskTimer(this, 0L, 2L);
         new PolymorphHealTask(debuffManager, playerHealthManager).runTaskTimer(this, 20L, 20L);
 

@@ -52,10 +52,11 @@ public class HolyWater implements Ability {
 
         healthManager.heal(player, SELF_HEAL);
         debuffManager.clear(player);
-        player.sendMessage("§aYour holy water healed your for " + SELF_HEAL + " health!");
+        player.sendMessage("§aYour holy water healed you for " + SELF_HEAL + " health!");
         if (closestAlly != null) {
             healthManager.heal(closestAlly, ALLY_HEAL);
             debuffManager.clear(closestAlly);
+            player.sendMessage("§aYour holy water healed " + closestAlly.getName() + " for " + ALLY_HEAL + " health!");
             closestAlly.sendMessage("§a"+ player.getName() + "'s holy water healed your for " + ALLY_HEAL + " health!");
         }
 

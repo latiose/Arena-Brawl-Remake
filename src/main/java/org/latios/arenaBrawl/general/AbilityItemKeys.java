@@ -15,4 +15,7 @@ public class AbilityItemKeys {
     public static final NamespacedKey PROJECTILE_SOURCE_ABILITY = new NamespacedKey(
             ArenaBrawlPlugin.getInstance(), "projectile_source_ability"
     );
+    public static final NamespacedKey PROJECTILE_AOE_RADIUS = new NamespacedKey(
+            ArenaBrawlPlugin.getInstance(), "projectile_aoe_radius"
+    );
 }

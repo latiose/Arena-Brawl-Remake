@@ -23,6 +23,7 @@ public class PolymorphHealTask extends BukkitRunnable {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)) {
                 healthManager.heal(player, HEAL_PER_SECOND);
+                player.sendMessage("§aPolymorph healed you for  " + HEAL_PER_SECOND + " health!");
             }
         }
     }

@@ -26,8 +26,8 @@ public class ArenaLocation {
         return arenaWorld;
     }
 
-    public Location redSpawn1() { return new Location(arenaWorld, 10, 100, 0); }
-    public Location redSpawn2() { return new Location(arenaWorld, 8, 100, 0); }
-    public Location blueSpawn1() { return new Location(arenaWorld, -10, 100, 0); }
-    public Location blueSpawn2() { return new Location(arenaWorld, -8, 100, 0); }
+    public Location redSpawn1() { return new Location(arenaWorld, 10, 0, 0); }
+    public Location redSpawn2() { return new Location(arenaWorld, 8, 0, 0); }
+    public Location blueSpawn1() { return new Location(arenaWorld, -10, 0, 0); }
+    public Location blueSpawn2() { return new Location(arenaWorld, -8, 0, 0); }
 }

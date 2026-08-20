@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.latios.arenaBrawl.abilities.healing.HolyWater; // Importar HolyWater
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.MatchManager;
@@ -14,7 +15,8 @@ public class AbilityTriggerListener implements Listener {
     private final AbilityManager abilityManager;
     private final MatchManager matchManager;
     private final DebuffManager debuffManager;
-    public AbilityTriggerListener(AbilityManager abilityManager,DebuffManager debuffManager, MatchManager matchManager) {
+
+    public AbilityTriggerListener(AbilityManager abilityManager, DebuffManager debuffManager, MatchManager matchManager) {
         this.abilityManager = abilityManager;
         this.debuffManager = debuffManager;
         this.matchManager = matchManager;
@@ -22,24 +24,13 @@ public class AbilityTriggerListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_AIR
-                && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
-
 
         Player player = event.getPlayer();
 
         if (!matchManager.isInMatch(player)) {
-            return; // abilities only work inside an active match
-        }
-        if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)) {
-            player.sendMessage("§cYou are polymorphed and cannot use abilities!");
-            return;
-        }
-
-        if (debuffManager.hasDebuff(player, DebuffType.STUN)) {
-            player.sendMessage("§cYou are stunned and cannot use abilities!");
             return;
         }
 
@@ -61,6 +52,19 @@ public class AbilityTriggerListener implements Listener {
 
         if (abilitySlot == null) {
             return;
+        }
+
+        Ability currentAbility = abilityManager.getAbility(player, abilitySlot);
+
+        if (debuffManager.hasDebuff(player, DebuffType.STUN)) {
+            player.sendMessage("§cYou are stunned and cannot use abilities!");
+            return;
+        }
+        if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)) {
+            if (!(currentAbility instanceof HolyWater)) {
+                player.sendMessage("§cYou are polymorphed and cannot use abilities!");
+                return;
+            }
         }
 
         event.setCancelled(true);

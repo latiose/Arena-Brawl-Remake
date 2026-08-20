@@ -3,5 +3,5 @@ worlds:
   lobby: "lobby"
 lobby-spawn:
   x: 0
-  y: 100
+  y: 150
   z: 0
