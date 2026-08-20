@@ -6,24 +6,32 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.latios.arenaBrawl.queue.QueueManager;
 
 public class PartyCommand implements CommandExecutor {
 
     private final PartyManager partyManager;
+    private final QueueManager queueManager;
 
-    public PartyCommand(PartyManager partyManager) {
+    public PartyCommand(PartyManager partyManager, QueueManager queueManager) {
         this.partyManager = partyManager;
+        this.queueManager = queueManager;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Only players allowed.");
+            sender.sendMessage("Players only.");
+            return true;
+        }
+
+        if (queueManager.isQueued(player)) {
+            player.sendMessage("§cLeave the queue before managing your party.");
             return true;
         }
 
         if (args.length == 0) {
-            player.sendMessage("§cUse: /party <invite|accept|leave> [player]");
+            player.sendMessage("§cUsage: /party <invite|accept|leave> [player]");
             return true;
         }
 
@@ -31,7 +39,7 @@ public class PartyCommand implements CommandExecutor {
             case "invite" -> handleInvite(player, args);
             case "accept" -> handleAccept(player, args);
             case "leave" -> handleLeave(player);
-            default -> player.sendMessage("§cUnknown command.");
+            default -> player.sendMessage("§cUnknown subcommand.");
         }
 
         return true;
@@ -39,7 +47,7 @@ public class PartyCommand implements CommandExecutor {
 
     private void handleInvite(Player player, String[] args) {
         if (args.length != 2) {
-            player.sendMessage("§cUse: /party invite <player>");
+            player.sendMessage("§cUsage: /party invite <player>");
             return;
         }
 
@@ -49,14 +57,19 @@ public class PartyCommand implements CommandExecutor {
             return;
         }
 
+        if (queueManager.isQueued(target)) {
+            player.sendMessage("§c" + target.getName() + " is currently in queue and can't be invited.");
+            return;
+        }
+
         if (target.equals(player)) {
-            player.sendMessage("§cYou cannot invite yourself.");
+            player.sendMessage("§cYou can't invite yourself.");
             return;
         }
 
         Party party = partyManager.getParty(player);
         if (party != null && !party.isLeader(player)) {
-            player.sendMessage("§cOnly the party leader is allowed to invite other players.");
+            player.sendMessage("§cOnly the party leader can invite.");
             return;
         }
 
@@ -70,13 +83,13 @@ public class PartyCommand implements CommandExecutor {
         }
 
         partyManager.invite(player, target);
-        player.sendMessage("§a" + target.getName() + " has been invited to your party");
-        target.sendMessage("§e" + player.getName() + " has invited you to their party. §a/party accept " + player.getName());
+        player.sendMessage("§aInvite sent to " + target.getName() + ".");
+        target.sendMessage("§e" + player.getName() + " invited you to their party. §a/party accept " + player.getName());
     }
 
     private void handleAccept(Player player, String[] args) {
         if (args.length != 2) {
-            player.sendMessage("§cUse: /party accept <player>");
+            player.sendMessage("§cUsage: /party accept <leader>");
             return;
         }
 
@@ -87,28 +100,28 @@ public class PartyCommand implements CommandExecutor {
         }
 
         if (!partyManager.hasPendingInvite(player, leader)) {
-            player.sendMessage("§cYou have no pending invites from given player.");
+            player.sendMessage("§cYou have no pending invite from that player.");
             return;
         }
 
         Party leaderParty = partyManager.getParty(leader);
         if (leaderParty != null && partyManager.isFull(leaderParty)) {
-            player.sendMessage("§cParty is already full.");
+            player.sendMessage("§cThe party is already full.");
             return;
         }
 
         partyManager.acceptInvite(player, leader);
-        player.sendMessage("§aYou have joined " + leader.getName() + "'s party.");
-        leader.sendMessage("§a" + player.getName() + " has joined your party.");
+        player.sendMessage("§aYou joined " + leader.getName() + "'s party.");
+        leader.sendMessage("§a" + player.getName() + " joined your party.");
     }
 
     private void handleLeave(Player player) {
         if (!partyManager.isInParty(player)) {
-            player.sendMessage("§cYou are not in a party.");
+            player.sendMessage("§cYou're not in a party.");
             return;
         }
 
         partyManager.leaveParty(player);
-        player.sendMessage("§eYou have left the party.");
+        player.sendMessage("§eYou left the party.");
     }
 }

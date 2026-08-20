@@ -34,6 +34,14 @@ public class DebuffManager {
             return false;
         }
 
+        // The player might still have a stale entry that expired by time but was never
+        // formally cleared yet (clear() only runs via the periodic tick task). Force a
+        // clean-up here to avoid orphaned boss bars / lingering potion effects before
+        // overwriting the map entries with a new debuff.
+        if (activeDebuffs.containsKey(player.getUniqueId())) {
+            clear(player);
+        }
+
         activeDebuffs.put(player.getUniqueId(), new ActiveDebuff(type, System.currentTimeMillis(), durationMillis));
         accumulatedDamage.put(player.getUniqueId(), 0.0);
 
@@ -104,7 +112,8 @@ public class DebuffManager {
             for (DebuffListener listener : listeners) {
                 listener.onExpired(player, debuff.type());
             }
-            for (PotionEffect effect : player.getActivePotionEffects()) {
+            List<PotionEffect> effectsSnapshot = new ArrayList<>(player.getActivePotionEffects());
+            for (PotionEffect effect : effectsSnapshot) {
                 if (effect.getType() != PotionEffectType.SPEED && effect.getType() != PotionEffectType.INVISIBILITY) {
                     player.removePotionEffect(effect.getType());
                 }

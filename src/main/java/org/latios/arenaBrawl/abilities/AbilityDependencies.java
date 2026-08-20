@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.entity.Player;
+import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.CombatService;
@@ -17,5 +18,6 @@ public record AbilityDependencies(
         ShieldManager shieldManager,
         DebuffManager debuffManager,
         PlayerHealthManager playerHealthManager,
-        CombatService combatService
+        CombatService combatService,
+        OrbitShieldManager orbitShieldManager
 ) {}

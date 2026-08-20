@@ -14,6 +14,7 @@ public class PartyManager {
     private final Map<UUID, Party> parties = new HashMap<>();
     private final Map<UUID, UUID> pendingInvites = new HashMap<>();
 
+
     public Party getParty(Player player) {
         return parties.get(player.getUniqueId());
     }

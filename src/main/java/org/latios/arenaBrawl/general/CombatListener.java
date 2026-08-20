@@ -1,6 +1,8 @@
 package org.latios.arenaBrawl.general;
 
 import io.papermc.paper.event.entity.EntityKnockbackEvent;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -8,11 +10,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 import org.latios.arenaBrawl.abilities.AbilityManager;
 
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.MatchManager;
@@ -28,9 +32,11 @@ public class CombatListener implements Listener {
     private final CombatService combatService;
     private final CooldownManager cooldownManager;
     private final MatchManager matchManager;
+    private final OrbitShieldManager orbitShieldManager;
+
 
     public CombatListener(TeamManager teamManager, AbilityManager abilityManager, PlayerHealthManager playerHealthManager, ShieldManager shieldManager,DebuffManager debuffManager,
-                          CombatService combatService, CooldownManager cooldownManager, MatchManager matchManager) {
+                          CombatService combatService, CooldownManager cooldownManager, MatchManager matchManager,OrbitShieldManager orbitShieldManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.healthManager = playerHealthManager;
@@ -39,6 +45,7 @@ public class CombatListener implements Listener {
         this.combatService = combatService;
         this.cooldownManager = cooldownManager;
         this.matchManager = matchManager;
+        this.orbitShieldManager = orbitShieldManager;
     }
 
 
@@ -55,12 +62,13 @@ public class CombatListener implements Listener {
         if (!(event instanceof EntityDamageByEntityEvent entityEvent)) return;
 
         Player attacker = resolveAttacker(entityEvent);
-
         if (attacker == null) return;
 
-        if(!matchManager.isInMatch(attacker) || !matchManager.isInMatch(victim)) {return;}
+        if (!matchManager.isInMatch(attacker) || !matchManager.isInMatch(victim)) return;
         if (attacker.equals(victim) || teamManager.isAlly(attacker, victim)) return;
-
+        if (debuffManager.hasDebuff(attacker, DebuffType.STUN)) {
+            return; // stunned players cannot deal damage of any kind
+        }
         if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
                 || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) {
 
@@ -76,7 +84,6 @@ public class CombatListener implements Listener {
             cooldownManager.setCooldown(attacker, "melee_hit", 500);
             return;
         }
-
 
         if (entityEvent.getDamager() instanceof Projectile projectile) {
             Boolean isAoe = projectile.getPersistentDataContainer().has(
@@ -115,6 +122,16 @@ public class CombatListener implements Listener {
     public void onKnockback(EntityKnockbackEvent event) {
         if (event.getEntity() instanceof Player) {
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        AttributeInstance attackSpeed = player.getAttribute(Attribute.ATTACK_SPEED);
+
+        if (attackSpeed != null) {
+            attackSpeed.setBaseValue(1024.0);
         }
     }
 

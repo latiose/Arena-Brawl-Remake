@@ -1,6 +1,8 @@
 package org.latios.arenaBrawl.abilities;
 
-import org.latios.arenaBrawl.abilities.healing.HolyWater;
+import org.latios.arenaBrawl.abilities.support.StarShield;
+import org.latios.arenaBrawl.abilities.support.BoneShield;
+import org.latios.arenaBrawl.abilities.support.HolyWater;
 import org.latios.arenaBrawl.abilities.utility.Polymorph;
 import org.latios.arenaBrawl.abilities.offensive.FireballAbility;
 import org.latios.arenaBrawl.abilities.offensive.GroundSlam;
@@ -34,6 +36,10 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "groundslam", deps -> new GroundSlam(deps.teamManager(), deps.energyManager(),deps.combatService()));
         register(AbilitySlot.UTILITY, "polymorph",
                 deps -> new Polymorph(deps.cooldownManager(), deps.teamManager(), deps.debuffManager()));
+        register(AbilitySlot.SUPPORT, "boneshield",
+                deps -> new BoneShield(deps.cooldownManager(), deps.orbitShieldManager()));
+        register(AbilitySlot.SUPPORT, "starshield",
+                deps -> new StarShield(deps.cooldownManager(), deps.orbitShieldManager()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");

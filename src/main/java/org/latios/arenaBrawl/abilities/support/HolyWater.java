@@ -1,4 +1,4 @@
-package org.latios.arenaBrawl.abilities.healing;
+package org.latios.arenaBrawl.abilities.support;
 
 import org.bukkit.Particle;
 import org.bukkit.Sound;

@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 
+import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.HungerManager;
@@ -34,11 +35,12 @@ public class MatchManager {
     private final RatingManager ratingManager;
     private final Map<UUID, Match> activeMatches = new HashMap<>();
     private final Map<Match, BukkitTask> scoreboardTasks = new HashMap<>();
-    private DebuffManager debuffManager;
+    private final DebuffManager debuffManager;
+    private final OrbitShieldManager orbitShieldManager;
 
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         EnergyManager energyManager, HungerManager hungerManager,
-                        ScoreboardManager scoreboardManager, Location lobbySpawn,RatingManager ratingManager,DebuffManager debuffManager) {
+                        ScoreboardManager scoreboardManager, Location lobbySpawn,RatingManager ratingManager,DebuffManager debuffManager,OrbitShieldManager orbitShieldManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -48,6 +50,7 @@ public class MatchManager {
         this.lobbySpawn = lobbySpawn;
         this.ratingManager = ratingManager;
         this.debuffManager = debuffManager;
+        this.orbitShieldManager = orbitShieldManager;
     }
 
     public void registerMatch(Match match, BukkitTask scoreboardTask) {
@@ -117,7 +120,7 @@ public class MatchManager {
         teamManager.clear(player);
         debuffManager.clear(player);
         abilityManager.clearAbilities(player);
-
+        orbitShieldManager.clear(player);
         if (!player.isOnline()) return;
 
         player.setGameMode(org.bukkit.GameMode.ADVENTURE);

@@ -23,7 +23,7 @@ public class LeaderboardCommand implements CommandExecutor {
         List<Map.Entry<String, Double>> top = ratingManager.getTopRatings(TOP_SIZE);
 
         if (top.isEmpty()) {
-            sender.sendMessage("§eAún no hay ratings registrados.");
+            sender.sendMessage("§eThe leaderboard is empty!.");
             return true;
         }
 

@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.game;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -33,11 +34,12 @@ public class ArenaManager {
     private final DebuffManager debuffManager;
     private final ArmorTierManager armorTierManager;
     private final CombatService combatService;
+    private final OrbitShieldManager orbitShieldManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
                         org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, PlayerHealthManager playerHealthManager, HungerManager hungerManager, MatchManager matchManager,ArenaLocation arenaLocation,ShieldManager shieldManager,
-    DebuffManager debuffManager,ArmorTierManager armorTierManager, CombatService combatService) {
+    DebuffManager debuffManager,ArmorTierManager armorTierManager, CombatService combatService,OrbitShieldManager orbitShieldManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -55,6 +57,7 @@ public class ArenaManager {
         this.debuffManager = debuffManager;
         this.armorTierManager = armorTierManager;
         this.combatService = combatService;
+        this.orbitShieldManager = orbitShieldManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -64,7 +67,7 @@ public class ArenaManager {
         teamManager.setTeam(p4, Team.BLUE);
 
         List<Player> allPlayers = List.of(p1, p2, p3, p4);
-        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager,energyManager, shieldManager, debuffManager,playerHealthManager,combatService);
+        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager,energyManager, shieldManager, debuffManager,playerHealthManager,combatService,orbitShieldManager);
 
         for (Player player : allPlayers) {
             playerHealthManager.setMaxHealth(player, MATCH_MAX_HEALTH);

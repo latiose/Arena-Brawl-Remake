@@ -5,7 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.latios.arenaBrawl.abilities.healing.HolyWater; // Importar HolyWater
+import org.latios.arenaBrawl.abilities.support.HolyWater; // Importar HolyWater
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.MatchManager;
@@ -56,16 +56,14 @@ public class AbilityTriggerListener implements Listener {
 
         Ability currentAbility = abilityManager.getAbility(player, abilitySlot);
 
-        if (debuffManager.hasDebuff(player, DebuffType.STUN)) {
-            player.sendMessage("§cYou are stunned and cannot use abilities!");
-            return;
-        }
-        if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)) {
+        if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)
+                || debuffManager.hasDebuff(player, DebuffType.STUN)) {
             if (!(currentAbility instanceof HolyWater)) {
-                player.sendMessage("§cYou are polymorphed and cannot use abilities!");
+                player.sendMessage("§cYou can't use abilities right now!");
                 return;
             }
         }
+
 
         event.setCancelled(true);
         abilityManager.tryActivate(player, abilitySlot);

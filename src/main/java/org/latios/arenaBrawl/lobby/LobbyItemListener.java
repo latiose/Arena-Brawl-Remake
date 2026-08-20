@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.gui.AbilitySelectorGUI;
 import org.latios.arenaBrawl.queue.QueueManager;
 
@@ -14,10 +15,12 @@ public class LobbyItemListener implements Listener {
 
     private final QueueManager queueManager;
     private final AbilitySelectorGUI abilitySelectorGUI;
+    private final MatchManager matchManager;
 
-    public LobbyItemListener(QueueManager queueManager, AbilitySelectorGUI abilitySelectorGUI) {
+    public LobbyItemListener(QueueManager queueManager, AbilitySelectorGUI abilitySelectorGUI, MatchManager matchManager) {
         this.queueManager = queueManager;
         this.abilitySelectorGUI = abilitySelectorGUI;
+        this.matchManager = matchManager;
     }
 
     @EventHandler
@@ -37,11 +40,22 @@ public class LobbyItemListener implements Listener {
             toggleQueue(player);
         } else if (item.getType() == Material.EMERALD) {
             event.setCancelled(true);
+
+            if (matchManager.isInMatch(player)) {
+                player.sendMessage("§cYou can't change abilities while in a match.");
+                return;
+            }
+
             abilitySelectorGUI.openMainMenu(player);
         }
     }
 
     private void toggleQueue(Player player) {
+        if (matchManager.isInMatch(player)) {
+            player.sendMessage("§cYou can't use the queue while in a match.");
+            return;
+        }
+
         if (queueManager.isQueued(player)) {
             queueManager.leaveQueue(player);
             player.sendMessage("§eYou left the queue.");

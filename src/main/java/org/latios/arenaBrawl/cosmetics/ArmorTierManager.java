@@ -46,6 +46,8 @@ public class ArmorTierManager {
         player.getInventory().setChestplate(buildPiece(tier.getChestplate(), tier));
     }
 
+
+
     private ItemStack buildPiece(Material material, ArmorTier tier) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
@@ -57,12 +59,11 @@ public class ArmorTierManager {
         ));
 
         meta.setAttributeModifiers(com.google.common.collect.ImmutableMultimap.of());
-
         meta.setUnbreakable(true);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ENCHANTS);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
 
         if (tier.isTop10()) {
-            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+            meta.setEnchantmentGlintOverride(true);
         }
 
         item.setItemMeta(meta);
