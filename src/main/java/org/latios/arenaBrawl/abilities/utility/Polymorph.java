@@ -8,6 +8,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
+import org.latios.arenaBrawl.abilities.AbilityTargeting;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -35,34 +36,24 @@ public class Polymorph implements Ability {
     @Override
     public AbilityCost getCost() { return cost; }
 
+
+
     @Override
     public boolean activate(Player player) {
-        Player closestEnemy = null;
-        double closestDistance = Double.MAX_VALUE;
+        Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, 20);
 
-        for (Entity nearby : player.getNearbyEntities(RANGE, RANGE, RANGE)) {
-            if (nearby instanceof Player target && teamManager.isEnemy(player, target)) {
-                double distance = target.getLocation().distanceSquared(player.getLocation());
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closestEnemy = target;
-                }
-            }
-        }
-
-        if (closestEnemy == null) {
-            player.sendMessage("§cNo enemy in range.");
+        if (target == null) {
+            player.sendMessage("§cNo enemy in your crosshair.");
             return false;
         }
 
-        boolean applied = debuffManager.tryApply(closestEnemy, DebuffType.POLYMORPH, DURATION_MILLIS);
+        boolean applied = debuffManager.tryApply(target, DebuffType.POLYMORPH, DURATION_MILLIS);
 
-        if (applied) {
-            closestEnemy.getWorld().spawnParticle(Particle.POOF, closestEnemy.getLocation(), 25);
-            closestEnemy.getWorld().playSound(closestEnemy.getLocation(), Sound.ENTITY_SHEEP_AMBIENT, 1.0f, 1.0f);
-            player.sendMessage("§aYou have morhped " + closestEnemy.getName() + " into a sheep!");
-            closestEnemy.sendMessage("§c" + player.getName() + " has turned you into a sheep!");
-        }
+        target.getWorld().spawnParticle(Particle.POOF, target.getLocation(), 25);
+        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_SHEEP_AMBIENT, 1.0f, 1.0f);
+        player.sendMessage("§aYou turned " + target.getName() + " into a sheep!");
+        target.sendMessage("§c" + player.getName() + " turned you into a sheep!");
+
         return true;
     }
 }

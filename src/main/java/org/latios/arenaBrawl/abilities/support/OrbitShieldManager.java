@@ -1,4 +1,4 @@
-// abilities/support/OrbitShieldManager.java
+
 package org.latios.arenaBrawl.abilities.support;
 
 import org.bukkit.Location;
@@ -18,7 +18,7 @@ import java.util.*;
 public class OrbitShieldManager {
 
     private static final double ORBIT_RADIUS = 1.3;
-    private static final double ORBIT_HEIGHT_OFFSET = 0.3;
+    private static final double ORBIT_HEIGHT_OFFSET = 1.4;
     private static final double ROTATION_SPEED_PER_TICK = 0.05;
 
     private static class ShieldState {
@@ -26,6 +26,7 @@ public class OrbitShieldManager {
         final List<Entity> charges = new ArrayList<>();
         long startedAt;
         double rotationOffset = 0.0;
+        int tickCounter = 0; // counts real ticks elapsed, used to gate position updates
     }
 
     private final Map<UUID, ShieldState> activeShields = new HashMap<>();
@@ -69,7 +70,7 @@ public class OrbitShieldManager {
             c.setPowered(true);
             c.setInvisible(true);
             c.setSilent(true);
-            c.setAI(false);           // prevents swelling/exploding entirely, no goals run
+            c.setAI(false);
             c.setInvulnerable(true);
             c.setCollidable(false);
             c.setGravity(false);
@@ -86,7 +87,6 @@ public class OrbitShieldManager {
         return state != null ? state.type : null;
     }
 
-    /** Consumes one charge. Returns the OrbitShieldType consumed, or null if no shield was active. */
     public OrbitShieldType consumeCharge(Player player) {
         ShieldState state = activeShields.get(player.getUniqueId());
         if (state == null || state.charges.isEmpty()) return null;
@@ -113,6 +113,7 @@ public class OrbitShieldManager {
         return activeShields.keySet();
     }
 
+    /** Called once per real tick. Internally decides per-shield whether it's this shield's turn to update. */
     public void tickOrbits(Server server) {
         var iterator = activeShields.entrySet().iterator();
 
@@ -134,15 +135,29 @@ public class OrbitShieldManager {
                 continue;
             }
 
-            state.rotationOffset += ROTATION_SPEED_PER_TICK;
-            int count = state.charges.size();
+            state.tickCounter++;
 
+            // Always advance the rotation math every real tick, so the angle stays
+            // consistent regardless of how often the entity position is actually pushed.
+            state.rotationOffset += ROTATION_SPEED_PER_TICK;
+
+            // Only move the entities on this shield type's configured interval.
+            if (state.tickCounter % state.type.getUpdateIntervalTicks() != 0) {
+                continue;
+            }
+
+            int count = state.charges.size();
             for (int i = 0; i < count; i++) {
                 double angle = state.rotationOffset + (2 * Math.PI * i / count);
                 double x = Math.cos(angle) * ORBIT_RADIUS;
                 double z = Math.sin(angle) * ORBIT_RADIUS;
 
-                Location target = player.getLocation().clone().add(x, ORBIT_HEIGHT_OFFSET, z);
+                Location target;
+                if(entry.getValue().type.getVisualType().equals(OrbitShieldVisualType.CHARGED_CREEPER)) {
+                    target = player.getLocation().clone().add(x, 0, z);
+                } else{
+                    target = player.getLocation().clone().add(x, ORBIT_HEIGHT_OFFSET, z);
+                }
                 state.charges.get(i).teleport(target);
             }
         }

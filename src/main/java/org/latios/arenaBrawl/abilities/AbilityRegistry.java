@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities;
 
+import org.latios.arenaBrawl.abilities.offensive.FreezingBreath;
 import org.latios.arenaBrawl.abilities.support.StarShield;
 import org.latios.arenaBrawl.abilities.support.BoneShield;
 import org.latios.arenaBrawl.abilities.support.HolyWater;
@@ -40,6 +41,8 @@ public class AbilityRegistry {
                 deps -> new BoneShield(deps.cooldownManager(), deps.orbitShieldManager()));
         register(AbilitySlot.SUPPORT, "starshield",
                 deps -> new StarShield(deps.cooldownManager(), deps.orbitShieldManager()));
+        register(AbilitySlot.OFFENSIVE, "freezingbreath",
+                deps -> new FreezingBreath(deps.energyManager(), deps.teamManager(), deps.combatService()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");

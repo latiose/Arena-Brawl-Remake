@@ -178,7 +178,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new AbilityDisplayTask(abilityManager).runTaskTimer(this, 0L, 2L);
         new DebuffTickTask(debuffManager).runTaskTimer(this, 0L, 2L);
         new PolymorphHealTask(debuffManager, playerHealthManager).runTaskTimer(this, 20L, 20L);
-        new OrbitShieldOrbitTask(orbitShieldManager).runTaskTimer(this, 0L, 3L);
+        new OrbitShieldOrbitTask(orbitShieldManager).runTaskTimer(this, 0L, 1L);
         new OrbitShieldSoundTask(orbitShieldManager).runTaskTimer(this, 0L, 20L);
 
         // Commands
