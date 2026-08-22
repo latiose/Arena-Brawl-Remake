@@ -17,7 +17,7 @@ public class AbilityKit {
     static {
         SLOT_ICONS.put(AbilitySlot.OFFENSIVE, Material.IRON_SWORD);
         SLOT_ICONS.put(AbilitySlot.UTILITY, Material.GLOWSTONE_DUST);
-        SLOT_ICONS.put(AbilitySlot.SUPPORT, Material.GREEN_DYE);
+        SLOT_ICONS.put(AbilitySlot.SUPPORT, Material.LIME_DYE);
         SLOT_ICONS.put(AbilitySlot.ULTIMATE, Material.ORANGE_DYE);
     }
 

@@ -60,11 +60,11 @@ public class ArmorTierManager {
 
         meta.setAttributeModifiers(com.google.common.collect.ImmutableMultimap.of());
         meta.setUnbreakable(true);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
 
         if (tier.isTop10()) {
-            meta.setEnchantmentGlintOverride(true);
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
         }
+        //meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ENCHANTS);
 
         item.setItemMeta(meta);
         return item;

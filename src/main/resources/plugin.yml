@@ -4,6 +4,7 @@ main: org.latios.arenaBrawl.ArenaBrawlPlugin
 api-version: '26.2'
 load: POSTWORLD
 softdepend: [LibsDisguises]
+enable-player-collisions: false
 commands:
   party:
     description: Manage your party

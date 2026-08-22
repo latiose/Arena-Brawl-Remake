@@ -30,7 +30,6 @@ public class StarShield implements Ability {
         player.getWorld().spawnParticle(
                 OrbitShieldType.STAR_SHIELD.getActivationParticle(), player.getLocation(), 25, 0.5, 1, 0.5
         );
-        player.sendMessage("§f" + getName() + " activated!");
         return true;
     }
 }

@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Transformation;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
+import org.latios.arenaBrawl.general.EntityCleanupUtils;
 
 import java.util.*;
 
@@ -26,7 +27,7 @@ public class OrbitShieldManager {
         final List<Entity> charges = new ArrayList<>();
         long startedAt;
         double rotationOffset = 0.0;
-        int tickCounter = 0; // counts real ticks elapsed, used to gate position updates
+        int tickCounter = 0;
     }
 
     private final Map<UUID, ShieldState> activeShields = new HashMap<>();
@@ -53,7 +54,7 @@ public class OrbitShieldManager {
     }
 
     private ItemDisplay spawnItemDisplay(Player player, org.bukkit.Material material) {
-        return player.getWorld().spawn(player.getLocation(), ItemDisplay.class, d -> {
+         ItemDisplay display = player.getWorld().spawn(player.getLocation(), ItemDisplay.class, d -> {
             d.setItemStack(new ItemStack(material));
             d.setBillboard(Display.Billboard.CENTER);
             d.setTransformation(new Transformation(
@@ -63,10 +64,12 @@ public class OrbitShieldManager {
                     new AxisAngle4f(0, 0, 0, 1)
             ));
         });
+        EntityCleanupUtils.markAsArenaEntity(display);
+        return display;
     }
 
     private Creeper spawnChargedCreeper(Player player) {
-        return player.getWorld().spawn(player.getLocation(), Creeper.class, c -> {
+        Creeper creeper = player.getWorld().spawn(player.getLocation(), Creeper.class, c -> {
             c.setPowered(true);
             c.setInvisible(true);
             c.setSilent(true);
@@ -76,6 +79,9 @@ public class OrbitShieldManager {
             c.setGravity(false);
             c.setPersistent(false);
         });
+        EntityCleanupUtils.markAsArenaEntity(creeper);
+        org.latios.arenaBrawl.general.CollisionUtils.disableCollision(creeper, player.getScoreboard());
+        return creeper;
     }
 
     public boolean hasActiveShield(Player player) {

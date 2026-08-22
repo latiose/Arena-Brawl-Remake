@@ -8,14 +8,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 
+import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
-import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.HungerManager;
-import org.latios.arenaBrawl.general.PlayerHealthManager;
-import org.latios.arenaBrawl.general.ScoreboardManager;
+import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.lobby.LobbyKit;
+import org.latios.arenaBrawl.lobby.LobbyScoreboardManager;
+import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import org.latios.arenaBrawl.rating.RatingManager;
+import org.latios.arenaBrawl.stats.StatsManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashMap;
@@ -37,10 +39,17 @@ public class MatchManager {
     private final Map<Match, BukkitTask> scoreboardTasks = new HashMap<>();
     private final DebuffManager debuffManager;
     private final OrbitShieldManager orbitShieldManager;
+    private Match currentMatch;
+    private final CooldownManager cooldownManager;
+    private final UsageManager usageManager;
+    private final StatsManager statsManager;
+    private final LobbyScoreboardManager lobbyScoreboardManager;
+    private final DamageBuffManager damageBuffManager;
 
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         EnergyManager energyManager, HungerManager hungerManager,
-                        ScoreboardManager scoreboardManager, Location lobbySpawn,RatingManager ratingManager,DebuffManager debuffManager,OrbitShieldManager orbitShieldManager) {
+                        ScoreboardManager scoreboardManager, Location lobbySpawn,RatingManager ratingManager,DebuffManager debuffManager,OrbitShieldManager orbitShieldManager,
+                        CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager,DamageBuffManager damageBuffManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -51,20 +60,28 @@ public class MatchManager {
         this.ratingManager = ratingManager;
         this.debuffManager = debuffManager;
         this.orbitShieldManager = orbitShieldManager;
-    }
-
-    public void registerMatch(Match match, BukkitTask scoreboardTask) {
-        for (Player player : match.getAllPlayers()) {
-            activeMatches.put(player.getUniqueId(), match);
-        }
-        scoreboardTasks.put(match, scoreboardTask);
+        this.cooldownManager = cooldownManager;
+        this.usageManager = usageManager;
+        this.statsManager = statsManager;
+        this.lobbyScoreboardManager = lobbyScoreboardManager;
+        this.damageBuffManager = damageBuffManager;
     }
 
     public void onPlayerEliminated(Player player) {
         Match match = activeMatches.get(player.getUniqueId());
         if (match == null) return;
 
+        UUID attackerId = healthManager.getLastAttacker(player);
+        if (attackerId != null) {
+            Player killer = Bukkit.getPlayer(attackerId);
+            if (killer != null && killer.isOnline() && !killer.equals(player)) {
+                statsManager.addKill(killer);
+            }
+        }
+        statsManager.addDeath(player);
+
         player.setGameMode(org.bukkit.GameMode.SPECTATOR);
+        player.sendMessage("§cYou have been eliminated.");
 
         String winner = match.eliminate(player);
         if (winner != null) {
@@ -72,27 +89,6 @@ public class MatchManager {
         }
     }
 
-    private void endMatch(Match match, String winnerTeam) {
-        List<Player> winners = winnerTeam.equals("RED") ? match.getRed() : match.getBlue();
-        List<Player> losers = winnerTeam.equals("RED") ? match.getBlue() : match.getRed();
-
-        applyRatingChanges(winners, losers);
-
-        String winnerMessage = winnerTeam.equals("RED") ? "§cRed team" : "§9Blue team";
-
-        for (Player player : match.getAllPlayers()) {
-            if (player.isOnline()) {
-                player.sendTitle(winnerMessage + " §fhas won!", "", 10, 60, 10);
-            }
-        }
-
-        BukkitTask task = scoreboardTasks.remove(match);
-        if (task != null) task.cancel();
-
-        for (Player player : match.getAllPlayers()) {
-            cleanupPlayer(player);
-        }
-    }
 
     private void applyRatingChanges(List<Player> winners, List<Player> losers) {
         double losersAvg = losers.stream().mapToDouble(ratingManager::getRating).average().orElse(1000.0);
@@ -111,7 +107,7 @@ public class MatchManager {
             // Uses the loser's own rating against the opponent team's average
             double loss = ratingManager.calculateLoss(ratingManager.getRating(loser), winnersAvg);
             ratingManager.applyDelta(loser, loss);
-            loser.sendMessage(String.format("§aYour new rating is %.2f (-%.2f)", ratingManager.getRating(loser), loss));
+            loser.sendMessage(String.format("§aYour new rating is %.2f (%.2f)", ratingManager.getRating(loser), loss));
         }
     }
 
@@ -120,10 +116,13 @@ public class MatchManager {
         teamManager.clear(player);
         debuffManager.clear(player);
         abilityManager.clearAbilities(player);
+        damageBuffManager.clear(player);
+        cooldownManager.clearPlayer(player);
+        usageManager.resetPlayer(player);
         orbitShieldManager.clear(player);
         if (!player.isOnline()) return;
 
-        player.setGameMode(org.bukkit.GameMode.ADVENTURE);
+        player.setGameMode(org.bukkit.GameMode.SURVIVAL);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         player.setFoodLevel(20);
         healthManager.setMaxHealth(player, 20.0);
@@ -132,6 +131,71 @@ public class MatchManager {
         player.teleport(lobbySpawn);
 
         LobbyKit.giveLobbyKit(player);
+        lobbyScoreboardManager.show(player);
+    }
+
+    public void registerMatch(Match match, BukkitTask scoreboardTask) {
+        for (Player player : match.getAllPlayers()) {
+            activeMatches.put(player.getUniqueId(), match);
+        }
+        scoreboardTasks.put(match, scoreboardTask);
+        currentMatch = match;
+    }
+
+    public Match getActiveMatch() {
+        return currentMatch;
+    }
+
+    private void endMatch(Match match, String winnerTeam) {
+        List<Player> winners = winnerTeam.equals("RED") ? match.getRed() : match.getBlue();
+        List<Player> losers = winnerTeam.equals("RED") ? match.getBlue() : match.getRed();
+
+        applyRatingChanges(winners, losers);
+
+        for (Player winner : winners) {
+            if (winner.isOnline()) statsManager.addWin(winner);
+        }
+        for (Player loser : losers) {
+            if (loser.isOnline()) statsManager.addLoss(loser);
+        }
+
+        String winnerMessage = winnerTeam.equals("RED") ? "§cRed Team" : "§9Blue Team";
+        for (Player player : match.getAllPlayers()) {
+            if (player.isOnline()) {
+                player.sendTitle(winnerMessage + " §fwins!", "", 10, 60, 10);
+            }
+        }
+
+        finishMatch(match);
+    }
+
+    /** Ends the match in a draw due to the 10-minute time limit. No rating changes are applied. */
+    public void endMatchAsDraw(Match match) {
+        for (Player player : match.getAllPlayers()) {
+            if (player.isOnline()) {
+                player.sendTitle("§eDraw!", "§7Time limit reached", 10, 60, 10);
+            }
+        }
+        finishMatch(match);
+    }
+
+    private void finishMatch(Match match) {
+        BukkitTask task = scoreboardTasks.remove(match);
+        if (task != null) task.cancel();
+
+        match.getPowerupManager().clear();
+
+        if (!match.getAllPlayers().isEmpty()) {
+            EntityCleanupUtils.sweepArenaEntities(match.getAllPlayers().get(0).getWorld());
+        }
+
+        if (currentMatch == match) {
+            currentMatch = null;
+        }
+
+        for (Player player : match.getAllPlayers()) {
+            cleanupPlayer(player);
+        }
     }
 
     public boolean isInMatch(Player player) {

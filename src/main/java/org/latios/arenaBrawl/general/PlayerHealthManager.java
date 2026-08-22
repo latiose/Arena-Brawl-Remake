@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public class PlayerHealthManager {
 
     private static final double VANILLA_MAX = 20.0;
-
+    private final Map<UUID, UUID> lastAttacker = new HashMap<>();
     private final Map<UUID, Double> currentHealth = new HashMap<>();
     private final Map<UUID, Double> maxHealth = new HashMap<>();
     private final Set<UUID> eliminated = new HashSet<>();
@@ -48,8 +48,12 @@ public class PlayerHealthManager {
         syncVanilla(player);
     }
 
-    public void damage(Player player, double amount) {
+    public void damage(Player player, double amount, Player attacker) {
         if (eliminated.contains(player.getUniqueId())) return;
+
+        if (attacker != null) {
+            lastAttacker.put(player.getUniqueId(), attacker.getUniqueId());
+        }
 
         double updated = Math.max(getHealth(player) - amount, 0);
         currentHealth.put(player.getUniqueId(), updated);
@@ -75,5 +79,13 @@ public class PlayerHealthManager {
         }
 
         player.setHealth(Math.min(vanillaHealth, VANILLA_MAX));
+    }
+
+    public void damage(Player player, double amount) {
+        damage(player, amount, null);
+    }
+
+    public UUID getLastAttacker(Player player) {
+        return lastAttacker.get(player.getUniqueId());
     }
 }

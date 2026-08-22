@@ -1,7 +1,15 @@
 worlds:
-  arena: "arena"
-  lobby: "lobby"
+  arena: "world"
+  lobby: "world"
 lobby-spawn:
   x: 0
-  y: 20
+  y: -60
   z: 0
+powerups:
+  health:
+    x: 10
+    y: -55
+    z: 5
+  damage:
+    - {x: -8, y: -55, z: -3}
+    - {x: 6, y: -55, z: -12}

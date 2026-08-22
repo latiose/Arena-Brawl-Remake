@@ -14,9 +14,12 @@ public class PolymorphEffectListener implements DebuffListener {
 
         MobDisguise disguise = new MobDisguise(DisguiseType.SHEEP);
         disguise.setReplaceSounds(true);
+
+        disguise.setViewSelfDisguise(false);
+        disguise.setHideArmorFromSelf(true);
+
         DisguiseAPI.disguiseToAll(player, disguise);
     }
-
     @Override
     public void onExpired(Player player, DebuffType type) {
         if (type != DebuffType.POLYMORPH) return;

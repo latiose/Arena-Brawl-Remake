@@ -17,7 +17,7 @@ public enum OrbitShieldType {
     STAR_SHIELD(
             "Star Shield", OrbitShieldVisualType.CHARGED_CREEPER, null,
             3, 15.0, true,
-            20_000, Sound.ENTITY_CREEPER_HURT, Particle.END_ROD,
+            30_000, Sound.ENTITY_CREEPER_HURT, Particle.END_ROD,
             3
     );
 

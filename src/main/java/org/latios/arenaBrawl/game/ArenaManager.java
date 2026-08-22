@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.game;
 
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
@@ -8,6 +9,7 @@ import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
+import org.latios.arenaBrawl.powerups.PowerupType;
 import org.latios.arenaBrawl.team.Team;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -70,6 +72,7 @@ public class ArenaManager {
         AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager,energyManager, shieldManager, debuffManager,playerHealthManager,combatService,orbitShieldManager);
 
         for (Player player : allPlayers) {
+            player.setCollidable(false);
             playerHealthManager.setMaxHealth(player, MATCH_MAX_HEALTH);
             usageManager.resetPlayer(player);
             energyManager.reset(player);
@@ -85,9 +88,30 @@ public class ArenaManager {
             armorTierManager.equipCosmeticArmor(player);
         }
 
-        var match = new Match(List.of(p1, p2), List.of(p3, p4), scoreboardManager.createMatchScoreboard());
-        scoreboardManager.assignToPlayers(match);
+        var match = new Match(List.of(p1, p2), List.of(p3, p4));
+
+        Location healthLoc = arenaLocation.getHealthPowerupLocation();
+        if (healthLoc != null) {
+            match.getPowerupManager().configureLocations(PowerupType.HEALTH, List.of(healthLoc));
+        } else {
+            plugin.getLogger().warning("Health powerup location is not configured — health powerups will not spawn.");
+        }
+
+        List<Location> damageLocs = arenaLocation.getDamagePowerupLocations();
+        if (!damageLocs.isEmpty()) {
+            match.getPowerupManager().configureLocations(PowerupType.DAMAGE, damageLocs);
+        } else {
+            plugin.getLogger().warning("Damage powerup locations are not configured — damage powerups will not spawn.");
+        }
+
+        match.getPowerupManager().reset();
+
+        match.setIndividualScoreboards(scoreboardManager.createIndividualScoreboards(match));
         scoreboardManager.updateHealthDisplay(match);
+
+        for (Player player : match.getAllPlayers()) {
+            CollisionUtils.disableCollision(player);
+        }
 
         var task = new MatchScoreboardTask(match, scoreboardManager).runTaskTimer(plugin, 0L, 10L);
         matchManager.registerMatch(match, task);
@@ -98,8 +122,6 @@ public class ArenaManager {
             for (Player player : allPlayers) {
                 player.sendMessage("§cError: cannot load arena");
             }
-            plugin.getLogger().severe("Match aborted: arena world is null.");
-            return; // don't start the match without a valid world
         }
 
 

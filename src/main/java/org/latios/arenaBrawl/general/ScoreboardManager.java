@@ -1,48 +1,56 @@
 package org.latios.arenaBrawl.general;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.*;
 import org.latios.arenaBrawl.game.Match;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ScoreboardManager {
 
-    private PlayerHealthManager playerHealthManager;
+    private final PlayerHealthManager healthManager;
 
-    public ScoreboardManager(PlayerHealthManager playerHealthManager) {
-        this.playerHealthManager = playerHealthManager;
-    }
-    public Scoreboard createMatchScoreboard() {
-        Scoreboard board = org.bukkit.Bukkit.getScoreboardManager().getNewScoreboard();
-        Objective obj = board.registerNewObjective("health_display", "dummy", "§c❤ HP");
-        obj.setDisplaySlot(DisplaySlot.SIDEBAR);
-        return board;
+    public ScoreboardManager(PlayerHealthManager healthManager) {
+        this.healthManager = healthManager;
     }
 
-    public void assignToPlayers(Match match) {
+    /** Creates one individual Scoreboard per player in the match (needed for per-viewer nametag colors). */
+    public Map<Player, Scoreboard> createIndividualScoreboards(Match match) {
+        Map<Player, Scoreboard> boards = new HashMap<>();
         for (Player player : match.getAllPlayers()) {
-            player.setScoreboard(match.getScoreboard());
+            Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+            Objective obj = board.registerNewObjective("health_display", "dummy", "§c❤ Health");
+            obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+            boards.put(player, board);
+            player.setScoreboard(board);
         }
+        return boards;
     }
 
     public void updateHealthDisplay(Match match) {
-        Scoreboard board = match.getScoreboard();
-        Objective obj = board.getObjective("health_display");
-        if (obj == null) return;
+        for (Map.Entry<Player, Scoreboard> entry : match.getIndividualScoreboards().entrySet()) {
+            Scoreboard board = entry.getValue();
+            Objective obj = board.getObjective("health_display");
+            if (obj == null) continue;
 
-        for (String entry : new java.util.HashSet<>(board.getEntries())) {
-            board.resetScores(entry);
-        }
+            for (String scoreEntry : new java.util.HashSet<>(board.getEntries())) {
+                board.resetScores(scoreEntry);
+            }
 
-        int line = 0;
-        for (Player player : match.getRed()) {
-            obj.getScore("§c" + player.getName() + ": " + (int) playerHealthManager.getHealth(player) + " HP")
-                    .setScore(line--);
-        }
-        for (Player player : match.getBlue()) {
-            obj.getScore("§9" + player.getName() + ": " + (int) playerHealthManager.getHealth(player) + " HP")
-                    .setScore(line--);
+            long elapsedSeconds = (System.currentTimeMillis() - match.getStartedAt()) / 1000;
+            String timeStr = String.format("%02d:%02d", elapsedSeconds / 60, elapsedSeconds % 60);
+
+            int line = 10;
+            obj.getScore("§7Time: §f" + timeStr).setScore(line--);
+
+            for (Player p : match.getRed()) {
+                obj.getScore("§c" + p.getName() + ": " + (int) healthManager.getHealth(p) + " ❤").setScore(line--);
+            }
+            for (Player p : match.getBlue()) {
+                obj.getScore("§9" + p.getName() + ": " + (int) healthManager.getHealth(p) + " ❤").setScore(line--);
+            }
         }
     }
 }

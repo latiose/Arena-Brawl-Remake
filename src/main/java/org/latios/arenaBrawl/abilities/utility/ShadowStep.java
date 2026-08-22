@@ -39,7 +39,7 @@ public class ShadowStep implements Ability {
         Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, MAX_RANGE);
 
         if (target == null) {
-            player.sendMessage("§cNo enemy in your crosshair.");
+            player.sendMessage("§cNo enemy within range.");
             return false;
         }
 
@@ -53,7 +53,6 @@ public class ShadowStep implements Ability {
                 PotionEffectType.SPEED, POST_SHADOW_SPEED_DURATION_TICKS, POST_SHADOW_SPEED_AMPLIFIER, true, false
         ));
 
-        player.sendMessage("§5Shadow Step towards " + target.getName() + "!");
         return true;
     }
 }

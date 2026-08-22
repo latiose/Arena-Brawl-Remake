@@ -6,6 +6,9 @@ import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldType;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
+import org.latios.arenaBrawl.game.Match;
+import org.latios.arenaBrawl.game.MatchManager;
+import org.latios.arenaBrawl.powerups.DamageBuffManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,34 +20,45 @@ public class CombatService {
     private final ShieldManager shieldManager;
     private final DebuffManager debuffManager;
     private final OrbitShieldManager orbitShieldManager;
+    private final DamageBuffManager damageBuffManager;
+    private final MatchManager matchManager;
 
     private static final long STAR_SHIELD_EFFECT_DURATION_MILLIS = 4_000;
     private static final List<DebuffType> STAR_SHIELD_POSSIBLE_DEBUFFS =
             List.of(DebuffType.STUN, DebuffType.IMMOBILIZE, DebuffType.SLOW);
     public CombatService(PlayerHealthManager healthManager, ShieldManager shieldManager,
-                         DebuffManager debuffManager, OrbitShieldManager orbitShieldManager) {
+                         DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,DamageBuffManager damageBuffManager, MatchManager matchManager) {
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
         this.orbitShieldManager = orbitShieldManager;
+        this.damageBuffManager = damageBuffManager;
+        this.matchManager = matchManager;
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
 
-        // Orbit shield: blocks the hit ENTIRELY and heals the victim instead
+        double multiplier = damageBuffManager.getMultiplier(attacker);
+
+        Match match = matchManager.getActiveMatch();
+        if (match != null && match.isDoubleDamageActive()) {
+            multiplier *= 2.0;
+        }
+
+        double adjustedDamage = rawDamage * multiplier;
         if (orbitShieldManager.hasActiveShield(victim)) {
             OrbitShieldType type = orbitShieldManager.consumeCharge(victim);
 
             if (type != null) {
                 resolveShieldEffect(type, attacker, victim);
-                return; // hit is fully blocked either way
+                return;
             }
         }
 
         double reduction = shieldManager.getDamageReduction(victim);
-        double finalDamage = reduction > 0 ? rawDamage * (1 - reduction) : rawDamage;
+        double finalDamage = reduction > 0 ? adjustedDamage * (1 - reduction) : adjustedDamage;
 
-        healthManager.damage(victim, finalDamage);
+        healthManager.damage(victim, finalDamage, attacker);
         playDamageFeedback(victim);
 
         if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {

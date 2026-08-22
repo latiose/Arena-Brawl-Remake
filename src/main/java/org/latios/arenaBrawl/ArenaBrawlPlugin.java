@@ -12,23 +12,26 @@ import org.latios.arenaBrawl.abilities.support.OrbitShieldSoundTask;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.*;
-import org.latios.arenaBrawl.game.ArenaLocation;
-import org.latios.arenaBrawl.game.ArenaManager;
-import org.latios.arenaBrawl.game.MatchDisconnectListener;
-import org.latios.arenaBrawl.game.MatchManager;
+import org.latios.arenaBrawl.game.*;
 import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.gui.AbilityMenuCommand;
 import org.latios.arenaBrawl.gui.AbilitySelectorGUI;
 import org.latios.arenaBrawl.gui.AbilitySelectorListener;
 import org.latios.arenaBrawl.lobby.LobbyItemListener;
 import org.latios.arenaBrawl.lobby.LobbyJoinListener;
+import org.latios.arenaBrawl.lobby.LobbyScoreboardManager;
 import org.latios.arenaBrawl.party.PartyCommand;
 import org.latios.arenaBrawl.party.PartyManager;
+import org.latios.arenaBrawl.powerups.ArenaCleanupListener;
+import org.latios.arenaBrawl.powerups.DamageBuffManager;
+import org.latios.arenaBrawl.powerups.PowerupRotationTask;
+import org.latios.arenaBrawl.powerups.PowerupTask;
 import org.latios.arenaBrawl.queue.QueueCommand;
 import org.latios.arenaBrawl.queue.QueueManager;
 import org.latios.arenaBrawl.rating.LeaderboardCommand;
 import org.latios.arenaBrawl.rating.RatingCommand;
 import org.latios.arenaBrawl.rating.RatingManager;
+import org.latios.arenaBrawl.stats.StatsManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.lang.foreign.Arena;
@@ -60,26 +63,31 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private ArmorTierManager armorTierManager;
     private CombatService combatService;
     private OrbitShieldManager orbitShieldManager;
-
+    private DamageBuffManager damageBuffManager;
+    private LobbyScoreboardManager lobbyScoreboardManager;
+    private StatsManager statsManager;
+    private NametagManager nametagManager;
+    private NametagUpdateTask nametagUpdateTask;
     @Override
     public void onEnable() {
         instance = this;
-        for (World world : getServer().getWorlds()) {
-            world.setGameRule(GameRules.ADVANCE_TIME, false);
-            world.setGameRule(GameRules.ADVANCE_WEATHER, false);
-        }
+
         // Managers
         this.shieldManager = new ShieldManager();
+
         this.debuffManager = new DebuffManager();
+        this.damageBuffManager = new DamageBuffManager();
+        this.statsManager = new StatsManager(this);
+        this.ratingManager = new RatingManager(this);
+        this.lobbyScoreboardManager = new LobbyScoreboardManager(ratingManager,statsManager);
 
         debuffManager.registerListener(new PolymorphEffectListener());
         //debuffManager.registerListener(new ImmobilizeListener(debuffManager));
         debuffManager.registerListener( new StunListener());
         debuffManager.registerListener( new SlowListener());
 
-        this.ratingManager = new RatingManager(this);
+
         this.armorTierManager = new ArmorTierManager(ratingManager);
-        getCommand("rating").setExecutor(new RatingCommand(ratingManager));
         this.abilityPersistenceManager = new AbilityPersistenceManager(this);
         this.energyManager = new EnergyManager();
         this.cooldownManager = new CooldownManager();
@@ -91,19 +99,23 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.partyManager = new PartyManager();
         this.abilityRegistry = new AbilityRegistry();
         this.orbitShieldManager = new OrbitShieldManager();
-        this.combatService = new CombatService(playerHealthManager,shieldManager,debuffManager,orbitShieldManager);
+        Location lobbySpawn = new Location(Bukkit.getWorld("world"), 0, 100, 0);
+        this.matchManager = new MatchManager(
+                playerHealthManager, teamManager, abilityManager,
+                energyManager, hungerManager, scoreboardManager, lobbySpawn,ratingManager,debuffManager,orbitShieldManager,cooldownManager,usageManager,statsManager,lobbyScoreboardManager,damageBuffManager
+        );
+        this.combatService = new CombatService(
+                playerHealthManager, shieldManager, debuffManager, orbitShieldManager, damageBuffManager, matchManager
+        );
         this.abilitySelectionManager = new AbilitySelectionManager(abilityRegistry, abilityPersistenceManager);
         this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager);
         this.arenaLocation = new ArenaLocation(this);
-
+        this.nametagManager = new NametagManager(teamManager,playerHealthManager);
         saveDefaultConfig();
 
-        Location lobbySpawn = new Location(Bukkit.getWorld("world"), 0, 100, 0);
 
-        this.matchManager = new MatchManager(
-                playerHealthManager, teamManager, abilityManager,
-                energyManager, hungerManager, scoreboardManager, lobbySpawn,ratingManager,debuffManager,orbitShieldManager
-        );
+
+
         playerHealthManager.setEliminationCallback(matchManager::onPlayerEliminated);
         // Ability Selector
 
@@ -166,7 +178,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new WeatherListener(), this
         );
         getServer().getPluginManager().registerEvents(new LobbyJoinListener(matchManager,  teamManager,
-                 abilityManager,  debuffManager), this);
+                 abilityManager,  debuffManager,lobbyScoreboardManager), this);
         getServer().getPluginManager().registerEvents(
                 new LobbyItemListener(queueManager, abilitySelectorGUI,matchManager), this
         );
@@ -180,7 +192,10 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new PolymorphHealTask(debuffManager, playerHealthManager).runTaskTimer(this, 20L, 20L);
         new OrbitShieldOrbitTask(orbitShieldManager).runTaskTimer(this, 0L, 1L);
         new OrbitShieldSoundTask(orbitShieldManager).runTaskTimer(this, 0L, 20L);
-
+        new PowerupTask(matchManager, playerHealthManager, damageBuffManager).runTaskTimer(this, 20L, 0L);
+        new PowerupRotationTask(matchManager).runTaskTimer(this, 0L, 2L); // smooth rotation, every 2 ticks
+        new MatchTimerTask(matchManager).runTaskTimer(this, 20L, 20L);
+        new NametagUpdateTask(matchManager, nametagManager).runTaskTimer(this, 0L, 4L);
         // Commands
         getCommand("party").setExecutor(new PartyCommand(partyManager, queueManager));
         getCommand("queue").setExecutor(new QueueCommand(queueManager, matchManager));
@@ -188,6 +203,18 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getCommand("rating").setExecutor(new RatingCommand(ratingManager));
         getCommand("leaderboard").setExecutor(new LeaderboardCommand(ratingManager));
 
+
+
+        for (World world : getServer().getWorlds()) {
+            world.setGameRule(GameRules.ADVANCE_TIME, false);
+            world.setGameRule(GameRules.ADVANCE_WEATHER, false);
+            EntityCleanupUtils.sweepArenaEntities(world);
+        }
+        for (World world : Bukkit.getWorlds()) {
+            EntityCleanupUtils.sweepArenaEntities(world); //powerups
+        }getServer().getPluginManager().registerEvents(new ArenaCleanupListener(), this);
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "kill @e[type=minecraft:item_display]"); //powerups stay forever if the server closes mid match idk why
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "kill @e[type=minecraft:text_display]");
         getLogger().info("ArenaBrawl on.");
 
 
@@ -195,8 +222,25 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        getLogger().info("ArenaBrawl off.");
+        /*
+        for (World world : Bukkit.getWorlds()) {
+            EntityCleanupUtils.sweepArenaEntities(world); //powerups
+        }
+        */
+        for (World world : getServer().getWorlds()) {
+            world.setGameRule(GameRules.ADVANCE_TIME, false);
+            world.setGameRule(GameRules.ADVANCE_WEATHER, false);
+            EntityCleanupUtils.sweepArenaEntities(world);
+        }
+        for (World world : Bukkit.getWorlds()) {
+            EntityCleanupUtils.sweepArenaEntities(world); //powerups
+        }
+        getLogger().info(
+
+                "ArenaBrawl off.");
     }
+
+
 
     public static ArenaBrawlPlugin getInstance() {
         return instance;

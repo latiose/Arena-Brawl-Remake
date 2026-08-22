@@ -30,4 +30,8 @@ public class CooldownManager {
                 .computeIfAbsent(player.getUniqueId(), k -> new HashMap<>())
                 .put(abilityKey, System.currentTimeMillis() + cooldownMillis);
     }
+
+    public void clearPlayer(Player player) {
+        cooldowns.remove(player.getUniqueId());
+    }
 }
