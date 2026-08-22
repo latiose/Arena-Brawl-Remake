@@ -47,4 +47,11 @@ public class EnergyManager {
         player.setLevel((int) current);
         player.setExp((float) (current / MAX_ENERGY));
     }
+
+    public void addEnergy(Player player, double amount) {
+        double current = getEnergy(player);
+        double updated = Math.min(current + amount, MAX_ENERGY);
+        energy.put(player.getUniqueId(), updated);
+        syncVisual(player);
+    }
 }

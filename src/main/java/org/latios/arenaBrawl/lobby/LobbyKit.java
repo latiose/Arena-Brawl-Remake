@@ -3,16 +3,22 @@ package org.latios.arenaBrawl.lobby;
 
 
 import org.bukkit.Material;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.latios.arenaBrawl.cosmetics.ArmorTier;
+import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 
 public class LobbyKit {
 
-    public static void giveLobbyKit(Player player) {
+
+    public static void giveLobbyKit(Player player, ArmorTierManager armorTierManager) {
         player.getInventory().clear();
         player.getInventory().setItem(0, buildCompass());
         player.getInventory().setItem(1, buildEmerald());
+        armorTierManager.equipCosmeticArmor(player);
+        player.updateInventory();
     }
 
     private static ItemStack buildCompass() {

@@ -20,6 +20,8 @@ import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.MatchManager;
+import org.latios.arenaBrawl.hats.HatPhraseListener;
+import org.latios.arenaBrawl.runes.RuneManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
 public class CombatListener implements Listener {
@@ -33,10 +35,12 @@ public class CombatListener implements Listener {
     private final CooldownManager cooldownManager;
     private final MatchManager matchManager;
     private final OrbitShieldManager orbitShieldManager;
+    private final HatPhraseListener hatPhraseListener;
 
-
+    private final RuneManager runeManager;
     public CombatListener(TeamManager teamManager, AbilityManager abilityManager, PlayerHealthManager playerHealthManager, ShieldManager shieldManager,DebuffManager debuffManager,
-                          CombatService combatService, CooldownManager cooldownManager, MatchManager matchManager,OrbitShieldManager orbitShieldManager) {
+                          CombatService combatService, CooldownManager cooldownManager, MatchManager matchManager,OrbitShieldManager orbitShieldManager,RuneManager runeManager,
+                          HatPhraseListener hatPhraseListener) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.healthManager = playerHealthManager;
@@ -46,6 +50,8 @@ public class CombatListener implements Listener {
         this.cooldownManager = cooldownManager;
         this.matchManager = matchManager;
         this.orbitShieldManager = orbitShieldManager;
+        this.runeManager = runeManager;
+        this.hatPhraseListener = hatPhraseListener;
     }
 
 
@@ -80,7 +86,9 @@ public class CombatListener implements Listener {
                 debuffManager.clear(attacker);
             }
 
-            combatService.applyAbilityDamage(attacker, victim, 10.0, "Melee");
+            double runeMultiplier = runeManager.tryProc(attacker, victim);
+            combatService.applyAbilityDamage(attacker, victim, 10.0 * runeMultiplier, "Melee");
+            hatPhraseListener.onMeleeHit(attacker, victim);
             cooldownManager.setCooldown(attacker, "melee_hit", 500);
             return;
         }

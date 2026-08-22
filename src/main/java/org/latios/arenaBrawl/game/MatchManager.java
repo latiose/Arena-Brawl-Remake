@@ -11,8 +11,12 @@ import org.latios.arenaBrawl.abilities.AbilityManager;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
+import org.latios.arenaBrawl.cosmetics.ArmorTier;
+import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
+import org.latios.arenaBrawl.hats.HatEquipUtils;
+import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.lobby.LobbyKit;
 import org.latios.arenaBrawl.lobby.LobbyScoreboardManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
@@ -45,11 +49,14 @@ public class MatchManager {
     private final StatsManager statsManager;
     private final LobbyScoreboardManager lobbyScoreboardManager;
     private final DamageBuffManager damageBuffManager;
+    private final ArmorTierManager armorTierManager;
+    private final HatSelectionManager hatSelectionManager;
 
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         EnergyManager energyManager, HungerManager hungerManager,
                         ScoreboardManager scoreboardManager, Location lobbySpawn,RatingManager ratingManager,DebuffManager debuffManager,OrbitShieldManager orbitShieldManager,
-                        CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager,DamageBuffManager damageBuffManager) {
+                        CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager,DamageBuffManager damageBuffManager,
+                        ArmorTierManager armorTierManager,HatSelectionManager hatSelectionManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -65,6 +72,8 @@ public class MatchManager {
         this.statsManager = statsManager;
         this.lobbyScoreboardManager = lobbyScoreboardManager;
         this.damageBuffManager = damageBuffManager;
+        this.armorTierManager = armorTierManager;
+        this.hatSelectionManager = hatSelectionManager;
     }
 
     public void onPlayerEliminated(Player player) {
@@ -130,8 +139,9 @@ public class MatchManager {
         player.setExp(0f);
         player.teleport(lobbySpawn);
 
-        LobbyKit.giveLobbyKit(player);
+        LobbyKit.giveLobbyKit(player,armorTierManager);
         lobbyScoreboardManager.show(player);
+        HatEquipUtils.applyEquippedHat(player, hatSelectionManager);
     }
 
     public void registerMatch(Match match, BukkitTask scoreboardTask) {

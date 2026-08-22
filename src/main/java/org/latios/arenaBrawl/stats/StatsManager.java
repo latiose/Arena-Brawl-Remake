@@ -51,6 +51,10 @@ public class StatsManager {
         return stats;
     }
 
+    public void saveDirectly(Player player, PlayerStats stats) {
+        save(player, stats);
+    }
+
     public void addWin(Player player) {
         PlayerStats stats = getStats(player);
         stats.wins++;
