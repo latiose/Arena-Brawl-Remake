@@ -4,6 +4,7 @@ package org.latios.arenaBrawl.debuffs;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 
 public class PolymorphHealTask extends BukkitRunnable {
@@ -23,7 +24,8 @@ public class PolymorphHealTask extends BukkitRunnable {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)) {
                 healthManager.heal(player, HEAL_PER_SECOND);
-                player.sendMessage("§aPolymorph healed you for " + HEAL_PER_SECOND + "health!");
+                int roundedHeal = (int) Math.round(HEAL_PER_SECOND);
+                player.sendMessage(MessageUtils.positive()+"§3Polymorph healed you for §a" + roundedHeal + "§3 health!"); //wip
             }
         }
     }

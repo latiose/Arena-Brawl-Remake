@@ -1,5 +1,5 @@
 worlds:
-  arena: "world"
+  arena: "Bridge"
   lobby: "world"
 lobby-spawn:
   x: 0
@@ -7,9 +7,9 @@ lobby-spawn:
   z: 0
 powerups:
   health:
-    x: 10
-    y: -55
-    z: 5
+    x: -2471.577
+    y: 17.5
+    z: 697.445
   damage:
-    - {x: -8, y: -55, z: -3}
-    - {x: 6, y: -55, z: -12}
+    - {x: -2480.476, y: 24.5, z: 697.423}
+    - {x: -2462.592, y: 24.5, z: -697.423}

@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.powerups;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -20,8 +21,8 @@ import java.util.*;
 
 public class PowerupManager {
 
-    private static final double PICKUP_RADIUS = 2.5;
-    private static final float ITEM_SCALE = 0.35f;
+    private static final double PICKUP_RADIUS = 2;
+    private static final float ITEM_SCALE = 0.4f;
     private static final double ROTATION_SPEED_PER_TICK = 0.1;
     private static final double HOLOGRAM_HEIGHT_OFFSET = 0.6;
 
@@ -109,7 +110,7 @@ public class PowerupManager {
             state.rotationAngle += ROTATION_SPEED_PER_TICK;
 
             Transformation transformation = state.itemEntity.getTransformation();
-            transformation.getLeftRotation().identity().rotateX((float) state.rotationAngle);
+            transformation.getLeftRotation().identity().rotateY((float) state.rotationAngle);
             state.itemEntity.setTransformation(transformation);
         }
     }
@@ -132,7 +133,7 @@ public class PowerupManager {
         });
 
         NamedTextColor color = type == PowerupType.HEALTH ? NamedTextColor.GREEN : NamedTextColor.RED;
-        String label = type == PowerupType.HEALTH ? "HEALING" : "DAMAGE";
+        String label = type == PowerupType.HEALTH ? "HEALING" : "DOUBLE DAMAGE";
 
         Location hologramLoc = location.clone().add(0, HOLOGRAM_HEIGHT_OFFSET, 0);
         TextDisplay hologram = world.spawn(hologramLoc, TextDisplay.class, d -> {
@@ -151,10 +152,18 @@ public class PowerupManager {
         state.spawnedAt = location;
         state.rotationAngle = 0.0;
 
+        NamedTextColor themeColor = type == PowerupType.HEALTH ? NamedTextColor.GREEN : NamedTextColor.RED;
+
+        Component spawnMessage = Component.text("The ", NamedTextColor.YELLOW)
+                .append(Component.text(type.getDisplayName(), themeColor, TextDecoration.BOLD))
+                .append(Component.text(" has spawned!", NamedTextColor.YELLOW));
+
         for (Player player : world.getPlayers()) {
-            player.sendMessage("§dThe " + type.getDisplayName() + " §fhas spawned!");
+            player.sendMessage(spawnMessage);
         }
     }
+
+
 
     private void despawn(PowerupState state) {
         if (state.spawnedAt != null && state.spawnedAt.getWorld() != null) {

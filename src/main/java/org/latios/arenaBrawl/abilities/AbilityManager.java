@@ -2,6 +2,9 @@ package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.UnknownNullability;
+import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -32,9 +35,22 @@ public class AbilityManager {
         Ability ability = abilities.get(slot);
         AbilityCost cost = ability.getCost();
 
-        if (!cost.canPay(player)) {
-            player.sendMessage("§cYou can't use " + ability.getName()
-                    + " yet (" + cost.describeRemaining(player) + ")");
+        if (!cost.canPay(player) && (cost instanceof CooldownCost)) {
+            player.sendMessage("§eWait another " + cost.describeRemaining(player));
+            return;
+        }
+        else if(!cost.canPay(player) && cost instanceof EnergyCost){
+            player.sendMessage("§e" + cost.describeRemaining(player));
+            return;
+        }
+        else if(!cost.canPay(player) && cost instanceof UltimateCost){
+            cost = (UltimateCost) cost;
+            if(cost.isPermanentlyUnavailable(player)){
+                player.sendMessage("§e" + cost.describeRemaining(player));
+            }
+          else{
+                player.sendMessage("§eWait another " + cost.describeRemaining(player));
+            }
             return;
         }
 

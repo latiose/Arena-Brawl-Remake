@@ -5,6 +5,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -14,6 +15,8 @@ import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.powerups.PowerupType;
 import org.latios.arenaBrawl.team.Team;
 import org.latios.arenaBrawl.team.TeamManager;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeType;
 
 import java.util.List;
 
@@ -40,11 +43,14 @@ public class ArenaManager {
     private final CombatService combatService;
     private final OrbitShieldManager orbitShieldManager;
     private final HatSelectionManager hatSelectionManager;
+    private final CombatUpgradeManager combatUpgradeManager;
+    private final BroodMotherEntityManager broodMotherEntityManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
                         org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, PlayerHealthManager playerHealthManager, HungerManager hungerManager, MatchManager matchManager,ArenaLocation arenaLocation,ShieldManager shieldManager,
-    DebuffManager debuffManager,ArmorTierManager armorTierManager, CombatService combatService,OrbitShieldManager orbitShieldManager, HatSelectionManager hatSelectionManager) {
+    DebuffManager debuffManager,ArmorTierManager armorTierManager, CombatService combatService,OrbitShieldManager orbitShieldManager, HatSelectionManager hatSelectionManager,
+                        CombatUpgradeManager combatUpgradeManager,BroodMotherEntityManager broodMotherEntityManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -64,6 +70,8 @@ public class ArenaManager {
         this.combatService = combatService;
         this.orbitShieldManager = orbitShieldManager;
         this.hatSelectionManager = hatSelectionManager;
+        this.combatUpgradeManager = combatUpgradeManager;
+        this.broodMotherEntityManager = broodMotherEntityManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -81,19 +89,22 @@ public class ArenaManager {
             return;
         }
 
-        // 1. Primero Teleportar a todos a la Arena
         p1.teleport(arenaLocation.redSpawn1());
         p2.teleport(arenaLocation.redSpawn2());
         p3.teleport(arenaLocation.blueSpawn1());
         p4.teleport(arenaLocation.blueSpawn2());
 
-        // 2. Aplicar estados y cosméticos POST-TELEPORT
-        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager);
+        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(false);
             CollisionUtils.disableCollision(player);
-            playerHealthManager.setMaxHealth(player, MATCH_MAX_HEALTH);
+            double maxHealth = combatUpgradeManager.getValue(player, CombatUpgradeType.HEALTH);
+            double maxEnergy = combatUpgradeManager.getValue(player, CombatUpgradeType.ENERGY);
+
+            playerHealthManager.setMaxHealth(player, maxHealth);
+            energyManager.setMaxEnergyOverride(player, maxEnergy);
+            //playerHealthManager.setMaxHealth(player, MATCH_MAX_HEALTH);
             usageManager.resetPlayer(player);
             energyManager.reset(player);
             hungerManager.reset(player);
@@ -107,15 +118,11 @@ public class ArenaManager {
 
             AbilityKit.giveDefaultKit(player, abilityManager);
 
-            // Cosméticos aplicados tras el teleport
             armorTierManager.equipCosmeticArmor(player);
             HatEquipUtils.applyEquippedHat(player, hatSelectionManager);
-
-            // Forzar actualización visual del inventario
             player.updateInventory();
         }
 
-        // 3. Configuración de Match y Powerups
         var match = new Match(List.of(p1, p2), List.of(p3, p4));
 
         Location healthLoc = arenaLocation.getHealthPowerupLocation();
@@ -127,7 +134,7 @@ public class ArenaManager {
 
         List<Location> damageLocs = arenaLocation.getDamagePowerupLocations();
         if (!damageLocs.isEmpty()) {
-            match.getPowerupManager().configureLocations(PowerupType.DAMAGE, damageLocs);
+            match.getPowerupManager().configureLocations(PowerupType.DOUBLE_DAMAGE, damageLocs);
         } else {
             plugin.getLogger().warning("Damage powerup locations are not configured — damage powerups will not spawn.");
         }
@@ -136,7 +143,6 @@ public class ArenaManager {
         match.setIndividualScoreboards(scoreboardManager.createIndividualScoreboards(match));
         scoreboardManager.updateHealthDisplay(match);
 
-        // 4. Registrar Task (solo una vez)
         var task = new MatchScoreboardTask(match, scoreboardManager).runTaskTimer(plugin, 0L, 10L);
         matchManager.registerMatch(match, task);
 

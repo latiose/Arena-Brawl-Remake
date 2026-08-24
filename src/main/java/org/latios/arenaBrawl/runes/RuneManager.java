@@ -47,19 +47,20 @@ public class RuneManager {
                 attacker.addPotionEffect(new PotionEffect(
                         PotionEffectType.SPEED, SPEED_DURATION_TICKS, SPEED_AMPLIFIER, true, false
                 ));
-                attacker.sendMessage("§b" + rune.getDisplayName() + " §fprocced! Speed III for 3s.");
+                attacker.sendMessage("§eYour §f" + rune.getDisplayName() + " §ewas activated");
             }
             case SLOW -> {
                 victim.addPotionEffect(new PotionEffect(
                         PotionEffectType.SLOWNESS, SLOW_DURATION_TICKS, SLOW_AMPLIFIER, true, false
                 ));
-                attacker.sendMessage("§b" + rune.getDisplayName() + " §fprocced on " + victim.getName() + "!");
-                victim.sendMessage("§c" + attacker.getName() + "'s " + rune.getDisplayName() + " §fslowed you!");
+                attacker.sendMessage("§eYour §5" + rune.getDisplayName() + " §ewas activated");
             }
-            case DAMAGE -> attacker.sendMessage("§b" + rune.getDisplayName() + " §fprocced! Double damage this hit.");
+            case DAMAGE -> {
+                attacker.sendMessage("§eYour §c" + rune.getDisplayName() + " §ewas activated");
+            }
             case ENERGY -> {
                 energyManager.addEnergy(attacker, ENERGY_AMOUNT);
-                attacker.sendMessage("§b" + rune.getDisplayName() + " §fprocced! +10 energy.");
+                attacker.sendMessage("§eYour §e" + rune.getDisplayName() + " §ewas activated");
             }
         }
     }

@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.abilities.AbilityManager;
 
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTier;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
@@ -51,12 +52,13 @@ public class MatchManager {
     private final DamageBuffManager damageBuffManager;
     private final ArmorTierManager armorTierManager;
     private final HatSelectionManager hatSelectionManager;
+    private final BroodMotherEntityManager broodMotherEntityManager;
 
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         EnergyManager energyManager, HungerManager hungerManager,
                         ScoreboardManager scoreboardManager, Location lobbySpawn,RatingManager ratingManager,DebuffManager debuffManager,OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager,DamageBuffManager damageBuffManager,
-                        ArmorTierManager armorTierManager,HatSelectionManager hatSelectionManager) {
+                        ArmorTierManager armorTierManager,HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -74,6 +76,7 @@ public class MatchManager {
         this.damageBuffManager = damageBuffManager;
         this.armorTierManager = armorTierManager;
         this.hatSelectionManager = hatSelectionManager;
+        this.broodMotherEntityManager = broodMotherEntityManager;
     }
 
     public void onPlayerEliminated(Player player) {
@@ -129,6 +132,8 @@ public class MatchManager {
         cooldownManager.clearPlayer(player);
         usageManager.resetPlayer(player);
         orbitShieldManager.clear(player);
+        broodMotherEntityManager.clearAll();
+        EntityCleanupUtils.sweepArenaEntities(player.getWorld());
         if (!player.isOnline()) return;
 
         player.setGameMode(org.bukkit.GameMode.SURVIVAL);
@@ -206,6 +211,7 @@ public class MatchManager {
         for (Player player : match.getAllPlayers()) {
             cleanupPlayer(player);
         }
+
     }
 
     public boolean isInMatch(Player player) {

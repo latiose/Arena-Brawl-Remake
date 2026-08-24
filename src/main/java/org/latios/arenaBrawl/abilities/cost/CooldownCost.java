@@ -3,16 +3,22 @@ package org.latios.arenaBrawl.abilities.cost;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeType;
 
 public class CooldownCost implements AbilityCost {
+
     private final CooldownManager cooldownManager;
     private final String abilityKey;
-    private final long cooldownMillis;
+    private final long baseCooldownMillis;
+    private final CombatUpgradeManager upgradeManager;
 
-    public CooldownCost(CooldownManager cooldownManager, String abilityKey, long cooldownMillis) {
+    public CooldownCost(CooldownManager cooldownManager, String abilityKey, long baseCooldownMillis,
+                        CombatUpgradeManager upgradeManager) {
         this.cooldownManager = cooldownManager;
         this.abilityKey = abilityKey;
-        this.cooldownMillis = cooldownMillis;
+        this.baseCooldownMillis = baseCooldownMillis;
+        this.upgradeManager = upgradeManager;
     }
 
     @Override
@@ -22,7 +28,9 @@ public class CooldownCost implements AbilityCost {
 
     @Override
     public void pay(Player player) {
-        cooldownManager.setCooldown(player, abilityKey, cooldownMillis);
+        double reductionPercent = upgradeManager.getValue(player, CombatUpgradeType.COOLDOWN_REDUCTION);
+        long effectiveCooldown = (long) (baseCooldownMillis * (1 - reductionPercent / 100.0));
+        cooldownManager.setCooldown(player, abilityKey, effectiveCooldown);
     }
 
     @Override

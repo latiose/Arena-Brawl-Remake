@@ -23,6 +23,8 @@ import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.hats.HatPhraseListener;
 import org.latios.arenaBrawl.runes.RuneManager;
 import org.latios.arenaBrawl.team.TeamManager;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeType;
 
 public class CombatListener implements Listener {
 
@@ -36,11 +38,12 @@ public class CombatListener implements Listener {
     private final MatchManager matchManager;
     private final OrbitShieldManager orbitShieldManager;
     private final HatPhraseListener hatPhraseListener;
+    private final CombatUpgradeManager combatUpgradeManager;
 
     private final RuneManager runeManager;
     public CombatListener(TeamManager teamManager, AbilityManager abilityManager, PlayerHealthManager playerHealthManager, ShieldManager shieldManager,DebuffManager debuffManager,
                           CombatService combatService, CooldownManager cooldownManager, MatchManager matchManager,OrbitShieldManager orbitShieldManager,RuneManager runeManager,
-                          HatPhraseListener hatPhraseListener) {
+                          HatPhraseListener hatPhraseListener,CombatUpgradeManager combatUpgradeManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.healthManager = playerHealthManager;
@@ -52,6 +55,7 @@ public class CombatListener implements Listener {
         this.orbitShieldManager = orbitShieldManager;
         this.runeManager = runeManager;
         this.hatPhraseListener = hatPhraseListener;
+        this.combatUpgradeManager = combatUpgradeManager;
     }
 
 
@@ -87,7 +91,8 @@ public class CombatListener implements Listener {
             }
 
             double runeMultiplier = runeManager.tryProc(attacker, victim);
-            combatService.applyAbilityDamage(attacker, victim, 10.0 * runeMultiplier, "Melee");
+            double meleeBaseDamage = combatUpgradeManager.getValue(attacker, CombatUpgradeType.MELEE_DAMAGE);
+            combatService.applyAbilityDamage(attacker, victim, meleeBaseDamage * runeMultiplier, "Melee");
             hatPhraseListener.onMeleeHit(attacker, victim);
             cooldownManager.setCooldown(attacker, "melee_hit", 500);
             return;

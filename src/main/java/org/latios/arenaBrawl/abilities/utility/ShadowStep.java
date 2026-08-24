@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.AbilityTargeting;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.team.TeamManager;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 public class ShadowStep implements Ability {
 
@@ -23,8 +24,8 @@ public class ShadowStep implements Ability {
     private final AbilityCost cost;
     private final TeamManager teamManager;
 
-    public ShadowStep(CooldownManager cooldownManager, TeamManager teamManager) {
-        this.cost = new CooldownCost(cooldownManager, "shadowstep", COOLDOWN_MILLIS);
+    public ShadowStep(CooldownManager cooldownManager, TeamManager teamManager, CombatUpgradeManager combatUpgradeManager) {
+        this.cost = new CooldownCost(cooldownManager, "shadowstep", COOLDOWN_MILLIS,combatUpgradeManager);
         this.teamManager = teamManager;
     }
 
@@ -39,7 +40,7 @@ public class ShadowStep implements Ability {
         Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, MAX_RANGE);
 
         if (target == null) {
-            player.sendMessage("§cNo enemy within range.");
+            player.sendMessage("§eThere is not valid player within range!");
             return false;
         }
 

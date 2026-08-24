@@ -1,9 +1,7 @@
 
 package org.latios.arenaBrawl.game;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
@@ -12,19 +10,33 @@ import java.util.Map;
 
 public class ArenaLocation {
 
-    private final World arenaWorld;
+    private World arenaWorld;
 
     private Plugin plugin;
+
     public ArenaLocation(Plugin plugin) {
         this.plugin = plugin;
         String worldName = plugin.getConfig().getString("worlds.arena", "world");
-        this.arenaWorld = Bukkit.getWorld(worldName);
+        plugin.getLogger().info("[ArenaLocation] Configured arena world name: '" + worldName + "'");
 
-        if (arenaWorld == null) {
+        // Check if loaded, otherwise load/create the world from disk
+        this.arenaWorld = Bukkit.getWorld(worldName);
+        if (this.arenaWorld == null) {
+            plugin.getLogger().info("World '" + worldName + "' is not loaded. Attempting to load...");
+            WorldCreator creator = new WorldCreator(worldName);
+            // creator.environment(World.Environment.NORMAL); // Forces Overworld format
+            arenaWorld = Bukkit.createWorld(creator);
+            if (this.arenaWorld != null) {
+                this.arenaWorld.setDifficulty(Difficulty.NORMAL);
+            }
+        }
+
+        if (this.arenaWorld == null) {
             plugin.getLogger().severe(
-                    "Arena world '" + worldName + "' not found! Check your config.yml. " +
-                            "Available worlds: " + Bukkit.getWorlds()
+                    "Failed to load arena world '" + worldName + "'! Available worlds: " + Bukkit.getWorlds()
             );
+        } else {
+            plugin.getLogger().info("Arena world '" + worldName + "' loaded successfully.");
         }
     }
 
@@ -71,8 +83,20 @@ public class ArenaLocation {
         }
         return locations;
     }
-    public Location redSpawn1() { return new Location(arenaWorld, 10, -60, 0); }
-    public Location redSpawn2() { return new Location(arenaWorld, 8, -60, 0); }
-    public Location blueSpawn1() { return new Location(arenaWorld, -10, -60, 0); }
-    public Location blueSpawn2() { return new Location(arenaWorld, -8, -60, 0); }
+
+    public Location redSpawn1() {
+        return new Location(arenaWorld, -2443, 17, 709, 90f, 0f); // Facing West
+    }
+
+    public Location redSpawn2() {
+        return new Location(arenaWorld, -2443, 17, 708, 90f, 0f); // Facing West
+    }
+
+    public Location blueSpawn1() {
+        return new Location(arenaWorld, -2499.3, 17, 686, -90f, 0f); // Facing East
+    }
+
+    public Location blueSpawn2() {
+        return new Location(arenaWorld, -2499.3, 17, 685, -90f, 0f); // Facing East
+    }
 }

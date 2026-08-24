@@ -14,6 +14,8 @@ import org.latios.arenaBrawl.abilities.AbilitySlot;
 import org.latios.arenaBrawl.hats.HatSelectorGUI;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeGUI;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +25,13 @@ public class AbilitySelectorGUI {
     private final AbilityRegistry registry;
     private final AbilitySelectionManager selectionManager;
     private final HatSelectorGUI hatSelectorGUI;
-    public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager,RuneSelectionManager runeSelectionManager, HatSelectorGUI hatSelectorGUI) {
+    private final CombatUpgradeGUI combatUpgradeGUI;
+    public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager, RuneSelectionManager runeSelectionManager, HatSelectorGUI hatSelectorGUI, CombatUpgradeGUI combatUpgradeGUI) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.runeSelectionManager = runeSelectionManager;
         this.hatSelectorGUI = hatSelectorGUI;
+        this.combatUpgradeGUI = combatUpgradeGUI;
     }
 
     public void openSlotMenu(Player player, AbilitySlot slot) {
@@ -53,7 +57,7 @@ public class AbilitySelectorGUI {
     }
 
     public void openMainMenu(Player player) {
-        Inventory inv = Bukkit.createInventory(new AbilitySelectorHolder(null), 9, "Selection Menu");
+        Inventory inv = Bukkit.createInventory(new AbilitySelectorHolder(null), 18, "Selection Menu");
 
         for (AbilitySlot slot : AbilitySlot.values()) {
             String current = selectionManager.getSelection(player, slot);
@@ -80,6 +84,13 @@ public class AbilitySelectorGUI {
         hatMeta.setLore(List.of("§7Click to choose your hat"));
         hatItem.setItemMeta(hatMeta);
         inv.setItem(7, hatItem);
+
+        ItemStack upgradesItem = new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+        ItemMeta upgradesMeta = upgradesItem.getItemMeta();
+        upgradesMeta.setDisplayName("§6Combat Upgrades");
+        upgradesMeta.setLore(List.of("§7Click to improve your combat stats"));
+        upgradesItem.setItemMeta(upgradesMeta);
+        inv.setItem(13, upgradesItem);
 
         player.openInventory(inv);
     }

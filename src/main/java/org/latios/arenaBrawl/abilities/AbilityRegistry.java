@@ -4,6 +4,7 @@ import org.latios.arenaBrawl.abilities.offensive.FreezingBreath;
 import org.latios.arenaBrawl.abilities.support.StarShield;
 import org.latios.arenaBrawl.abilities.support.BoneShield;
 import org.latios.arenaBrawl.abilities.support.HolyWater;
+import org.latios.arenaBrawl.abilities.ultimate.BroodMother;
 import org.latios.arenaBrawl.abilities.utility.Polymorph;
 import org.latios.arenaBrawl.abilities.offensive.FireballAbility;
 import org.latios.arenaBrawl.abilities.offensive.GroundSlam;
@@ -30,19 +31,21 @@ public class AbilityRegistry {
 
     private void registerDefaults() {
         register(AbilitySlot.OFFENSIVE, "fireball", deps -> new FireballAbility(deps.energyManager()));
-        register(AbilitySlot.UTILITY, "shadowstep", deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager()));
-        register(AbilitySlot.SUPPORT, "holywater", deps -> new HolyWater(deps.cooldownManager(),deps.teamManager(),deps.playerHealthManager(), deps.debuffManager()));
+        register(AbilitySlot.UTILITY, "shadowstep", deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager(),deps.combatUpgradeManager()));
+        register(AbilitySlot.SUPPORT, "holywater", deps -> new HolyWater(deps.cooldownManager(),deps.teamManager(),deps.playerHealthManager(), deps.debuffManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.ULTIMATE, "shieldwall",
                 deps -> new ShieldWall(deps.cooldownManager(), deps.usageManager(), deps.shieldManager()));
         register(AbilitySlot.OFFENSIVE, "groundslam", deps -> new GroundSlam(deps.teamManager(), deps.energyManager(),deps.combatService()));
         register(AbilitySlot.UTILITY, "polymorph",
-                deps -> new Polymorph(deps.cooldownManager(), deps.teamManager(), deps.debuffManager()));
+                deps -> new Polymorph(deps.cooldownManager(), deps.teamManager(), deps.debuffManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.SUPPORT, "boneshield",
-                deps -> new BoneShield(deps.cooldownManager(), deps.orbitShieldManager()));
+                deps -> new BoneShield(deps.cooldownManager(), deps.orbitShieldManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.SUPPORT, "starshield",
-                deps -> new StarShield(deps.cooldownManager(), deps.orbitShieldManager()));
+                deps -> new StarShield(deps.cooldownManager(), deps.orbitShieldManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.OFFENSIVE, "freezingbreath",
                 deps -> new FreezingBreath(deps.energyManager(), deps.teamManager(), deps.combatService()));
+        register(AbilitySlot.ULTIMATE, "broodmother",
+                deps -> new BroodMother(deps.cooldownManager(), deps.usageManager(), deps.broodMotherEntityManager()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");

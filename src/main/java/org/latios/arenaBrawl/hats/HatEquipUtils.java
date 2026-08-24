@@ -50,7 +50,7 @@ public class HatEquipUtils {
         List<String> lore = new ArrayList<>();
         lore.add("§7Rarity: " + hat.rarity().getColor() + hat.rarity().getDisplayName());
         lore.add("");
-        lore.add("§SSayings:");
+        lore.add("§eSayings:");
         for (String phrase : hat.phrases()) {
             lore.add("§f\"" + phrase + "\"");
         }

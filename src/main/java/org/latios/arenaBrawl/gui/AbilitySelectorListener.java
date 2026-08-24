@@ -12,6 +12,8 @@ import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.hats.HatSelectorGUI;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeGUI;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +25,14 @@ public class AbilitySelectorListener implements Listener {
     private final AbilitySelectorGUI gui;
     private final RuneSelectionManager runeManager;
     private final HatSelectorGUI hatManager;
-    public AbilitySelectorListener(AbilityRegistry registry, AbilitySelectionManager selectionManager, AbilitySelectorGUI gui, RuneSelectionManager runeManager,HatSelectorGUI hatSelectorGUI) {
+    private final CombatUpgradeGUI combatUpgradeGUI;
+    public AbilitySelectorListener(AbilityRegistry registry, AbilitySelectionManager selectionManager, AbilitySelectorGUI gui, RuneSelectionManager runeManager,HatSelectorGUI hatSelectorGUI,CombatUpgradeGUI combatUpgradeGUI) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.gui = gui;
         this.runeManager = runeManager;
         this.hatManager = hatSelectorGUI;
+        this.combatUpgradeGUI = combatUpgradeGUI;
     }
 
     @EventHandler
@@ -65,6 +69,10 @@ public class AbilitySelectorListener implements Listener {
                 return;
             }
 
+            if (rawSlot == 13) {
+                combatUpgradeGUI.open(player);
+                return;
+            }
             AbilitySlot slot = switch (rawSlot) {
                 case 0 -> AbilitySlot.OFFENSIVE;
                 case 2 -> AbilitySlot.UTILITY;

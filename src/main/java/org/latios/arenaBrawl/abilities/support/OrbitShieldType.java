@@ -11,12 +11,12 @@ public enum OrbitShieldType {
             "Bone Shield", OrbitShieldVisualType.ITEM_DISPLAY, Material.BONE,
             5, 30.0, false,
             18_000, Sound.ENTITY_SKELETON_STEP, Particle.WHITE_ASH,
-            1
+            2
     ),
 
     STAR_SHIELD(
             "Star Shield", OrbitShieldVisualType.CHARGED_CREEPER, null,
-            3, 15.0, true,
+            3, 50.0, true,
             30_000, Sound.ENTITY_CREEPER_HURT, Particle.END_ROD,
             3
     );

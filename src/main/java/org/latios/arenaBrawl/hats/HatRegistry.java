@@ -151,7 +151,7 @@ public class HatRegistry {
                 "Bzzz.", "Honey, plz.", "Send in the drones", "and 1"
         )));
         register(new HatDefinition("edupa", "Edupa Hat", Material.PLAYER_HEAD, HatRarity.EPIC, List.of(
-                "stop cry, stop lie", "learn queue", "dargon under mine bed", "spend 50 beer money on 2 frog","minecraft more important than gf xD","hit me up with an chocolate","im rune like one saxobeat"),null,UUID.fromString("747709c7-3449-4480-bfe0-58265d0e6509")
+                "stop cry stop lie", "learn queue", "dargon under mine bed", "spend 50 beer money on 2 frog","minecraft more important than gf xD","hit me up with an chocolate","im rune like one saxobeat","im speak brazil"),null,UUID.fromString("747709c7-3449-4480-bfe0-58265d0e6509")
         ));
     }
 

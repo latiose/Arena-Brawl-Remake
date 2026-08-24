@@ -9,6 +9,7 @@ import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.Match;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
+import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,6 +35,7 @@ public class CombatService {
         this.orbitShieldManager = orbitShieldManager;
         this.damageBuffManager = damageBuffManager;
         this.matchManager = matchManager;
+
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
@@ -69,26 +71,29 @@ public class CombatService {
         }
 
         if (!abilityName.equals("Melee")) {
-            attacker.sendMessage(String.format(
-                    "§7[%s] §fYou dealt §c%.1f §fdamage to §e%s", abilityName, finalDamage, victim.getName()
+            int roundedDamage = (int) Math.round(finalDamage);
+
+            // "Your [Ability] hit [Victim] for [Damage] damage."
+            attacker.sendMessage(MessageUtils.positive()+String.format(
+                    "§3Your %s hit §3%s §3for §c%d §3damage.",
+                    abilityName, victim.getName(), roundedDamage
             ));
-            victim.sendMessage(String.format(
-                    "§7[%s] §e%s §fdealt §c%.1f §fdamage to you", abilityName, attacker.getName(), finalDamage
+
+            // "[Attacker]'s [Ability] hit you for [Damage] damage."
+            victim.sendMessage(MessageUtils.negative()+String.format(
+                    "§3%s's %s hit §3you §3for §c%d §3damage.",
+                    attacker.getName(), abilityName, roundedDamage
             ));
         }
     }
 
 
     private void resolveShieldEffect(OrbitShieldType type, Player attacker, Player victim) {
-        victim.sendMessage(String.format("§fYour %s blocked the hit!", type.getDisplayName()));
-        attacker.sendMessage(String.format(
-                "§7Your attack was blocked by %s's %s!", victim.getName(), type.getDisplayName()
-        ));
-
         if (type.getHealPerCharge() > 0) {
             double healAmount = type.getHealPerCharge();
             healthManager.heal(victim, healAmount);
-            victim.sendMessage(String.format("§a+%.0f HP", healAmount));
+            int roundedHeal = (int) Math.round(healAmount);
+            victim.sendMessage(MessageUtils.positive()+String.format("§3Your %s healed you for §a%d §3health.", type.getDisplayName(), roundedHeal));
         }
 
         if (type.rollsDebuffOnBlock()) {
@@ -98,20 +103,12 @@ public class CombatService {
 
     private void applyGuaranteedRandomDebuff(Player attacker, Player victim, OrbitShieldType type) {
         List<DebuffType> shuffled = new ArrayList<>(STAR_SHIELD_POSSIBLE_DEBUFFS);
-        Collections.shuffle(shuffled); // random order = each has an equal (~33%) chance of being picked first
+        Collections.shuffle(shuffled);
 
         for (DebuffType debuffType : shuffled) {
             boolean applied = debuffManager.tryApply(attacker, debuffType, STAR_SHIELD_EFFECT_DURATION_MILLIS);
             if (applied) {
-                attacker.sendMessage(String.format(
-                        "§c%s's %s struck you with %s!",
-                        victim.getName(), type.getDisplayName(), debuffType.getDisplayName()
-                ));
-                victim.sendMessage(String.format(
-                        "§aYour %s afflicted %s with %s!",
-                        type.getDisplayName(), attacker.getName(), debuffType.getDisplayName()
-                ));
-                return; // exactly one debuff applied, stop here
+                return;
             }
             // if tryApply failed (attacker already has an active debuff), the shield still
             // consumed a charge and blocked the hit — just no new debuff could stack on top
@@ -120,5 +117,30 @@ public class CombatService {
     private void playDamageFeedback(Player victim) {
         victim.playHurtAnimation(0);
         victim.getWorld().playSound(victim.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_HURT, 1f, 1f);
+    }
+
+    public void applyMinionDamage(Player owner, Player victim, double rawDamage, String sourceName) {
+        double ownerMultiplier = damageBuffManager.getMultiplier(owner);
+        double reduction = shieldManager.getDamageReduction(victim);
+
+        double finalDamage = rawDamage * ownerMultiplier * (1 - Math.max(0, reduction));
+
+        if (orbitShieldManager.hasActiveShield(victim)) {
+            orbitShieldManager.consumeCharge(victim);
+        }
+
+        healthManager.damage(victim, finalDamage);
+        playDamageFeedback(victim);
+
+        if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
+            boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, finalDamage, 30.0);
+            if (shouldBreak) {
+                debuffManager.clear(victim);
+            }
+        }
+
+        victim.sendMessage(MessageUtils.negative() + String.format(
+                "A %s deals §c%.1f §fdamage to you!", sourceName, finalDamage
+        ));
     }
 }

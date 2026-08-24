@@ -5,7 +5,8 @@ public enum DebuffType {
     IMMOBILIZE("Immobilize",true),
     STUN("Stun", true),
     POLYMORPH("Polymorph", true),
-    SLOW("Slow", false);
+    SLOW("Slow", false),
+    POISON("Poison", false);
 
     private final String displayName;
 

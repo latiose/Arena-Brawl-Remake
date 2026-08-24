@@ -24,7 +24,7 @@ public class DamageBuffManager {
         long now = System.currentTimeMillis();
         activeBuffs.put(player.getUniqueId(), new ActiveBuff(multiplier, now, durationMillis));
 
-        BossBar bar = Bukkit.createBossBar("§c§lDOUBLE DAMAGE", BarColor.RED, BarStyle.SOLID);
+        BossBar bar = Bukkit.createBossBar("§c§lDOUBLE DAMAGE", BarColor.PURPLE, BarStyle.SOLID);
         bar.addPlayer(player);
         bar.setProgress(1.0);
         bossBars.put(player.getUniqueId(), bar);

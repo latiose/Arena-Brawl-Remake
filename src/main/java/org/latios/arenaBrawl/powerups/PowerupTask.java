@@ -29,7 +29,6 @@ public class PowerupTask extends BukkitRunnable {
         var players = match.getAllPlayers();
         if (players.isEmpty()) return;
 
-
         for (Player player : players) {
             if (player.isOnline()) {
                 damageBuffManager.getMultiplier(player);
@@ -43,16 +42,36 @@ public class PowerupTask extends BukkitRunnable {
 
         Map<PowerupType, Player> pickedUp = powerupManager.checkPickups(players);
         for (Map.Entry<PowerupType, Player> entry : pickedUp.entrySet()) {
-            Player player = entry.getValue();
+            Player picker = entry.getValue();
+            PowerupType type = entry.getKey();
 
-            switch (entry.getKey()) {
-                case HEALTH -> {
-                    healthManager.heal(player, 200);
-                    player.sendMessage("§a§lYou picked up the Healing Powerup!");
-                }
-                case DAMAGE -> {
-                    damageBuffManager.applyBuff(player, 2, 12_000);
-                    player.sendMessage("§c§lYou picked up the Double Damage Powerup!");
+            switch (type) {
+                case HEALTH -> healthManager.heal(picker, 200);
+                case DOUBLE_DAMAGE -> damageBuffManager.applyBuff(picker, 2, 12_000);
+            }
+
+            String powerupName = type == PowerupType.HEALTH ? "HEALING" : "DOUBLE DAMAGE";
+
+            boolean isPickerRed = match.getRed().contains(picker);
+
+            for (Player p : players) {
+                if (!p.isOnline()) continue;
+
+                if (p.equals(picker)) {
+
+                    if (type == PowerupType.HEALTH) {
+                        p.sendMessage("§a§lYou activated the Healing Powerup!");
+                        p.sendMessage("§a§l+200 health!");
+                    } else if (type == PowerupType.DOUBLE_DAMAGE) {
+                        p.sendMessage("§c§lYou activated the Double Damage Powerup!");
+                    }
+                } else {
+                    boolean isViewerRed = match.getRed().contains(p);
+                    boolean isTeammate = (isPickerRed == isViewerRed);
+
+                    String color = isTeammate ? "§a" : "§c";
+
+                    p.sendMessage(color + picker.getName() + " §eactivated the §a" + powerupName + " §epowerup!");
                 }
             }
         }

@@ -2,6 +2,7 @@ package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.CombatService;
@@ -9,6 +10,7 @@ import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.team.TeamManager;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 public record AbilityDependencies(
         CooldownManager cooldownManager,
@@ -19,5 +21,7 @@ public record AbilityDependencies(
         DebuffManager debuffManager,
         PlayerHealthManager playerHealthManager,
         CombatService combatService,
-        OrbitShieldManager orbitShieldManager
+        OrbitShieldManager orbitShieldManager,
+        CombatUpgradeManager combatUpgradeManager,
+        BroodMotherEntityManager broodMotherEntityManager
 ) {}

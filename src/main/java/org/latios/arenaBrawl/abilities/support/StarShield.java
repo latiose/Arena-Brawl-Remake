@@ -7,14 +7,15 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldType;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 public class StarShield implements Ability {
 
     private final AbilityCost cost;
     private final OrbitShieldManager orbitShieldManager;
 
-    public StarShield(CooldownManager cooldownManager, OrbitShieldManager orbitShieldManager) {
-        this.cost = new CooldownCost(cooldownManager, "starshield", 45000);
+    public StarShield(CooldownManager cooldownManager, OrbitShieldManager orbitShieldManager, CombatUpgradeManager combatUpgradeManager) {
+        this.cost = new CooldownCost(cooldownManager, "starshield", 45000,combatUpgradeManager);
         this.orbitShieldManager = orbitShieldManager;
     }
 

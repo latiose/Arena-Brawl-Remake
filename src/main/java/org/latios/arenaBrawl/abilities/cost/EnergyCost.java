@@ -27,6 +27,6 @@ public class EnergyCost implements AbilityCost {
 
     @Override
     public String describeRemaining(Player player) {
-        return (int) energyManager.getEnergy(player) + "/" + (int) EnergyManager.MAX_ENERGY + " energy";
+        return "You don't have enough energy";
     }
 }

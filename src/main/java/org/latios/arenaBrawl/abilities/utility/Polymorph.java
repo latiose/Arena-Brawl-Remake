@@ -14,6 +14,7 @@ import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.team.TeamManager;
+import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 public class Polymorph implements Ability {
 
@@ -24,8 +25,8 @@ public class Polymorph implements Ability {
     private final TeamManager teamManager;
     private final DebuffManager debuffManager;
 
-    public Polymorph(CooldownManager cooldownManager, TeamManager teamManager, DebuffManager debuffManager) {
-        this.cost = new CooldownCost(cooldownManager, "polymorph", 40000);
+    public Polymorph(CooldownManager cooldownManager, TeamManager teamManager, DebuffManager debuffManager, CombatUpgradeManager combatUpgradeManager) {
+        this.cost = new CooldownCost(cooldownManager, "polymorph", 40000,combatUpgradeManager);
         this.teamManager = teamManager;
         this.debuffManager = debuffManager;
     }
@@ -43,7 +44,7 @@ public class Polymorph implements Ability {
         Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, 20);
 
         if (target == null) {
-            player.sendMessage("§cNo enemy in your crosshair.");
+            player.sendMessage("§eThere is not valid player within range!");
             return false;
         }
 
@@ -51,8 +52,8 @@ public class Polymorph implements Ability {
 
         target.getWorld().spawnParticle(Particle.POOF, target.getLocation(), 25);
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_SHEEP_AMBIENT, 1.0f, 1.0f);
-        player.sendMessage("§aYou turned " + target.getName() + " into a sheep!");
-        target.sendMessage("§c" + player.getName() + " turned you into a sheep!");
+        player.sendMessage("§eYou turned " + target.getName() + " into a sheep!");
+        target.sendMessage("§e" + player.getName() + "'s polymorph ability turned you into a sheep!");
 
         return true;
     }

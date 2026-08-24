@@ -31,8 +31,8 @@ public class UltimateCost implements AbilityCost {
 
     @Override
     public String describeRemaining(Player player) {
-        if (usageManager.hasUsed(player, abilityKey)) return "already used";
-        return cooldownManager.getRemainingSeconds(player, abilityKey) + "s left";
+        if (usageManager.hasUsed(player, abilityKey)) return "This ability can only be used once";
+        return cooldownManager.getRemainingSeconds(player, abilityKey) + "s";
     }
 
     @Override
