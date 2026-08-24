@@ -44,6 +44,8 @@ public class AbilityRegistry {
                 deps -> new StarShield(deps.cooldownManager(), deps.orbitShieldManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.OFFENSIVE, "freezingbreath",
                 deps -> new FreezingBreath(deps.energyManager(), deps.teamManager(), deps.combatService(),deps.debuffManager()));
+        register(AbilitySlot.OFFENSIVE, "ancientbreath",
+                deps -> new AncientBreath(deps.energyManager(), deps.teamManager(), deps.combatService(),deps.debuffManager()));
         register(AbilitySlot.OFFENSIVE, "flamebreath",
                 deps -> new FlameBreath(plugin,deps.energyManager(),deps.teamManager(),deps.combatService()));
         register(AbilitySlot.OFFENSIVE, "lightningstrike",

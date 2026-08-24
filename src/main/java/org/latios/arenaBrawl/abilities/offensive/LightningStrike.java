@@ -16,7 +16,7 @@ public class LightningStrike implements Ability {
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
-    private static final double ENERGY_COST = 80.0;
+    private static final double ENERGY_COST = 70.0;
     private static final double DAMAGE = 165;
     private final DebuffManager debuffManager;
     private final CombatService combatService;
