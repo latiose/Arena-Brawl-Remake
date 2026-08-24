@@ -110,7 +110,7 @@ public class FreezingBreath implements Ability {
     }
 
     private void spawnTrailParticles(Location point) {
-       // point.getWorld().spawnParticle(Particle.SNOWBALL, point, 3, 0, 0, 0, 0);
+       point.getWorld().spawnParticle(Particle.SNOWFLAKE, point, 3, 0, 0, 0, 0);
         point.getWorld().spawnParticle(Particle.DRIPPING_WATER, point, 1, 0, 0, 0, 0);
 
     }

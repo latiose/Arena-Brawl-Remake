@@ -242,7 +242,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new MobTargetListener(broodMotherEntityManager), this);
         // Tasks
         new BaseSpeedTask().runTaskTimer(this, 0L, 10L);
-        new EnergyRegenTask(energyManager,matchManager).runTaskTimer(this, 20L, 6L);
+        new EnergyRegenTask(energyManager,matchManager).runTaskTimer(this, 20L, 5L);
         new HungerTask(hungerManager,matchManager).runTaskTimer(this, 20L, 20L);
         new AbilityDisplayTask(abilityManager).runTaskTimer(this, 0L, 20L);
         new DebuffTickTask(debuffManager).runTaskTimer(this, 0L, 2L);

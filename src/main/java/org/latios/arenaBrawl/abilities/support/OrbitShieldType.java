@@ -58,4 +58,6 @@ public enum OrbitShieldType {
     public Sound getAmbientSound() { return ambientSound; }
     public Particle getActivationParticle() { return activationParticle; }
     public int getUpdateIntervalTicks() { return updateIntervalTicks; }
+
+
 }

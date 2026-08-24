@@ -91,11 +91,29 @@ public class CombatService {
 
 
     private void resolveShieldEffect(OrbitShieldType type, Player attacker, Player victim) {
+        if (type == null) return;
+
+        int remainingCharges = orbitShieldManager.getCharges(victim);
+        int maxCharges = type.getChargeCount();
+
+        if (remainingCharges > 0) {
+            int healthPercent = (int) Math.round(((double) remainingCharges / maxCharges) * 100.0);
+            victim.sendMessage(String.format("§e%s Health: %d%%", type.getDisplayName(), healthPercent));
+        }
+
         if (type.getHealPerCharge() > 0) {
             double healAmount = type.getHealPerCharge();
             healthManager.heal(victim, healAmount);
             int roundedHeal = (int) Math.round(healAmount);
-            victim.sendMessage(MessageUtils.positive()+String.format("§3Your %s healed you for §a%d §3health.", type.getDisplayName(), roundedHeal));
+
+            victim.sendMessage(String.format(
+                    "§3Your %s healed you for §a%d §3health.",
+                    type.getDisplayName(), roundedHeal
+            ));
+        }
+
+        if (remainingCharges <= 0) {
+            victim.sendMessage(String.format("§eYour %s was destroyed.", type.getDisplayName()));
         }
 
         if (type.rollsDebuffOnBlock()) {

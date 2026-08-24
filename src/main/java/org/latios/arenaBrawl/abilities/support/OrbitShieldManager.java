@@ -22,6 +22,11 @@ public class OrbitShieldManager {
     private static final double ORBIT_HEIGHT_OFFSET = 1.4;
     private static final double ROTATION_SPEED_PER_TICK = 0.05;
 
+    public int getCharges(Player player) {
+        ShieldState state = activeShields.get(player.getUniqueId());
+        return state.charges.toArray().length;
+    }
+
     private static class ShieldState {
         OrbitShieldType type;
         final List<Entity> charges = new ArrayList<>();
