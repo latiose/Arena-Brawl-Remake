@@ -61,7 +61,9 @@ public class CombatService {
         double finalDamage = reduction > 0 ? adjustedDamage * (1 - reduction) : adjustedDamage;
 
         healthManager.damage(victim, finalDamage, attacker);
-        playDamageFeedback(victim);
+        if (abilityName.equals("Melee")) {
+            playDamageFeedback(victim);
+        }
 
         if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
             boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, finalDamage, 30.0);
@@ -124,13 +126,14 @@ public class CombatService {
         double reduction = shieldManager.getDamageReduction(victim);
 
         double finalDamage = rawDamage * ownerMultiplier * (1 - Math.max(0, reduction));
-
+        int roundedDamage = (int) Math.round(finalDamage);
         if (orbitShieldManager.hasActiveShield(victim)) {
             orbitShieldManager.consumeCharge(victim);
+            resolveShieldEffect(orbitShieldManager.getActiveType(victim),owner,victim);
         }
 
-        healthManager.damage(victim, finalDamage);
-        playDamageFeedback(victim);
+        healthManager.damageSilent(victim, finalDamage);
+       // playDamageFeedback(victim);
 
         if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
             boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, finalDamage, 30.0);
@@ -139,8 +142,10 @@ public class CombatService {
             }
         }
 
-        victim.sendMessage(MessageUtils.negative() + String.format(
-                "A %s deals §c%.1f §fdamage to you!", sourceName, finalDamage
+        // "A [Source] hit you for [Damage] damage."
+        victim.sendMessage(String.format(
+                "%s§3A %s hit §3you §3for §c%d §3damage.",
+                MessageUtils.negative(), sourceName, roundedDamage
         ));
     }
 }

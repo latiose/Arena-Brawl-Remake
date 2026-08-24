@@ -42,7 +42,7 @@ public class BroodMotherEntityManager {
 
     private final DebuffManager debuffManager;
     private final TeamManager teamManager;
-    private final CombatService combatService;
+    private CombatService combatService;
 
     public BroodMotherEntityManager(DebuffManager debuffManager, TeamManager teamManager, CombatService combatService) {
         this.debuffManager = debuffManager;
@@ -50,11 +50,11 @@ public class BroodMotherEntityManager {
         this.combatService = combatService;
     }
 
-    public void summonBoss(Player owner) {
+    public void summonBoss(Player owner,Player target) {
         Spider spider = owner.getWorld().spawn(owner.getLocation(), Spider.class, s -> {
             s.setCustomNameVisible(false);
             s.setRemoveWhenFarAway(false);
-            s.setAI(false); // fully manual control, vanilla AI never decides anything
+            s.setAI(true);
             var maxHealthAttr = s.getAttribute(Attribute.MAX_HEALTH);
             if (maxHealthAttr != null) maxHealthAttr.setBaseValue(200);
             s.setHealth(200);
@@ -62,24 +62,26 @@ public class BroodMotherEntityManager {
 
         EntityCleanupUtils.markAsArenaEntity(spider);
         registerControlledEntity(spider, owner.getUniqueId(), BOSS_HIT_COUNT, true);
-        acquireTarget(spider, owner);
+        acquireTarget(spider, owner,target);
     }
 
     private void spawnSpiderling(Location location, UUID ownerId) {
         CaveSpider spiderling = location.getWorld().spawn(location, CaveSpider.class, s -> {
             s.setCustomNameVisible(false);
             s.setRemoveWhenFarAway(false);
-            s.setAI(false);
+            s.setAI(true);
+
             var maxHealthAttr = s.getAttribute(Attribute.MAX_HEALTH);
             if (maxHealthAttr != null) maxHealthAttr.setBaseValue(50);
             s.setHealth(50);
+
         });
 
         EntityCleanupUtils.markAsArenaEntity(spiderling);
         registerControlledEntity(spiderling, ownerId, SPIDERLING_HIT_COUNT, false);
 
         Player owner = org.bukkit.Bukkit.getPlayer(ownerId);
-        if (owner != null) acquireTarget(spiderling, owner);
+        if (owner != null) acquireTarget(spiderling, owner, null);
     }
 
     private void registerControlledEntity(LivingEntity entity, UUID ownerId, int hitCount, boolean isBoss) {
@@ -99,22 +101,26 @@ public class BroodMotherEntityManager {
     }
 
     /** Picks the nearest enemy to the owner and locks the spider onto them, like a targeted ability. */
-    public void acquireTarget(LivingEntity spider, Player owner) {
-        Player nearest = null;
-        double closestDistance = Double.MAX_VALUE;
-
-        for (Player candidate : spider.getWorld().getPlayers()) {
-            if (!teamManager.isEnemy(owner, candidate)) continue;
-            double distance = spider.getLocation().distance(candidate.getLocation());
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                nearest = candidate;
-            }
-        }
-
-        if (nearest != null) {
-            currentTarget.put(spider.getUniqueId(), nearest.getUniqueId());
+    public void acquireTarget(LivingEntity spider, Player owner,Player target) {
+        if (target != null) {
+            currentTarget.put(spider.getUniqueId(), target.getUniqueId());
             lastLandedHitAt.put(spider.getUniqueId(), System.currentTimeMillis()); // reset timeout on new target
+        }
+        else{
+            Player nearest = null;
+            double closestDistance = Double.MAX_VALUE;
+            for (Player candidate : spider.getWorld().getPlayers()) {
+                if (!teamManager.isEnemy(owner, candidate)) continue;
+                double distance = spider.getLocation().distance(candidate.getLocation());
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    nearest = candidate;
+                }
+            }
+            if (nearest != null) {
+                currentTarget.put(spider.getUniqueId(), nearest.getUniqueId());
+                lastLandedHitAt.put(spider.getUniqueId(), System.currentTimeMillis()); // reset timeout on new target
+            }
         }
     }
 
@@ -172,6 +178,7 @@ public class BroodMotherEntityManager {
 
         remainingHits.put(id, remaining);
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_SPIDER_HURT, 1f, 1f);
+        entity.playHurtAnimation(1);
         return false;
     }
 
@@ -198,7 +205,7 @@ public class BroodMotherEntityManager {
 
     /** Called when a controlled spider lands a melee hit on its target player. */
     public void onControlledAttack(LivingEntity attackerEntity, Player victim) {
-        lastLandedHitAt.put(attackerEntity.getUniqueId(), System.currentTimeMillis()); // resets the 7s timeout
+        lastLandedHitAt.put(attackerEntity.getUniqueId(), System.currentTimeMillis());
 
         boolean isBoss = bossEntities.contains(attackerEntity.getUniqueId());
         UUID ownerId = ownerOf.get(attackerEntity.getUniqueId());
@@ -207,12 +214,12 @@ public class BroodMotherEntityManager {
         if (isBoss) {
             boolean applied = debuffManager.tryApply(victim, DebuffType.POISON, POISON_DURATION_MILLIS);
             if (!applied) return;
-            victim.sendMessage(MessageUtils.negative() + "The BroodMother poisoned you!");
-        } else if (owner != null) {
+            victim.sendMessage(MessageUtils.negative() + "§3You were poisoned by a Broodmother!");
+        } else {
+
             combatService.applyMinionDamage(owner, victim, SPIDERLING_DAMAGE, "Spiderling");
         }
     }
-
     public void clearAll() {
         remainingHits.clear();
         ownerOf.clear();
@@ -220,5 +227,9 @@ public class BroodMotherEntityManager {
         currentTarget.clear();
         lastLandedHitAt.clear();
         lastAttackAt.clear();
+    }
+
+    public void setCombatService(CombatService combatService) {
+        this.combatService = combatService;
     }
 }

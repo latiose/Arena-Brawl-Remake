@@ -5,6 +5,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.latios.arenaBrawl.game.ArenaManager;
+import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.hats.KeyManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
@@ -17,12 +19,14 @@ public class AbilitySelectionLoadListener implements Listener {
     private final HatSelectionManager hatSelectionManager;
     private final KeyManager keyManager;
     private final CombatUpgradeManager combatUpgradeManager;
-    public AbilitySelectionLoadListener(AbilitySelectionManager selectionManager, RuneSelectionManager runeManager,HatSelectionManager hatSelectionManager, KeyManager keyManager, CombatUpgradeManager combatUpgradeManager) {
+    private final MatchManager matchManager;
+    public AbilitySelectionLoadListener(AbilitySelectionManager selectionManager, RuneSelectionManager runeManager,HatSelectionManager hatSelectionManager, KeyManager keyManager, CombatUpgradeManager combatUpgradeManager, MatchManager matchManager) {
         this.selectionManager = selectionManager;
         this.runeManager = runeManager;
         this.hatSelectionManager = hatSelectionManager;
         this.keyManager = keyManager;
         this.combatUpgradeManager = combatUpgradeManager;
+        this.matchManager = matchManager;
     }
 
 
@@ -33,6 +37,7 @@ public class AbilitySelectionLoadListener implements Listener {
         hatSelectionManager.loadForPlayer(event.getPlayer());
         keyManager.loadForPlayer(event.getPlayer());
         combatUpgradeManager.loadForPlayer(event.getPlayer());
+        matchManager.cleanupPlayer(event.getPlayer());
     }
 
     @EventHandler

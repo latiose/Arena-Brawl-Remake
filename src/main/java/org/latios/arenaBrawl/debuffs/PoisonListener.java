@@ -45,10 +45,11 @@ public class PoisonListener implements DebuffListener {
                     return;
                 }
                 healthManager.damage(player, DAMAGE_PER_SECOND);
-
+                player.playHurtAnimation(0);
+                player.getWorld().playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_HURT, 1f, 1f);
                 // "[Attacker]'s [Ability] hit you for [Damage] damage."
-                player.sendMessage(MessageUtils.negative()+String.format(
-                        "§3Broodmothers' poison hit §3you §3for §c%d §3damage.",DAMAGE_PER_SECOND)
+                player.sendMessage(MessageUtils.negative() + String.format(
+                        "§3Broodmothers' poison hit §3you §3for §c%d §3damage.", (int) DAMAGE_PER_SECOND)
                 );
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 20L, 20L);

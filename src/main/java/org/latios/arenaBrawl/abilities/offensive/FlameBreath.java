@@ -1,60 +1,49 @@
-// abilities/impl/DragonBreathAbility.java
 package org.latios.arenaBrawl.abilities.offensive;
 
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
-import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
-
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
-import org.latios.arenaBrawl.debuffs.DebuffManager;
-import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
-public class FreezingBreath implements Ability {
+public class FlameBreath implements Ability {
 
-    private static final double DAMAGE = 220.0;
-    private static final double ENERGY_COST = 80.0;
-    private static final long SLOW_DURATION_TICKS = 2_000;
+    private static final double DAMAGE = 150.0;
+    private static final double TICK_DAMAGE = 25.0;
+    private static final double ENERGY_COST = 60.0;
     private static final double HIT_RADIUS = 2.5;
 
-    // Exactly 8 blocks from the player's position, as specified
     private static final double MAX_DISTANCE = 8.0;
     private static final double STEP_SIZE = 0.2;
-
-    // Double helix shape: radius grows linearly with distance (cone), two strands
-    // 180 degrees apart in rotation phase ("upright" and "upside down").
-    private static final double RADIUS_GROWTH = 0.22;   // radius per block travelled
-    private static final double ANGULAR_SPEED = 2.4;    // radians per block travelled
+    private static final double RADIUS_GROWTH = 0.22;
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
-    private final DebuffManager debuffManager;
+    private final Plugin plugin;
 
-    public FreezingBreath(EnergyManager energyManager, TeamManager teamManager, CombatService combatService,DebuffManager debuffManager) {
+    public FlameBreath(Plugin plugin, EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
+        this.plugin = plugin;
         this.cost = new EnergyCost(energyManager, ENERGY_COST);
         this.teamManager = teamManager;
         this.combatService = combatService;
-        this.debuffManager = debuffManager;
     }
 
     @Override
-    public String getName() { return "Freezing Breath"; }
+    public String getName() { return "Flame Breath"; }
 
     @Override
     public AbilityCost getCost() { return cost; }
@@ -73,13 +62,14 @@ public class FreezingBreath implements Ability {
         Vector right = new Vector(-axis.getZ(), 0, axis.getX()).normalize();
         Vector up = new Vector(0, 1, 0);
 
-        Set<Player> hitPlayers = new HashSet<>();
+        List<List<Location>> slices = new ArrayList<>();
+        List<Location> allConePoints = new ArrayList<>();
+        Set<Player> initialHitPlayers = new HashSet<>();
 
         double currentAngle = 0.0;
 
         for (double distance = STEP_SIZE; distance <= MAX_DISTANCE; distance += STEP_SIZE) {
             double radius = distance * RADIUS_GROWTH;
-
             double deltaTheta = 0.35 + (0.05 / (distance + 0.1));
             currentAngle += deltaTheta;
 
@@ -88,17 +78,58 @@ public class FreezingBreath implements Ability {
             Location strand1 = helixPoint(center, right, up, radius, currentAngle);
             Location strand2 = helixPoint(center, right, up, radius, currentAngle + Math.PI);
 
-            spawnTrailParticles(strand1);
-            spawnTrailParticles(strand2);
+            List<Location> slice = List.of(strand1, strand2);
+            slices.add(slice);
+            allConePoints.addAll(slice);
 
-            checkHit(player, strand1, hitPlayers);
-            checkHit(player, strand2, hitPlayers);
+            checkHit(player, strand1, initialHitPlayers);
+            checkHit(player, strand2, initialHitPlayers);
         }
 
-        for (Player target : hitPlayers) {
+        for (Player target : initialHitPlayers) {
             combatService.applyAbilityDamage(player, target, DAMAGE, getName());
             applySpike(target);
         }
+
+        int totalSlices = slices.size();
+
+        new BukkitRunnable() {
+            int tick = 0;
+
+            @Override
+            public void run() {
+                tick++;
+
+                if (tick <= 20) {
+                    int maxSliceToSpawn = (int) Math.ceil((double) tick / 20.0 * totalSlices);
+
+                    for (int i = 0; i < Math.min(maxSliceToSpawn, totalSlices); i++) {
+                        for (Location pt : slices.get(i)) {
+                            spawnTrailParticles(pt);
+                        }
+                    }
+                } else {
+                    for (Location pt : allConePoints) {
+                        pt.getWorld().spawnParticle(Particle.FLAME, pt, 1, 0.05, 0.05, 0.05, 0);
+                    }
+                }
+
+                if (tick == 20 || tick == 40) {
+                    Set<Player> tickHitPlayers = new HashSet<>();
+                    for (Location pt : allConePoints) {
+                        checkHit(player, pt, tickHitPlayers);
+                    }
+
+                    for (Player target : tickHitPlayers) {
+                        combatService.applyAbilityDamage(player, target, TICK_DAMAGE, getName());
+                    }
+                }
+
+                if (tick >= 40) {
+                    cancel();
+                }
+            }
+        }.runTaskTimer(plugin, 1L, 1L);
 
         return true;
     }
@@ -110,9 +141,7 @@ public class FreezingBreath implements Ability {
     }
 
     private void spawnTrailParticles(Location point) {
-       // point.getWorld().spawnParticle(Particle.SNOWBALL, point, 3, 0, 0, 0, 0);
-        point.getWorld().spawnParticle(Particle.DRIPPING_WATER, point, 1, 0, 0, 0, 0);
-
+        point.getWorld().spawnParticle(Particle.FLAME, point, 1, 0, 0, 0, 0);
     }
 
     private void checkHit(Player caster, Location point, Set<Player> hitPlayers) {
@@ -125,10 +154,6 @@ public class FreezingBreath implements Ability {
                 hitPlayers.add(candidate);
             }
         }
-    }
-
-    private void applySlow(Player target) {
-        debuffManager.tryApply(target, DebuffType.SLOW, SLOW_DURATION_TICKS);
     }
 
     private void applySpike(Player target) {

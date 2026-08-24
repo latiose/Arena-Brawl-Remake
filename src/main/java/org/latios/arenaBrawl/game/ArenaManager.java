@@ -22,8 +22,6 @@ import java.util.List;
 
 public class ArenaManager {
 
-    private static final double MATCH_MAX_HEALTH = 2000.0;
-
     private final ArenaLocation arenaLocation;
     private final TeamManager teamManager;
     private final AbilityManager abilityManager;

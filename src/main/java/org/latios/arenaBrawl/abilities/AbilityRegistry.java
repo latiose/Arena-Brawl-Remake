@@ -1,13 +1,12 @@
 package org.latios.arenaBrawl.abilities;
 
-import org.latios.arenaBrawl.abilities.offensive.FreezingBreath;
+import org.bukkit.plugin.Plugin;
+import org.latios.arenaBrawl.abilities.offensive.*;
 import org.latios.arenaBrawl.abilities.support.StarShield;
 import org.latios.arenaBrawl.abilities.support.BoneShield;
 import org.latios.arenaBrawl.abilities.support.HolyWater;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMother;
 import org.latios.arenaBrawl.abilities.utility.Polymorph;
-import org.latios.arenaBrawl.abilities.offensive.FireballAbility;
-import org.latios.arenaBrawl.abilities.offensive.GroundSlam;
 import org.latios.arenaBrawl.abilities.ultimate.ShieldWall;
 
 import org.latios.arenaBrawl.abilities.utility.ShadowStep;
@@ -21,11 +20,12 @@ public class AbilityRegistry {
 
     private final Map<AbilitySlot, Map<String, AbilityFactory>> registry = new EnumMap<>(AbilitySlot.class);
     private final Map<AbilitySlot, String> defaults = new EnumMap<>(AbilitySlot.class);
-
-    public AbilityRegistry() {
+    private final Plugin plugin;
+    public AbilityRegistry(Plugin plugin) {
         for (AbilitySlot slot : AbilitySlot.values()) {
             registry.put(slot, new LinkedHashMap<>());
         }
+        this.plugin = plugin;
         registerDefaults();
     }
 
@@ -43,9 +43,13 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "starshield",
                 deps -> new StarShield(deps.cooldownManager(), deps.orbitShieldManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.OFFENSIVE, "freezingbreath",
-                deps -> new FreezingBreath(deps.energyManager(), deps.teamManager(), deps.combatService()));
+                deps -> new FreezingBreath(deps.energyManager(), deps.teamManager(), deps.combatService(),deps.debuffManager()));
+        register(AbilitySlot.OFFENSIVE, "flamebreath",
+                deps -> new FlameBreath(plugin,deps.energyManager(),deps.teamManager(),deps.combatService()));
+        register(AbilitySlot.OFFENSIVE, "lightningstrike",
+                deps -> new LightningStrike(deps.teamManager(),deps.energyManager(),deps.combatService(),deps.debuffManager()));
         register(AbilitySlot.ULTIMATE, "broodmother",
-                deps -> new BroodMother(deps.cooldownManager(), deps.usageManager(), deps.broodMotherEntityManager()));
+                deps -> new BroodMother(deps.cooldownManager(), deps.usageManager(), deps.broodMotherEntityManager(),deps.teamManager()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");

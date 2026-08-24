@@ -54,13 +54,14 @@ public class OrbitShieldManager {
     }
 
     private ItemDisplay spawnItemDisplay(Player player, org.bukkit.Material material) {
-         ItemDisplay display = player.getWorld().spawn(player.getLocation(), ItemDisplay.class, d -> {
+        ItemDisplay display = player.getWorld().spawn(player.getLocation(), ItemDisplay.class, d -> {
             d.setItemStack(new ItemStack(material));
             d.setBillboard(Display.Billboard.CENTER);
+
             d.setTransformation(new Transformation(
                     new Vector3f(0, 0, 0),
                     new AxisAngle4f(0, 0, 0, 1),
-                    new Vector3f(0.6f, 0.6f, 0.6f),
+                    new Vector3f(0.55f, 0.55f, 0.55f),
                     new AxisAngle4f(0, 0, 0, 1)
             ));
         });
@@ -110,8 +111,13 @@ public class OrbitShieldManager {
     }
 
     public void clear(Player player) {
+        OrbitShieldType type = getActiveType(player);
         ShieldState state = activeShields.remove(player.getUniqueId());
         if (state == null) return;
+
+        if(!(type.getVisualType() == OrbitShieldVisualType.CHARGED_CREEPER)) {
+            player.getWorld().playSound(player.getLocation(), org.bukkit.Sound.ENTITY_SKELETON_DEATH, 1.0f, 1.0f);
+        }
         despawnAll(state);
     }
 
@@ -158,13 +164,35 @@ public class OrbitShieldManager {
                 double x = Math.cos(angle) * ORBIT_RADIUS;
                 double z = Math.sin(angle) * ORBIT_RADIUS;
 
-                Location target;
-                if(entry.getValue().type.getVisualType().equals(OrbitShieldVisualType.CHARGED_CREEPER)) {
-                    target = player.getLocation().clone().add(x, 0, z);
-                } else{
-                    target = player.getLocation().clone().add(x, ORBIT_HEIGHT_OFFSET, z);
+                Entity charge = state.charges.get(i);
+
+                if (state.type.getVisualType() == OrbitShieldVisualType.CHARGED_CREEPER) {
+                    Location target = player.getLocation().clone().add(x, 0, z);
+                    charge.teleport(target);
+                } else {
+                    // Posición objetivo absoluta en este tick
+                    Location targetLoc = player.getLocation().clone().add(x, ORBIT_HEIGHT_OFFSET, z);
+
+                    // Posición actual de la entidad
+                    Location currentLoc = charge.getLocation();
+
+                    // Si cambia de mundo o está demasiado lejos, teletransporta directo
+                    if (currentLoc.getWorld() != targetLoc.getWorld() || currentLoc.distanceSquared(targetLoc) > 16.0) {
+                        charge.teleport(targetLoc);
+                    } else {
+                        // INTERPOLACIÓN MANUAL (LERP):
+                        // 0.355 es el factor de suavizado (0.1 = más delay, 0.9 = más rígido)
+                        double factor = 0.35;
+
+                        double lerpX = currentLoc.getX() + (targetLoc.getX() - currentLoc.getX()) * factor;
+                        double lerpy = currentLoc.getY() + (targetLoc.getY() - currentLoc.getY()) * factor;
+                        double lerpZ = currentLoc.getZ() + (targetLoc.getZ() - currentLoc.getZ()) * factor;
+
+                        Location finalLoc = new Location(player.getWorld(), lerpX, lerpy, lerpZ, 0f, 0f);
+                        charge.teleport(finalLoc);
+
+                    }
                 }
-                state.charges.get(i).teleport(target);
             }
         }
     }

@@ -24,7 +24,6 @@ public class ArenaLocation {
         if (this.arenaWorld == null) {
             plugin.getLogger().info("World '" + worldName + "' is not loaded. Attempting to load...");
             WorldCreator creator = new WorldCreator(worldName);
-            // creator.environment(World.Environment.NORMAL); // Forces Overworld format
             arenaWorld = Bukkit.createWorld(creator);
             if (this.arenaWorld != null) {
                 this.arenaWorld.setDifficulty(Difficulty.NORMAL);

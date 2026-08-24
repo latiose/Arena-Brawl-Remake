@@ -88,4 +88,25 @@ public class PlayerHealthManager {
     public UUID getLastAttacker(Player player) {
         return lastAttacker.get(player.getUniqueId());
     }
+
+
+    public void damageSilent(Player player, double amount, Player attacker) {
+        if (eliminated.contains(player.getUniqueId())) return;
+
+        if (attacker != null) {
+            lastAttacker.put(player.getUniqueId(), attacker.getUniqueId());
+        }
+
+        double updated = Math.max(getHealth(player) - amount, 0);
+        currentHealth.put(player.getUniqueId(), updated);
+
+        if (updated <= 0) {
+            eliminated.add(player.getUniqueId());
+            eliminationCallback.accept(player);
+        }
+    }
+
+    public void damageSilent(Player player, double amount) {
+        damageSilent(player, amount, null);
+    }
 }

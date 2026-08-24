@@ -83,24 +83,63 @@ public class MatchManager {
         Match match = activeMatches.get(player.getUniqueId());
         if (match == null) return;
 
+        Player killer = null;
         UUID attackerId = healthManager.getLastAttacker(player);
         if (attackerId != null) {
-            Player killer = Bukkit.getPlayer(attackerId);
+            killer = Bukkit.getPlayer(attackerId);
             if (killer != null && killer.isOnline() && !killer.equals(player)) {
                 statsManager.addKill(killer);
             }
         }
         statsManager.addDeath(player);
 
+        String killMessage;
+        if (killer != null && killer.isOnline() && !killer.equals(player)) {
+            killMessage = String.format("§e%s §3has been eliminated by §e%s§3!", player.getName(), killer.getName());
+        } else {
+            killMessage = String.format("§e%s §3has been eliminated!", player.getName());
+        }
+
+        for (Player matchPlayer : match.getAllPlayers()) {
+            matchPlayer.sendMessage(killMessage);
+        }
+
+        org.bukkit.Location loc = player.getLocation();
+
+        org.bukkit.entity.Firework fw = loc.getWorld().spawn(loc, org.bukkit.entity.Firework.class);
+        org.bukkit.inventory.meta.FireworkMeta meta = fw.getFireworkMeta();
+        meta.addEffect(org.bukkit.FireworkEffect.builder()
+                .with(org.bukkit.FireworkEffect.Type.BALL)
+                .withColor(org.bukkit.Color.RED)
+                .build());
+        fw.setFireworkMeta(meta);
+        fw.detonate();
+
+        org.bukkit.Material[] materials = {
+                org.bukkit.Material.PORKCHOP, org.bukkit.Material.PORKCHOP,
+                org.bukkit.Material.BONE, org.bukkit.Material.BONE,
+                org.bukkit.Material.POPPY, org.bukkit.Material.POPPY
+        };
+
+        java.util.Random random = new java.util.Random();
+        for (org.bukkit.Material mat : materials) {
+            org.bukkit.entity.Item item = loc.getWorld().dropItem(loc, new org.bukkit.inventory.ItemStack(mat, 1));
+
+            double vx = (random.nextDouble() - 0.5) * 0.5;
+            double vy = 0.75 + (random.nextDouble() * 0.15);
+            double vz = (random.nextDouble() - 0.5) * 0.5;
+
+            item.setVelocity(new org.bukkit.util.Vector(vx, vy, vz));
+        }
+
         player.setGameMode(org.bukkit.GameMode.SPECTATOR);
-        player.sendMessage("§cYou have been eliminated.");
+       // player.sendMessage("§3You have been eliminated.");
 
         String winner = match.eliminate(player);
         if (winner != null) {
             endMatch(match, winner);
         }
     }
-
 
     private void applyRatingChanges(List<Player> winners, List<Player> losers) {
         double losersAvg = losers.stream().mapToDouble(ratingManager::getRating).average().orElse(1000.0);
@@ -123,7 +162,7 @@ public class MatchManager {
         }
     }
 
-    private void cleanupPlayer(Player player) {
+    public void cleanupPlayer(Player player) {
         activeMatches.remove(player.getUniqueId());
         teamManager.clear(player);
         debuffManager.clear(player);
@@ -174,10 +213,11 @@ public class MatchManager {
             if (loser.isOnline()) statsManager.addLoss(loser);
         }
 
-        String winnerMessage = winnerTeam.equals("RED") ? "§cRed Team" : "§9Blue Team";
         for (Player player : match.getAllPlayers()) {
             if (player.isOnline()) {
-                player.sendTitle(winnerMessage + " §fwins!", "", 10, 60, 10);
+                for (Player winner : winners) {
+                    player.sendMessage(String.format("§e%s §3has won the game!", winner.getName()));
+                }
             }
         }
 
@@ -188,7 +228,7 @@ public class MatchManager {
     public void endMatchAsDraw(Match match) {
         for (Player player : match.getAllPlayers()) {
             if (player.isOnline()) {
-                player.sendTitle("§eDraw!", "§7Time limit reached", 10, 60, 10);
+                player.sendMessage("§eDraw! §3Time limit reached.");
             }
         }
         finishMatch(match);

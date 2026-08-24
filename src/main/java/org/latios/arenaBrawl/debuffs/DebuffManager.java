@@ -45,7 +45,7 @@ public class DebuffManager {
         activeDebuffs.put(player.getUniqueId(), new ActiveDebuff(type, System.currentTimeMillis(), durationMillis));
         accumulatedDamage.put(player.getUniqueId(), 0.0);
 
-        BossBar bar = Bukkit.createBossBar(type.getDisplayName(), BarColor.RED, BarStyle.SOLID);
+        BossBar bar = Bukkit.createBossBar(type.getDisplayName(), BarColor.PURPLE, BarStyle.SOLID);
         bar.addPlayer(player);
         bar.setProgress(1.0);
         bossBars.put(player.getUniqueId(), bar);

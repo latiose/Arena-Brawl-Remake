@@ -41,7 +41,9 @@ public class GroundSlam implements Ability {
                 hitSomeone = true;
             }
         }
-        if(!hitSomeone) player.sendMessage("§4§bNo player within range!");
+        if (!hitSomeone) {
+            player.sendMessage("§cNo player within range!");
+        }
         return hitSomeone;
     }
 }

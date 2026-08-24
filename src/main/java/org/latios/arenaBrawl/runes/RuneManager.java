@@ -4,6 +4,8 @@ package org.latios.arenaBrawl.runes;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.EnergyManager;
 
 
@@ -14,16 +16,17 @@ public class RuneManager {
     private static final int SPEED_DURATION_TICKS = 60;
     private static final int SPEED_AMPLIFIER = 2;
     private static final int SLOW_DURATION_TICKS = 60;
-    private static final int SLOW_AMPLIFIER = 1;
     private static final double ENERGY_AMOUNT = 10.0;
 
     private final EnergyManager energyManager;
     private final RuneSelectionManager selectionManager;
     private final Random random = new Random();
+    private final DebuffManager debuffManager;
 
-    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager) {
+    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager,DebuffManager debuffManager) {
         this.energyManager = energyManager;
         this.selectionManager = selectionManager;
+        this.debuffManager = debuffManager;
     }
 
     /**
@@ -50,9 +53,7 @@ public class RuneManager {
                 attacker.sendMessage("§eYour §f" + rune.getDisplayName() + " §ewas activated");
             }
             case SLOW -> {
-                victim.addPotionEffect(new PotionEffect(
-                        PotionEffectType.SLOWNESS, SLOW_DURATION_TICKS, SLOW_AMPLIFIER, true, false
-                ));
+                debuffManager.tryApply(victim, DebuffType.SLOW, SLOW_DURATION_TICKS);
                 attacker.sendMessage("§eYour §5" + rune.getDisplayName() + " §ewas activated");
             }
             case DAMAGE -> {
