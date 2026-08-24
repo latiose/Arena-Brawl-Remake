@@ -35,4 +35,9 @@ public class ShieldManager {
         activeUntil.remove(player.getUniqueId());
         activeReduction.remove(player.getUniqueId());
     }
+
+    public boolean hasShield(Player player) {
+        Long expiresAt = activeUntil.get(player.getUniqueId());
+        return System.currentTimeMillis() < expiresAt;
+    }
 }
