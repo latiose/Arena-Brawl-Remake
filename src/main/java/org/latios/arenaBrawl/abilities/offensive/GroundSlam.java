@@ -4,11 +4,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
+import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
+
+import java.util.List;
 
 public class GroundSlam implements Ability {
 
@@ -45,5 +48,19 @@ public class GroundSlam implements Ability {
             player.sendMessage("§cNo player within range!");
         }
         return hitSomeone;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Shakes the ground around the user, dealing damage and knocking up nearby enemies.";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
+                new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
+                new AbilityStat("Range", 4 + "")
+        );
     }
 }

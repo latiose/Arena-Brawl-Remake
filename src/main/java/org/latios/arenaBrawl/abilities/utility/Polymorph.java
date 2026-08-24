@@ -6,15 +6,15 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.latios.arenaBrawl.abilities.Ability;
-import org.latios.arenaBrawl.abilities.AbilityCost;
-import org.latios.arenaBrawl.abilities.AbilityTargeting;
-import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
+
+import java.util.List;
+
 
 public class Polymorph implements Ability {
 
@@ -41,7 +41,7 @@ public class Polymorph implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, 20);
+        Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, RANGE);
 
         if (target == null) {
             player.sendMessage("§eThere is not valid player within range!");
@@ -56,5 +56,19 @@ public class Polymorph implements Ability {
         target.sendMessage("§e" + player.getName() + "'s polymorph ability turned you into a sheep!");
 
         return true;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Morphs targeted enemy into a sheep for "+(int)DURATION_MILLIS/1000+"s. Morhped players will heal 25 health per second, won't be able to use their abilities or move but they will" +
+                "break out if they manage to hit an enemy player with a melee attack.";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Cooldown", (DURATION_MILLIS / 1000) + "s"),
+                new AbilityStat("Range", RANGE + " blocks")
+        );
     }
 }

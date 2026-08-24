@@ -4,6 +4,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
+import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.AbilityTargeting;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -11,6 +12,8 @@ import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
+
+import java.util.List;
 
 public class LightningStrike implements Ability {
 
@@ -55,5 +58,21 @@ public class LightningStrike implements Ability {
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f);
 
         return true;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Calls lightning on an enemy, dealing damage and having a chance to immobilize";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
+                new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
+                new AbilityStat("Range", maxRange+""),
+                new AbilityStat("Immobilization chance",  "50%"),
+                new AbilityStat("Immobilization duration", (int) IMMO_DURATION/1000 + "")
+        );
     }
 }

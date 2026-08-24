@@ -14,4 +14,8 @@ public interface AbilityCost {
     default boolean isPermanentlyUnavailable(Player player) {
         return false;
     }
+
+    default String getBaseCostDescription() {
+        return "";
+    }
 }

@@ -3,11 +3,14 @@ package org.latios.arenaBrawl.abilities.support;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
+import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldType;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
+
+import java.util.List;
 
 public class StarShield implements Ability {
 
@@ -32,5 +35,20 @@ public class StarShield implements Ability {
                 OrbitShieldType.STAR_SHIELD.getActivationParticle(), player.getLocation(), 25, 0.5, 1, 0.5
         );
         return true;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Blocks the 3 next abilities, on hit heals the user for 50 health and applies a random debuff to the attacker for 4s";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Heal", (int) OrbitShieldType.STAR_SHIELD.getHealPerCharge()*3 + " HP"),
+                new AbilityStat("Charges", (int) OrbitShieldType.STAR_SHIELD.getChargeCount() + " HP"),
+                new AbilityStat("Cooldown", "45s"),
+                new AbilityStat("Bonus", "Debuffs attackers with slow,immobilization or stun")
+        );
     }
 }

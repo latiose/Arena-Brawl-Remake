@@ -29,4 +29,9 @@ public class EnergyCost implements AbilityCost {
     public String describeRemaining(Player player) {
         return "You don't have enough energy";
     }
+
+    @Override
+    public String getBaseCostDescription() {
+        return (int) energyAmount + " energy";
+    }
 }

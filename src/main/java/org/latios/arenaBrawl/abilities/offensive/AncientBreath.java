@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
+import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
@@ -16,6 +17,7 @@ import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AncientBreath implements Ability {
@@ -47,7 +49,7 @@ public class AncientBreath implements Ability {
     }
 
     @Override
-    public String getName() { return "Freezing Breath"; }
+    public String getName() { return "Ancient Breath"; }
 
     @Override
     public AbilityCost getCost() { return cost; }
@@ -70,10 +72,10 @@ public class AncientBreath implements Ability {
 
         double currentAngle = 0.0;
 
-        for (double distance = STEP_SIZE; distance <= MAX_DISTANCE; distance += STEP_SIZE) {
-            double radius = distance * RADIUS_GROWTH;
+        for (double distance = -1.0; distance <= MAX_DISTANCE; distance += STEP_SIZE) {
+            double radius = Math.abs(distance) * RADIUS_GROWTH;
 
-            double deltaTheta = 0.35 + (0.05 / (distance + 0.1));
+            double deltaTheta = 0.35 + (0.05 / (Math.abs(distance) + 0.1));
             currentAngle += deltaTheta;
 
             Location center = origin.clone().add(axis.clone().multiply(distance));
@@ -132,5 +134,21 @@ public class AncientBreath implements Ability {
         if (velocity.getY() < 0) {
             target.setVelocity(velocity.setY(velocity.getY() * 2));
         }
+    }
+
+    @Override
+    public String getDescription() {
+        return "Breathes in a cone in front of the user, dealing damage and having a chance to immobilize enemies caught inside";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
+                new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
+                new AbilityStat("Range", 8 + ""),
+                new AbilityStat("Immobilization chance", "50%"),
+                new AbilityStat("Immobilization duration", (int) IMMO_DURATION_TICKS / 1000 + "")
+        );
     }
 }

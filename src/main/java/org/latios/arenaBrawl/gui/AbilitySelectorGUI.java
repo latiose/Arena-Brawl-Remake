@@ -8,17 +8,17 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.latios.arenaBrawl.abilities.AbilityRegistry;
-import org.latios.arenaBrawl.abilities.AbilitySelectionManager;
-import org.latios.arenaBrawl.abilities.AbilitySlot;
+import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.hats.HatSelectorGUI;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeGUI;
-import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
+
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AbilitySelectorGUI {
     private final RuneSelectionManager runeSelectionManager;
@@ -26,6 +26,18 @@ public class AbilitySelectorGUI {
     private final AbilitySelectionManager selectionManager;
     private final HatSelectorGUI hatSelectorGUI;
     private final CombatUpgradeGUI combatUpgradeGUI;
+    private AbilityDependencies previewDependencies;
+    private final Map<String, Ability> previewCache = new HashMap<>();
+
+    public Ability createPreview(AbilitySlot slot, String id) {
+        return previewCache.computeIfAbsent(slot.name() + ":" + id, k -> registry.create(slot, id,previewDependencies));
+    }
+    public void setPreviewDependencies(AbilityDependencies deps) {
+        this.previewDependencies = deps;
+    }
+
+
+
     public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager, RuneSelectionManager runeSelectionManager, HatSelectorGUI hatSelectorGUI, CombatUpgradeGUI combatUpgradeGUI) {
         this.registry = registry;
         this.selectionManager = selectionManager;
@@ -33,11 +45,10 @@ public class AbilitySelectorGUI {
         this.hatSelectorGUI = hatSelectorGUI;
         this.combatUpgradeGUI = combatUpgradeGUI;
     }
-
     public void openSlotMenu(Player player, AbilitySlot slot) {
         List<String> ids = new ArrayList<>(registry.getAvailableIds(slot));
 
-        Inventory inv = Bukkit.createInventory(new AbilitySelectorHolder(slot), 27, "Select: " + slot.name());
+        Inventory inv = Bukkit.createInventory(new AbilitySelectorHolder(slot), 27, "Choose: " + slot.name());
 
         String current = selectionManager.getSelection(player, slot);
 
@@ -45,11 +56,41 @@ public class AbilitySelectorGUI {
             String id = ids.get(i);
             boolean selected = id.equals(current);
 
+            Ability preview = createPreview(slot,id);
+
             ItemStack item = new ItemStack(selected ? Material.LIME_DYE : Material.GRAY_DYE);
             ItemMeta meta = item.getItemMeta();
-            meta.setDisplayName((selected ? "§a✔ " : "§f") + prettify(id));
-            item.setItemMeta(meta);
+            meta.setDisplayName((selected ? "§a✔ " : "§f") + preview.getName());
 
+            List<String> lore = new ArrayList<>();
+            lore.add("");
+
+            // Stats block
+            List<AbilityStat> stats = preview.getStats();
+            if (!stats.isEmpty()) {
+                for (AbilityStat stat : stats) {
+                    lore.add("§b" + stat.label() + ": §f" + stat.value());
+                }
+                lore.add("");
+            }
+
+            // Base cost, if the AbilityCost provides one and it isn't already covered by a manual stat
+            String baseCost = preview.getCost().getBaseCostDescription();
+            if (!baseCost.isEmpty()) {
+                lore.add("§b" + baseCost);
+                lore.add("");
+            }
+
+            // Description block
+            for (String line : wrapText(preview.getDescription(), 40)) {
+                lore.add("§7" + line);
+            }
+
+            lore.add("");
+            lore.add(selected ? "§aCurrently selected" : "§eClick to select");
+            meta.setLore(lore);
+
+            item.setItemMeta(meta);
             inv.setItem(i, item);
         }
 
@@ -133,5 +174,34 @@ public class AbilitySelectorGUI {
         public Inventory getInventory() {
             throw new UnsupportedOperationException();
         }
+    }
+
+    public List<String> wrapText(String text, int lineLength) {
+        List<String> result = new ArrayList<>();
+        if (text == null || text.isEmpty()) {
+            return result;
+        }
+
+        String[] words = text.split(" ");
+        StringBuilder currentLine = new StringBuilder();
+
+        for (String word : words) {
+            if (currentLine.length() + word.length() + 1 > lineLength) {
+                if (currentLine.length() > 0) {
+                    result.add(currentLine.toString());
+                    currentLine.setLength(0);
+                }
+            }
+            if (currentLine.length() > 0) {
+                currentLine.append(" ");
+            }
+            currentLine.append(word);
+        }
+
+        if (currentLine.length() > 0) {
+            result.add(currentLine.toString());
+        }
+
+        return result;
     }
 }

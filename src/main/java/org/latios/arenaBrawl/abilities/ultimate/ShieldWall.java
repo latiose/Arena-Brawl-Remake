@@ -8,10 +8,13 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
+import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.general.ShieldManager;
+
+import java.util.List;
 
 public class ShieldWall implements Ability {
 
@@ -60,10 +63,11 @@ public class ShieldWall implements Ability {
                 }
 
                 player.getWorld().spawnParticle(
-                        Particle.CRIT,
+                        Particle.DRAGON_BREATH,
                         player.getLocation().add(0, 1.0, 0),
                         15,
-                        0.5, 0.5, 0.5, 0.1
+                        0.5, 0.5, 0.5, 0.1,
+                        1.0f
                 );
 
                 secondsElapsed++;
@@ -76,7 +80,7 @@ public class ShieldWall implements Ability {
     private void spawnWaterRings(Player player) {
         Location loc = player.getLocation();
         int circleCount = 8;
-        int pointsPerCircle = 20;
+        int pointsPerCircle = 15;
         double radius = 1.3;
 
         double minHeight = 0.2;
@@ -95,5 +99,20 @@ public class ShieldWall implements Ability {
                 player.getWorld().spawnParticle(Particle.DRIPPING_WATER, particleLoc, 1, 0, 0, 0, 0);
             }
         }
+    }
+
+    @Override
+    public String getDescription() {
+        return "Reduces incoming damage by 70% for 10 seconds.";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Damage Reduction", (int) (DAMAGE_REDUCTION * 100) + "%"),
+                new AbilityStat("Duration", (DURATION_MILLIS / 1000) + "s"),
+                new AbilityStat("Charge Time", (CHARGE_TIME_MILLIS / 1000) + "s"),
+                new AbilityStat("Uses", "1 per match")
+        );
     }
 }

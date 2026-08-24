@@ -1,4 +1,4 @@
-// abilities/impl/DragonBreathAbility.java
+
 package org.latios.arenaBrawl.abilities.offensive;
 
 import org.bukkit.Location;
@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 
+import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
@@ -19,11 +20,7 @@ import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class FreezingBreath implements Ability {
 
@@ -77,10 +74,10 @@ public class FreezingBreath implements Ability {
 
         double currentAngle = 0.0;
 
-        for (double distance = STEP_SIZE; distance <= MAX_DISTANCE; distance += STEP_SIZE) {
-            double radius = distance * RADIUS_GROWTH;
+        for (double distance = -1.0; distance <= MAX_DISTANCE; distance += STEP_SIZE) {
+            double radius = Math.abs(distance) * RADIUS_GROWTH;
 
-            double deltaTheta = 0.35 + (0.05 / (distance + 0.1));
+            double deltaTheta = 0.35 + (0.05 / (Math.abs(distance) + 0.1));
             currentAngle += deltaTheta;
 
             Location center = origin.clone().add(axis.clone().multiply(distance));
@@ -136,5 +133,20 @@ public class FreezingBreath implements Ability {
         if (velocity.getY() < 0) {
             target.setVelocity(velocity.setY(velocity.getY() * 2));
         }
+    }
+
+    @Override
+    public String getDescription() {
+        return "Breathes in a cone in front of the user, dealing damage and slowing enemies caught inside";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
+                new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
+                new AbilityStat("Range", 8 + ""),
+                new AbilityStat("Slow duration", (int) SLOW_DURATION_TICKS / 1000 + "")
+        );
     }
 }

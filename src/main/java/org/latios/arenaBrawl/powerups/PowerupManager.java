@@ -4,6 +4,7 @@ package org.latios.arenaBrawl.powerups;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -21,7 +22,7 @@ import java.util.*;
 
 public class PowerupManager {
 
-    private static final double PICKUP_RADIUS = 2;
+    private static final double PICKUP_RADIUS = 1.8;
     private static final float ITEM_SCALE = 0.4f;
     private static final double ROTATION_SPEED_PER_TICK = 0.1;
     private static final double HOLOGRAM_HEIGHT_OFFSET = 0.6;
@@ -194,6 +195,7 @@ public class PowerupManager {
 
             for (Player player : players) {
                 if (!player.isOnline()) continue;
+                if (player.getGameMode().equals(GameMode.SPECTATOR)) continue;
                 if (player.getWorld() != state.spawnedAt.getWorld()) continue;
 
                 if (player.getLocation().distance(state.spawnedAt) <= PICKUP_RADIUS) {

@@ -42,4 +42,9 @@ public class CooldownCost implements AbilityCost {
     public int getRemainingSeconds(Player player) {
         return (int) cooldownManager.getRemainingSeconds(player, abilityKey);
     }
+
+    @Override
+    public String getBaseCostDescription() {
+        return (baseCooldownMillis / 1000) + "s cooldown";
+    }
 }

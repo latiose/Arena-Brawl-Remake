@@ -184,6 +184,10 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         );
 
 
+        abilitySelectorGUI.setPreviewDependencies(new AbilityDependencies(
+                cooldownManager, teamManager, usageManager, energyManager, shieldManager,
+                debuffManager, playerHealthManager, combatService, orbitShieldManager, combatUpgradeManager,broodMotherEntityManager
+        ));
 
         for (Player online : Bukkit.getOnlinePlayers()) {
             combatUpgradeManager.loadForPlayer(online);
@@ -207,7 +211,9 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new VanillaHungerBlockListener(matchManager), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(),this);
-        getServer().getPluginManager().registerEvents(new MagicalChestHologramListener(this),this);
+
+        MagicalChestHologramListener hologramListener = new MagicalChestHologramListener(this);getServer().getPluginManager().registerEvents(hologramListener, this);
+
         getServer().getPluginManager().registerEvents(
                 new MatchDisconnectListener(matchManager, playerHealthManager), this
         );

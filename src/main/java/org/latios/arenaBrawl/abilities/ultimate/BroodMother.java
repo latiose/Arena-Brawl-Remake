@@ -2,12 +2,11 @@
 package org.latios.arenaBrawl.abilities.ultimate;
 
 import org.bukkit.entity.Player;
-import org.latios.arenaBrawl.abilities.Ability;
-import org.latios.arenaBrawl.abilities.AbilityCost;
-import org.latios.arenaBrawl.abilities.AbilityTargeting;
-import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.team.TeamManager;
+
+import java.util.List;
 
 public class BroodMother implements Ability {
 
@@ -43,5 +42,20 @@ public class BroodMother implements Ability {
         Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, MAX_RANGE);
         entityManager.summonBoss(player, target);
         return true;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Summons a giant spider that hunts enemies. On death, spawns 4 spiderlings. Poisons on hit.";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Brood HP", "6"),
+                new AbilityStat("Spiderlings", "4 (3 hits each)"),
+                new AbilityStat("Poison", "33 dmg/s for 6s"),
+                new AbilityStat("Spiderling Damage", "5")
+        );
     }
 }

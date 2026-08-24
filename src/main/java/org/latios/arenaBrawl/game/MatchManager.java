@@ -4,6 +4,7 @@ package org.latios.arenaBrawl.game;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.latios.arenaBrawl.abilities.AbilityManager;
@@ -79,6 +80,7 @@ public class MatchManager {
         this.broodMotherEntityManager = broodMotherEntityManager;
     }
 
+
     public void onPlayerEliminated(Player player) {
         Match match = activeMatches.get(player.getUniqueId());
         if (match == null) return;
@@ -92,20 +94,24 @@ public class MatchManager {
             }
         }
         statsManager.addDeath(player);
+        for (Player viewer : match.getAllPlayers()) {
+            String victimColor = teamManager.isAlly(viewer, player) ? "§a" : "§c";
+            String victimName = victimColor + player.getName();
+            String killMessage;
 
-        String killMessage;
-        if (killer != null && killer.isOnline() && !killer.equals(player)) {
-            killMessage = String.format("§e%s §3has been eliminated by §e%s§3!", player.getName(), killer.getName());
-        } else {
-            killMessage = String.format("§e%s §3has been eliminated!", player.getName());
+            if (killer != null && killer.isOnline() && !killer.equals(player)) {
+                String killerColor = teamManager.isAlly(viewer, killer) ? "§a" : "§c";
+                String killerName = killerColor + killer.getName();
+                killMessage = String.format("%s §3has been eliminated by %s§3!", victimName, killerName);
+            } else {
+                killMessage = String.format("%s §3has been eliminated!", victimName);
+            }
+
+            viewer.sendMessage(killMessage);
         }
 
-        for (Player matchPlayer : match.getAllPlayers()) {
-            matchPlayer.sendMessage(killMessage);
-        }
-
-        org.bukkit.Location loc = player.getLocation();
-
+        Location loc = player.getLocation();
+        player.getWorld().playSound(loc, Sound.BLOCK_GLASS_BREAK, 1.0f, 1.0f);
         org.bukkit.entity.Firework fw = loc.getWorld().spawn(loc, org.bukkit.entity.Firework.class);
         org.bukkit.inventory.meta.FireworkMeta meta = fw.getFireworkMeta();
         meta.addEffect(org.bukkit.FireworkEffect.builder()
@@ -132,8 +138,7 @@ public class MatchManager {
             item.setVelocity(new org.bukkit.util.Vector(vx, vy, vz));
         }
 
-        player.setGameMode(org.bukkit.GameMode.SPECTATOR);
-       // player.sendMessage("§3You have been eliminated.");
+        player.setGameMode(GameMode.SPECTATOR);
 
         String winner = match.eliminate(player);
         if (winner != null) {
@@ -213,11 +218,12 @@ public class MatchManager {
             if (loser.isOnline()) statsManager.addLoss(loser);
         }
 
-        for (Player player : match.getAllPlayers()) {
-            if (player.isOnline()) {
-                for (Player winner : winners) {
-                    player.sendMessage(String.format("§e%s §3has won the game!", winner.getName()));
-                }
+        for (Player viewer : match.getAllPlayers()) {
+            if (!viewer.isOnline()) continue;
+            for (Player winner : winners) {
+                String winnerColor = teamManager.isAlly(viewer, winner) ? "§a" : "§c";
+                String winnerFormatted = winnerColor + winner.getName();
+                viewer.sendMessage(String.format("%s §3has won the game!", winnerFormatted));
             }
         }
 

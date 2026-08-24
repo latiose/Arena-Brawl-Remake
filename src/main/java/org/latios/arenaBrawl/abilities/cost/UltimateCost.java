@@ -45,4 +45,9 @@ public class UltimateCost implements AbilityCost {
     public boolean isPermanentlyUnavailable(Player player) {
         return usageManager.hasUsed(player, abilityKey);
     }
+
+    @Override
+    public String getBaseCostDescription() {
+        return "Once per match";
+    }
 }

@@ -6,13 +6,12 @@ import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.latios.arenaBrawl.abilities.Ability;
-import org.latios.arenaBrawl.abilities.AbilityCost;
-import org.latios.arenaBrawl.abilities.AbilityTargeting;
-import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
+
+import java.util.List;
 
 public class ShadowStep implements Ability {
 
@@ -55,5 +54,19 @@ public class ShadowStep implements Ability {
         ));
 
         return true;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Teleports behind the nearest enemy in your crosshair (up to "+MAX_RANGE+" blocks). Grants Speed III for "+ POST_SHADOW_SPEED_AMPLIFIER/20+"s.";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Cooldown", (COOLDOWN_MILLIS / 1000) + "s"),
+                new AbilityStat("Range", MAX_RANGE + " blocks"),
+                new AbilityStat("Bonus", "Speed III (2s) after teleport")
+        );
     }
 }

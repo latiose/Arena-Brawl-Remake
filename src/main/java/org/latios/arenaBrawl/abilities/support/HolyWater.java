@@ -6,6 +6,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
+import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -13,6 +14,8 @@ import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
+
+import java.util.List;
 
 public class HolyWater implements Ability {
 
@@ -66,7 +69,22 @@ public class HolyWater implements Ability {
         }
 
         player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 50);
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1.0f, 1.0f);
         return true;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Heals and cleanses user and nearby allies";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Self Heal", (int) SELF_HEAL + " HP"),
+                new AbilityStat("Ally Heal", (int) ALLY_HEAL + " HP"),
+                new AbilityStat("Cooldown", "30s"),
+                new AbilityStat("Bonus", "Cleanses debuffs")
+        );
     }
 }

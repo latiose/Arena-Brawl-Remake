@@ -9,6 +9,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
+import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
@@ -68,9 +69,9 @@ public class FlameBreath implements Ability {
 
         double currentAngle = 0.0;
 
-        for (double distance = STEP_SIZE; distance <= MAX_DISTANCE; distance += STEP_SIZE) {
-            double radius = distance * RADIUS_GROWTH;
-            double deltaTheta = 0.35 + (0.05 / (distance + 0.1));
+        for (double distance = -1.0; distance <= MAX_DISTANCE; distance += STEP_SIZE) {
+            double radius = Math.abs(distance) * RADIUS_GROWTH;
+            double deltaTheta = 0.35 + (0.05 / (Math.abs(distance) + 0.1));
             currentAngle += deltaTheta;
 
             Location center = origin.clone().add(axis.clone().multiply(distance));
@@ -95,6 +96,7 @@ public class FlameBreath implements Ability {
 
         new BukkitRunnable() {
             int tick = 0;
+            int lastSpawnedSliceIndex = 0;
 
             @Override
             public void run() {
@@ -102,12 +104,14 @@ public class FlameBreath implements Ability {
 
                 if (tick <= 20) {
                     int maxSliceToSpawn = (int) Math.ceil((double) tick / 20.0 * totalSlices);
+                    int targetIndex = Math.min(maxSliceToSpawn, totalSlices);
 
-                    for (int i = 0; i < Math.min(maxSliceToSpawn, totalSlices); i++) {
+                    for (int i = lastSpawnedSliceIndex; i < targetIndex; i++) {
                         for (Location pt : slices.get(i)) {
                             spawnTrailParticles(pt);
                         }
                     }
+                    lastSpawnedSliceIndex = targetIndex;
                 } else {
                     for (Location pt : allConePoints) {
                         pt.getWorld().spawnParticle(Particle.FLAME, pt, 1, 0.05, 0.05, 0.05, 0);
@@ -161,5 +165,20 @@ public class FlameBreath implements Ability {
         if (velocity.getY() < 0) {
             target.setVelocity(velocity.setY(velocity.getY() * 2));
         }
+    }
+
+    @Override
+    public String getDescription() {
+        return "Breathes in a cone in front of the user, dealing damage over the next 2 seconds to enemies caught inside";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
+                new AbilityStat("Tick damage", String.valueOf((int) TICK_DAMAGE)),
+                new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
+                new AbilityStat("Range", 8 + "")
+        );
     }
 }

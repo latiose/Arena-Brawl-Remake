@@ -23,8 +23,7 @@ public class ShieldManager {
         if (expiresAt == null) return 0.0;
 
         if (System.currentTimeMillis() > expiresAt) {
-            activeUntil.remove(player.getUniqueId());
-            activeReduction.remove(player.getUniqueId());
+            expireShield(player);
             return 0.0;
         }
 
@@ -38,6 +37,20 @@ public class ShieldManager {
 
     public boolean hasShield(Player player) {
         Long expiresAt = activeUntil.get(player.getUniqueId());
-        return System.currentTimeMillis() < expiresAt;
+        if (expiresAt == null) return false;
+
+        if (System.currentTimeMillis() >= expiresAt) {
+            expireShield(player);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void expireShield(Player player) {
+        activeUntil.remove(player.getUniqueId());
+        activeReduction.remove(player.getUniqueId());
+
+        player.sendMessage(MessageUtils.negative() + "§3Your Shield Wall ran out!");
     }
 }

@@ -175,19 +175,13 @@ public class OrbitShieldManager {
                     Location target = player.getLocation().clone().add(x, 0, z);
                     charge.teleport(target);
                 } else {
-                    // Posición objetivo absoluta en este tick
                     Location targetLoc = player.getLocation().clone().add(x, ORBIT_HEIGHT_OFFSET, z);
-
-                    // Posición actual de la entidad
                     Location currentLoc = charge.getLocation();
 
-                    // Si cambia de mundo o está demasiado lejos, teletransporta directo
                     if (currentLoc.getWorld() != targetLoc.getWorld() || currentLoc.distanceSquared(targetLoc) > 16.0) {
                         charge.teleport(targetLoc);
                     } else {
-                        // INTERPOLACIÓN MANUAL (LERP):
-                        // 0.355 es el factor de suavizado (0.1 = más delay, 0.9 = más rígido)
-                        double factor = 0.35;
+                        double factor = 0.3;
 
                         double lerpX = currentLoc.getX() + (targetLoc.getX() - currentLoc.getX()) * factor;
                         double lerpy = currentLoc.getY() + (targetLoc.getY() - currentLoc.getY()) * factor;

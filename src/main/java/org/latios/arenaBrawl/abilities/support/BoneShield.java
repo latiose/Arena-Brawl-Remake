@@ -2,12 +2,11 @@ package org.latios.arenaBrawl.abilities.support;
 
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
-import org.latios.arenaBrawl.abilities.Ability;
-import org.latios.arenaBrawl.abilities.AbilityCost;
-import org.latios.arenaBrawl.abilities.AbilityDependencies;
-import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
+
+import java.util.List;
 
 public class BoneShield implements Ability {
 
@@ -32,5 +31,19 @@ public class BoneShield implements Ability {
                 OrbitShieldType.BONE_SHIELD.getActivationParticle(), player.getLocation(), 20, 0.5, 1, 0.5
         );
         return true;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Blocks the 5 next abilities, on hit heals the user for 30 health";
+    }
+
+    @Override
+    public List<AbilityStat> getStats() {
+        return List.of(
+                new AbilityStat("Heal", (int) OrbitShieldType.BONE_SHIELD.getHealPerCharge() * 5 + " HP"),
+                new AbilityStat("Cooldown", "30s"),
+                new AbilityStat("Bonus", "Blocks the 5 next enemy attacks")
+        );
     }
 }

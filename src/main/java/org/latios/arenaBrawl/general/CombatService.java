@@ -1,4 +1,3 @@
-// general/CombatService.java
 package org.latios.arenaBrawl.general;
 
 import org.bukkit.entity.Player;
@@ -9,7 +8,6 @@ import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.Match;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
-import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,15 +25,16 @@ public class CombatService {
     private static final long STAR_SHIELD_EFFECT_DURATION_MILLIS = 4_000;
     private static final List<DebuffType> STAR_SHIELD_POSSIBLE_DEBUFFS =
             List.of(DebuffType.STUN, DebuffType.IMMOBILIZE, DebuffType.SLOW);
+
     public CombatService(PlayerHealthManager healthManager, ShieldManager shieldManager,
-                         DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,DamageBuffManager damageBuffManager, MatchManager matchManager) {
+                         DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
+                         DamageBuffManager damageBuffManager, MatchManager matchManager) {
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
         this.orbitShieldManager = orbitShieldManager;
         this.damageBuffManager = damageBuffManager;
         this.matchManager = matchManager;
-
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
@@ -48,10 +47,11 @@ public class CombatService {
         }
 
         double adjustedDamage = rawDamage * multiplier;
-        if (orbitShieldManager.hasActiveShield(victim)) {
-            OrbitShieldType type = orbitShieldManager.consumeCharge(victim);
 
+        if (orbitShieldManager.hasActiveShield(victim)) {
+            OrbitShieldType type = orbitShieldManager.getActiveType(victim);
             if (type != null) {
+                orbitShieldManager.consumeCharge(victim);
                 resolveShieldEffect(type, attacker, victim);
                 return;
             }
@@ -75,30 +75,28 @@ public class CombatService {
         if (!abilityName.equals("Melee")) {
             int roundedDamage = (int) Math.round(finalDamage);
 
-            // "Your [Ability] hit [Victim] for [Damage] damage."
-            attacker.sendMessage(MessageUtils.positive()+String.format(
+            attacker.sendMessage(MessageUtils.positive() + String.format(
                     "§3Your %s hit §3%s §3for §c%d §3damage.",
                     abilityName, victim.getName(), roundedDamage
             ));
 
-            // "[Attacker]'s [Ability] hit you for [Damage] damage."
-            victim.sendMessage(MessageUtils.negative()+String.format(
+            victim.sendMessage(MessageUtils.negative() + String.format(
                     "§3%s's %s hit §3you §3for §c%d §3damage.",
                     attacker.getName(), abilityName, roundedDamage
             ));
         }
     }
 
-
     private void resolveShieldEffect(OrbitShieldType type, Player attacker, Player victim) {
         if (type == null) return;
-
-        int remainingCharges = orbitShieldManager.getCharges(victim);
+        int remainingCharges = orbitShieldManager.hasActiveShield(victim) ? orbitShieldManager.getCharges(victim) : 0;
         int maxCharges = type.getChargeCount();
 
         if (remainingCharges > 0) {
             int healthPercent = (int) Math.round(((double) remainingCharges / maxCharges) * 100.0);
             victim.sendMessage(String.format("§e%s Health: %d%%", type.getDisplayName(), healthPercent));
+        } else {
+            victim.sendMessage(String.format("§eYour %s was destroyed.", type.getDisplayName()));
         }
 
         if (type.getHealPerCharge() > 0) {
@@ -110,10 +108,6 @@ public class CombatService {
                     "§3Your %s healed you for §a%d §3health.",
                     type.getDisplayName(), roundedHeal
             ));
-        }
-
-        if (remainingCharges <= 0) {
-            victim.sendMessage(String.format("§eYour %s was destroyed.", type.getDisplayName()));
         }
 
         if (type.rollsDebuffOnBlock()) {
@@ -130,10 +124,9 @@ public class CombatService {
             if (applied) {
                 return;
             }
-            // if tryApply failed (attacker already has an active debuff), the shield still
-            // consumed a charge and blocked the hit — just no new debuff could stack on top
         }
     }
+
     private void playDamageFeedback(Player victim) {
         victim.playHurtAnimation(0);
         victim.getWorld().playSound(victim.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_HURT, 1f, 1f);
@@ -145,13 +138,17 @@ public class CombatService {
 
         double finalDamage = rawDamage * ownerMultiplier * (1 - Math.max(0, reduction));
         int roundedDamage = (int) Math.round(finalDamage);
+
         if (orbitShieldManager.hasActiveShield(victim)) {
-            orbitShieldManager.consumeCharge(victim);
-            resolveShieldEffect(orbitShieldManager.getActiveType(victim),owner,victim);
+            OrbitShieldType type = orbitShieldManager.getActiveType(victim);
+            if (type != null) {
+                orbitShieldManager.consumeCharge(victim);
+                resolveShieldEffect(type, owner, victim);
+                return;
+            }
         }
 
         healthManager.damageSilent(victim, finalDamage);
-       // playDamageFeedback(victim);
 
         if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
             boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, finalDamage, 30.0);
@@ -160,7 +157,6 @@ public class CombatService {
             }
         }
 
-        // "A [Source] hit you for [Damage] damage."
         victim.sendMessage(String.format(
                 "%s§3A %s hit §3you §3for §c%d §3damage.",
                 MessageUtils.negative(), sourceName, roundedDamage

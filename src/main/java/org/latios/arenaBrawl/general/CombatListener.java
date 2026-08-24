@@ -90,7 +90,8 @@ public class CombatListener implements Listener {
                 debuffManager.clear(attacker);
             }
 
-            double runeMultiplier = runeManager.tryProc(attacker, victim);
+            double runeMultiplier = 1;
+            if(!orbitShieldManager.hasActiveShield(victim))  runeMultiplier = runeManager.tryProc(attacker, victim);
             double meleeBaseDamage = combatUpgradeManager.getValue(attacker, CombatUpgradeType.MELEE_DAMAGE);
             combatService.applyAbilityDamage(attacker, victim, meleeBaseDamage * runeMultiplier, "Melee");
             hatPhraseListener.onMeleeHit(attacker, victim);

@@ -78,4 +78,7 @@ public class AbilityRegistry {
     public Set<String> getAvailableIds(AbilitySlot slot) {
         return registry.get(slot).keySet();
     }
+
+
+
 }
