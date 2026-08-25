@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.general;
 
 import org.bukkit.Bukkit;
@@ -36,18 +35,41 @@ public class AbilityDisplayTask extends BukkitRunnable {
         AbilityCost cost = ability.getCost();
 
         if (cost.isPermanentlyUnavailable(player)) {
-            setItem(player, slot, Material.GRAY_DYE, 1, "§7" + ability.getName() + " §8(used)");
+            Material unavailableMat = (slot.ordinal() == 0) ? AbilityKit.getIcon(slot) : Material.GRAY_DYE;
+            setItem(player, slot, unavailableMat, 1, "§7" + ability.getName());
             return;
         }
 
-        int remaining = cost.getRemainingSeconds(player);
+        if (!cost.canPay(player)) {
+            int remaining = Math.max(1, cost.getRemainingSeconds(player));
 
-        if (remaining > 0) {
-            setItem(player, slot, Material.GRAY_DYE, Math.min(remaining, 64),
-                    "§7" + ability.getName() + " §8(" + remaining + "s)");
+            Material cdMaterial = (slot.ordinal() == 0)
+                    ? AbilityKit.getIcon(slot)
+                    : Material.GRAY_DYE;
+
+            String name = (slot.ordinal() == 0)
+                    ? "§7" + ability.getName()
+                    : "§7" + ability.getName() + " §8(" + remaining + "s)";
+
+            int amount = (slot.ordinal() == 0) ? 1 : Math.min(remaining, 64);
+
+            setItem(player, slot, cdMaterial, amount, name);
         } else {
-            setItem(player, slot, AbilityKit.getIcon(slot), 1, "§e" + ability.getName());
+            String readyColorCode = getReadyColorCode(slot);
+            String readyName = readyColorCode + ability.getName() + " §f- §b§lRIGHT CLICK";
+
+            setItem(player, slot, AbilityKit.getIcon(slot), 1, readyName);
         }
+    }
+
+
+    private String getReadyColorCode(AbilitySlot slot) {
+        return switch (slot) {
+            case OFFENSIVE -> "§c";
+            case UTILITY -> "§e";
+            case SUPPORT -> "§a";
+            case ULTIMATE -> "§6";
+        };
     }
 
     private void setItem(Player player, AbilitySlot slot, Material material, int amount, String name) {
@@ -60,8 +82,10 @@ public class AbilityDisplayTask extends BukkitRunnable {
 
         ItemStack item = new ItemStack(material, amount);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(name);
-        item.setItemMeta(meta);
+        if (meta != null) {
+            meta.setDisplayName(name);
+            item.setItemMeta(meta);
+        }
         player.getInventory().setItem(slot.ordinal(), item);
     }
 }

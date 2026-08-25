@@ -6,6 +6,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 
@@ -54,12 +55,13 @@ public class MatchManager {
     private final ArmorTierManager armorTierManager;
     private final HatSelectionManager hatSelectionManager;
     private final BroodMotherEntityManager broodMotherEntityManager;
+    private final Plugin plugin;
 
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         EnergyManager energyManager, HungerManager hungerManager,
-                        ScoreboardManager scoreboardManager, Location lobbySpawn,RatingManager ratingManager,DebuffManager debuffManager,OrbitShieldManager orbitShieldManager,
-                        CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager,DamageBuffManager damageBuffManager,
-                        ArmorTierManager armorTierManager,HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager) {
+                        ScoreboardManager scoreboardManager, Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
+                        CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
+                        ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -78,6 +80,7 @@ public class MatchManager {
         this.armorTierManager = armorTierManager;
         this.hatSelectionManager = hatSelectionManager;
         this.broodMotherEntityManager = broodMotherEntityManager;
+        this.plugin = plugin;
     }
 
 
@@ -91,23 +94,31 @@ public class MatchManager {
             killer = Bukkit.getPlayer(attackerId);
             if (killer != null && killer.isOnline() && !killer.equals(player)) {
                 statsManager.addKill(killer);
+                killer.sendMessage(String.format("§3You killed §c%s§3!", player.getName()));
             }
         }
         statsManager.addDeath(player);
+
+        if (killer != null && killer.isOnline() && !killer.equals(player)) {
+            player.sendMessage(String.format("§3You were killed by §c%s§3!", killer.getName()));
+        } else {
+            player.sendMessage("§3You were killed!");
+        }
+
         for (Player viewer : match.getAllPlayers()) {
+            if (viewer.equals(player)) continue;
+            if (killer != null && viewer.equals(killer)) continue;
+
             String victimColor = teamManager.isAlly(viewer, player) ? "§a" : "§c";
             String victimName = victimColor + player.getName();
-            String killMessage;
 
-            if (killer != null && killer.isOnline() && !killer.equals(player)) {
+            if (killer != null && killer.isOnline()) {
                 String killerColor = teamManager.isAlly(viewer, killer) ? "§a" : "§c";
                 String killerName = killerColor + killer.getName();
-                killMessage = String.format("%s §3has been eliminated by %s§3!", victimName, killerName);
+                viewer.sendMessage(String.format("%s §3was killed by %s§3!", victimName, killerName));
             } else {
-                killMessage = String.format("%s §3has been eliminated!", victimName);
+                viewer.sendMessage(String.format("%s §3was killed!", victimName));
             }
-
-            viewer.sendMessage(killMessage);
         }
 
         Location loc = player.getLocation();
@@ -139,7 +150,7 @@ public class MatchManager {
         }
 
         player.setGameMode(GameMode.SPECTATOR);
-
+        debuffManager.clear(player);
         String winner = match.eliminate(player);
         if (winner != null) {
             endMatch(match, winner);
@@ -155,7 +166,7 @@ public class MatchManager {
             // Uses the winner's own rating against the opponent team's average
             double gain = ratingManager.calculateGain(ratingManager.getRating(winner), losersAvg);
             ratingManager.applyDelta(winner, gain);
-            winner.sendMessage(String.format("§aYour new rating is %.2f (+%.2f)", ratingManager.getRating(winner), gain));
+            winner.sendMessage(String.format("§6Your new rating is %.0f (+%.2f)", ratingManager.getRating(winner), gain));
         }
 
         for (Player loser : losers) {
@@ -163,7 +174,7 @@ public class MatchManager {
             // Uses the loser's own rating against the opponent team's average
             double loss = ratingManager.calculateLoss(ratingManager.getRating(loser), winnersAvg);
             ratingManager.applyDelta(loser, loss);
-            loser.sendMessage(String.format("§aYour new rating is %.2f (%.2f)", ratingManager.getRating(loser), loss));
+            loser.sendMessage(String.format("§6Your new rating is %.0f (%.2f)", ratingManager.getRating(loser), loss));
         }
     }
 
@@ -188,7 +199,7 @@ public class MatchManager {
         player.setExp(0f);
         player.teleport(lobbySpawn);
 
-        LobbyKit.giveLobbyKit(player,armorTierManager);
+        LobbyKit.giveLobbyKit(player, armorTierManager);
         lobbyScoreboardManager.show(player);
         HatEquipUtils.applyEquippedHat(player, hatSelectionManager);
     }
@@ -196,6 +207,7 @@ public class MatchManager {
     public void registerMatch(Match match, BukkitTask scoreboardTask) {
         for (Player player : match.getAllPlayers()) {
             activeMatches.put(player.getUniqueId(), match);
+            statsManager.startMatchTracker(player);
         }
         scoreboardTasks.put(match, scoreboardTask);
         currentMatch = match;
@@ -209,38 +221,52 @@ public class MatchManager {
         List<Player> winners = winnerTeam.equals("RED") ? match.getRed() : match.getBlue();
         List<Player> losers = winnerTeam.equals("RED") ? match.getBlue() : match.getRed();
 
+        for (Player viewer : match.getAllPlayers()) {
+            if (!viewer.isOnline()) continue;
+            viewer.sendMessage(String.format("§6#§7--------------------------§6#"));
+            for (Player winner : winners) {
+                viewer.sendMessage(String.format("§6%s has won the game!", winner.getName()));
+            }
+            viewer.sendMessage(String.format("§6#§7--------------------------§6#"));
+        }
+
         applyRatingChanges(winners, losers);
 
         for (Player winner : winners) {
-            if (winner.isOnline()) statsManager.addWin(winner);
+            if (winner.isOnline()) {
+                int earnedCoins = statsManager.addWin(winner);
+                winner.sendMessage(String.format("§6You earned a total of %d Coins!", earnedCoins));
+            }
         }
         for (Player loser : losers) {
-            if (loser.isOnline()) statsManager.addLoss(loser);
-        }
-
-        for (Player viewer : match.getAllPlayers()) {
-            if (!viewer.isOnline()) continue;
-            for (Player winner : winners) {
-                String winnerColor = teamManager.isAlly(viewer, winner) ? "§a" : "§c";
-                String winnerFormatted = winnerColor + winner.getName();
-                viewer.sendMessage(String.format("%s §3has won the game!", winnerFormatted));
+            if (loser.isOnline()) {
+                int earnedCoins = statsManager.addLoss(loser);
+                loser.sendMessage(String.format("§6You earned a total of %d Coins!", earnedCoins));
             }
         }
 
-        finishMatch(match);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            for (Player player : match.getAllPlayers()) {
+                cleanupPlayer(player);
+            }
+            finishMatch(match);
+        }, 140L);
     }
+
+
 
     /** Ends the match in a draw due to the 10-minute time limit. No rating changes are applied. */
     public void endMatchAsDraw(Match match) {
         for (Player player : match.getAllPlayers()) {
             if (player.isOnline()) {
-                player.sendMessage("§eDraw! §3Time limit reached.");
+                player.sendMessage("§6Draw! Time limit reached.");
             }
         }
         finishMatch(match);
     }
 
     private void finishMatch(Match match) {
+
         BukkitTask task = scoreboardTasks.remove(match);
         if (task != null) task.cancel();
 
@@ -252,10 +278,6 @@ public class MatchManager {
 
         if (currentMatch == match) {
             currentMatch = null;
-        }
-
-        for (Player player : match.getAllPlayers()) {
-            cleanupPlayer(player);
         }
 
     }

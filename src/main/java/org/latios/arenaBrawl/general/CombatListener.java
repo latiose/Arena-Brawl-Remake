@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.general;
 
 import io.papermc.paper.event.entity.EntityKnockbackEvent;
+import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
@@ -76,6 +77,7 @@ public class CombatListener implements Listener {
 
         if (!matchManager.isInMatch(attacker) || !matchManager.isInMatch(victim)) return;
         if (attacker.equals(victim) || teamManager.isAlly(attacker, victim)) return;
+        if(victim.getGameMode() == GameMode.SPECTATOR) return;
         if (debuffManager.hasDebuff(attacker, DebuffType.STUN)) {
             return; // stunned players cannot deal damage of any kind
         }

@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.EnergyRegenTask;
+import org.latios.arenaBrawl.abilities.support.OrbitShieldHitListener;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldOrbitTask;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldSoundTask;
@@ -18,9 +19,7 @@ import org.latios.arenaBrawl.gui.AbilityMenuCommand;
 import org.latios.arenaBrawl.gui.AbilitySelectorGUI;
 import org.latios.arenaBrawl.gui.AbilitySelectorListener;
 import org.latios.arenaBrawl.hats.*;
-import org.latios.arenaBrawl.lobby.LobbyItemListener;
-import org.latios.arenaBrawl.lobby.LobbyJoinListener;
-import org.latios.arenaBrawl.lobby.LobbyScoreboardManager;
+import org.latios.arenaBrawl.lobby.*;
 import org.latios.arenaBrawl.party.PartyCommand;
 import org.latios.arenaBrawl.party.PartyManager;
 import org.latios.arenaBrawl.powerups.ArenaCleanupListener;
@@ -87,6 +86,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private CombatUpgradeGUI combatUpgradeGUI;
     private PolymorphNameUpdateTask polymorphNameUpdateTask;
     private BroodMotherEntityManager broodMotherEntityManager;
+    private LeaderboardSignManager leaderboardSignManager;
     @Override
     public void onEnable() {
         instance = this;
@@ -118,6 +118,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.abilityPersistenceManager = new AbilityPersistenceManager(this);
         this.keyManager = new KeyManager(this, statsManager);
         this.nametagManager = new NametagManager(teamManager, playerHealthManager);
+        this.leaderboardSignManager = new LeaderboardSignManager(ratingManager, abilityPersistenceManager, abilityRegistry);
+        leaderboardSignManager.configureSignLocations(arenaLocation.getLeaderboardSignLocations());
 
         this.lobbyScoreboardManager = new LobbyScoreboardManager(ratingManager, statsManager);
         this.runeSelectionManager = new RuneSelectionManager(this);
@@ -135,7 +137,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.matchManager = new MatchManager(
                 playerHealthManager, teamManager, abilityManager,
                 energyManager, hungerManager, scoreboardManager, lobbySpawn, ratingManager, debuffManager, orbitShieldManager, cooldownManager, usageManager, statsManager, lobbyScoreboardManager, damageBuffManager,
-                armorTierManager, hatSelectionManager, broodMotherEntityManager
+                armorTierManager, hatSelectionManager, broodMotherEntityManager,this
         );
         this.combatService = new CombatService(
                 playerHealthManager, shieldManager, debuffManager, orbitShieldManager, damageBuffManager, matchManager
@@ -145,7 +147,6 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         debuffManager.registerListener(new StunListener());
         debuffManager.registerListener(new SlowListener());
         saveDefaultConfig();
-
 
 
 
@@ -183,6 +184,10 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new CombatUpgradeListener(combatUpgradeGUI, combatUpgradeManager), this
         );
 
+        abilityRegistry.setPreviewDependencies(new AbilityDependencies(
+                cooldownManager, teamManager, usageManager, energyManager, shieldManager,
+                debuffManager, playerHealthManager, combatService, orbitShieldManager, combatUpgradeManager,broodMotherEntityManager
+        ));
 
         abilitySelectorGUI.setPreviewDependencies(new AbilityDependencies(
                 cooldownManager, teamManager, usageManager, energyManager, shieldManager,
@@ -217,10 +222,17 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(
                 new MatchDisconnectListener(matchManager, playerHealthManager), this
         );
+        getServer().getPluginManager().registerEvents(
+                new SignEditListener(), this
+        );
         getServer().getPluginManager().registerEvents(new ImmobilizeListener(debuffManager), this);
         getServer().getPluginManager().registerEvents(new ImmobilizeJumpListener(debuffManager), this);
         getServer().getPluginManager().registerEvents(
                 new HatSelectorListener(hatSelectorGUI, hatSelectionManager), this
+        );
+        getServer().getPluginManager().registerEvents(
+                new OrbitShieldHitListener(orbitShieldManager, combatService,teamManager,cooldownManager,debuffManager),
+                this
         );
       //  getServer().getPluginManager().registerEvents(new StunListener(debuffManager), this);
 
@@ -250,7 +262,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new BaseSpeedTask().runTaskTimer(this, 0L, 10L);
         new EnergyRegenTask(energyManager,matchManager).runTaskTimer(this, 20L, 5L);
         new HungerTask(hungerManager,matchManager).runTaskTimer(this, 20L, 20L);
-        new AbilityDisplayTask(abilityManager).runTaskTimer(this, 0L, 20L);
+        new AbilityDisplayTask(abilityManager).runTaskTimer(this, 0L, 2L);
         new DebuffTickTask(debuffManager).runTaskTimer(this, 0L, 2L);
         new PolymorphHealTask(debuffManager, playerHealthManager).runTaskTimer(this, 20L, 20L);
         new OrbitShieldOrbitTask(orbitShieldManager).runTaskTimer(this, 0L, 1L);
@@ -261,6 +273,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new NametagUpdateTask(matchManager, nametagManager).runTaskTimer(this, 0L, 4L);
         new PolymorphNameUpdateTask(debuffManager, playerHealthManager).runTaskTimer(this, 0L, 20L);
         new BroodMotherAI(broodMotherEntityManager).runTaskTimer(this, 0L, 4L);
+        new LeaderboardRefreshTask(leaderboardSignManager).runTaskTimer(this, 20L, 20L * 60 * 5);
+        new LeaderboardRotationTask(leaderboardSignManager).runTaskTimer(this, 20L * 6, 20L * 2);
         Bukkit.getPluginManager().registerEvents(new ItemCleanupListener(this), this);
         // Commands
         getCommand("party").setExecutor(new PartyCommand(partyManager, queueManager));

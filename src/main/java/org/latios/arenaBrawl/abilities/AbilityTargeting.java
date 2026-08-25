@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -10,7 +11,6 @@ import org.latios.arenaBrawl.team.TeamManager;
 public class AbilityTargeting {
 
     private static final double STEP_SIZE = 0.2;
-
 
     public static Player findEnemyAlongRay(Player caster, TeamManager teamManager, double maxRange) {
         Location eye = caster.getEyeLocation();
@@ -25,14 +25,14 @@ public class AbilityTargeting {
             if (blocksRay(behindCursor.getBlock())) break;
 
             for (Player candidate : behindCursor.getWorld().getPlayers()) {
-                if (candidate.equals(caster)) continue;
-                if (!teamManager.isEnemy(caster, candidate)) continue;
+                if (!isValidEnemyTarget(caster, candidate, teamManager)) continue;
 
                 if (isInsideHitbox(candidate, behindCursor)) {
                     return candidate;
                 }
             }
         }
+
         Location cursor = eye.clone();
         Player bestTarget = null;
         double bestAngle = Double.MAX_VALUE;
@@ -46,8 +46,7 @@ public class AbilityTargeting {
             }
 
             for (Player candidate : cursor.getWorld().getPlayers()) {
-                if (candidate.equals(caster)) continue;
-                if (!teamManager.isEnemy(caster, candidate)) continue;
+                if (!isValidEnemyTarget(caster, candidate, teamManager)) continue;
 
                 if (isInsideHitbox(candidate, cursor)) {
                     Vector toCandidate = candidate.getEyeLocation().toVector().subtract(eye.toVector()).normalize();
@@ -68,6 +67,12 @@ public class AbilityTargeting {
         return bestTarget;
     }
 
+
+    private static boolean isValidEnemyTarget(Player caster, Player candidate, TeamManager teamManager) {
+        if (candidate.equals(caster)) return false;
+        if (candidate.getGameMode() == GameMode.SPECTATOR) return false;
+        return teamManager.isEnemy(caster, candidate);
+    }
 
     private static boolean isInsideHitbox(Player target, Location point) {
         BoundingBox box = target.getBoundingBox().expand(0.3, 0.3, 0.3);

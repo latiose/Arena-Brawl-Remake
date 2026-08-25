@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.general;
 
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldType;
@@ -38,6 +39,9 @@ public class CombatService {
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
+        if (victim == null || victim.getGameMode() == GameMode.SPECTATOR) {
+            return;
+        }
 
         double multiplier = damageBuffManager.getMultiplier(attacker);
 
@@ -87,14 +91,14 @@ public class CombatService {
         }
     }
 
-    private void resolveShieldEffect(OrbitShieldType type, Player attacker, Player victim) {
+    public void resolveShieldEffect(OrbitShieldType type, Player attacker, Player victim) {
         if (type == null) return;
         int remainingCharges = orbitShieldManager.hasActiveShield(victim) ? orbitShieldManager.getCharges(victim) : 0;
         int maxCharges = type.getChargeCount();
 
         if (remainingCharges > 0) {
             int healthPercent = (int) Math.round(((double) remainingCharges / maxCharges) * 100.0);
-            victim.sendMessage(String.format("§e%s Health: %d%%", type.getDisplayName(), healthPercent));
+            victim.sendMessage(String.format("§e%s Health: §a%d%%", type.getDisplayName(), healthPercent));
         } else {
             victim.sendMessage(String.format("§eYour %s was destroyed.", type.getDisplayName()));
         }
@@ -133,6 +137,10 @@ public class CombatService {
     }
 
     public void applyMinionDamage(Player owner, Player victim, double rawDamage, String sourceName) {
+        if (victim == null || victim.getGameMode() == GameMode.SPECTATOR) {
+            return;
+        }
+
         double ownerMultiplier = damageBuffManager.getMultiplier(owner);
         double reduction = shieldManager.getDamageReduction(victim);
 

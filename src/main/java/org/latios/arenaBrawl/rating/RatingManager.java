@@ -115,4 +115,24 @@ public class RatingManager {
 
         return entries.size() > limit ? entries.subList(0, limit) : entries;
     }
+
+    public List<LeaderboardEntry> getTopRatingsDetailed(int limit) {
+        List<LeaderboardEntry> entries = new ArrayList<>();
+
+        for (String key : config.getKeys(false)) {
+            try {
+                UUID id = UUID.fromString(key);
+                double rating = config.getDouble(key, STARTING_RATING);
+                String name = org.bukkit.Bukkit.getOfflinePlayer(id).getName();
+                if (name != null) {
+                    entries.add(new LeaderboardEntry(id, name, rating));
+                }
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        entries.sort((a, b) -> Double.compare(b.rating(), a.rating()));
+
+        return entries.size() > limit ? entries.subList(0, limit) : entries;
+    }
 }

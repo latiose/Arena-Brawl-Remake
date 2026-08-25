@@ -1,6 +1,7 @@
 // abilities/ultimate/BroodMotherEntityManager.java
 package org.latios.arenaBrawl.abilities.ultimate;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -100,27 +101,34 @@ public class BroodMotherEntityManager {
         return ownerOf.get(entity.getUniqueId());
     }
 
-    /** Picks the nearest enemy to the owner and locks the spider onto them, like a targeted ability. */
-    public void acquireTarget(LivingEntity spider, Player owner,Player target) {
-        if (target != null) {
+
+    /** Picks the nearest valid enemy to the owner and locks the spider onto them. */
+    public void acquireTarget(LivingEntity spider, Player owner, Player target) {
+        currentTarget.remove(spider.getUniqueId());
+
+        if (target != null && target.isOnline() && !target.isDead() && target.getGameMode() != GameMode.SPECTATOR) {
             currentTarget.put(spider.getUniqueId(), target.getUniqueId());
-            lastLandedHitAt.put(spider.getUniqueId(), System.currentTimeMillis()); // reset timeout on new target
+            lastLandedHitAt.put(spider.getUniqueId(), System.currentTimeMillis());
+            return;
         }
-        else{
-            Player nearest = null;
-            double closestDistance = Double.MAX_VALUE;
-            for (Player candidate : spider.getWorld().getPlayers()) {
-                if (!teamManager.isEnemy(owner, candidate)) continue;
-                double distance = spider.getLocation().distance(candidate.getLocation());
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    nearest = candidate;
-                }
+
+        Player nearest = null;
+        double closestDistance = Double.MAX_VALUE;
+
+        for (Player candidate : spider.getWorld().getPlayers()) {
+            if (!candidate.isOnline() || candidate.isDead() || candidate.getGameMode() == GameMode.SPECTATOR) continue;
+            if (!teamManager.isEnemy(owner, candidate)) continue;
+
+            double distance = spider.getLocation().distance(candidate.getLocation());
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                nearest = candidate;
             }
-            if (nearest != null) {
-                currentTarget.put(spider.getUniqueId(), nearest.getUniqueId());
-                lastLandedHitAt.put(spider.getUniqueId(), System.currentTimeMillis()); // reset timeout on new target
-            }
+        }
+
+        if (nearest != null) {
+            currentTarget.put(spider.getUniqueId(), nearest.getUniqueId());
+            lastLandedHitAt.put(spider.getUniqueId(), System.currentTimeMillis());
         }
     }
 
@@ -128,7 +136,7 @@ public class BroodMotherEntityManager {
         UUID targetId = currentTarget.get(spider.getUniqueId());
         if (targetId == null) return null;
         Player target = org.bukkit.Bukkit.getPlayer(targetId);
-        return (target != null && target.isOnline()) ? target : null;
+        return (target != null && target.isOnline() && !target.isDead()) ? target : null;
     }
 
     /** True if this spider hasn't landed a hit within the timeout window — caller should teleport it to its target. */
@@ -150,6 +158,8 @@ public class BroodMotherEntityManager {
     public void markAttacked(LivingEntity entity) {
         lastAttackAt.put(entity.getUniqueId(), System.currentTimeMillis());
     }
+
+
 
     /**
      * Registers one melee hit FROM A PLAYER against a controlled entity.
@@ -212,7 +222,7 @@ public class BroodMotherEntityManager {
         Player owner = ownerId != null ? org.bukkit.Bukkit.getPlayer(ownerId) : null;
 
         if (isBoss) {
-            boolean applied = debuffManager.tryApply(victim, DebuffType.POISON, POISON_DURATION_MILLIS);
+            boolean applied = debuffManager.tryApply(owner, victim, DebuffType.POISON, POISON_DURATION_MILLIS);
             if (!applied) return;
             victim.sendMessage(MessageUtils.negative() + "§3You were poisoned by a Broodmother!");
         } else {

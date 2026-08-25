@@ -1,7 +1,10 @@
-// debuffs/PoisonListener.java
 package org.latios.arenaBrawl.debuffs;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -14,47 +17,67 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class PoisonListener implements DebuffListener {
+public class PoisonListener implements DebuffListener, Listener {
 
     private static final double DAMAGE_PER_SECOND = 33.0;
-    private static final long DURATION_TICKS = 120; // 6 seconds, matches DURATION_MILLIS in BroodMother
+    private static final long DURATION_TICKS = 120; // 6
 
     private final PlayerHealthManager healthManager;
     private final Map<UUID, BukkitTask> activeTasks = new HashMap<>();
+    private final Map<UUID, UUID> activeAttackers = new HashMap<>();
 
     public PoisonListener(PlayerHealthManager healthManager) {
         this.healthManager = healthManager;
     }
 
-    @Override
-    public void onApplied(Player player, DebuffType type) {
+    public void onAppliedWithAttacker(Player victim, Player attacker, DebuffType type) {
         if (type != DebuffType.POISON) return;
 
-        // Vanilla poison effect for the green tint/particles/icon, purely visual —
-        // the actual damage is handled manually below so it can bypass shields.
-        player.addPotionEffect(new PotionEffect(
+        onExpired(victim, DebuffType.POISON);
+
+        if (attacker != null) {
+            activeAttackers.put(victim.getUniqueId(), attacker.getUniqueId());
+        }
+
+        victim.addPotionEffect(new PotionEffect(
                 PotionEffectType.POISON, (int) DURATION_TICKS, 0, true, true
         ));
 
         BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
-                if (!player.isOnline()) {
-                    this.cancel();
-                    activeTasks.remove(player.getUniqueId());
+                if (!victim.isOnline() || victim.isDead()) {
+                    onExpired(victim, DebuffType.POISON);
                     return;
                 }
-                healthManager.damage(player, DAMAGE_PER_SECOND);
-                player.playHurtAnimation(0);
-                player.getWorld().playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_HURT, 1f, 1f);
-                // "[Attacker]'s [Ability] hit you for [Damage] damage."
-                player.sendMessage(MessageUtils.negative() + String.format(
-                        "§3Broodmothers' poison hit §3you §3for §c%d §3damage.", (int) DAMAGE_PER_SECOND)
-                );
+
+                int roundedDamage = (int) Math.round(DAMAGE_PER_SECOND);
+                healthManager.damage(victim, DAMAGE_PER_SECOND);
+                victim.playHurtAnimation(0);
+                victim.getWorld().playSound(victim.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_HURT, 1f, 1f);
+
+                UUID attackerId = activeAttackers.get(victim.getUniqueId());
+                if (attackerId != null) {
+                    Player attackerPlayer = Bukkit.getPlayer(attackerId);
+                victim.sendMessage(MessageUtils.negative() + String.format(
+                        "§3%s's poison hit §3you §3for §c%d §3damage.",attackerPlayer.getName(), roundedDamage
+                ));
+
+                    if (attackerPlayer.isOnline()) {
+                        attackerPlayer.sendMessage(MessageUtils.positive() + String.format(
+                                "§3Your poison hit §3%s §3for §c%d §3damage.", victim.getName(), roundedDamage
+                        ));
+                    }
+                }
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 20L, 20L);
 
-        activeTasks.put(player.getUniqueId(), task);
+        activeTasks.put(victim.getUniqueId(), task);
+    }
+
+    @Override
+    public void onApplied(Player player, DebuffType type) {
+        onAppliedWithAttacker(player, null, type);
     }
 
     @Override
@@ -65,6 +88,13 @@ public class PoisonListener implements DebuffListener {
         if (task != null) {
             task.cancel();
         }
+
+        activeAttackers.remove(player.getUniqueId());
         player.removePotionEffect(PotionEffectType.POISON);
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        onExpired(event.getEntity(), DebuffType.POISON);
     }
 }

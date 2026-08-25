@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities.offensive;
 
+import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
@@ -38,7 +39,7 @@ public class GroundSlam implements Ability {
     public boolean activate(Player player) {
         boolean hitSomeone = false;
         for (Entity nearby : player.getNearbyEntities(4, 3, 4)) {
-            if (nearby instanceof Player target && teamManager.isEnemy(player, target)) {
+            if (nearby instanceof Player target && teamManager.isEnemy(player, target) && target.getGameMode() != GameMode.SPECTATOR) {
                 combatService.applyAbilityDamage(player, target, DAMAGE, getName());
                 target.setVelocity(target.getVelocity().setY(0.5));
                 hitSomeone = true;

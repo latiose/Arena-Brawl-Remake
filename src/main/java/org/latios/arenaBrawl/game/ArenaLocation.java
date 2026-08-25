@@ -83,6 +83,23 @@ public class ArenaLocation {
         return locations;
     }
 
+    public List<Location> getLeaderboardSignLocations() {
+        List<Location> points = new ArrayList<>();
+        List<?> raw = plugin.getConfig().getList("leaderboard-signs");
+        if (raw == null) return points;
+
+        World lobbyWorld = Bukkit.getWorld(plugin.getConfig().getString("worlds.lobby", "world"));
+
+        for (Object entry : raw) {
+            if (entry instanceof Map<?, ?> map) {
+                double x = ((Number) map.get("x")).doubleValue();
+                double y = ((Number) map.get("y")).doubleValue();
+                double z = ((Number) map.get("z")).doubleValue();
+                points.add(new Location(lobbyWorld, x, y, z));
+            }
+        }
+        return points;
+    }
     public Location redSpawn1() {
         return new Location(arenaWorld, -2443, 17, 709, 90f, 0f); // Facing West
     }

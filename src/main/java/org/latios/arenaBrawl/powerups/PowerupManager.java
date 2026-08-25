@@ -1,4 +1,3 @@
-// powerups/PowerupManager.java
 package org.latios.arenaBrawl.powerups;
 
 import net.kyori.adventure.text.Component;
@@ -34,10 +33,9 @@ public class PowerupManager {
         Location spawnedAt;
         double rotationAngle = 0.0;
 
-
         long lastHandledCycleStart = -1;
-
         boolean pickedUpThisWindow = false;
+        long spawnTimeInCycle = -1;
     }
 
     private final Map<PowerupType, PowerupState> states = new EnumMap<>(PowerupType.class);
@@ -65,6 +63,7 @@ public class PowerupManager {
             despawn(state);
             state.lastHandledCycleStart = -1;
             state.pickedUpThisWindow = false;
+            state.spawnTimeInCycle = -1;
         }
     }
 
@@ -83,23 +82,31 @@ public class PowerupManager {
             long cyclePosition = matchElapsedMillis % cycleLength;
             long currentCycleStart = matchElapsedMillis - cyclePosition;
 
-            boolean inWindow = schedule.isWithinWindow(cyclePosition);
-            boolean entityStillAlive = state.itemEntity != null && !state.itemEntity.isDead();
-
             if (currentCycleStart != state.lastHandledCycleStart) {
+                state.lastHandledCycleStart = currentCycleStart;
                 state.pickedUpThisWindow = false;
+
+                long windowStart = schedule.windowStartMillis();
+                long windowEnd = schedule.windowEndMillis();
+                long windowDuration = windowEnd - windowStart;
+
+                if (windowDuration > 0) {
+                    state.spawnTimeInCycle = windowStart + (long) (random.nextDouble() * windowDuration);
+                } else {
+                    state.spawnTimeInCycle = windowStart;
+                }
             }
 
-            if (inWindow) {
-                if (!entityStillAlive && !state.pickedUpThisWindow && state.lastHandledCycleStart != currentCycleStart) {
+            boolean entityStillAlive = state.itemEntity != null && !state.itemEntity.isDead();
+
+            if (!entityStillAlive && !state.pickedUpThisWindow && state.spawnTimeInCycle != -1) {
+                if (cyclePosition >= state.spawnTimeInCycle && schedule.isWithinWindow(cyclePosition)) {
                     spawn(type, state);
-                    state.lastHandledCycleStart = currentCycleStart;
                 }
             }
         }
     }
 
-    /** Call from CheckPickups when a powerup is collected, so it won't respawn until the next window. */
     private void markPickedUp(PowerupState state) {
         state.pickedUpThisWindow = true;
     }
@@ -124,7 +131,6 @@ public class PowerupManager {
         ItemDisplay itemDisplay = world.spawn(location, ItemDisplay.class, d -> {
             d.setItemStack(new ItemStack(type.getMaterial()));
             d.setBillboard(Display.Billboard.FIXED);
-            //d.setPersistent(false);
             d.setTransformation(new Transformation(
                     new Vector3f(0, 0, 0),
                     new AxisAngle4f(0, 0, 0, 1),
@@ -140,7 +146,6 @@ public class PowerupManager {
         TextDisplay hologram = world.spawn(hologramLoc, TextDisplay.class, d -> {
             d.text(Component.text(label, color));
             d.setBillboard(Display.Billboard.CENTER);
-           // d.setPersistent(false);
             d.setSeeThrough(false);
             d.setShadowed(true);
             d.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
@@ -164,8 +169,6 @@ public class PowerupManager {
         }
     }
 
-
-
     private void despawn(PowerupState state) {
         if (state.spawnedAt != null && state.spawnedAt.getWorld() != null) {
             if (!state.spawnedAt.getChunk().isLoaded()) {
@@ -183,6 +186,7 @@ public class PowerupManager {
         }
         state.spawnedAt = null;
     }
+
     public Map<PowerupType, Player> checkPickups(Collection<Player> players) {
         Map<PowerupType, Player> pickedUp = new EnumMap<>(PowerupType.class);
 

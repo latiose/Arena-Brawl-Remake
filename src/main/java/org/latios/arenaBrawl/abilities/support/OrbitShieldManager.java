@@ -1,8 +1,9 @@
-
 package org.latios.arenaBrawl.abilities.support;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.Sound;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
@@ -22,9 +23,11 @@ public class OrbitShieldManager {
     private static final double ORBIT_HEIGHT_OFFSET = 1.4;
     private static final double ROTATION_SPEED_PER_TICK = 0.05;
 
+    private final Map<UUID, UUID> entityToOwner = new HashMap<>();
+
     public int getCharges(Player player) {
         ShieldState state = activeShields.get(player.getUniqueId());
-        return state.charges.toArray().length;
+        return state != null ? state.charges.size() : 0;
     }
 
     private static class ShieldState {
@@ -71,6 +74,8 @@ public class OrbitShieldManager {
             ));
         });
         EntityCleanupUtils.markAsArenaEntity(display);
+        entityToOwner.put(display.getUniqueId(), player.getUniqueId());
+
         return display;
     }
 
@@ -87,7 +92,13 @@ public class OrbitShieldManager {
         });
         EntityCleanupUtils.markAsArenaEntity(creeper);
         org.latios.arenaBrawl.general.CollisionUtils.disableCollision(creeper, player.getScoreboard());
+        entityToOwner.put(creeper.getUniqueId(), player.getUniqueId());
         return creeper;
+    }
+
+    public Player getOwnerOfChargeEntity(Entity entity) {
+        UUID ownerId = entityToOwner.get(entity.getUniqueId());
+        return ownerId != null ? Bukkit.getPlayer(ownerId) : null;
     }
 
     public boolean hasActiveShield(Player player) {
@@ -104,25 +115,29 @@ public class OrbitShieldManager {
         if (state == null || state.charges.isEmpty()) return null;
 
         Entity charge = state.charges.remove(state.charges.size() - 1);
+        entityToOwner.remove(charge.getUniqueId());
         charge.remove();
 
         OrbitShieldType type = state.type;
 
         if (state.charges.isEmpty()) {
+            playShieldBreakSound(player, type);
             activeShields.remove(player.getUniqueId());
         }
 
         return type;
     }
 
+    private void despawnAll(ShieldState state) {
+        for (Entity charge : state.charges) {
+            entityToOwner.remove(charge.getUniqueId());
+            if (!charge.isDead()) charge.remove();
+        }
+    }
+
     public void clear(Player player) {
-        OrbitShieldType type = getActiveType(player);
         ShieldState state = activeShields.remove(player.getUniqueId());
         if (state == null) return;
-
-        if(!(type.getVisualType() == OrbitShieldVisualType.CHARGED_CREEPER)) {
-            player.getWorld().playSound(player.getLocation(), org.bukkit.Sound.ENTITY_SKELETON_DEATH, 1.0f, 1.0f);
-        }
         despawnAll(state);
     }
 
@@ -147,6 +162,7 @@ public class OrbitShieldManager {
 
             long elapsed = System.currentTimeMillis() - state.startedAt;
             if (elapsed >= state.type.getDurationMillis()) {
+                playShieldBreakSound(player, state.type);
                 despawnAll(state);
                 iterator.remove();
                 continue;
@@ -181,7 +197,7 @@ public class OrbitShieldManager {
                     if (currentLoc.getWorld() != targetLoc.getWorld() || currentLoc.distanceSquared(targetLoc) > 16.0) {
                         charge.teleport(targetLoc);
                     } else {
-                        double factor = 0.3;
+                        double factor = 0.37;
 
                         double lerpX = currentLoc.getX() + (targetLoc.getX() - currentLoc.getX()) * factor;
                         double lerpy = currentLoc.getY() + (targetLoc.getY() - currentLoc.getY()) * factor;
@@ -189,16 +205,19 @@ public class OrbitShieldManager {
 
                         Location finalLoc = new Location(player.getWorld(), lerpX, lerpy, lerpZ, 0f, 0f);
                         charge.teleport(finalLoc);
-
                     }
                 }
             }
         }
     }
 
-    private void despawnAll(ShieldState state) {
-        for (Entity charge : state.charges) {
-            if (!charge.isDead()) charge.remove();
-        }
+    private void playShieldBreakSound(Player player, OrbitShieldType type) {
+        if (player == null || !player.isOnline()) return;
+
+        Sound soundToPlay = (type.getVisualType() == OrbitShieldVisualType.CHARGED_CREEPER)
+                ? Sound.ENTITY_CREEPER_DEATH
+                : Sound.ENTITY_SKELETON_DEATH;
+
+        player.getWorld().playSound(player.getLocation(), soundToPlay, 1.0f, 1.0f);
     }
 }

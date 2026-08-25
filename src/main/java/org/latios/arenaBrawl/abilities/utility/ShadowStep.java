@@ -58,7 +58,7 @@ public class ShadowStep implements Ability {
 
     @Override
     public String getDescription() {
-        return "Teleports behind the nearest enemy in your crosshair (up to "+MAX_RANGE+" blocks). Grants Speed III for "+ POST_SHADOW_SPEED_AMPLIFIER/20+"s.";
+        return "Teleports behind the nearest enemy in your crosshair (up to "+MAX_RANGE+" blocks). Grants Speed III for 2s.";
     }
 
     @Override

@@ -141,6 +141,7 @@ public class ArenaManager {
         match.setIndividualScoreboards(scoreboardManager.createIndividualScoreboards(match));
         scoreboardManager.updateHealthDisplay(match);
 
+        CollisionUtils.disableCollisionForGroup(match.getAllPlayers());
         var task = new MatchScoreboardTask(match, scoreboardManager).runTaskTimer(plugin, 0L, 10L);
         matchManager.registerMatch(match, task);
 

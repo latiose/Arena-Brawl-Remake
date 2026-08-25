@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.debuffs;
 
 import org.bukkit.Bukkit;
@@ -17,7 +16,7 @@ import java.util.UUID;
 
 public class DebuffManager {
 
-    private record ActiveDebuff(DebuffType type, long startedAt, long durationMillis) {
+    private record ActiveDebuff(DebuffType type, UUID attackerId, long startedAt, long durationMillis) {
     }
 
     private final Map<UUID, ActiveDebuff> activeDebuffs = new HashMap<>();
@@ -29,34 +28,38 @@ public class DebuffManager {
         listeners.add(listener);
     }
 
-    public boolean tryApply(Player player, DebuffType type, long durationMillis) {
-        if (hasActiveDebuff(player)) {
+    public boolean tryApply(Player attacker, Player victim, DebuffType type, long durationMillis) {
+        if (hasActiveDebuff(victim)) {
             return false;
         }
 
-        // The player might still have a stale entry that expired by time but was never
-        // formally cleared yet (clear() only runs via the periodic tick task). Force a
-        // clean-up here to avoid orphaned boss bars / lingering potion effects before
-        // overwriting the map entries with a new debuff.
-        if (activeDebuffs.containsKey(player.getUniqueId())) {
-            clear(player);
+        if (activeDebuffs.containsKey(victim.getUniqueId())) {
+            clear(victim);
         }
 
-        activeDebuffs.put(player.getUniqueId(), new ActiveDebuff(type, System.currentTimeMillis(), durationMillis));
-        accumulatedDamage.put(player.getUniqueId(), 0.0);
+        UUID attackerId = attacker != null ? attacker.getUniqueId() : null;
+        activeDebuffs.put(victim.getUniqueId(), new ActiveDebuff(type, attackerId, System.currentTimeMillis(), durationMillis));
+        accumulatedDamage.put(victim.getUniqueId(), 0.0);
 
         BossBar bar = Bukkit.createBossBar(type.getDisplayName(), BarColor.PURPLE, BarStyle.SOLID);
-        bar.addPlayer(player);
+        bar.addPlayer(victim);
         bar.setProgress(1.0);
-        bossBars.put(player.getUniqueId(), bar);
+        bossBars.put(victim.getUniqueId(), bar);
 
         for (DebuffListener listener : listeners) {
-            listener.onApplied(player, type);
+            if (listener instanceof PoisonListener poisonListener) {
+                poisonListener.onAppliedWithAttacker(victim, attacker, type);
+            } else {
+                listener.onApplied(victim, type);
+            }
         }
 
         return true;
     }
 
+    public boolean tryApply(Player victim, DebuffType type, long durationMillis) {
+        return tryApply(null, victim, type, durationMillis);
+    }
     public boolean hasActiveDebuff(Player player) {
         ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
         if (debuff == null) return false;
@@ -68,10 +71,6 @@ public class DebuffManager {
         return debuff != null && debuff.type() == type && hasActiveDebuff(player);
     }
 
-    /**
-     * Adds damage to the accumulated total for the player's active debuff.
-     * Returns true if the accumulated damage reached the given threshold (caller should then clear the debuff).
-     */
     public boolean addAccumulatedDamage(Player player, double amount, double breakThreshold) {
         if (!hasActiveDebuff(player)) return false;
 

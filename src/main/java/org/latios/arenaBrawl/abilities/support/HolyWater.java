@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities.support;
 
+import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -47,7 +48,7 @@ public class HolyWater implements Ability {
         for (Entity nearby : player.getNearbyEntities(6, 4, 6)) {
             if (nearby instanceof Player nearbyPlayer && teamManager.isAlly(player, nearbyPlayer)) {
                 double distance = nearbyPlayer.getLocation().distanceSquared(player.getLocation());
-                if (distance < closestDistance) {
+                if (distance < closestDistance && nearbyPlayer.getGameMode()!= GameMode.SPECTATOR) {
                     closestDistance = distance;
                     closestAlly = nearbyPlayer;
                 }

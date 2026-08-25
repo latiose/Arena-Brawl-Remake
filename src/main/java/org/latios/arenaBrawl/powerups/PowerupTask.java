@@ -60,10 +60,10 @@ public class PowerupTask extends BukkitRunnable {
                 if (p.equals(picker)) {
 
                     if (type == PowerupType.HEALTH) {
-                        p.sendMessage("§a§lYou activated the Healing Powerup!");
-                        p.sendMessage("§a§l+200 health!");
+                        p.sendMessage("§aYou activated the Healing Powerup!");
+                        p.sendMessage("§a+200 health!");
                     } else if (type == PowerupType.DOUBLE_DAMAGE) {
-                        p.sendMessage("§c§lYou activated the Double Damage Powerup!");
+                        p.sendMessage("§cYou activated the Double Damage Powerup!");
                     }
                 } else {
                     boolean isViewerRed = match.getRed().contains(p);

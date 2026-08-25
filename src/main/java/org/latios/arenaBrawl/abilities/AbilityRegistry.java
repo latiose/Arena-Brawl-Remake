@@ -80,5 +80,17 @@ public class AbilityRegistry {
     }
 
 
+    private AbilityDependencies previewDependencies; // set once, safe no-op dependencies for preview purposes
 
+    public void setPreviewDependencies(AbilityDependencies deps) {
+        this.previewDependencies = deps;
+    }
+
+    /**
+     * Creates a throwaway instance of an ability purely to read its name/description for menus.
+     * Never call activate() on the result — it may use dependencies that aren't tied to any real match.
+     */
+    public Ability createPreview(AbilitySlot slot, String id) {
+        return create(slot, id, previewDependencies);
+    }
 }

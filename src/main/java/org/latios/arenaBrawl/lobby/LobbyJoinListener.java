@@ -11,9 +11,12 @@ import org.latios.arenaBrawl.abilities.AbilityManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.game.MatchManager;
+import org.latios.arenaBrawl.general.CollisionUtils;
 import org.latios.arenaBrawl.hats.HatEquipUtils;
 import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.team.TeamManager;
+
+import java.util.List;
 
 public class LobbyJoinListener implements Listener {
 
@@ -61,5 +64,15 @@ public class LobbyJoinListener implements Listener {
         LobbyKit.giveLobbyKit(player,armorTierManager);
         HatEquipUtils.applyEquippedHat(player, hatSelectionManager);
         lobbyScoreboardManager.show(player);
+        CollisionUtils.disableCollision(player);
     }
+/*
+    private void refreshLobbyCollisionGroup() {
+        List<Player> lobbyPlayers = (List<Player>) Bukkit.getOnlinePlayers().stream()
+                .filter(p -> !matchManager.isInMatch(p))
+                .toList();
+        CollisionUtils.disableCollisionForGroup(lobbyPlayers);
+    }
+    */
+
 }
