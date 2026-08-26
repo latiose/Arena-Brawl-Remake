@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.debuffs;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Particle;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -83,6 +84,10 @@ public class DebuffManager {
     public void tick(Player player) {
         ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
         if (debuff == null) return;
+        if(debuff.type.equals(DebuffType.SLOW)) player.getWorld().spawnParticle(Particle.PORTAL, player.getLocation(), 10);
+        if(debuff.type.equals(DebuffType.IMMOBILIZE)) player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation(), 10);
+        if(debuff.type.equals(DebuffType.STUN)) player.getWorld().spawnParticle(Particle.WHITE_ASH, player.getLocation(), 10);
+
 
         long elapsed = System.currentTimeMillis() - debuff.startedAt();
         long remaining = debuff.durationMillis() - elapsed;

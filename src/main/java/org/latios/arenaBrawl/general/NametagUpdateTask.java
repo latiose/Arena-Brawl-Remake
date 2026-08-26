@@ -17,8 +17,8 @@ public class NametagUpdateTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        Match match = matchManager.getActiveMatch();
-        if (match == null) return;
-        nametagManager.update(match);
+        for (Match match : matchManager.getActiveMatches()) {
+            nametagManager.update(match);
+        }
     }
 }

@@ -45,7 +45,7 @@ public class CombatService {
 
         double multiplier = damageBuffManager.getMultiplier(attacker);
 
-        Match match = matchManager.getActiveMatch();
+        Match match = matchManager.getMatchFor(attacker);
         if (match != null && match.isDoubleDamageActive()) {
             multiplier *= 2.0;
         }

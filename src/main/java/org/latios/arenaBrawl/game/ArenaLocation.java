@@ -39,49 +39,8 @@ public class ArenaLocation {
         }
     }
 
-    public List<Location> getPowerupSpawnPoints() {
-        List<Location> points = new ArrayList<>();
-        List<?> raw = plugin.getConfig().getList("powerup-spawns");
-        if (raw == null) return points;
 
-        for (Object entry : raw) {
-            if (entry instanceof Map<?, ?> map) {
-                double x = ((Number) map.get("x")).doubleValue();
-                double y = ((Number) map.get("y")).doubleValue();
-                double z = ((Number) map.get("z")).doubleValue();
-                points.add(new Location(getArenaWorld(), x, y, z));
-            }
-        }
-        return points;
-    }
 
-    public World getArenaWorld() {
-        return arenaWorld;
-    }
-
-    public Location getHealthPowerupLocation() {
-        var section = plugin.getConfig().getConfigurationSection("powerups.health");
-        if (section == null) return null;
-
-        return new Location(getArenaWorld(),
-                section.getDouble("x"), section.getDouble("y"), section.getDouble("z"));
-    }
-
-    public List<Location> getDamagePowerupLocations() {
-        List<Location> locations = new ArrayList<>();
-        List<?> raw = plugin.getConfig().getList("powerups.damage");
-        if (raw == null) return locations;
-
-        for (Object entry : raw) {
-            if (entry instanceof Map<?, ?> map) {
-                double x = ((Number) map.get("x")).doubleValue();
-                double y = ((Number) map.get("y")).doubleValue();
-                double z = ((Number) map.get("z")).doubleValue();
-                locations.add(new Location(getArenaWorld(), x, y, z));
-            }
-        }
-        return locations;
-    }
 
     public List<Location> getLeaderboardSignLocations() {
         List<Location> points = new ArrayList<>();
@@ -100,19 +59,6 @@ public class ArenaLocation {
         }
         return points;
     }
-    public Location redSpawn1() {
-        return new Location(arenaWorld, -2443, 17, 709, 90f, 0f); // Facing West
-    }
 
-    public Location redSpawn2() {
-        return new Location(arenaWorld, -2443, 17, 708, 90f, 0f); // Facing West
-    }
 
-    public Location blueSpawn1() {
-        return new Location(arenaWorld, -2499.3, 17, 686, -90f, 0f); // Facing East
-    }
-
-    public Location blueSpawn2() {
-        return new Location(arenaWorld, -2499.3, 17, 685, -90f, 0f); // Facing East
-    }
 }

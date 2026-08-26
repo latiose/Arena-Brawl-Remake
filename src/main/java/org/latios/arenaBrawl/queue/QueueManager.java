@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.queue;
 
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.game.ArenaManager;
+import org.latios.arenaBrawl.game.ArenaMapManager;
 import org.latios.arenaBrawl.party.Party;
 import org.latios.arenaBrawl.party.PartyManager;
 
@@ -19,10 +20,12 @@ public class QueueManager {
     private final Set<UUID> queuedPlayers = new LinkedHashSet<>();
     private final PartyManager partyManager;
     private final ArenaManager arenaManager;
+    private final ArenaMapManager arenaMapManager;
 
-    public QueueManager(PartyManager partyManager, ArenaManager arenaManager) {
+    public QueueManager(PartyManager partyManager, ArenaManager arenaManager, ArenaMapManager arenaMapManager) {
         this.partyManager = partyManager;
         this.arenaManager = arenaManager;
+        this.arenaMapManager = arenaMapManager;
     }
 
     public boolean isQueued(Player player) {
@@ -65,6 +68,8 @@ public class QueueManager {
 
     private void tryStartMatch() {
         if (queuedPlayers.size() < MATCH_SIZE) return;
+        if (arenaMapManager.getAvailableMapCount() == 0) return; // wait until a map frees up, don't dequeue anyone
+
 
         List<UUID> selected = new ArrayList<>();
         for (UUID id : queuedPlayers) {

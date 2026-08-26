@@ -27,10 +27,7 @@ import org.latios.arenaBrawl.rating.RatingManager;
 import org.latios.arenaBrawl.stats.StatsManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class MatchManager {
 
@@ -46,7 +43,6 @@ public class MatchManager {
     private final Map<Match, BukkitTask> scoreboardTasks = new HashMap<>();
     private final DebuffManager debuffManager;
     private final OrbitShieldManager orbitShieldManager;
-    private Match currentMatch;
     private final CooldownManager cooldownManager;
     private final UsageManager usageManager;
     private final StatsManager statsManager;
@@ -56,12 +52,15 @@ public class MatchManager {
     private final HatSelectionManager hatSelectionManager;
     private final BroodMotherEntityManager broodMotherEntityManager;
     private final Plugin plugin;
+    private final ArenaMapManager arenaMapManager;
+    private final List<Match> activeMatchesList = new ArrayList<>();
+
 
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         EnergyManager energyManager, HungerManager hungerManager,
                         ScoreboardManager scoreboardManager, Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
-                        ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin) {
+                        ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin,ArenaMapManager arenaMapManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -81,6 +80,7 @@ public class MatchManager {
         this.hatSelectionManager = hatSelectionManager;
         this.broodMotherEntityManager = broodMotherEntityManager;
         this.plugin = plugin;
+        this.arenaMapManager = arenaMapManager;
     }
 
 
@@ -207,17 +207,24 @@ public class MatchManager {
     public void registerMatch(Match match, BukkitTask scoreboardTask) {
         for (Player player : match.getAllPlayers()) {
             activeMatches.put(player.getUniqueId(), match);
-            statsManager.startMatchTracker(player);
         }
         scoreboardTasks.put(match, scoreboardTask);
-        currentMatch = match;
+        activeMatchesList.add(match);
     }
 
-    public Match getActiveMatch() {
-        return currentMatch;
+    /** Returns the match a specific player is currently in, or null. */
+    public Match getMatchFor(Player player) {
+        return activeMatches.get(player.getUniqueId());
+    }
+
+    /** Returns all matches currently running (needed for tasks that iterate every active game). */
+    public List<Match> getActiveMatches() {
+        return new ArrayList<>(activeMatchesList);
     }
 
     private void endMatch(Match match, String winnerTeam) {
+        if (match.isEnded()) return;
+        match.setEnded(true);
         List<Player> winners = winnerTeam.equals("RED") ? match.getRed() : match.getBlue();
         List<Player> losers = winnerTeam.equals("RED") ? match.getBlue() : match.getRed();
 
@@ -257,12 +264,23 @@ public class MatchManager {
 
     /** Ends the match in a draw due to the 10-minute time limit. No rating changes are applied. */
     public void endMatchAsDraw(Match match) {
+        if (match.isEnded()) return;
+        match.setEnded(true);
+
         for (Player player : match.getAllPlayers()) {
             if (player.isOnline()) {
+                player.sendMessage("§6#§7--------------------------§6#");
                 player.sendMessage("§6Draw! Time limit reached.");
+                player.sendMessage("§6#§7--------------------------§6#");
             }
         }
-        finishMatch(match);
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            for (Player player : match.getAllPlayers()) {
+                cleanupPlayer(player);
+            }
+            finishMatch(match);
+        }, 140L);
     }
 
     private void finishMatch(Match match) {
@@ -272,13 +290,14 @@ public class MatchManager {
 
         match.getPowerupManager().clear();
 
+        activeMatchesList.remove(match);
+        arenaMapManager.releaseMap(match.getArenaMap());
+
         if (!match.getAllPlayers().isEmpty()) {
             EntityCleanupUtils.sweepArenaEntities(match.getAllPlayers().get(0).getWorld());
         }
 
-        if (currentMatch == match) {
-            currentMatch = null;
-        }
+
 
     }
 

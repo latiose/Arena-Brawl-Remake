@@ -43,12 +43,13 @@ public class ArenaManager {
     private final HatSelectionManager hatSelectionManager;
     private final CombatUpgradeManager combatUpgradeManager;
     private final BroodMotherEntityManager broodMotherEntityManager;
+    private final ArenaMapManager arenaMapManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
                         org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, PlayerHealthManager playerHealthManager, HungerManager hungerManager, MatchManager matchManager,ArenaLocation arenaLocation,ShieldManager shieldManager,
     DebuffManager debuffManager,ArmorTierManager armorTierManager, CombatService combatService,OrbitShieldManager orbitShieldManager, HatSelectionManager hatSelectionManager,
-                        CombatUpgradeManager combatUpgradeManager,BroodMotherEntityManager broodMotherEntityManager) {
+                        CombatUpgradeManager combatUpgradeManager,BroodMotherEntityManager broodMotherEntityManager, ArenaMapManager arenaMapManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -70,8 +71,10 @@ public class ArenaManager {
         this.hatSelectionManager = hatSelectionManager;
         this.combatUpgradeManager = combatUpgradeManager;
         this.broodMotherEntityManager = broodMotherEntityManager;
+        this.arenaMapManager = arenaMapManager;
     }
 
+    /*
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
         teamManager.setTeam(p1, Team.RED);
         teamManager.setTeam(p2, Team.RED);
@@ -162,4 +165,68 @@ public class ArenaManager {
 
 
     }
+    */
+    // game/ArenaManager.java
+    public void startMatch(Player p1, Player p2, Player p3, Player p4) {
+        ArenaMap map = arenaMapManager.claimAvailableMap();
+
+        if (map == null || !map.isValid()) {
+            if (map != null) {
+                arenaMapManager.releaseMap(map);
+            }
+            for (Player p : List.of(p1, p2, p3, p4)) {
+                p.sendMessage("§cAll arenas are currently occupied or invalid. Please wait.");
+            }
+            return;
+        }
+        teamManager.setTeam(p1, Team.RED);
+        teamManager.setTeam(p2, Team.RED);
+        teamManager.setTeam(p3, Team.BLUE);
+        teamManager.setTeam(p4, Team.BLUE);
+
+        List<Player> allPlayers = List.of(p1, p2, p3, p4);
+        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager);
+
+        for (Player player : allPlayers) {
+            player.setCollidable(false);
+            playerHealthManager.setMaxHealth(player, combatUpgradeManager.getValue(player, CombatUpgradeType.HEALTH));
+            usageManager.resetPlayer(player);
+            energyManager.reset(player);
+            hungerManager.reset(player);
+
+            for (AbilitySlot slot : AbilitySlot.values()) {
+                String abilityId = selectionManager.getSelection(player, slot);
+                Ability ability = abilityRegistry.create(slot, abilityId, deps);
+                abilityManager.setAbility(player, slot, ability);
+                ability.onMatchStart(player);
+            }
+
+            AbilityKit.giveDefaultKit(player, abilityManager);
+            armorTierManager.equipCosmeticArmor(player);
+            HatEquipUtils.applyEquippedHat(player, hatSelectionManager);
+            player.updateInventory();
+        }
+
+        var match = new Match(List.of(p1, p2), List.of(p3, p4), map);
+
+        match.getPowerupManager().configureLocations(PowerupType.HEALTH,
+                map.getHealthPowerupLocation() != null ? List.of(map.getHealthPowerupLocation()) : List.of());
+        match.getPowerupManager().configureLocations(PowerupType.DOUBLE_DAMAGE, map.getDamagePowerupLocations());
+        match.getPowerupManager().reset();
+
+        match.setIndividualScoreboards(scoreboardManager.createIndividualScoreboards(match));
+        scoreboardManager.updateHealthDisplay(match);
+
+        CollisionUtils.disableCollisionForGroup(match.getAllPlayers());
+
+        var task = new MatchScoreboardTask(match, scoreboardManager).runTaskTimer(plugin, 0L, 10L);
+        matchManager.registerMatch(match, task);
+
+        p1.teleport(map.getRedSpawn1());
+        p2.teleport(map.getRedSpawn2());
+        p3.teleport(map.getBlueSpawn1());
+        p4.teleport(map.getBlueSpawn2());
+
+    }
+
 }

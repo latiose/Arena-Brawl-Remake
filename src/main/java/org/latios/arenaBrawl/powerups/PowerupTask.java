@@ -23,55 +23,47 @@ public class PowerupTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        Match match = matchManager.getActiveMatch();
-        if (match == null) return;
+        for (Match match : matchManager.getActiveMatches()) {
+            var players = match.getAllPlayers();
+            if (players.isEmpty()) continue;
 
-        var players = match.getAllPlayers();
-        if (players.isEmpty()) return;
+            long elapsed = System.currentTimeMillis() - match.getStartedAt();
+            PowerupManager powerupManager = match.getPowerupManager();
+            powerupManager.tick(elapsed, players);
 
-        for (Player player : players) {
-            if (player.isOnline()) {
-                damageBuffManager.getMultiplier(player);
-            }
-        }
+            Map<PowerupType, Player> pickedUp = powerupManager.checkPickups(players);
+            for (Map.Entry<PowerupType, Player> entry : pickedUp.entrySet()) {
+                Player picker = entry.getValue();
+                PowerupType type = entry.getKey();
 
-        long elapsed = System.currentTimeMillis() - match.getStartedAt();
-        PowerupManager powerupManager = match.getPowerupManager();
+                switch (type) {
+                    case HEALTH -> healthManager.heal(picker, 200);
+                    case DOUBLE_DAMAGE -> damageBuffManager.applyBuff(picker, 2, 12_000);
+                }
 
-        powerupManager.tick(elapsed, players);
+                String powerupName = type == PowerupType.HEALTH ? "HEALING" : "DOUBLE DAMAGE";
 
-        Map<PowerupType, Player> pickedUp = powerupManager.checkPickups(players);
-        for (Map.Entry<PowerupType, Player> entry : pickedUp.entrySet()) {
-            Player picker = entry.getValue();
-            PowerupType type = entry.getKey();
+                boolean isPickerRed = match.getRed().contains(picker);
 
-            switch (type) {
-                case HEALTH -> healthManager.heal(picker, 200);
-                case DOUBLE_DAMAGE -> damageBuffManager.applyBuff(picker, 2, 12_000);
-            }
+                for (Player p : players) {
+                    if (!p.isOnline()) continue;
 
-            String powerupName = type == PowerupType.HEALTH ? "HEALING" : "DOUBLE DAMAGE";
+                    if (p.equals(picker)) {
 
-            boolean isPickerRed = match.getRed().contains(picker);
-
-            for (Player p : players) {
-                if (!p.isOnline()) continue;
-
-                if (p.equals(picker)) {
-
-                    if (type == PowerupType.HEALTH) {
-                        p.sendMessage("§aYou activated the Healing Powerup!");
-                        p.sendMessage("§a+200 health!");
-                    } else if (type == PowerupType.DOUBLE_DAMAGE) {
-                        p.sendMessage("§cYou activated the Double Damage Powerup!");
+                        if (type == PowerupType.HEALTH) {
+                            p.sendMessage("§aYou activated the Healing Powerup!");
+                            p.sendMessage("§a+200 health!");
+                        } else if (type == PowerupType.DOUBLE_DAMAGE) {
+                            p.sendMessage("§cYou activated the Double Damage Powerup!");
+                        }
+                    } else {
+                        boolean isViewerRed = match.getRed().contains(p);
+                        boolean isTeammate = (isPickerRed == isViewerRed);
+                        boolean isHP = (type == PowerupType.HEALTH);
+                        String color = isTeammate ? "§a" : "§c";
+                        String color2 = isHP ? "§a" : "§c";
+                        p.sendMessage(color + picker.getName() + " §eactivated the " +color2 + powerupName + " §epowerup!");
                     }
-                } else {
-                    boolean isViewerRed = match.getRed().contains(p);
-                    boolean isTeammate = (isPickerRed == isViewerRed);
-
-                    String color = isTeammate ? "§a" : "§c";
-
-                    p.sendMessage(color + picker.getName() + " §eactivated the §a" + powerupName + " §epowerup!");
                 }
             }
         }

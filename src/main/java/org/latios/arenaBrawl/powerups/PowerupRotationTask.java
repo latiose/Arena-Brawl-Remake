@@ -1,9 +1,10 @@
-// powerups/PowerupRotationTask.java
+
 package org.latios.arenaBrawl.powerups;
 
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.game.Match;
 import org.latios.arenaBrawl.game.MatchManager;
+import java.util.List;
 
 public class PowerupRotationTask extends BukkitRunnable {
 
@@ -15,9 +16,10 @@ public class PowerupRotationTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        Match match = matchManager.getActiveMatch();
-        if (match == null) return;
-
-        match.getPowerupManager().tickRotation();
+       List<Match> matches = matchManager.getActiveMatches();
+        if (matches == null || matches.isEmpty()) return;
+        for(Match match : matches) {
+            match.getPowerupManager().tickRotation();
+        }
     }
 }

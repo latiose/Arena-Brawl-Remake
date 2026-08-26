@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.latios.arenaBrawl.powerups.PowerupManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,15 +23,26 @@ public class Match {
     private boolean doubleDamageActive = false;
     private final Map<Player, org.bukkit.scoreboard.Scoreboard> individualScoreboards = new HashMap<>();
 
-    public Match(List<Player> red, List<Player> blue) {
+    private final ArenaMap arenaMap;
+    private boolean ended = false;
+
+    public boolean isEnded() {
+        return ended;
+    }
+
+    public void setEnded(boolean ended) {
+        this.ended = ended;
+    }
+    public Match(List<Player> red, List<Player> blue, ArenaMap arenaMap) {
         this.red = red;
         this.blue = blue;
-       // this.scoreboard = scoreboard;
-        this.aliveRed = new java.util.ArrayList<>(red);
-        this.aliveBlue = new java.util.ArrayList<>(blue);
+        this.arenaMap = arenaMap;
+        this.aliveRed = new ArrayList<>(red);
+        this.aliveBlue = new ArrayList<>(blue);
         this.startedAt = System.currentTimeMillis();
     }
 
+    public ArenaMap getArenaMap() { return arenaMap; }
     public List<Player> getRed() { return red; }
     public List<Player> getBlue() { return blue; }
     public Scoreboard getScoreboard() { return scoreboard; }
