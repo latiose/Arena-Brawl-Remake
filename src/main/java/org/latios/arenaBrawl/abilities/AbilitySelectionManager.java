@@ -1,4 +1,4 @@
-// abilities/AbilitySelectionManager.java
+
 package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.entity.Player;

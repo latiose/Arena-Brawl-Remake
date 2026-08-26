@@ -1,4 +1,4 @@
-// general/ProjectileAoeListener.java
+
 package org.latios.arenaBrawl.general;
 
 import org.bukkit.entity.Entity;

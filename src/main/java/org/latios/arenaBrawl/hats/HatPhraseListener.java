@@ -32,7 +32,7 @@ public class HatPhraseListener {
      * The phrase comes from the VICTIM's equipped hat (as if the hat "reacts" to being hit),
      * and floats above the victim, not the attacker.
      */
-    public void onMeleeHit(Player attacker, Player victim) {
+    public void onMeleeHit(Player victim) {
         HatDefinition hat = hatSelectionManager.getEquipped(victim);
         if (hat == null) return;
 
@@ -42,10 +42,10 @@ public class HatPhraseListener {
         if (phrases.isEmpty()) return;
 
         String phrase = phrases.get(random.nextInt(phrases.size()));
-        spawnHologram(victim, hat, phrase);
+        spawnHologram(victim, phrase);
     }
 
-    private void spawnHologram(Player wearer, HatDefinition hat, String phrase) {
+    private void spawnHologram(Player wearer, String phrase) {
         Location location = wearer.getLocation().add(0, HOLOGRAM_HEIGHT_OFFSET, 0);
         TextColor color = TextColor.color(TextColor.color(0xFFA500));
 

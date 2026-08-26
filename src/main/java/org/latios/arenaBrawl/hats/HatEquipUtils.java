@@ -1,4 +1,4 @@
-// hats/HatEquipUtils.java
+
 package org.latios.arenaBrawl.hats;
 
 import org.bukkit.Bukkit;

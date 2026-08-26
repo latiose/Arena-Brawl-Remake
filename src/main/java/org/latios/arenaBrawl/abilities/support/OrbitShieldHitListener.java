@@ -11,8 +11,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.latios.arenaBrawl.abilities.CooldownManager;
-import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
-import org.latios.arenaBrawl.abilities.support.OrbitShieldType;
+
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
@@ -58,18 +57,14 @@ public class OrbitShieldHitListener implements Listener {
         if (attacker.getGameMode() == GameMode.SPECTATOR) return;
 
         double maxDistance = 3.5;
-        Entity targetEntity = attacker.getWorld().getNearbyEntities(attacker.getEyeLocation(), maxDistance, maxDistance, maxDistance)
+        attacker.getWorld().getNearbyEntities(attacker.getEyeLocation(), maxDistance, maxDistance, maxDistance)
                 .stream()
                 .filter(e -> orbitShieldManager.getOwnerOfChargeEntity(e) != null)
                 .filter(e -> e.getBoundingBox().expand(0.3).contains(
                         attacker.getEyeLocation().toVector().add(attacker.getEyeLocation().getDirection().multiply(attacker.getEyeLocation().distance(e.getLocation())))
                 ))
-                .findFirst()
-                .orElse(null);
+                .findFirst().ifPresent(targetEntity -> processShieldHit(attacker, targetEntity));
 
-        if (targetEntity != null) {
-            processShieldHit(attacker, targetEntity);
-        }
     }
 
     private boolean processShieldHit(Player attacker, Entity target) {

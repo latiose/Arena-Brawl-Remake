@@ -1,4 +1,4 @@
-// rating/RatingManager.java
+
 package org.latios.arenaBrawl.rating;
 
 import org.bukkit.configuration.file.YamlConfiguration;

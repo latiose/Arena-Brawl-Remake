@@ -29,7 +29,7 @@ public class PowerupTask extends BukkitRunnable {
 
             long elapsed = System.currentTimeMillis() - match.getStartedAt();
             PowerupManager powerupManager = match.getPowerupManager();
-            powerupManager.tick(elapsed, players);
+            powerupManager.tick(elapsed);
 
             Map<PowerupType, Player> pickedUp = powerupManager.checkPickups(players);
             for (Map.Entry<PowerupType, Player> entry : pickedUp.entrySet()) {

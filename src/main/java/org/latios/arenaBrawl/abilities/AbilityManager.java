@@ -1,7 +1,6 @@
 package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.UnknownNullability;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
@@ -44,7 +43,6 @@ public class AbilityManager {
             return;
         }
         else if(!cost.canPay(player) && cost instanceof UltimateCost){
-            cost = (UltimateCost) cost;
             if(cost.isPermanentlyUnavailable(player)){
                 player.sendMessage("§e" + cost.describeRemaining(player));
             }

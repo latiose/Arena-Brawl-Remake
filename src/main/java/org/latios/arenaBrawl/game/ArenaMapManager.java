@@ -36,9 +36,10 @@ public class ArenaMapManager {
 
             String worldName = section.getString("world");
 
+            assert worldName != null;
             World world = Bukkit.getWorld(worldName);
 
-            if (world == null && worldName != null) {
+            if (world == null) {
                 world = Bukkit.createWorld(new WorldCreator(worldName));
             }
 
@@ -115,10 +116,6 @@ public class ArenaMapManager {
         if (map != null) {
             occupiedMaps.remove(map.getName());
         }
-    }
-
-    public int getTotalMapCount() {
-        return maps.size();
     }
 
     public int getAvailableMapCount() {

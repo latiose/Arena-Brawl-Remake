@@ -114,7 +114,7 @@ public class OrbitShieldManager {
         ShieldState state = activeShields.get(player.getUniqueId());
         if (state == null || state.charges.isEmpty()) return null;
 
-        Entity charge = state.charges.remove(state.charges.size() - 1);
+        Entity charge = state.charges.removeLast();
         entityToOwner.remove(charge.getUniqueId());
         charge.remove();
 

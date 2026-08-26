@@ -1,4 +1,4 @@
-// general/VanillaHungerBlockListener.java
+
 package org.latios.arenaBrawl.general;
 
 import org.bukkit.entity.Player;

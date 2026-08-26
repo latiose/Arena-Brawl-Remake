@@ -1,4 +1,4 @@
-// general/NametagUpdateTask.java
+
 package org.latios.arenaBrawl.general;
 
 import org.bukkit.scheduler.BukkitRunnable;

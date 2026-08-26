@@ -1,4 +1,4 @@
-// runes/RuneSelectionManager.java
+
 package org.latios.arenaBrawl.runes;
 
 import org.bukkit.configuration.file.YamlConfiguration;

@@ -1,4 +1,4 @@
-// general/HungerTask.java
+
 package org.latios.arenaBrawl.general;
 
 import org.bukkit.Bukkit;

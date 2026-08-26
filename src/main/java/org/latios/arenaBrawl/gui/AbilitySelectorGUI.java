@@ -8,13 +8,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jspecify.annotations.NonNull;
 import org.latios.arenaBrawl.abilities.*;
-import org.latios.arenaBrawl.hats.HatSelectorGUI;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
-import org.latios.arenaBrawl.upgrades.CombatUpgradeGUI;
-
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +21,6 @@ public class AbilitySelectorGUI {
     private final RuneSelectionManager runeSelectionManager;
     private final AbilityRegistry registry;
     private final AbilitySelectionManager selectionManager;
-    private final HatSelectorGUI hatSelectorGUI;
-    private final CombatUpgradeGUI combatUpgradeGUI;
     private AbilityDependencies previewDependencies;
     private final Map<String, Ability> previewCache = new HashMap<>();
 
@@ -38,12 +33,10 @@ public class AbilitySelectorGUI {
 
 
 
-    public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager, RuneSelectionManager runeSelectionManager, HatSelectorGUI hatSelectorGUI, CombatUpgradeGUI combatUpgradeGUI) {
+    public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager, RuneSelectionManager runeSelectionManager) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.runeSelectionManager = runeSelectionManager;
-        this.hatSelectorGUI = hatSelectorGUI;
-        this.combatUpgradeGUI = combatUpgradeGUI;
     }
     public void openSlotMenu(Player player, AbilitySlot slot) {
         List<String> ids = new ArrayList<>(registry.getAvailableIds(slot));
@@ -171,7 +164,7 @@ public class AbilitySelectorGUI {
         }
 
         @Override
-        public Inventory getInventory() {
+        public @NonNull Inventory getInventory() {
             throw new UnsupportedOperationException();
         }
     }
@@ -187,18 +180,18 @@ public class AbilitySelectorGUI {
 
         for (String word : words) {
             if (currentLine.length() + word.length() + 1 > lineLength) {
-                if (currentLine.length() > 0) {
+                if (!currentLine.isEmpty()) {
                     result.add(currentLine.toString());
                     currentLine.setLength(0);
                 }
             }
-            if (currentLine.length() > 0) {
+            if (!currentLine.isEmpty()) {
                 currentLine.append(" ");
             }
             currentLine.append(word);
         }
 
-        if (currentLine.length() > 0) {
+        if (!currentLine.isEmpty()) {
             result.add(currentLine.toString());
         }
 

@@ -1,10 +1,10 @@
-// abilities/impl/PolymorphAbility.java
+
 package org.latios.arenaBrawl.abilities.utility;
 
-import org.bukkit.Effect;
+
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.entity.Entity;
+
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
@@ -48,7 +48,7 @@ public class Polymorph implements Ability {
             return false;
         }
 
-        boolean applied = debuffManager.tryApply(target, DebuffType.POLYMORPH, DURATION_MILLIS);
+        debuffManager.tryApply(target, DebuffType.POLYMORPH, DURATION_MILLIS);
 
         target.getWorld().spawnParticle(Particle.POOF, target.getLocation(), 25);
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_SHEEP_AMBIENT, 1.0f, 1.0f);

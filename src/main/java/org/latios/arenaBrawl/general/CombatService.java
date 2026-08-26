@@ -115,11 +115,11 @@ public class CombatService {
         }
 
         if (type.rollsDebuffOnBlock()) {
-            applyGuaranteedRandomDebuff(attacker, victim, type);
+            applyGuaranteedRandomDebuff(attacker, type);
         }
     }
 
-    private void applyGuaranteedRandomDebuff(Player attacker, Player victim, OrbitShieldType type) {
+    private void applyGuaranteedRandomDebuff(Player attacker, OrbitShieldType type) {
         List<DebuffType> shuffled = new ArrayList<>(STAR_SHIELD_POSSIBLE_DEBUFFS);
         Collections.shuffle(shuffled);
 

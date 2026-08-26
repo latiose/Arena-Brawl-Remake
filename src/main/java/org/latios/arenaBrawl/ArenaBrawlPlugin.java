@@ -39,7 +39,7 @@ import org.latios.arenaBrawl.upgrades.CombatUpgradeGUI;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeListener;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
-import java.lang.foreign.Arena;
+
 
 public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
 
@@ -130,21 +130,20 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.hatPhraseListener = new HatPhraseListener(hatSelectionManager);
 
         this.hatSelectorGUI = new HatSelectorGUI(hatRegistry, hatSelectionManager);
-        this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager, runeSelectionManager, hatSelectorGUI, combatUpgradeGUI);
+        this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager, runeSelectionManager);
         this.magicChestManager = new MagicChestManager(statsManager, hatRegistry, hatSelectionManager);
         this.magicChestGUI = new MagicChestGUI(keyManager, statsManager);
 
         this.broodMotherEntityManager = new BroodMotherEntityManager(debuffManager, teamManager, combatService);
         this.matchManager = new MatchManager(
-                playerHealthManager, teamManager, abilityManager,
-                energyManager, hungerManager, scoreboardManager, lobbySpawn, ratingManager, debuffManager, orbitShieldManager, cooldownManager, usageManager, statsManager, lobbyScoreboardManager, damageBuffManager,
+                playerHealthManager, teamManager, abilityManager, lobbySpawn, ratingManager, debuffManager, orbitShieldManager, cooldownManager, usageManager, statsManager, lobbyScoreboardManager, damageBuffManager,
                 armorTierManager, hatSelectionManager, broodMotherEntityManager,this, arenaMapManager
         );
         this.combatService = new CombatService(
                 playerHealthManager, shieldManager, debuffManager, orbitShieldManager, damageBuffManager, matchManager
         );
         this.broodMotherEntityManager.setCombatService(combatService);
-        debuffManager.registerListener(new PolymorphEffectListener(teamManager, playerHealthManager));
+        debuffManager.registerListener(new PolymorphEffectListener(playerHealthManager));
         debuffManager.registerListener(new StunListener());
         debuffManager.registerListener(new SlowListener());
         saveDefaultConfig();
@@ -167,7 +166,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 cooldownManager,
                 usageManager,
                 scoreboardManager,
-                this, energyManager, playerHealthManager, hungerManager, matchManager, arenaLocation, shieldManager,debuffManager,armorTierManager,combatService,orbitShieldManager, hatSelectionManager,combatUpgradeManager,broodMotherEntityManager, arenaMapManager
+                this, energyManager, playerHealthManager, hungerManager, matchManager, shieldManager,debuffManager,armorTierManager,combatService,orbitShieldManager, hatSelectionManager,combatUpgradeManager,broodMotherEntityManager, arenaMapManager
         );
 
         this.queueManager = new QueueManager(partyManager, arenaManager,arenaMapManager);
@@ -200,7 +199,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         }
 
         getServer().getPluginManager().registerEvents(
-                new CombatListener(teamManager, abilityManager, playerHealthManager, shieldManager, debuffManager,
+                new CombatListener(teamManager, debuffManager,
                         combatService, cooldownManager, matchManager, orbitShieldManager, runeManager,hatPhraseListener,combatUpgradeManager), this
         );
         getServer().getPluginManager().registerEvents(
@@ -216,7 +215,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new AbilitySelectorListener(abilityRegistry, abilitySelectionManager, abilitySelectorGUI,runeSelectionManager,hatSelectorGUI,combatUpgradeGUI), this);
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new VanillaHungerBlockListener(matchManager), this);
-       // getServer().getPluginManager().registerEvents(new BlockBreakListener(),this);
+       getServer().getPluginManager().registerEvents(new BlockBreakListener(),this);
 
         MagicalChestHologramListener hologramListener = new MagicalChestHologramListener(this);getServer().getPluginManager().registerEvents(hologramListener, this);
 
@@ -307,11 +306,6 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        /*
-        for (World world : Bukkit.getWorlds()) {
-            EntityCleanupUtils.sweepArenaEntities(world); //powerups
-        }
-        */
         for (World world : getServer().getWorlds()) {
             world.setGameRule(GameRules.ADVANCE_TIME, false);
             world.setGameRule(GameRules.ADVANCE_WEATHER, false);
@@ -331,9 +325,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         return instance;
     }
 
-    public AbilityManager getAbilityManager() {
-        return abilityManager;
-    }
+
 
     public CooldownManager getCooldownManager() {
         return cooldownManager;
@@ -343,31 +335,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         return teamManager;
     }
 
-    public UsageManager getUsageManager() {
-        return usageManager;
-    }
-
-    public AbilityRegistry getAbilityRegistry() {
-        return abilityRegistry;
-    }
-
-    public AbilitySelectionManager getAbilitySelectionManager() {
-        return abilitySelectionManager;
-    }
-
-    public ScoreboardManager getScoreboardManager() {
-        return scoreboardManager;
-    }
-
-    public ArenaManager getArenaManager() {
-        return arenaManager;
-    }
-
     public EnergyManager getEnergyManager() {
         return energyManager;
     }
 
-    public PlayerHealthManager getHealthUtils() {
-        return playerHealthManager;
-    }
 }

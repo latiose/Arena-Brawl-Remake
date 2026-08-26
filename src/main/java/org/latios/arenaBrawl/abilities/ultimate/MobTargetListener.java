@@ -1,13 +1,13 @@
 package org.latios.arenaBrawl.abilities.ultimate;
 
-import org.bukkit.entity.LivingEntity;
+
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTargetEvent;
-import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
+
 
 public class MobTargetListener implements Listener {
 

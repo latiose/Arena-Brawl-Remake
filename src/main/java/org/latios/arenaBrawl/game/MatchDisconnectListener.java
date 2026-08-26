@@ -1,4 +1,4 @@
-// game/MatchDisconnectListener.java
+
 package org.latios.arenaBrawl.game;
 
 import org.bukkit.entity.Player;

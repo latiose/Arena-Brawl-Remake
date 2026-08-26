@@ -1,4 +1,4 @@
-// upgrades/CombatUpgradeManager.java
+
 package org.latios.arenaBrawl.upgrades;
 
 import org.bukkit.configuration.file.YamlConfiguration;

@@ -1,4 +1,4 @@
-// debuffs/SlowListener.java
+
 package org.latios.arenaBrawl.debuffs;
 
 import org.bukkit.entity.Player;

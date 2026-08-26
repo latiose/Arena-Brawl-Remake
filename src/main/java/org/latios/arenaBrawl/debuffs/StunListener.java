@@ -1,4 +1,4 @@
-// debuffs/StunListener.java
+
 package org.latios.arenaBrawl.debuffs;
 
 import org.bukkit.entity.Player;

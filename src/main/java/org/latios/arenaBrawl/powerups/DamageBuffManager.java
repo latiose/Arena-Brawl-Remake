@@ -54,9 +54,6 @@ public class DamageBuffManager {
         return buff.multiplier();
     }
 
-    public void tick(Player player) {
-        getMultiplier(player);
-    }
 
     public void clear(Player player) {
         activeBuffs.remove(player.getUniqueId());

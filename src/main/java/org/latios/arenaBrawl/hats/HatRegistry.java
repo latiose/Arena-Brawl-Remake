@@ -1,4 +1,4 @@
-// hats/HatRegistry.java
+
 package org.latios.arenaBrawl.hats;
 
 import org.bukkit.Color;
@@ -168,7 +168,5 @@ public class HatRegistry {
         return hatsByRarity.get(rarity);
     }
 
-    public Collection<HatDefinition> getAll() {
-        return hatsById.values();
-    }
+
 }

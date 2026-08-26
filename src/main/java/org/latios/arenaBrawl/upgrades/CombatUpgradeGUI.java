@@ -1,4 +1,4 @@
-// upgrades/CombatUpgradeGUI.java
+
 package org.latios.arenaBrawl.upgrades;
 
 import org.bukkit.Bukkit;
@@ -7,6 +7,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class CombatUpgradeGUI {
 
     public record CombatUpgradeHolder() implements InventoryHolder {
         @Override
-        public Inventory getInventory() { throw new UnsupportedOperationException(); }
+        public @NonNull Inventory getInventory() { throw new UnsupportedOperationException(); }
     }
 
     private final CombatUpgradeManager upgradeManager;

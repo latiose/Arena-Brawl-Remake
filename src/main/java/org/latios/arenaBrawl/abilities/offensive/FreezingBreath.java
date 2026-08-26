@@ -4,11 +4,10 @@ package org.latios.arenaBrawl.abilities.offensive;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
+
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
-import org.latios.arenaBrawl.ArenaBrawlPlugin;
+
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 
@@ -28,15 +27,13 @@ public class FreezingBreath implements Ability {
     private static final double ENERGY_COST = 80.0;
     private static final long SLOW_DURATION_TICKS = 2_000;
     private static final double HIT_RADIUS = 2.5;
-
-    // Exactly 8 blocks from the player's position, as specified
     private static final double MAX_DISTANCE = 8.0;
     private static final double STEP_SIZE = 0.2;
 
     // Double helix shape: radius grows linearly with distance (cone), two strands
     // 180 degrees apart in rotation phase ("upright" and "upside down").
     private static final double RADIUS_GROWTH = 0.22;   // radius per block travelled
-    private static final double ANGULAR_SPEED = 2.4;    // radians per block travelled
+
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -93,6 +90,7 @@ public class FreezingBreath implements Ability {
         }
 
         for (Player target : hitPlayers) {
+            applySlow(target);
             combatService.applyAbilityDamage(player, target, DAMAGE, getName());
             applySpike(target);
         }

@@ -1,4 +1,4 @@
-// hats/HatSelectionManager.java
+
 package org.latios.arenaBrawl.hats;
 
 import org.bukkit.configuration.file.YamlConfiguration;

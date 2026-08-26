@@ -1,4 +1,4 @@
-// hats/HatSelectorListener.java
+
 package org.latios.arenaBrawl.hats;
 
 import org.bukkit.entity.Player;

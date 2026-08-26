@@ -1,4 +1,4 @@
-// abilities/support/OrbitShieldType.java
+
 package org.latios.arenaBrawl.abilities.support;
 
 import org.bukkit.Material;

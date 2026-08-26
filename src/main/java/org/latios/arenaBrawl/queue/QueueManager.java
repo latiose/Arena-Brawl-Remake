@@ -83,11 +83,11 @@ public class QueueManager {
                 .toList();
 
         if (players.size() < MATCH_SIZE) {
-            queuedPlayers.removeAll(selected);
+            selected.forEach(queuedPlayers::remove);
             return;
         }
 
-        queuedPlayers.removeAll(selected);
+        selected.forEach(queuedPlayers::remove);
 
         List<Player> team1 = new ArrayList<>();
         List<Player> team2 = new ArrayList<>();

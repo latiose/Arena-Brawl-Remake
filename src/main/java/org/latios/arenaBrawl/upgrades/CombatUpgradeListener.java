@@ -1,4 +1,4 @@
-// upgrades/CombatUpgradeListener.java
+
 package org.latios.arenaBrawl.upgrades;
 
 import org.bukkit.entity.Player;

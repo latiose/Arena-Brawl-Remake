@@ -72,7 +72,7 @@ public class PowerupManager {
     }
 
     /** Call once per second with the match's elapsed time in millis. */
-    public void tick(long matchElapsedMillis, Collection<Player> players) {
+    public void tick(long matchElapsedMillis) {
         for (PowerupType type : PowerupType.values()) {
             PowerupState state = states.get(type);
             if (state.locations.isEmpty()) continue;

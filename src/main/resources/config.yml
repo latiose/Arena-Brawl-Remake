@@ -1,19 +1,74 @@
 worlds:
-  arena: "Bridge"
+  bridge: "Bridge"
+  jungle: "Jungle"
+  highlink: "Highlink"
+  zeus: "Zeus"
   lobby: "world"
 lobby-spawn:
   x: 0
   y: -60
   z: 0
-powerups:
-  health:
-    x: -2471.577
-    y: 17.5
-    z: 697.445
-  damage:
-    - {x: -2480.476, y: 24.5, z: 697.423}
-    - {x: -2462.592, y: 24.5, z: -697.423}
+
 leaderboard-signs:
-  - { x: 10, y: 65, z: 2 }
-  - { x: 11, y: 65, z: 2 }
-  - { x: 12, y: 65, z: 2 }
+  - { x: 1.75, y: -56.51, z: 35.7 }
+  - { x: 0.75, y: -56.51, z: 35.7 }
+  - { x: -0.75, y: -56.51, z: 35.7 }
+  - { x: -1.75, y: -56.51, z: 35.7 }
+  - { x: -2.75, y: -56.51, z: 35.7 }
+  - { x: 1.75, y: -57.51, z: 35.7 }
+  - { x: 0.75, y: -57.51, z: 35.7 }
+  - { x: -0.75, y: -57.51, z: 35.7 }
+  - { x: -1.75, y: -57.51, z: 35.7 }
+  - { x: -2.75, y: -57.51, z: 35.7 }
+  - { x: 1.75, y: -58.51, z: 35.7 }
+  - { x: 0.75, y: -58.51, z: 35.7 }
+  - { x: -0.75, y: -58.51, z: 35.7 }
+  - { x: -1.75, y: -58.51, z: 35.7 }
+  - { x: -2.75, y: -58.51, z: 35.7 }
+  - { x: 1.75, y: -59.51, z: 35.7 }
+  - { x: 0.75, y: -59.51, z: 35.7 }
+  - { x: -0.75, y: -59.51, z: 35.7 }
+  - { x: -1.75, y: -59.51, z: 35.7 }
+  - { x: -2.75, y: -59.51, z: 35.7 }
+
+maps:
+  Bridge:
+    world: "Bridge"
+    red-spawn-1: {x: -2443, y: 17, z: 709,yaw: 90, pitch: 0}
+    red-spawn-2: {x: -2443, y: 17, z: 708,yaw: 90, pitch: 0}
+    blue-spawn-1: {x: -2499.3, y: 17, z: 686,yaw: -90, pitch: 0}
+    blue-spawn-2: {x: -2499.3, y: 17, z: 685,yaw: -90, pitch: 0}
+    health-powerup: {x: -2471.577, y: 17.5, z: 697.445 }
+    damage-powerups:
+      - { x: -2480.476, y: 24.5, z: 697.423 }
+      - { x: -2462.592, y: 24.5, z: -697.423 }
+  Jungle:
+    world: "Jungle"
+    red-spawn-1: {x: -2421.7, y: 35, z: 753.579,yaw: -90, pitch: 0}
+    red-spawn-2: {x: -2421.7, y: 35, z: 754.579,yaw: -90, pitch: 0}
+    blue-spawn-1: {x: -2385.3, y: 35, z: 723,yaw: 90, pitch: 0}
+    blue-spawn-2: {x: -2385.3, y: 35, z: 722.185,yaw: 90, pitch: 0}
+    health-powerup: {x: -2403.4, y: 36.5, z: 738.43}
+    damage-powerups:
+      - {x: -2403.4, y: 43.5, z: 738.43}
+      - {x: -2403.4, y: 43.5, z: 738.43}
+  Highlink:
+    world: "Highlink"
+    red-spawn-1: {x: 1, y: 76, z: 51.5}
+    red-spawn-2: {x: 0, y: 76, z: 51.5}
+    blue-spawn-1: {x: 0, y: 76, z: 110.5,yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 1, y: 76, z: 110.5,yaw: 180, pitch: 0}
+    health-powerup: {x: 0.48, y: 77.5, z: 81.5}
+    damage-powerups:
+      - {x: -13, y: 75.5, z: -81.5}
+      - {x: 14, y: 75.5, z: 81.5}
+  Zeus:
+    world: "Zeus"
+    red-spawn-1: {x: 16.421, y: 45, z: 91.961}
+    red-spawn-2: {x: 15.421, y: 45, z: 91.961}
+    blue-spawn-1: {x: -15, y: 45, z: 148.8,yaw: 180, pitch: 0}
+    blue-spawn-2: {x: -14, y: 45, z: 148.8,yaw: 180, pitch: 0}
+    health-powerup: {x: 0.589, y: 46.5, z: 120.4}
+    damage-powerups:
+      - {x: 15, y: 55.5, z: 134.91}
+      - {x: -13.951, y: 55.5, z: 106.1}

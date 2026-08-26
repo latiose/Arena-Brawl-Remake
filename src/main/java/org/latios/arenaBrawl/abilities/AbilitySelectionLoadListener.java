@@ -1,11 +1,11 @@
-// abilities/AbilitySelectionLoadListener.java
+
 package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.latios.arenaBrawl.game.ArenaManager;
+
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.hats.KeyManager;

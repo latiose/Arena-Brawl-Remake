@@ -1,4 +1,4 @@
-// upgrades/CombatUpgradeType.java
+
 package org.latios.arenaBrawl.upgrades;
 
 import org.bukkit.Material;

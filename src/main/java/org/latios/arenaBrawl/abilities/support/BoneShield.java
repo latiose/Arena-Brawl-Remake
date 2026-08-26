@@ -1,6 +1,6 @@
 package org.latios.arenaBrawl.abilities.support;
 
-import org.bukkit.Particle;
+
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
@@ -35,7 +35,7 @@ public class BoneShield implements Ability {
 
     @Override
     public String getDescription() {
-        return "Blocks the 5 next abilities, on hit heals the user for 30 health";
+        return "Blocks the 5 next attacks, on hit heals the user for 30 health";
     }
 
     @Override

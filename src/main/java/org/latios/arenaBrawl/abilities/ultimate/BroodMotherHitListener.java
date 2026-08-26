@@ -1,4 +1,4 @@
-// abilities/ultimate/BroodMotherHitListener.java
+
 package org.latios.arenaBrawl.abilities.ultimate;
 
 import io.papermc.paper.event.entity.EntityKnockbackEvent;

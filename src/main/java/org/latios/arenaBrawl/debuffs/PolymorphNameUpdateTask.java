@@ -1,4 +1,4 @@
-// debuffs/PolymorphNameUpdateTask.java
+
 package org.latios.arenaBrawl.debuffs;
 
 import me.libraryaddict.disguise.DisguiseAPI;

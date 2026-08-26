@@ -64,7 +64,7 @@ public class AbilityTargeting {
             }
         }
 
-        return bestTarget;
+        return null;
     }
 
 

@@ -1,4 +1,4 @@
-// abilities/impl/DragonBreathAbility.java
+
 package org.latios.arenaBrawl.abilities.offensive;
 
 import org.bukkit.Location;

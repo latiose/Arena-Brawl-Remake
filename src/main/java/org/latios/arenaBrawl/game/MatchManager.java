@@ -1,4 +1,4 @@
-// game/MatchManager.java
+
 package org.latios.arenaBrawl.game;
 
 import org.bukkit.Bukkit;
@@ -14,7 +14,7 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
-import org.latios.arenaBrawl.cosmetics.ArmorTier;
+
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
@@ -34,9 +34,6 @@ public class MatchManager {
     private final PlayerHealthManager healthManager;
     private final TeamManager teamManager;
     private final AbilityManager abilityManager;
-    private final EnergyManager energyManager;
-    private final HungerManager hungerManager;
-    private final ScoreboardManager scoreboardManager;
     private final Location lobbySpawn;
     private final RatingManager ratingManager;
     private final Map<UUID, Match> activeMatches = new HashMap<>();
@@ -57,16 +54,12 @@ public class MatchManager {
 
 
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
-                        EnergyManager energyManager, HungerManager hungerManager,
-                        ScoreboardManager scoreboardManager, Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
+                        Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
                         ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin,ArenaMapManager arenaMapManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
-        this.energyManager = energyManager;
-        this.hungerManager = hungerManager;
-        this.scoreboardManager = scoreboardManager;
         this.lobbySpawn = lobbySpawn;
         this.ratingManager = ratingManager;
         this.debuffManager = debuffManager;
@@ -107,7 +100,7 @@ public class MatchManager {
 
         for (Player viewer : match.getAllPlayers()) {
             if (viewer.equals(player)) continue;
-            if (killer != null && viewer.equals(killer)) continue;
+            if (viewer.equals(killer)) continue;
 
             String victimColor = teamManager.isAlly(viewer, player) ? "§a" : "§c";
             String victimName = victimColor + player.getName();
@@ -230,11 +223,11 @@ public class MatchManager {
 
         for (Player viewer : match.getAllPlayers()) {
             if (!viewer.isOnline()) continue;
-            viewer.sendMessage(String.format("§6#§7--------------------------§6#"));
+            viewer.sendMessage("§6#§7--------------------------§6#");
             for (Player winner : winners) {
                 viewer.sendMessage(String.format("§6%s has won the game!", winner.getName()));
             }
-            viewer.sendMessage(String.format("§6#§7--------------------------§6#"));
+            viewer.sendMessage("§6#§7--------------------------§6#");
         }
 
         applyRatingChanges(winners, losers);
@@ -294,7 +287,7 @@ public class MatchManager {
         arenaMapManager.releaseMap(match.getArenaMap());
 
         if (!match.getAllPlayers().isEmpty()) {
-            EntityCleanupUtils.sweepArenaEntities(match.getAllPlayers().get(0).getWorld());
+            EntityCleanupUtils.sweepArenaEntities(match.getAllPlayers().getFirst().getWorld());
         }
 
 

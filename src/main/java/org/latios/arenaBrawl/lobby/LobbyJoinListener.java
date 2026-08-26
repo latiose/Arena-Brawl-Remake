@@ -1,4 +1,4 @@
-// lobby/LobbyJoinListener.java
+
 package org.latios.arenaBrawl.lobby;
 
 import org.bukkit.Bukkit;
@@ -16,7 +16,7 @@ import org.latios.arenaBrawl.hats.HatEquipUtils;
 import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
-import java.util.List;
+
 
 public class LobbyJoinListener implements Listener {
 
@@ -66,13 +66,6 @@ public class LobbyJoinListener implements Listener {
         lobbyScoreboardManager.show(player);
         CollisionUtils.disableCollision(player);
     }
-/*
-    private void refreshLobbyCollisionGroup() {
-        List<Player> lobbyPlayers = (List<Player>) Bukkit.getOnlinePlayers().stream()
-                .filter(p -> !matchManager.isInMatch(p))
-                .toList();
-        CollisionUtils.disableCollisionForGroup(lobbyPlayers);
-    }
-    */
+
 
 }

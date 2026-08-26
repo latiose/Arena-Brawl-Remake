@@ -1,4 +1,4 @@
-// debuffs/PolymorphEffectListener.java
+
 package org.latios.arenaBrawl.debuffs;
 
 import me.libraryaddict.disguise.DisguiseAPI;
@@ -7,15 +7,13 @@ import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
-import org.latios.arenaBrawl.team.TeamManager;
+
 
 public class PolymorphEffectListener implements DebuffListener {
 
-    private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
 
-    public PolymorphEffectListener(TeamManager teamManager, PlayerHealthManager healthManager) {
-        this.teamManager = teamManager;
+    public PolymorphEffectListener(PlayerHealthManager healthManager) {
         this.healthManager = healthManager;
     }
 

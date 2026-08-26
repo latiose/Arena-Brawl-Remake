@@ -36,9 +36,6 @@ public class StatsManager {
         this.config = YamlConfiguration.loadConfiguration(file);
     }
 
-    public void startMatchTracker(Player player) {
-        matchCoins.put(player.getUniqueId(), 0);
-    }
 
     public PlayerStats getStats(Player player) {
         UUID id = player.getUniqueId();
@@ -99,10 +96,6 @@ public class StatsManager {
         PlayerStats stats = getStats(player);
         stats.deaths++;
         save(player, stats);
-    }
-
-    public void clearMatchTracker(Player player) {
-        matchCoins.remove(player.getUniqueId());
     }
 
     private void save(Player player, PlayerStats stats) {

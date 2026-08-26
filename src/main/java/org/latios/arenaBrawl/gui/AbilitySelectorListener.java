@@ -1,4 +1,4 @@
-// gui/AbilitySelectorListener.java
+
 package org.latios.arenaBrawl.gui;
 
 import org.bukkit.entity.Player;
@@ -8,12 +8,12 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.latios.arenaBrawl.abilities.AbilityRegistry;
 import org.latios.arenaBrawl.abilities.AbilitySelectionManager;
 import org.latios.arenaBrawl.abilities.AbilitySlot;
-import org.latios.arenaBrawl.hats.HatSelectionManager;
+
 import org.latios.arenaBrawl.hats.HatSelectorGUI;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeGUI;
-import org.latios.arenaBrawl.upgrades.CombatUpgradeListener;
+
 
 import java.util.ArrayList;
 import java.util.List;

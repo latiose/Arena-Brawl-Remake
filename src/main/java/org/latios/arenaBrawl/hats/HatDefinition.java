@@ -1,4 +1,4 @@
-// hats/HatDefinition.java
+
 package org.latios.arenaBrawl.hats;
 
 import org.bukkit.Color;

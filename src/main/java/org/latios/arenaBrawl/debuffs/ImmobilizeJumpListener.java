@@ -1,4 +1,4 @@
-// debuffs/ImmobilizeJumpListener.java
+
 package org.latios.arenaBrawl.debuffs;
 
 

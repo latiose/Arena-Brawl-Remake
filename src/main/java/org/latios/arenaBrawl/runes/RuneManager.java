@@ -1,4 +1,4 @@
-// runes/RuneManager.java
+
 package org.latios.arenaBrawl.runes;
 
 import org.bukkit.entity.Player;
@@ -56,9 +56,7 @@ public class RuneManager {
                 debuffManager.tryApply(victim, DebuffType.SLOW, SLOW_DURATION_TICKS);
                 attacker.sendMessage("§eYour §5" + rune.getDisplayName() + " §ewas activated");
             }
-            case DAMAGE -> {
-                attacker.sendMessage("§eYour §c" + rune.getDisplayName() + " §ewas activated");
-            }
+            case DAMAGE -> attacker.sendMessage("§eYour §c" + rune.getDisplayName() + " §ewas activated");
             case ENERGY -> {
                 energyManager.addEnergy(attacker, ENERGY_AMOUNT);
                 attacker.sendMessage("§eYour §e" + rune.getDisplayName() + " §ewas activated");

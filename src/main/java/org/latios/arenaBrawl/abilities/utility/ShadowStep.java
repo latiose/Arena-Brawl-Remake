@@ -1,4 +1,4 @@
-// abilities/utility/ShadowStep.java
+
 package org.latios.arenaBrawl.abilities.utility;
 
 import org.bukkit.Location;

@@ -8,7 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryType;
+
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 
@@ -21,13 +21,12 @@ public class InventoryLockListener implements Listener {
         if (event.getClickedInventory() != null
                 && event.getClickedInventory().equals(player.getInventory())) {
             event.setCancelled(true);
-            return;
         }
     }
 
     @EventHandler
     public void onDrag(InventoryDragEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (!(event.getWhoClicked() instanceof Player)) return;
         event.setCancelled(true);
     }
 

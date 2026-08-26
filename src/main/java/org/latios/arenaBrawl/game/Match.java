@@ -15,7 +15,6 @@ public class Match {
 
     private final List<Player> red;
     private final List<Player> blue;
-    private Scoreboard scoreboard;
     private final List<Player> aliveRed;
     private final List<Player> aliveBlue;
     private final long startedAt;
@@ -45,7 +44,7 @@ public class Match {
     public ArenaMap getArenaMap() { return arenaMap; }
     public List<Player> getRed() { return red; }
     public List<Player> getBlue() { return blue; }
-    public Scoreboard getScoreboard() { return scoreboard; }
+
     public long getStartedAt() { return startedAt; }
     public PowerupManager getPowerupManager() { return powerupManager; }
     public boolean isDoubleDamageActive() { return doubleDamageActive; }

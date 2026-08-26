@@ -1,4 +1,4 @@
-// abilities/ultimate/BroodMother.java
+
 package org.latios.arenaBrawl.abilities.ultimate;
 
 import org.bukkit.entity.Player;

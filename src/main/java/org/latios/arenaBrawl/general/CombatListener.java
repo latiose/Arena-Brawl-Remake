@@ -14,7 +14,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.persistence.PersistentDataType;
 
-import org.latios.arenaBrawl.abilities.AbilityManager;
+
 
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
@@ -30,9 +30,7 @@ import org.latios.arenaBrawl.upgrades.CombatUpgradeType;
 public class CombatListener implements Listener {
 
     private final TeamManager teamManager;
-    private final AbilityManager abilityManager;
-    private final PlayerHealthManager healthManager;
-    private final ShieldManager shieldManager;
+
     private final DebuffManager debuffManager;
     private final CombatService combatService;
     private final CooldownManager cooldownManager;
@@ -42,13 +40,11 @@ public class CombatListener implements Listener {
     private final CombatUpgradeManager combatUpgradeManager;
 
     private final RuneManager runeManager;
-    public CombatListener(TeamManager teamManager, AbilityManager abilityManager, PlayerHealthManager playerHealthManager, ShieldManager shieldManager,DebuffManager debuffManager,
+    public CombatListener(TeamManager teamManager,DebuffManager debuffManager,
                           CombatService combatService, CooldownManager cooldownManager, MatchManager matchManager,OrbitShieldManager orbitShieldManager,RuneManager runeManager,
                           HatPhraseListener hatPhraseListener,CombatUpgradeManager combatUpgradeManager) {
         this.teamManager = teamManager;
-        this.abilityManager = abilityManager;
-        this.healthManager = playerHealthManager;
-        this.shieldManager = shieldManager;
+
         this.debuffManager = debuffManager;
         this.combatService = combatService;
         this.cooldownManager = cooldownManager;
@@ -96,13 +92,13 @@ public class CombatListener implements Listener {
             if(!orbitShieldManager.hasActiveShield(victim))  runeMultiplier = runeManager.tryProc(attacker, victim);
             double meleeBaseDamage = combatUpgradeManager.getValue(attacker, CombatUpgradeType.MELEE_DAMAGE);
             combatService.applyAbilityDamage(attacker, victim, meleeBaseDamage * runeMultiplier, "Melee");
-            hatPhraseListener.onMeleeHit(attacker, victim);
+            hatPhraseListener.onMeleeHit(victim);
             cooldownManager.setCooldown(attacker, "melee_hit", 500);
             return;
         }
 
         if (entityEvent.getDamager() instanceof Projectile projectile) {
-            Boolean isAoe = projectile.getPersistentDataContainer().has(
+            boolean isAoe = projectile.getPersistentDataContainer().has(
                     AbilityItemKeys.PROJECTILE_AOE_RADIUS, PersistentDataType.DOUBLE
             );
             if (isAoe) return;
@@ -119,12 +115,6 @@ public class CombatListener implements Listener {
 
             combatService.applyAbilityDamage(attacker, victim, damageAmount, abilityName);
         }
-    }
-
-
-    private void playDamageFeedback(Player victim) {
-        victim.playHurtAnimation(0);
-        victim.getWorld().playSound(victim.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_HURT, 1f, 1f);
     }
 
     private Player resolveAttacker(EntityDamageByEntityEvent event) {

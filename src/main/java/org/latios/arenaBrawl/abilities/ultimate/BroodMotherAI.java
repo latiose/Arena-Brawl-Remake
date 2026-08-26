@@ -1,4 +1,4 @@
-// abilities/ultimate/BroodMotherAI.java
+
 package org.latios.arenaBrawl.abilities.ultimate;
 
 import org.bukkit.Bukkit;

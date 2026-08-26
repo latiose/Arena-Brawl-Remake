@@ -10,9 +10,7 @@ import java.util.Map;
 
 public class ArenaLocation {
 
-    private World arenaWorld;
-
-    private Plugin plugin;
+    private final Plugin plugin;
 
     public ArenaLocation(Plugin plugin) {
         this.plugin = plugin;
@@ -20,17 +18,17 @@ public class ArenaLocation {
         plugin.getLogger().info("[ArenaLocation] Configured arena world name: '" + worldName + "'");
 
         // Check if loaded, otherwise load/create the world from disk
-        this.arenaWorld = Bukkit.getWorld(worldName);
-        if (this.arenaWorld == null) {
+        World arenaWorld = Bukkit.getWorld(worldName);
+        if (arenaWorld == null) {
             plugin.getLogger().info("World '" + worldName + "' is not loaded. Attempting to load...");
             WorldCreator creator = new WorldCreator(worldName);
             arenaWorld = Bukkit.createWorld(creator);
-            if (this.arenaWorld != null) {
-                this.arenaWorld.setDifficulty(Difficulty.NORMAL);
+            if (arenaWorld != null) {
+                arenaWorld.setDifficulty(Difficulty.NORMAL);
             }
         }
 
-        if (this.arenaWorld == null) {
+        if (arenaWorld == null) {
             plugin.getLogger().severe(
                     "Failed to load arena world '" + worldName + "'! Available worlds: " + Bukkit.getWorlds()
             );
