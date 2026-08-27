@@ -35,8 +35,9 @@ public class AbilityDisplayTask extends BukkitRunnable {
         AbilityCost cost = ability.getCost();
 
         if (cost.isPermanentlyUnavailable(player)) {
+            String readyColorCode = getReadyColorCode(slot);
             Material unavailableMat = (slot.ordinal() == 0) ? AbilityKit.getIcon(slot) : Material.GRAY_DYE;
-            setItem(player, slot, unavailableMat, 1, "§7" + ability.getName());
+            setItem(player, slot, unavailableMat, 1, readyColorCode + ability.getName());
             return;
         }
 

@@ -15,7 +15,7 @@ public class RuneManager {
 
     private static final int SPEED_DURATION_TICKS = 60;
     private static final int SPEED_AMPLIFIER = 2;
-    private static final int SLOW_DURATION_TICKS = 60;
+    private static final int SLOW_DURATION_TICKS = 3000;
     private static final double ENERGY_AMOUNT = 10.0;
 
     private final EnergyManager energyManager;

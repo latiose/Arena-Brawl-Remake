@@ -22,10 +22,7 @@ import org.latios.arenaBrawl.hats.*;
 import org.latios.arenaBrawl.lobby.*;
 import org.latios.arenaBrawl.party.PartyCommand;
 import org.latios.arenaBrawl.party.PartyManager;
-import org.latios.arenaBrawl.powerups.ArenaCleanupListener;
-import org.latios.arenaBrawl.powerups.DamageBuffManager;
-import org.latios.arenaBrawl.powerups.PowerupRotationTask;
-import org.latios.arenaBrawl.powerups.PowerupTask;
+import org.latios.arenaBrawl.powerups.*;
 import org.latios.arenaBrawl.queue.QueueCommand;
 import org.latios.arenaBrawl.queue.QueueManager;
 import org.latios.arenaBrawl.rating.LeaderboardCommand;
@@ -275,7 +272,9 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new BroodMotherAI(broodMotherEntityManager).runTaskTimer(this, 0L, 4L);
         new LeaderboardRefreshTask(leaderboardSignManager).runTaskTimer(this, 20L, 20L * 60 * 5);
         new LeaderboardRotationTask(leaderboardSignManager).runTaskTimer(this, 20L * 6, 20L * 2);
+        new DamageBuffParticleTask(damageBuffManager).runTaskTimer(this, 0L, 20L);
         Bukkit.getPluginManager().registerEvents(new ItemCleanupListener(this), this);
+
         // Commands
         getCommand("party").setExecutor(new PartyCommand(partyManager, queueManager));
         getCommand("queue").setExecutor(new QueueCommand(queueManager, matchManager));

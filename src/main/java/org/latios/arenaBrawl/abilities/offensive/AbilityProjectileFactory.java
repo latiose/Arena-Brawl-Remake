@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.abilities.offensive;
 
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Snowball;
 import org.bukkit.persistence.PersistentDataType;
 import org.latios.arenaBrawl.general.AbilityItemKeys;
 
@@ -43,5 +44,18 @@ public class AbilityProjectileFactory {
         projectile.getPersistentDataContainer().set(
                 AbilityItemKeys.PROJECTILE_SOURCE_ABILITY, PersistentDataType.STRING, abilityName
         );
+    }
+
+    public static Snowball launchItemAoe(
+            Player shooter, org.bukkit.Material material, double damage, String abilityName, double radius) {
+
+        Snowball projectile = shooter.launchProjectile(Snowball.class);
+        projectile.setItem(new org.bukkit.inventory.ItemStack(material));
+
+        tagDamage(projectile, damage, abilityName);
+        projectile.getPersistentDataContainer().set(
+                AbilityItemKeys.PROJECTILE_AOE_RADIUS, org.bukkit.persistence.PersistentDataType.DOUBLE, radius
+        );
+        return projectile;
     }
 }

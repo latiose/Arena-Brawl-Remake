@@ -3,13 +3,17 @@ package org.latios.arenaBrawl.abilities.offensive;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 
+import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 
+import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.TrackedProjectileTask;
+import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
 
@@ -18,11 +22,14 @@ public class FireballAbility implements Ability {
     private final AbilityCost cost;
     private static final double DAMAGE = 105.0;
     private static final double ENERGY_COST = 40.0;
+    private static final double AOE_RADIUS = 3.0;
+    private final TeamManager teamManager;
+    private final CombatService combatService;
 
-    private static final double AOE_RADIUS = 3.0; // blocks
-
-    public FireballAbility(EnergyManager energyManager) {
+    public FireballAbility(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
         this.cost = new EnergyCost(energyManager, ENERGY_COST);
+        this.teamManager = teamManager;
+        this.combatService = combatService;
     }
 
     @Override
@@ -38,6 +45,8 @@ public class FireballAbility implements Ability {
         );
         fireball.setYield(0f);
         fireball.setIsIncendiary(false);
+        new TrackedProjectileTask(fireball, player, DAMAGE, AOE_RADIUS, getName(), teamManager, combatService)
+                .runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
         return true;
     }
 

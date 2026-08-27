@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.debuffs;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -84,9 +85,23 @@ public class DebuffManager {
     public void tick(Player player) {
         ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
         if (debuff == null) return;
-        if(debuff.type.equals(DebuffType.SLOW)) player.getWorld().spawnParticle(Particle.PORTAL, player.getLocation(), 10);
-        if(debuff.type.equals(DebuffType.IMMOBILIZE)) player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation(), 10);
-        if(debuff.type.equals(DebuffType.STUN)) player.getWorld().spawnParticle(Particle.WHITE_ASH, player.getLocation(), 10);
+        Location bodyLoc = player.getLocation().add(0, 1.0, 0);
+
+        if (debuff.type.equals(DebuffType.SLOW)) {
+            player.getWorld().spawnParticle(Particle.WITCH, bodyLoc, 2, 0.3, 0.5, 0.3, 0.05);
+        }
+
+        if (debuff.type.equals(DebuffType.IMMOBILIZE)) {
+            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, bodyLoc, 2, 0.3, 0.5, 0.3, 0.05);
+        }
+
+        if (debuff.type.equals(DebuffType.STUN) || debuff.type.equals(DebuffType.POLYMORPH)) {
+            player.getWorld().spawnParticle(Particle.WHITE_ASH, bodyLoc, 10, 0.2, 0.2, 0.2, 0.01);
+        }
+
+        if (debuff.type.equals(DebuffType.POISON)) {
+            player.getWorld().spawnParticle(Particle.ITEM_SLIME, bodyLoc, 2, 0.2, 0.2, 0.2, 0.01);
+        }
 
 
         long elapsed = System.currentTimeMillis() - debuff.startedAt();

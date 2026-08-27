@@ -30,7 +30,8 @@ public class AbilityRegistry {
     }
 
     private void registerDefaults() {
-        register(AbilitySlot.OFFENSIVE, "fireball", deps -> new FireballAbility(deps.energyManager()));
+        register(AbilitySlot.OFFENSIVE, "fireball", deps -> new FireballAbility(deps.energyManager(),deps.teamManager(),deps.combatService()));
+        register(AbilitySlot.OFFENSIVE, "melonlauncher", deps -> new MelonLauncher(deps.energyManager(),deps.teamManager(),deps.combatService()));
         register(AbilitySlot.UTILITY, "shadowstep", deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.SUPPORT, "holywater", deps -> new HolyWater(deps.cooldownManager(),deps.teamManager(),deps.playerHealthManager(), deps.debuffManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.ULTIMATE, "shieldwall",
