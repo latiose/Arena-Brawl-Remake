@@ -51,7 +51,7 @@ public class TrackedProjectileTask extends BukkitRunnable {
 
     private void explode(Player directHitVictim) {
         cancel();
-        combatService.applyAbilityDamage(shooter, directHitVictim, damage, abilityName);
+        combatService.applyAbilityDamage(shooter, directHitVictim, damage, abilityName, projectile.getLocation());
 
         for (Entity nearby : projectile.getNearbyEntities(aoeRadius, aoeRadius, aoeRadius)) {
             if (nearby instanceof Player target && !target.equals(directHitVictim)

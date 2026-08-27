@@ -8,6 +8,8 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -17,18 +19,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class FlameBreath extends Breath {
+public class DragonsBreath extends Breath {
 
-    private static final double DAMAGE = 150.0;
+    private static final double DAMAGE = 140.0;
     private static final double TICK_DAMAGE = 25.0;
     private static final double ENERGY_COST = 60.0;
+    private static final long SLOW_DURATION_TICKS = 1_000;
 
-    public FlameBreath(Plugin plugin, EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
-        super(plugin, energyManager, ENERGY_COST, teamManager, combatService, null);
+    public DragonsBreath(Plugin plugin, EnergyManager energyManager, TeamManager teamManager, CombatService combatService, DebuffManager debuffManager) {
+        super(plugin, energyManager, ENERGY_COST, teamManager, combatService, debuffManager);
     }
 
     @Override
-    public String getName() { return "Flame Breath"; }
+    public String getName() { return "Dragons Breath"; }
 
     @Override
     protected Sound getCastSound() {
@@ -43,11 +46,14 @@ public class FlameBreath extends Breath {
     @Override
     protected void spawnTrailParticles(Location point) {
         point.getWorld().spawnParticle(Particle.FLAME, point, 1, 0, 0, 0, 0);
+        point.getWorld().spawnParticle(Particle.DRIPPING_WATER, point, 1, 0, 0, 0, 0);
     }
 
     @Override
     protected void applyHitEffects(Player target) {
-
+        if (debuffManager != null) {
+            debuffManager.tryApply(target, DebuffType.SLOW, SLOW_DURATION_TICKS);
+        }
     }
 
     @Override
@@ -89,6 +95,7 @@ public class FlameBreath extends Breath {
         }
 
         for (Player target : initialHitPlayers) {
+            applyHitEffects(target);
             combatService.applyAbilityDamage(player, target, getDamage(), getName());
             applySpike(target);
         }
@@ -116,10 +123,11 @@ public class FlameBreath extends Breath {
                 } else {
                     for (Location pt : allConePoints) {
                         pt.getWorld().spawnParticle(Particle.FLAME, pt, 1, 0.05, 0.05, 0.05, 0);
+                        pt.getWorld().spawnParticle(Particle.DRIPPING_WATER, pt, 1, 0.05, 0.05, 0.05, 0);
                     }
                 }
 
-                if (tick == 20 || tick == 40) {
+                if (tick == 20) {
                     Set<Player> tickHitPlayers = new HashSet<>();
                     for (Location pt : allConePoints) {
                         checkHit(player, pt, tickHitPlayers);
@@ -130,7 +138,7 @@ public class FlameBreath extends Breath {
                     }
                 }
 
-                if (tick >= 40) {
+                if (tick >= 20) {
                     cancel();
                 }
             }
@@ -141,7 +149,7 @@ public class FlameBreath extends Breath {
 
     @Override
     public String getDescription() {
-        return "Breathes in a cone in front of the user, dealing damage over the next 2 seconds to enemies caught inside";
+        return "Breathes in a cone in front of the user, dealing damage over the next second and slowing enemies caught inside";
     }
 
     @Override
@@ -149,6 +157,7 @@ public class FlameBreath extends Breath {
         return List.of(
                 new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
                 new AbilityStat("Tick damage", String.valueOf((int) TICK_DAMAGE)),
+                new AbilityStat("Slow duration", String.valueOf(1)),
                 new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
                 new AbilityStat("Range", "8")
         );

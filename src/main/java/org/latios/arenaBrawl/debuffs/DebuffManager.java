@@ -139,4 +139,10 @@ public class DebuffManager {
             }
         }
     }
+
+    public Player getAttacker(Player victim) {
+        ActiveDebuff debuff = activeDebuffs.get(victim.getUniqueId());
+        if (debuff == null || debuff.attackerId() == null) return null;
+        return Bukkit.getPlayer(debuff.attackerId());
+    }
 }

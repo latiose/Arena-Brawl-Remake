@@ -55,7 +55,7 @@ public class LightningStrike implements Ability {
         }
 
         target.getWorld().strikeLightningEffect(target.getLocation());
-        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f);
+        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.1f, 1.0f);
 
         return true;
     }

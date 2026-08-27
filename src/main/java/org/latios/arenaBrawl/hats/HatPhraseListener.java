@@ -1,4 +1,3 @@
-// hats/HatPhraseListener.java
 package org.latios.arenaBrawl.hats;
 
 import net.kyori.adventure.text.Component;
@@ -11,8 +10,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class HatPhraseListener {
 
@@ -23,15 +21,12 @@ public class HatPhraseListener {
     private final HatSelectionManager hatSelectionManager;
     private final Random random = new Random();
 
+    private final Map<UUID, TextDisplay> activeHolograms = new HashMap<>();
+
     public HatPhraseListener(HatSelectionManager hatSelectionManager) {
         this.hatSelectionManager = hatSelectionManager;
     }
 
-    /**
-     * Call this whenever a player successfully lands a melee hit on another player.
-     * The phrase comes from the VICTIM's equipped hat (as if the hat "reacts" to being hit),
-     * and floats above the victim, not the attacker.
-     */
     public void onMeleeHit(Player victim) {
         HatDefinition hat = hatSelectionManager.getEquipped(victim);
         if (hat == null) return;
@@ -46,6 +41,15 @@ public class HatPhraseListener {
     }
 
     private void spawnHologram(Player wearer, String phrase) {
+        UUID playerId = wearer.getUniqueId();
+
+        if (activeHolograms.containsKey(playerId)) {
+            TextDisplay existing = activeHolograms.remove(playerId);
+            if (existing != null && !existing.isDead()) {
+                existing.remove();
+            }
+        }
+
         Location location = wearer.getLocation().add(0, HOLOGRAM_HEIGHT_OFFSET, 0);
         TextColor color = TextColor.color(TextColor.color(0xFFA500));
 
@@ -59,12 +63,14 @@ public class HatPhraseListener {
 
         EntityCleanupUtils.markAsArenaEntity(hologram);
 
+        activeHolograms.put(playerId, hologram);
+
         new BukkitRunnable() {
             int ticksElapsed = 0;
 
             @Override
             public void run() {
-                if (hologram.isDead() || !wearer.isOnline()) {
+                if (hologram.isDead() || !wearer.isOnline() || activeHolograms.get(playerId) != hologram) {
                     if (!hologram.isDead()) hologram.remove();
                     cancel();
                     return;
@@ -72,6 +78,7 @@ public class HatPhraseListener {
 
                 if (ticksElapsed >= HOLOGRAM_LIFETIME_TICKS) {
                     hologram.remove();
+                    activeHolograms.remove(playerId, hologram);
                     cancel();
                     return;
                 }

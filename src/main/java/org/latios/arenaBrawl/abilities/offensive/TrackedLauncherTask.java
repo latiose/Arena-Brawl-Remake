@@ -15,28 +15,31 @@ import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.team.TeamManager;
 
-public class TrackedMelonTask extends BukkitRunnable {
+public class TrackedLauncherTask extends BukkitRunnable {
 
-    private final ArmorStand melonStand;
+    private final ArmorStand armorStand;
     private final Player shooter;
     private final double mainDamage;
     private final double sliceDamage;
     private final double aoeRadius;
     private final String abilityName;
+    private final Material sliceMaterial;
     private final TeamManager teamManager;
     private final CombatService combatService;
     private Vector velocity;
     private int ticksLived = 0;
 
-    public TrackedMelonTask(ArmorStand melonStand, Vector velocity, Player shooter, double mainDamage, double sliceDamage,
-                            double aoeRadius, String abilityName, TeamManager teamManager, CombatService combatService) {
-        this.melonStand = melonStand;
+    public TrackedLauncherTask(ArmorStand armorStand, Vector velocity, Player shooter, double mainDamage, double sliceDamage,
+                               double aoeRadius, String abilityName, Material headMaterial, Material sliceMaterial,
+                               TeamManager teamManager, CombatService combatService) {
+        this.armorStand = armorStand;
         this.velocity = velocity;
         this.shooter = shooter;
         this.mainDamage = mainDamage;
         this.sliceDamage = sliceDamage;
         this.aoeRadius = aoeRadius;
         this.abilityName = abilityName;
+        this.sliceMaterial = sliceMaterial;
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
@@ -45,29 +48,29 @@ public class TrackedMelonTask extends BukkitRunnable {
     public void run() {
         ticksLived++;
 
-        if (!melonStand.isValid() || ticksLived > 100) {
+        if (!armorStand.isValid() || ticksLived > 100) {
             cancel();
-            melonStand.remove();
+            armorStand.remove();
             return;
         }
 
         velocity.setY(velocity.getY() - 0.04);
-        Location nextLoc = melonStand.getLocation().add(velocity);
-        melonStand.teleport(nextLoc);
+        Location nextLoc = armorStand.getLocation().add(velocity);
+        armorStand.teleport(nextLoc);
 
-        Location melonCenter = nextLoc.clone().add(0, 1.4, 0);
+        Location projectileCenter = nextLoc.clone().add(0, 1.4, 0);
 
-        for (Player candidate : melonStand.getWorld().getPlayers()) {
+        for (Player candidate : armorStand.getWorld().getPlayers()) {
             if (candidate.equals(shooter) || !teamManager.isEnemy(shooter, candidate)) continue;
 
-            if (candidate.getBoundingBox().expand(0.5).contains(melonCenter.toVector())) {
-                explode(candidate, melonCenter);
+            if (candidate.getBoundingBox().expand(0.5).contains(projectileCenter.toVector())) {
+                explode(candidate, projectileCenter);
                 return;
             }
         }
 
-        if (melonCenter.getBlock().getType().isSolid() && !melonCenter.getBlock().isPassable()) {
-            explode(null, melonCenter);
+        if (projectileCenter.getBlock().getType().isSolid() && !projectileCenter.getBlock().isPassable()) {
+            explode(null, projectileCenter);
         }
     }
 
@@ -78,37 +81,40 @@ public class TrackedMelonTask extends BukkitRunnable {
             combatService.applyAbilityDamage(shooter, directHitVictim, mainDamage, abilityName);
         }
 
-        for (Entity nearby : melonStand.getNearbyEntities(aoeRadius, aoeRadius, aoeRadius)) {
+        for (Entity nearby : armorStand.getNearbyEntities(aoeRadius, aoeRadius, aoeRadius)) {
             if (nearby instanceof Player target && !target.equals(directHitVictim)
                     && teamManager.isEnemy(shooter, target)) {
                 combatService.applyAbilityDamage(shooter, target, mainDamage, abilityName);
             }
         }
 
+
         impactLoc.getWorld().spawnParticle(Particle.EXPLOSION, impactLoc, 1);
         impactLoc.getWorld().spawnParticle(Particle.ITEM_SLIME, impactLoc, 40, 0.5, 0.5, 0.5, 0.2);
         impactLoc.getWorld().spawnParticle(Particle.ITEM_SLIME, impactLoc, 30, 0.4, 0.4, 0.4, 0.1);
 
-        impactLoc.getWorld().playSound(impactLoc, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1);
-        impactLoc.getWorld().playSound(impactLoc, Sound.BLOCK_WOOD_BREAK, 1f, 1.5f);
+        for (Player p : impactLoc.getWorld().getPlayers()) {
+            impactLoc.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1);
+            impactLoc.getWorld().playSound(p.getLocation(), Sound.BLOCK_WOOD_BREAK, 1f, 1.5f);
+        }
+
 
         spawnSlices(impactLoc);
 
-        melonStand.remove();
+        armorStand.remove();
     }
 
     private void spawnSlices(Location impactLoc) {
         Location spawnLoc = impactLoc.clone();
 
         for (int i = 0; i < 3; i++) {
-            Item slice = spawnLoc.getWorld().dropItem(spawnLoc, new ItemStack(Material.MELON_SLICE));
+            Item slice = spawnLoc.getWorld().dropItem(spawnLoc, new ItemStack(sliceMaterial));
             slice.setPickupDelay(Integer.MAX_VALUE);
-
             slice.setVelocity(new Vector(0, 0.5, 0));
 
             spawnLoc.getWorld().playSound(spawnLoc, Sound.BLOCK_SLIME_BLOCK_BREAK, 0.8f, 0.8f);
 
-            new TrackedMelonSliceTask(slice, shooter, sliceDamage, abilityName, teamManager, combatService)
+            new TrackedLauncherSliceTask(slice, shooter, sliceDamage, abilityName, teamManager, combatService)
                     .runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
         }
     }

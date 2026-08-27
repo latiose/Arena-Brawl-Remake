@@ -13,7 +13,7 @@ import org.latios.arenaBrawl.team.TeamManager;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TrackedMelonSliceTask extends BukkitRunnable {
+public class TrackedLauncherSliceTask extends BukkitRunnable {
 
     private final Item slice;
     private final Player shooter;
@@ -24,8 +24,8 @@ public class TrackedMelonSliceTask extends BukkitRunnable {
     private int ticksLived = 0;
     private static final double SLICE_AOE_RADIUS = 3;
 
-    public TrackedMelonSliceTask(Item slice, Player shooter, double damage, String abilityName,
-                                 TeamManager teamManager, CombatService combatService) {
+    public TrackedLauncherSliceTask(Item slice, Player shooter, double damage, String abilityName,
+                                    TeamManager teamManager, CombatService combatService) {
         this.slice = slice;
         this.shooter = shooter;
         this.damage = damage;
@@ -50,7 +50,7 @@ public class TrackedMelonSliceTask extends BukkitRunnable {
             explodeSlice(sliceLoc);
             return;
         }
-        if (ticksLived < 20) return;
+        if (ticksLived < 32) return;
 
         List<Player> hitEnemies = new ArrayList<>();
         for (Entity entity : slice.getNearbyEntities(SLICE_AOE_RADIUS, SLICE_AOE_RADIUS, SLICE_AOE_RADIUS)) {

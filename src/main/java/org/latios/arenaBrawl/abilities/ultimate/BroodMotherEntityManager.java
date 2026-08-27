@@ -227,7 +227,7 @@ public class BroodMotherEntityManager {
             victim.sendMessage(MessageUtils.negative() + "§3You were poisoned by a Broodmother!");
         } else {
 
-            combatService.applyMinionDamage(owner, victim, SPIDERLING_DAMAGE, "Spiderling");
+            combatService.applyMinionDamage(owner, victim, SPIDERLING_DAMAGE, "Spiderling",victim.getLocation());
         }
     }
     public void clearAll() {

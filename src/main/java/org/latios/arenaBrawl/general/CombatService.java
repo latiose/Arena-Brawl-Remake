@@ -1,7 +1,16 @@
 package org.latios.arenaBrawl.general;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Transformation;
+import org.joml.Vector3f;
+import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldType;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -13,6 +22,7 @@ import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class CombatService {
 
@@ -22,7 +32,8 @@ public class CombatService {
     private final OrbitShieldManager orbitShieldManager;
     private final DamageBuffManager damageBuffManager;
     private final MatchManager matchManager;
-
+    private static final double HOLOGRAM_HEIGHT_OFFSET = 2.3;
+    private static final long HOLOGRAM_LIFETIME_TICKS = 35;
     private static final long STAR_SHIELD_EFFECT_DURATION_MILLIS = 4_000;
     private static final List<DebuffType> STAR_SHIELD_POSSIBLE_DEBUFFS =
             List.of(DebuffType.STUN, DebuffType.IMMOBILIZE, DebuffType.SLOW);
@@ -39,6 +50,10 @@ public class CombatService {
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
+        applyAbilityDamage(attacker, victim, rawDamage, abilityName, null);
+    }
+
+    public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName, Location impactLocation) {
         if (victim == null || victim.getGameMode() == GameMode.SPECTATOR) {
             return;
         }
@@ -89,6 +104,24 @@ public class CombatService {
                     attacker.getName(), abilityName, roundedDamage
             ));
         }
+
+        Location resolvedImpact = impactLocation != null ? impactLocation : estimateMeleeImpact(attacker, victim);
+        spawnHologram(victim, String.valueOf(finalDamage), resolvedImpact);
+    }
+
+    private Location estimateMeleeImpact(Player attacker, Player victim) {
+        Location eye = attacker.getEyeLocation();
+        org.bukkit.util.Vector direction = eye.getDirection();
+        org.bukkit.util.BoundingBox box = victim.getBoundingBox();
+
+        org.bukkit.util.RayTraceResult result = box.rayTrace(eye.toVector(), direction, 6.0);
+
+        if (result != null) {
+            result.getHitPosition();
+            return result.getHitPosition().toLocation(victim.getWorld());
+        }
+
+        return victim.getLocation().add(0, victim.getHeight() * 0.5, 0);
     }
 
     public void resolveShieldEffect(OrbitShieldType type, Player attacker, Player victim) {
@@ -136,7 +169,7 @@ public class CombatService {
         victim.getWorld().playSound(victim.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_HURT, 1f, 1f);
     }
 
-    public void applyMinionDamage(Player owner, Player victim, double rawDamage, String sourceName) {
+    public void applyMinionDamage(Player owner, Player victim, double rawDamage, String sourceName,Location impactLocation) {
         if (victim == null || victim.getGameMode() == GameMode.SPECTATOR) {
             return;
         }
@@ -169,5 +202,65 @@ public class CombatService {
                 "%s§3A %s hit §3you §3for §c%d §3damage.",
                 MessageUtils.negative(), sourceName, roundedDamage
         ));
+        Location resolvedImpact = impactLocation != null ? impactLocation : victim.getLocation().add(0, victim.getHeight() * 0.5, 0);
+        spawnHologram(victim, String.valueOf(finalDamage), resolvedImpact);
+    }
+
+
+
+    private void spawnHologram(Player victim, String phrase, Location impactLocation) {
+        // Small jitter so multiple hologram numbers don't perfectly overlap, but centered
+        // on the REAL impact point instead of a random spot above the head
+        float jitterX = (float) ThreadLocalRandom.current().nextDouble(-0.15, 0.15);
+        float jitterY = (float) ThreadLocalRandom.current().nextDouble(-0.1, 0.1);
+        float jitterZ = (float) ThreadLocalRandom.current().nextDouble(-0.15, 0.15);
+
+        Location baseLocation = impactLocation.clone();
+        TextColor color = TextColor.color(0xFF474C);
+
+        TextDisplay hologram = victim.getWorld().spawn(baseLocation, TextDisplay.class, d -> {
+            d.text(Component.text(phrase, color));
+            d.setBillboard(Display.Billboard.CENTER);
+            d.setSeeThrough(true);
+            d.setShadowed(true);
+            d.setBackgroundColor(org.bukkit.Color.fromARGB(100, 40, 0, 10));
+
+            Transformation currentTransform = d.getTransformation();
+            Vector3f translation = new Vector3f(jitterX, jitterY, jitterZ);
+
+            d.setTransformation(new Transformation(
+                    translation,
+                    currentTransform.getLeftRotation(),
+                    currentTransform.getScale(),
+                    currentTransform.getRightRotation()
+            ));
+        });
+        EntityCleanupUtils.markAsArenaEntity(hologram);
+
+        // Offset relative to the victim's feet position, computed once at spawn time,
+        // so we can keep the SAME relative body height while following the victim's movement
+        double relativeHeight = impactLocation.getY() - victim.getLocation().getY();
+
+        new BukkitRunnable() {
+            int ticksElapsed = 0;
+
+            @Override
+            public void run() {
+                if (hologram.isDead() || !victim.isOnline()) {
+                    if (!hologram.isDead()) hologram.remove();
+                    cancel();
+                    return;
+                }
+
+                if (ticksElapsed >= HOLOGRAM_LIFETIME_TICKS) {
+                    hologram.remove();
+                    cancel();
+                    return;
+                }
+
+                hologram.teleport(victim.getLocation().add(0, relativeHeight, 0));
+                ticksElapsed++;
+            }
+        }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
     }
 }
