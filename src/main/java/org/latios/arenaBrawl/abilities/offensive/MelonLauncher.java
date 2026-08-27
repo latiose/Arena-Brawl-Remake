@@ -2,10 +2,8 @@ package org.latios.arenaBrawl.abilities.offensive;
 
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Item;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Snowball;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
@@ -15,7 +13,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.TrackedMelonTask;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -43,20 +40,25 @@ public class MelonLauncher implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        Item melon = player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(Material.MELON));
-        melon.setPickupDelay(Integer.MAX_VALUE);
+        ArmorStand melonStand = player.getWorld().spawn(player.getEyeLocation().subtract(0, 1.2, 0), ArmorStand.class, stand -> {
+            stand.setVisible(false);
+            stand.setGravity(false);
+            stand.setMarker(true);
+            stand.getEquipment();
+            stand.getEquipment().setHelmet(new ItemStack(Material.MELON));
+        });
 
-        Vector velocity = player.getLocation().getDirection().multiply(1.1);
-        velocity.setY(velocity.getY() + 0.25);
-        melon.setVelocity(velocity);
+        Vector velocity = player.getLocation().getDirection().multiply(1.2);
+        velocity.setY(velocity.getY() + 0.1);
 
-        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_SLIME_BLOCK_STEP, 1.0f, 0.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_DISPENSER_LAUNCH, 1, 1.5f);
 
-        new TrackedMelonTask(melon, player, DAMAGE, SLICE_DAMAGE, AOE_RADIUS, getName(), teamManager, combatService)
+        new TrackedMelonTask(melonStand, velocity, player, DAMAGE, SLICE_DAMAGE, AOE_RADIUS, getName(), teamManager, combatService)
                 .runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
 
         return true;
     }
+
     @Override
     public String getDescription() {
         return "Launches a melon that splits into 3 slices on impact.";

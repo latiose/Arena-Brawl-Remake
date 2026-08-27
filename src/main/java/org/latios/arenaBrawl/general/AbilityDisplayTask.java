@@ -47,10 +47,10 @@ public class AbilityDisplayTask extends BukkitRunnable {
             Material cdMaterial = (slot.ordinal() == 0)
                     ? AbilityKit.getIcon(slot)
                     : Material.GRAY_DYE;
-
+            String readyColorCode = getReadyColorCode(slot);
             String name = (slot.ordinal() == 0)
-                    ? "§7" + ability.getName()
-                    : "§7" + ability.getName() + " §8(" + remaining + "s)";
+                    ? readyColorCode + ability.getName()
+                    : readyColorCode + ability.getName() + " §8(" + remaining + "s)";
 
             int amount = (slot.ordinal() == 0) ? 1 : Math.min(remaining, 64);
 
