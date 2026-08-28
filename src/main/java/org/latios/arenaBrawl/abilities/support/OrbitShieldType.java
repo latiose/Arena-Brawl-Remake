@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.abilities.support;
 
 import org.bukkit.Material;
@@ -10,15 +9,22 @@ public enum OrbitShieldType {
     BONE_SHIELD(
             "Bone Shield", OrbitShieldVisualType.ITEM_DISPLAY, Material.BONE,
             5, 30.0, false,
-            18_000, Sound.ENTITY_SKELETON_STEP, Particle.WHITE_ASH,
-            2
+            18_000, Sound.ENTITY_SKELETON_STEP, Sound.ENTITY_SKELETON_DEATH, Particle.WHITE_ASH,
+            2, 0
+    ),
+
+    CACTUS_SHIELD(
+            "Cactus Shield", OrbitShieldVisualType.ITEM_DISPLAY, Material.CACTUS,
+            4, 0.0, false,
+            18_000, Sound.ENTITY_CHICKEN_AMBIENT, Sound.ENTITY_CHICKEN_DEATH, Particle.WHITE_ASH,
+            2, 50
     ),
 
     STAR_SHIELD(
             "Star Shield", OrbitShieldVisualType.CHARGED_CREEPER, null,
             3, 50.0, true,
-            30_000, Sound.ENTITY_CREEPER_HURT, Particle.END_ROD,
-            3
+            30_000, Sound.ENTITY_CREEPER_HURT, Sound.ENTITY_CREEPER_DEATH, Particle.END_ROD,
+            3, 0
     );
 
     private final String displayName;
@@ -29,13 +35,15 @@ public enum OrbitShieldType {
     private final boolean rollsDebuffOnBlock;
     private final long durationMillis;
     private final Sound ambientSound;
+    private final Sound breakSound;
     private final Particle activationParticle;
     private final int updateIntervalTicks;
+    private final double damagePerCharge;
 
     OrbitShieldType(String displayName, OrbitShieldVisualType visualType, Material material,
                     int chargeCount, double healPerCharge, boolean rollsDebuffOnBlock,
-                    long durationMillis, Sound ambientSound, Particle activationParticle,
-                    int updateIntervalTicks) {
+                    long durationMillis, Sound ambientSound, Sound breakSound, Particle activationParticle,
+                    int updateIntervalTicks, double damagePerCharge) {
         this.displayName = displayName;
         this.visualType = visualType;
         this.material = material;
@@ -44,8 +52,10 @@ public enum OrbitShieldType {
         this.rollsDebuffOnBlock = rollsDebuffOnBlock;
         this.durationMillis = durationMillis;
         this.ambientSound = ambientSound;
+        this.breakSound = breakSound;
         this.activationParticle = activationParticle;
         this.updateIntervalTicks = updateIntervalTicks;
+        this.damagePerCharge = damagePerCharge;
     }
 
     public String getDisplayName() { return displayName; }
@@ -56,8 +66,9 @@ public enum OrbitShieldType {
     public boolean rollsDebuffOnBlock() { return rollsDebuffOnBlock; }
     public long getDurationMillis() { return durationMillis; }
     public Sound getAmbientSound() { return ambientSound; }
+    public Sound getBreakSound() { return breakSound; }
     public Particle getActivationParticle() { return activationParticle; }
     public int getUpdateIntervalTicks() { return updateIntervalTicks; }
-
+    public double getDamagePerCharge() { return damagePerCharge; }
 
 }

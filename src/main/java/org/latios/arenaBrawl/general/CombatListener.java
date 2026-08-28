@@ -4,8 +4,7 @@ import io.papermc.paper.event.entity.EntityKnockbackEvent;
 import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -124,12 +123,6 @@ public class CombatListener implements Listener {
         return null;
     }
 
-    @EventHandler
-    public void onKnockback(EntityKnockbackEvent event) {
-        if (event.getEntity() instanceof Player) {
-            event.setCancelled(true);
-        }
-    }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {

@@ -1,11 +1,15 @@
 package org.latios.arenaBrawl.general;
 
-import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.latios.arenaBrawl.abilities.offensive.ProjectileImpactEffect;
+import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.team.TeamManager;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TrackedProjectileTask extends BukkitRunnable {
 
@@ -16,9 +20,16 @@ public class TrackedProjectileTask extends BukkitRunnable {
     private final String abilityName;
     private final TeamManager teamManager;
     private final CombatService combatService;
+    private final DebuffManager debuffManager;
+    private final DebuffType debuffType;
+    private final long debuffDuration;
+    private final double debuffChance;
+    private final ProjectileImpactEffect impactEffect;
 
     public TrackedProjectileTask(Projectile projectile, Player shooter, double damage, double aoeRadius,
-                                 String abilityName, TeamManager teamManager, CombatService combatService) {
+                                 String abilityName, TeamManager teamManager, CombatService combatService,
+                                 DebuffManager debuffManager, DebuffType debuffType, long debuffDuration,
+                                 double debuffChance, ProjectileImpactEffect impactEffect) {
         this.projectile = projectile;
         this.shooter = shooter;
         this.damage = damage;
@@ -26,6 +37,17 @@ public class TrackedProjectileTask extends BukkitRunnable {
         this.abilityName = abilityName;
         this.teamManager = teamManager;
         this.combatService = combatService;
+        this.debuffManager = debuffManager;
+        this.debuffType = debuffType;
+        this.debuffDuration = debuffDuration;
+        this.debuffChance = debuffChance;
+        this.impactEffect = impactEffect != null ? impactEffect : ProjectileImpactEffect.DEFAULT;
+    }
+
+    public TrackedProjectileTask(Projectile projectile, Player shooter, double damage, double aoeRadius,
+                                 String abilityName, TeamManager teamManager, CombatService combatService,
+                                 ProjectileImpactEffect impactEffect) {
+        this(projectile, shooter, damage, aoeRadius, abilityName, teamManager, combatService, null, null, 0, 0, impactEffect);
     }
 
     @Override
@@ -51,6 +73,11 @@ public class TrackedProjectileTask extends BukkitRunnable {
 
     private void explode(Player directHitVictim) {
         cancel();
+        if (debuffManager != null && debuffChance > 0) {
+            if (ThreadLocalRandom.current().nextDouble() < debuffChance) {
+                debuffManager.tryApply(directHitVictim, debuffType, debuffDuration);
+            }
+        }
         combatService.applyAbilityDamage(shooter, directHitVictim, damage, abilityName, projectile.getLocation());
 
         for (Entity nearby : projectile.getNearbyEntities(aoeRadius, aoeRadius, aoeRadius)) {
@@ -60,8 +87,7 @@ public class TrackedProjectileTask extends BukkitRunnable {
             }
         }
 
-        projectile.getWorld().spawnParticle(org.bukkit.Particle.EXPLOSION, projectile.getLocation(), 1);
-        projectile.getWorld().playSound(projectile.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
+        playImpactEffects();
         projectile.remove();
     }
 
@@ -74,7 +100,22 @@ public class TrackedProjectileTask extends BukkitRunnable {
             }
         }
 
-        projectile.getWorld().spawnParticle(org.bukkit.Particle.EXPLOSION, projectile.getLocation(), 1);
+        playImpactEffects();
         projectile.remove();
+    }
+
+    private void playImpactEffects() {
+        projectile.getWorld().spawnParticle(
+                impactEffect.particle(),
+                projectile.getLocation(),
+                impactEffect.particleCount(),
+                0.2, 0.2, 0.2, 0.05
+        );
+        projectile.getWorld().playSound(
+                projectile.getLocation(),
+                impactEffect.sound(),
+                impactEffect.volume(),
+                impactEffect.pitch()
+        );
     }
 }

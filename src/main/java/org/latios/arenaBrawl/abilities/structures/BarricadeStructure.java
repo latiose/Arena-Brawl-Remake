@@ -104,4 +104,9 @@ public class BarricadeStructure extends PlacedStructure {
     public List<Block> getPlacedBlocks() {
         return placedBlocks;
     }
+
+    @Override
+    public List<Block> getOccupiedBlocks() {
+        return placedBlocks;
+    }
 }

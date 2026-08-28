@@ -1,10 +1,11 @@
 
 package org.latios.arenaBrawl.abilities.structures;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.UUID;
 
 public abstract class PlacedStructure {
@@ -23,13 +24,13 @@ public abstract class PlacedStructure {
     public Location getLocation() { return location; }
     public long getPlacedAt() { return placedAt; }
 
-    /** Called every tick/interval by the manager; return true once this structure should be removed. */
-    public abstract boolean tick();
+    public Player getOwner() {
+        return org.bukkit.Bukkit.getPlayer(ownerId);
+    }
 
-    /** Called when the structure is destroyed/removed, for cleanup (entities, blocks, etc.). */
+    public abstract boolean tick();
     public abstract void remove();
 
-    public Player getOwner() {
-        return Bukkit.getPlayer(ownerId);
-    }
+    /** All physical blocks belonging to this structure, used for hit-detection by abilities like Bull Charge/GolemFall. */
+    public abstract List<Block> getOccupiedBlocks();
 }

@@ -1,3 +1,4 @@
+
 package org.latios.arenaBrawl.abilities.utility;
 
 import me.libraryaddict.disguise.DisguiseAPI;
@@ -8,16 +9,9 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
-import org.latios.arenaBrawl.abilities.structures.BarricadeStructure;
-import org.latios.arenaBrawl.abilities.structures.HealingTotemStructure;
 import org.latios.arenaBrawl.abilities.structures.PlacedStructure;
-import org.latios.arenaBrawl.abilities.structures.StructureManager;
-import org.latios.arenaBrawl.abilities.structures.WallOfVinesStructure;
+import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.general.MovementLockManager;
-import org.latios.arenaBrawl.team.TeamManager;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class BullChargeTask extends BukkitRunnable {
 
@@ -28,20 +22,18 @@ public class BullChargeTask extends BukkitRunnable {
 
     private final Player player;
     private final Vector direction;
-    private final StructureManager structureManager;
+    private final StructureDemolitionService demolitionService;
     private final MovementLockManager movementLockManager;
-    private final TeamManager teamManager;
 
     private double traveled = 0.0;
     private int ticksElapsed = 0;
 
-    public BullChargeTask(Player player, Vector direction, StructureManager structureManager,
-                          MovementLockManager movementLockManager, TeamManager teamManager) {
+    public BullChargeTask(Player player, Vector direction, StructureDemolitionService demolitionService,
+                          MovementLockManager movementLockManager) {
         this.player = player;
         this.direction = direction;
-        this.structureManager = structureManager;
+        this.demolitionService = demolitionService;
         this.movementLockManager = movementLockManager;
-        this.teamManager = teamManager;
     }
 
     @Override
@@ -54,21 +46,14 @@ public class BullChargeTask extends BukkitRunnable {
         Location current = player.getLocation();
         Location next = current.clone().add(direction.clone().multiply(STEP_DISTANCE));
 
-        PlacedStructure hitStructure = findStructureNear(next);
+        PlacedStructure hitStructure = demolitionService.findStructureNear(next, STRUCTURE_HIT_RADIUS);
         if (hitStructure != null) {
-            Player owner = hitStructure.getOwner();
-
-            if (owner != null && teamManager.isEnemy(player, owner)) {
-                structureManager.remove(hitStructure);
-                next.getWorld().spawnParticle(Particle.EXPLOSION, next, 2);
-                next.getWorld().playSound(next, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f);
+            if (demolitionService.isEnemyStructure(player, hitStructure)) {
+                demolitionService.demolish(hitStructure, next);
                 player.teleport(next);
-                end();
-                return;
-            } else if (owner != null && !teamManager.isEnemy(player, owner)) {
-                end();
-                return;
             }
+            end(); // charge stops either way: breaks enemy structure, or blocked by an ally's
+            return;
         }
 
         if (isBlockedByTerrain(next)) {
@@ -83,49 +68,14 @@ public class BullChargeTask extends BukkitRunnable {
         ticksElapsed++;
     }
 
-    private PlacedStructure findStructureNear(Location point) {
-        for (PlacedStructure structure : new ArrayList<>(structureManager.getAll())) {
-            List<Block> blocks = getStructureBlocks(structure);
-            for (Block block : blocks) {
-                Location blockCenter = block.getLocation().add(0.5, 0.5, 0.5);
-                if (blockCenter.distance(point) <= STRUCTURE_HIT_RADIUS) {
-                    return structure;
-                }
-            }
-        }
-        return null;
-    }
-
-    private List<Block> getStructureBlocks(PlacedStructure structure) {
-        if (structure instanceof BarricadeStructure barricade) {
-            return barricade.getPlacedBlocks();
-        }
-        if (structure instanceof HealingTotemStructure totem) {
-            return totem.getStandBlocks();
-        }
-        if (structure instanceof WallOfVinesStructure wallOfVines) {
-            return wallOfVines.getPlacedBlocks();
-        }
-        return List.of();
-    }
-
     private boolean isBlockedByTerrain(Location destination) {
         Block block = destination.getBlock();
         Block above = destination.clone().add(0, 1, 0).getBlock();
 
-        boolean blockSolid = block.getType().isSolid() && !isStructureBlock(block);
-        boolean aboveSolid = above.getType().isSolid() && !isStructureBlock(above);
+        boolean blockSolid = block.getType().isSolid() && !demolitionService.isBlockPartOfAnyStructure(block);
+        boolean aboveSolid = above.getType().isSolid() && !demolitionService.isBlockPartOfAnyStructure(above);
 
         return blockSolid || aboveSolid;
-    }
-
-    private boolean isStructureBlock(Block block) {
-        for (PlacedStructure structure : structureManager.getAll()) {
-            if (getStructureBlocks(structure).contains(block)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void end() {

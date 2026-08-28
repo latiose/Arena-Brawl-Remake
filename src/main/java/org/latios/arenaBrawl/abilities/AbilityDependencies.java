@@ -1,8 +1,11 @@
 package org.latios.arenaBrawl.abilities;
 
 
+import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
+import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -23,5 +26,8 @@ public record AbilityDependencies(
         CombatUpgradeManager combatUpgradeManager,
         BroodMotherEntityManager broodMotherEntityManager,
         StructureManager structureManager,
-        MovementLockManager movementLockManager
+        MovementLockManager movementLockManager,
+        SongOfPowerManager songOfPowerManager,
+        LifeLeechManager lifeLeechManager,
+        StructureDemolitionService demolitionService
 ) {}

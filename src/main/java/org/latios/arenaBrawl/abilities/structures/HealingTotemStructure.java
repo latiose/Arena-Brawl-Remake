@@ -50,10 +50,7 @@ public class HealingTotemStructure extends PlacedStructure {
 
     /** Registers a hit from an enemy. Returns true if the totem is destroyed by this hit. */
     public boolean registerHit(Player attacker) {
-        Player owner = org.bukkit.Bukkit.getPlayer(getOwnerId());
-        if (owner != null && !teamManager.isEnemy(owner, attacker)) {
-            return false;
-        }
+        if(!canHit(attacker)) return false;
 
         remainingHits--;
         getLocation().getWorld().spawnParticle(Particle.CRIT, getLocation().clone().add(0.5, 1, 0.5), 10);
@@ -62,6 +59,13 @@ public class HealingTotemStructure extends PlacedStructure {
         return remainingHits <= 0;
     }
 
+    public boolean canHit(Player attacker){
+        Player owner = org.bukkit.Bukkit.getPlayer(getOwnerId());
+        if (owner != null && !teamManager.isEnemy(owner, attacker)) {
+            return false;
+        }
+        return true;
+    }
     @Override
     public boolean tick() {
         if (healPulsesUsed >= MAX_HEAL_PULSES) {
@@ -114,22 +118,20 @@ public class HealingTotemStructure extends PlacedStructure {
         for (int i = 0; i < standBlocks.size(); i++) {
             standBlocks.get(i).setBlockData(originalBlockData.get(i));
         }
-//        getLocation().getWorld().spawnParticle(Particle.FIREWORK, getLocation().clone().add(0.5, 1, 0.5), 15);
-        FireworkEffect effect = FireworkEffect.builder()
-                .withColor(Color.RED)
-                .with(FireworkEffect.Type.BALL)
-                .build();
+       getLocation().getWorld().spawnParticle(Particle.FIREWORK, getLocation().clone().add(0.5, 1, 0.5), 15);
 
-        getLocation().getWorld().spawnParticle(
-                Particle.FIREWORK,
-                getLocation().clone().add(0.5, 1, 0.5),
-                15,
-                0.2, 0.2, 0.2,
-                0.05,
-                effect);
     }
 
     public List<Block> getStandBlocks() {
         return standBlocks;
+    }
+
+    @Override
+    public List<Block> getOccupiedBlocks() {
+        return standBlocks;
+    }
+
+    public int getHealthPercentage() {
+        return (int) Math.ceil(((double) remainingHits / MELEE_HITS_TO_DESTROY) * 100);
     }
 }

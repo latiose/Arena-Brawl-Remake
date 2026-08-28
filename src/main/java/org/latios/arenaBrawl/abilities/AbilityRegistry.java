@@ -2,10 +2,7 @@ package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.plugin.Plugin;
 import org.latios.arenaBrawl.abilities.offensive.*;
-import org.latios.arenaBrawl.abilities.support.HealingTotem;
-import org.latios.arenaBrawl.abilities.support.StarShield;
-import org.latios.arenaBrawl.abilities.support.BoneShield;
-import org.latios.arenaBrawl.abilities.support.HolyWater;
+import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMother;
 import org.latios.arenaBrawl.abilities.utility.*;
 import org.latios.arenaBrawl.abilities.ultimate.ShieldWall;
@@ -30,9 +27,11 @@ public class AbilityRegistry {
 
     private void registerDefaults() {
         register(AbilitySlot.OFFENSIVE, "fireball", deps -> new FireballAbility(deps.energyManager(),deps.teamManager(),deps.combatService()));
+        register(AbilitySlot.OFFENSIVE, "snowball", deps -> new SnowballAbility(deps.energyManager(),deps.teamManager(),deps.combatService(),deps.debuffManager()));
         register(AbilitySlot.OFFENSIVE, "melonlauncher", deps -> new MelonLauncher(deps.energyManager(),deps.teamManager(),deps.combatService()));
         register(AbilitySlot.OFFENSIVE, "pumpkinlauncher", deps -> new PumpkinLauncher(deps.energyManager(),deps.teamManager(),deps.combatService()));
         register(AbilitySlot.UTILITY, "shadowstep", deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager(),deps.combatUpgradeManager()));
+        register(AbilitySlot.UTILITY, "sugarrush", deps -> new SugarRush(deps.cooldownManager(),deps.combatUpgradeManager(),deps.debuffManager()));
         register(AbilitySlot.SUPPORT, "holywater", deps -> new HolyWater(deps.cooldownManager(),deps.teamManager(),deps.playerHealthManager(), deps.debuffManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.ULTIMATE, "shieldwall",
                 deps -> new ShieldWall(plugin,deps.cooldownManager(), deps.usageManager(), deps.shieldManager()));
@@ -43,6 +42,8 @@ public class AbilityRegistry {
                 deps -> new Swap(deps.cooldownManager(), deps.debuffManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.SUPPORT, "boneshield",
                 deps -> new BoneShield(deps.cooldownManager(), deps.orbitShieldManager(),deps.combatUpgradeManager()));
+        register(AbilitySlot.SUPPORT, "cactusshield",
+                deps -> new CactusShield(deps.cooldownManager(), deps.orbitShieldManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.SUPPORT, "starshield",
                 deps -> new StarShield(deps.cooldownManager(), deps.orbitShieldManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.OFFENSIVE, "freezingbreath",
@@ -62,12 +63,24 @@ public class AbilityRegistry {
                         deps.structureManager(), deps.teamManager(), deps.playerHealthManager()));
         register(AbilitySlot.UTILITY, "barricade",
                 deps -> new BarricadeAbility(deps.cooldownManager(), deps.combatUpgradeManager(), deps.structureManager()));
+        register(AbilitySlot.UTILITY, "golemfall",
+                deps -> new GolemFallAbility(deps.cooldownManager(), deps.combatUpgradeManager(),
+                        deps.teamManager(), deps.demolitionService()));
         register(AbilitySlot.UTILITY, "bullcharge",
                 deps -> new BullChargeAbility(deps.cooldownManager(), deps.combatUpgradeManager(),
-                        deps.structureManager(), deps.movementLockManager(),deps.teamManager()));
+                        deps.demolitionService(), deps.movementLockManager()));
+        register(AbilitySlot.SUPPORT, "treeoflife",
+                deps -> new TreeOfLifeAbility(deps.cooldownManager(), deps.combatUpgradeManager(),
+                        deps.structureManager(), deps.teamManager(), deps.playerHealthManager()));
         register(AbilitySlot.UTILITY, "wallofvines",
                 deps -> new WallOfVines(deps.cooldownManager(), deps.combatUpgradeManager(),
                         deps.structureManager(), deps.teamManager(),deps.debuffManager()));
+        register(AbilitySlot.SUPPORT, "songofpower",
+                deps -> new SongOfPowerAbility(deps.cooldownManager(), deps.combatUpgradeManager(),
+                        deps.teamManager(), deps.songOfPowerManager()));
+        register(AbilitySlot.SUPPORT, "lifeleech",
+                deps -> new LifeLeechAbility(deps.cooldownManager(), deps.combatUpgradeManager(), deps.lifeLeechManager()));
+
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");

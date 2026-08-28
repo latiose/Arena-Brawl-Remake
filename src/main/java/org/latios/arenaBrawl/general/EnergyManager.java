@@ -30,11 +30,13 @@ public class EnergyManager {
         syncVisual(player);
     }
 
-    public void regenTick(Player player) {
+    public void regenTick(Player player, boolean doubleRegen) {
         double current = getEnergy(player);
-        if (current >= getMaxEnergy(player)) return;
+        double max = getMaxEnergy(player);
+        if (current >= max) return;
 
-        double updated = Math.min(getMaxEnergy(player), current + REGEN_PER_SECOND);
+        double amount = REGEN_PER_SECOND * (doubleRegen ? 2 : 1);
+        double updated = Math.min(max, current + amount);
         energy.put(player.getUniqueId(), updated);
         syncVisual(player);
     }

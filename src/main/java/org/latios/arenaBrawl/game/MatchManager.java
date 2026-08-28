@@ -13,6 +13,7 @@ import org.latios.arenaBrawl.abilities.AbilityManager;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 
@@ -53,11 +54,12 @@ public class MatchManager {
     private final ArenaMapManager arenaMapManager;
     private final List<Match> activeMatchesList = new ArrayList<>();
     private final StructureManager structureManager;
-
+    private final SongOfPowerManager songOfPowerManager;
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
-                        ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin,ArenaMapManager arenaMapManager, StructureManager structureManager) {
+                        ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin,ArenaMapManager arenaMapManager, StructureManager structureManager,
+                        SongOfPowerManager songOfPowerManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -76,6 +78,7 @@ public class MatchManager {
         this.plugin = plugin;
         this.arenaMapManager = arenaMapManager;
         this.structureManager = structureManager;
+        this.songOfPowerManager = songOfPowerManager;
     }
 
 
@@ -183,6 +186,7 @@ public class MatchManager {
         usageManager.resetPlayer(player);
         orbitShieldManager.clear(player);
         broodMotherEntityManager.clearAll();
+        songOfPowerManager.clear(player);
         EntityCleanupUtils.sweepArenaEntities(player.getWorld());
         if (!player.isOnline()) return;
 
@@ -292,6 +296,7 @@ public class MatchManager {
             EntityCleanupUtils.sweepArenaEntities(match.getAllPlayers().getFirst().getWorld());
         }
         structureManager.clearAll();
+
 
 
     }

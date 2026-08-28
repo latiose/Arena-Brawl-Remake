@@ -1,4 +1,4 @@
-// abilities/utility/BullChargeAbility.java
+
 package org.latios.arenaBrawl.abilities.utility;
 
 import me.libraryaddict.disguise.DisguiseAPI;
@@ -17,6 +17,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.general.MovementLockManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -28,19 +29,18 @@ public class BullChargeAbility implements Ability {
 
     private static final double TOTAL_DISTANCE = 15.0;
     private static final long DURATION_TICKS = 20; // 1 second
-    private static final double STEP_DISTANCE = TOTAL_DISTANCE / DURATION_TICKS;
+
 
     private final AbilityCost cost;
-    private final StructureManager structureManager;
+
     private final MovementLockManager movementLockManager;
-    private final TeamManager teamManager;
+   private final StructureDemolitionService demolitionService;
 
     public BullChargeAbility(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
-                             StructureManager structureManager, MovementLockManager movementLockManager,TeamManager teamManager) {
+                             StructureDemolitionService demolitionService, MovementLockManager movementLockManager) {
         this.cost = new CooldownCost(cooldownManager, "bullcharge", 30000, upgradeManager);
-        this.structureManager = structureManager;
         this.movementLockManager = movementLockManager;
-        this.teamManager = teamManager;
+        this.demolitionService = demolitionService;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class BullChargeAbility implements Ability {
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_COW_AMBIENT, 1f, 0.7f);
         player.sendMessage("§eMoooove out of the way!");
-        new BullChargeTask(player, direction, structureManager, movementLockManager,teamManager)
+        new BullChargeTask(player, direction, demolitionService,movementLockManager)
                 .runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
 
         return true;

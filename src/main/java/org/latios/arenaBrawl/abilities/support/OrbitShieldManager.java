@@ -212,12 +212,8 @@ public class OrbitShieldManager {
     }
 
     private void playShieldBreakSound(Player player, OrbitShieldType type) {
-        if (player == null || !player.isOnline()) return;
+        if (player == null || !player.isOnline() || type == null) return;
 
-        Sound soundToPlay = (type.getVisualType() == OrbitShieldVisualType.CHARGED_CREEPER)
-                ? Sound.ENTITY_CREEPER_DEATH
-                : Sound.ENTITY_SKELETON_DEATH;
-
-        player.getWorld().playSound(player.getLocation(), soundToPlay, 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), type.getBreakSound(), 1.0f, 1.0f);
     }
 }

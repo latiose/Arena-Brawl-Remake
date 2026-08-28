@@ -9,6 +9,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,12 +26,19 @@ public class DebuffManager {
     private final Map<UUID, BossBar> bossBars = new HashMap<>();
     private final Map<UUID, Double> accumulatedDamage = new HashMap<>();
     private final List<DebuffListener> listeners = new ArrayList<>();
+    private SongOfPowerManager songOfPowerManager;
+
 
     public void registerListener(DebuffListener listener) {
         listeners.add(listener);
     }
-
+    public void setSongOfPowerManager(SongOfPowerManager songOfPowerManager) {
+        this.songOfPowerManager = songOfPowerManager;
+    }
     public boolean tryApply(Player attacker, Player victim, DebuffType type, long durationMillis) {
+        if (songOfPowerManager != null && songOfPowerManager.isActive(victim)) {
+            return false;
+        }
         if (hasActiveDebuff(victim)) {
             return false;
         }

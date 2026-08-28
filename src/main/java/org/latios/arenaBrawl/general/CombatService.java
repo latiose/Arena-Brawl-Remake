@@ -11,6 +11,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.joml.Vector3f;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
+import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldType;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -32,7 +33,7 @@ public class CombatService {
     private final OrbitShieldManager orbitShieldManager;
     private final DamageBuffManager damageBuffManager;
     private final MatchManager matchManager;
-    private static final double HOLOGRAM_HEIGHT_OFFSET = 2.3;
+    private final LifeLeechManager lifeLeechManager;
     private static final long HOLOGRAM_LIFETIME_TICKS = 35;
     private static final long STAR_SHIELD_EFFECT_DURATION_MILLIS = 4_000;
     private static final List<DebuffType> STAR_SHIELD_POSSIBLE_DEBUFFS =
@@ -40,13 +41,14 @@ public class CombatService {
 
     public CombatService(PlayerHealthManager healthManager, ShieldManager shieldManager,
                          DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
-                         DamageBuffManager damageBuffManager, MatchManager matchManager) {
+                         DamageBuffManager damageBuffManager, MatchManager matchManager,LifeLeechManager lifeLeechManager) {
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
         this.orbitShieldManager = orbitShieldManager;
         this.damageBuffManager = damageBuffManager;
         this.matchManager = matchManager;
+        this.lifeLeechManager = lifeLeechManager;
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
@@ -82,6 +84,10 @@ public class CombatService {
         healthManager.damage(victim, finalDamage, attacker);
         if (abilityName.equals("Melee")) {
             playDamageFeedback(victim);
+            if (lifeLeechManager.consumeCharge(attacker)) {
+                healthManager.heal(attacker, 60.0);
+                attacker.sendMessage(MessageUtils.positive() + "§3Your Life Leech healed you for §a60 §3health!");
+            }
         }
 
         if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
@@ -144,6 +150,27 @@ public class CombatService {
             victim.sendMessage(String.format(
                     "§3Your %s healed you for §a%d §3health.",
                     type.getDisplayName(), roundedHeal
+            ));
+        }
+
+        if (type.getDamagePerCharge() > 0) {
+            double damageAmount = type.getDamagePerCharge();
+            int roundedDamage = (int) Math.round(damageAmount);
+
+            healthManager.damage(attacker, damageAmount, victim);
+            playDamageFeedback(attacker);
+
+            Location impactLoc = attacker.getLocation().add(0, attacker.getHeight() * 0.5, 0);
+            spawnHologram(attacker, String.valueOf(damageAmount), impactLoc);
+
+            victim.sendMessage(MessageUtils.positive() + String.format(
+                    "§3Your %s hit §3%s §3for §c%d §3damage.",
+                    type.getDisplayName(), attacker.getName(), roundedDamage
+            ));
+
+            attacker.sendMessage(MessageUtils.negative() + String.format(
+                    "§3%s's %s hit §3you §3for §c%d §3damage.",
+                    victim.getName(), type.getDisplayName(), roundedDamage
             ));
         }
 

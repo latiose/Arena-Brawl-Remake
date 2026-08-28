@@ -1,3 +1,4 @@
+
 package org.latios.arenaBrawl.abilities.structures;
 
 import org.bukkit.block.Block;
@@ -11,14 +12,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class HealingTotemHitListener implements Listener {
+public class TreeOfLifeHitListener implements Listener {
 
     private static final long HIT_COOLDOWN_MILLIS = 500;
 
     private final StructureManager structureManager;
     private final Map<UUID, Long> lastHitAt = new HashMap<>();
 
-    public HealingTotemHitListener(StructureManager structureManager) {
+    public TreeOfLifeHitListener(StructureManager structureManager) {
         this.structureManager = structureManager;
     }
 
@@ -29,8 +30,8 @@ public class HealingTotemHitListener implements Listener {
         Block clickedBlock = event.getClickedBlock();
         if (clickedBlock == null) return;
 
-        HealingTotemStructure totem = findTotemByBlock(clickedBlock);
-        if (totem == null) return;
+        TreeOfLifeStructure tree = findTreeByBlock(clickedBlock);
+        if (tree == null) return;
 
         event.setCancelled(true);
 
@@ -40,21 +41,21 @@ public class HealingTotemHitListener implements Listener {
         if (System.currentTimeMillis() - last < HIT_COOLDOWN_MILLIS) return;
         lastHitAt.put(attacker.getUniqueId(), System.currentTimeMillis());
 
-        boolean destroyed = totem.registerHit(attacker);
-        boolean canHit = totem.canHit(attacker);
+        boolean destroyed = tree.registerHit(attacker);
+        boolean canHit = tree.canHit(attacker);
         if (destroyed) {
-            attacker.sendMessage("§eHealing Totem destroyed!");
-            structureManager.remove(totem);
-        } else if(canHit) {
-            int healthPercent = totem.getHealthPercentage();
-            attacker.sendMessage(String.format("§eHealing Totem health: §6%d%%", healthPercent));
+            attacker.sendMessage("§Tree of Life destroyed!");
+            structureManager.remove(tree);
+        }  if (canHit) {
+            int healthPercent = tree.getHealthPercentage();
+            attacker.sendMessage(String.format("§eTree of life health: §6%d%%", healthPercent));
         }
     }
 
-    private HealingTotemStructure findTotemByBlock(Block block) {
+    private TreeOfLifeStructure findTreeByBlock(Block block) {
         for (PlacedStructure structure : structureManager.getAll()) {
-            if (structure instanceof HealingTotemStructure totem && totem.getStandBlocks().contains(block)) {
-                return totem;
+            if (structure instanceof TreeOfLifeStructure tree && tree.getOccupiedBlocks().contains(block)) {
+                return tree;
             }
         }
         return null;
