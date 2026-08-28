@@ -2,15 +2,13 @@ package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.plugin.Plugin;
 import org.latios.arenaBrawl.abilities.offensive.*;
+import org.latios.arenaBrawl.abilities.support.HealingTotem;
 import org.latios.arenaBrawl.abilities.support.StarShield;
 import org.latios.arenaBrawl.abilities.support.BoneShield;
 import org.latios.arenaBrawl.abilities.support.HolyWater;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMother;
-import org.latios.arenaBrawl.abilities.utility.Polymorph;
+import org.latios.arenaBrawl.abilities.utility.*;
 import org.latios.arenaBrawl.abilities.ultimate.ShieldWall;
-
-import org.latios.arenaBrawl.abilities.utility.ShadowStep;
-import org.latios.arenaBrawl.abilities.utility.Swap;
 
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -59,6 +57,17 @@ public class AbilityRegistry {
                 deps -> new LightningStrike(deps.teamManager(),deps.energyManager(),deps.combatService(),deps.debuffManager()));
         register(AbilitySlot.ULTIMATE, "broodmother",
                 deps -> new BroodMother(deps.cooldownManager(), deps.usageManager(), deps.broodMotherEntityManager(),deps.teamManager()));
+        register(AbilitySlot.SUPPORT, "healingtotem",
+                deps -> new HealingTotem(deps.cooldownManager(), deps.combatUpgradeManager(),
+                        deps.structureManager(), deps.teamManager(), deps.playerHealthManager()));
+        register(AbilitySlot.UTILITY, "barricade",
+                deps -> new BarricadeAbility(deps.cooldownManager(), deps.combatUpgradeManager(), deps.structureManager()));
+        register(AbilitySlot.UTILITY, "bullcharge",
+                deps -> new BullChargeAbility(deps.cooldownManager(), deps.combatUpgradeManager(),
+                        deps.structureManager(), deps.movementLockManager(),deps.teamManager()));
+        register(AbilitySlot.UTILITY, "wallofvines",
+                deps -> new WallOfVines(deps.cooldownManager(), deps.combatUpgradeManager(),
+                        deps.structureManager(), deps.teamManager(),deps.debuffManager()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");

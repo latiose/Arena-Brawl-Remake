@@ -11,6 +11,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
@@ -51,12 +52,12 @@ public class MatchManager {
     private final Plugin plugin;
     private final ArenaMapManager arenaMapManager;
     private final List<Match> activeMatchesList = new ArrayList<>();
-
+    private final StructureManager structureManager;
 
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
-                        ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin,ArenaMapManager arenaMapManager) {
+                        ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin,ArenaMapManager arenaMapManager, StructureManager structureManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -74,6 +75,7 @@ public class MatchManager {
         this.broodMotherEntityManager = broodMotherEntityManager;
         this.plugin = plugin;
         this.arenaMapManager = arenaMapManager;
+        this.structureManager = structureManager;
     }
 
 
@@ -289,7 +291,7 @@ public class MatchManager {
         if (!match.getAllPlayers().isEmpty()) {
             EntityCleanupUtils.sweepArenaEntities(match.getAllPlayers().getFirst().getWorld());
         }
-
+        structureManager.clearAll();
 
 
     }

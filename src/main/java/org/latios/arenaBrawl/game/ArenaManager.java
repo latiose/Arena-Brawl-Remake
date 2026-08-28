@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.game;
 
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
@@ -42,12 +43,14 @@ public class ArenaManager {
     private final CombatUpgradeManager combatUpgradeManager;
     private final BroodMotherEntityManager broodMotherEntityManager;
     private final ArenaMapManager arenaMapManager;
+    private final StructureManager structureManager;
+    private final MovementLockManager movementLockManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
                         org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, PlayerHealthManager playerHealthManager, HungerManager hungerManager, MatchManager matchManager,ShieldManager shieldManager,
     DebuffManager debuffManager,ArmorTierManager armorTierManager, CombatService combatService,OrbitShieldManager orbitShieldManager, HatSelectionManager hatSelectionManager,
-                        CombatUpgradeManager combatUpgradeManager,BroodMotherEntityManager broodMotherEntityManager, ArenaMapManager arenaMapManager) {
+                        CombatUpgradeManager combatUpgradeManager,BroodMotherEntityManager broodMotherEntityManager, ArenaMapManager arenaMapManager, StructureManager structureManager, MovementLockManager movementLockManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -69,6 +72,8 @@ public class ArenaManager {
         this.combatUpgradeManager = combatUpgradeManager;
         this.broodMotherEntityManager = broodMotherEntityManager;
         this.arenaMapManager = arenaMapManager;
+        this.structureManager = structureManager;
+        this.movementLockManager = movementLockManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -89,11 +94,12 @@ public class ArenaManager {
         teamManager.setTeam(p4, Team.BLUE);
 
         List<Player> allPlayers = List.of(p1, p2, p3, p4);
-        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager);
+        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(false);
             playerHealthManager.setMaxHealth(player, combatUpgradeManager.getValue(player, CombatUpgradeType.HEALTH));
+            energyManager.setMaxEnergyOverride(player,combatUpgradeManager.getValue(player, CombatUpgradeType.ENERGY));
             usageManager.resetPlayer(player);
             energyManager.reset(player);
             hungerManager.reset(player);

@@ -7,20 +7,22 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.util.Vector;
+import org.latios.arenaBrawl.general.MovementLockManager;
 
 public class ImmobilizeListener implements Listener {
 
     private final DebuffManager debuffManager;
-
-    public ImmobilizeListener(DebuffManager debuffManager) {
+    private final MovementLockManager movementLockManager;
+    public ImmobilizeListener(DebuffManager debuffManager,MovementLockManager movementLockManager) {
         this.debuffManager = debuffManager;
+        this.movementLockManager = movementLockManager;
     }
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         if (!isCurrentlyImmobilizing(player)) return;
-
+        if (movementLockManager.isLocked(player)) return;
         Location from = event.getFrom();
         Location to = event.getTo();
 

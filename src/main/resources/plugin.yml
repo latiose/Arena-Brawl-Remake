@@ -21,3 +21,6 @@ commands:
   leaderboard:
     description: Shows the top 10 highest rated players
     usage: /leaderboard
+  capturestructure:
+    description: Captures blocks around you into BlockOffset code for a structure blueprint
+    usage: /capturestructure [radiusX radiusY radiusZ]
