@@ -1,8 +1,6 @@
 package org.latios.arenaBrawl.abilities.structures;
 
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
@@ -116,7 +114,19 @@ public class HealingTotemStructure extends PlacedStructure {
         for (int i = 0; i < standBlocks.size(); i++) {
             standBlocks.get(i).setBlockData(originalBlockData.get(i));
         }
-        getLocation().getWorld().spawnParticle(Particle.POOF, getLocation().clone().add(0.5, 1, 0.5), 15);
+//        getLocation().getWorld().spawnParticle(Particle.FIREWORK, getLocation().clone().add(0.5, 1, 0.5), 15);
+        FireworkEffect effect = FireworkEffect.builder()
+                .withColor(Color.RED)
+                .with(FireworkEffect.Type.BALL)
+                .build();
+
+        getLocation().getWorld().spawnParticle(
+                Particle.FIREWORK,
+                getLocation().clone().add(0.5, 1, 0.5),
+                15,
+                0.2, 0.2, 0.2,
+                0.05,
+                effect);
     }
 
     public List<Block> getStandBlocks() {
