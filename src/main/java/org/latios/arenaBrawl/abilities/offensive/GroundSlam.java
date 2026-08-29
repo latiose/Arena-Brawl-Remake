@@ -19,7 +19,7 @@ public class GroundSlam implements Ability {
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private static final double ENERGY_COST = 100.0;
-    private static final double DAMAGE = 2000;
+    private static final double DAMAGE = 250;
 
     private final CombatService combatService;
 

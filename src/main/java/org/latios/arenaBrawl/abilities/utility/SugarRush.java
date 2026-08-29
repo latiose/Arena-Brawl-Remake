@@ -41,13 +41,13 @@ public class SugarRush implements Ability {
         player.addPotionEffect(new PotionEffect(
                 PotionEffectType.SPEED, SPEED_DURATION_TICKS, SPEED_AMPLIFIER, true, false
         ));
+        player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 1f, 1f);
 
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (player.isOnline()) {
-                    player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
-                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_BOTTLE_THROW, 1f, 0.8f);
                     debuffManager.tryApply(player, DebuffType.SLOW, SLOW_DURATION_MS);
                     player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BREATH, 1f, 0.8f);

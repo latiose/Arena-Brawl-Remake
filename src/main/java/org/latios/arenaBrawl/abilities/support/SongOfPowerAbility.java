@@ -13,6 +13,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -29,12 +30,14 @@ public class SongOfPowerAbility implements Ability {
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final SongOfPowerManager songOfPowerManager;
+    private final EnergyModifierManager energyModifierManager;
 
     public SongOfPowerAbility(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
-                              TeamManager teamManager, SongOfPowerManager songOfPowerManager) {
+                              TeamManager teamManager, SongOfPowerManager songOfPowerManager, EnergyModifierManager energyModifierManager) {
         this.cost = new CooldownCost(cooldownManager, "songofpower", 45000, upgradeManager);
         this.teamManager = teamManager;
         this.songOfPowerManager = songOfPowerManager;
+        this.energyModifierManager = energyModifierManager;
     }
 
     @Override
@@ -72,6 +75,7 @@ public class SongOfPowerAbility implements Ability {
 
         for (Player target : affected) {
             songOfPowerManager.applyBuff(target, DURATION_MILLIS);
+            energyModifierManager.addModifier(target, "song_of_power", 2.0, DURATION_MILLIS);
         }
 
         startAmbientEffect(player);

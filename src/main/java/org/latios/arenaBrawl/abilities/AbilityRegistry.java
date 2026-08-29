@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.abilities;
 import org.bukkit.plugin.Plugin;
 import org.latios.arenaBrawl.abilities.offensive.*;
 import org.latios.arenaBrawl.abilities.support.*;
+import org.latios.arenaBrawl.abilities.ultimate.AbsoluteZeroAbility;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMother;
 import org.latios.arenaBrawl.abilities.utility.*;
 import org.latios.arenaBrawl.abilities.ultimate.ShieldWall;
@@ -77,10 +78,21 @@ public class AbilityRegistry {
                         deps.structureManager(), deps.teamManager(),deps.debuffManager()));
         register(AbilitySlot.SUPPORT, "songofpower",
                 deps -> new SongOfPowerAbility(deps.cooldownManager(), deps.combatUpgradeManager(),
-                        deps.teamManager(), deps.songOfPowerManager()));
+                        deps.teamManager(), deps.songOfPowerManager(),deps.energyModifierManager()));
+        register(AbilitySlot.UTILITY, "sparkbolt",
+                deps -> new SparkBolt(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
+                        ,deps.energyModifierManager()));
         register(AbilitySlot.SUPPORT, "lifeleech",
                 deps -> new LifeLeechAbility(deps.cooldownManager(), deps.combatUpgradeManager(), deps.lifeLeechManager()));
-
+        register(AbilitySlot.OFFENSIVE, "consume",
+                deps -> new ConsumeAbility(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.playerHealthManager()));
+        register(AbilitySlot.OFFENSIVE, "dash",
+                deps -> new DashAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
+        register(AbilitySlot.ULTIMATE, "absolutezero",
+                deps -> new AbsoluteZeroAbility(deps.cooldownManager(), deps.usageManager(),
+                        deps.teamManager(), deps.combatService(), deps.debuffManager()));
+        register(AbilitySlot.OFFENSIVE, "rocketchicken",
+                deps -> new RocketChickenAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");

@@ -41,7 +41,7 @@ public class CombatService {
 
     public CombatService(PlayerHealthManager healthManager, ShieldManager shieldManager,
                          DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
-                         DamageBuffManager damageBuffManager, MatchManager matchManager,LifeLeechManager lifeLeechManager) {
+                         DamageBuffManager damageBuffManager, MatchManager matchManager, LifeLeechManager lifeLeechManager) {
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
@@ -112,7 +112,7 @@ public class CombatService {
         }
 
         Location resolvedImpact = impactLocation != null ? impactLocation : estimateMeleeImpact(attacker, victim);
-        spawnHologram(victim, String.valueOf(finalDamage), resolvedImpact);
+        spawnHologram(victim, String.valueOf((int) Math.round(finalDamage)), resolvedImpact);
     }
 
     private Location estimateMeleeImpact(Player attacker, Player victim) {
@@ -123,7 +123,6 @@ public class CombatService {
         org.bukkit.util.RayTraceResult result = box.rayTrace(eye.toVector(), direction, 6.0);
 
         if (result != null) {
-            result.getHitPosition();
             return result.getHitPosition().toLocation(victim.getWorld());
         }
 
@@ -161,7 +160,7 @@ public class CombatService {
             playDamageFeedback(attacker);
 
             Location impactLoc = attacker.getLocation().add(0, attacker.getHeight() * 0.5, 0);
-            spawnHologram(attacker, String.valueOf(damageAmount), impactLoc);
+            spawnHologram(attacker, String.valueOf(roundedDamage), impactLoc);
 
             victim.sendMessage(MessageUtils.positive() + String.format(
                     "§3Your %s hit §3%s §3for §c%d §3damage.",
@@ -196,7 +195,7 @@ public class CombatService {
         victim.getWorld().playSound(victim.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_HURT, 1f, 1f);
     }
 
-    public void applyMinionDamage(Player owner, Player victim, double rawDamage, String sourceName,Location impactLocation) {
+    public void applyMinionDamage(Player owner, Player victim, double rawDamage, String sourceName, Location impactLocation) {
         if (victim == null || victim.getGameMode() == GameMode.SPECTATOR) {
             return;
         }
@@ -230,22 +229,18 @@ public class CombatService {
                 MessageUtils.negative(), sourceName, roundedDamage
         ));
         Location resolvedImpact = impactLocation != null ? impactLocation : victim.getLocation().add(0, victim.getHeight() * 0.5, 0);
-        spawnHologram(victim, String.valueOf(finalDamage), resolvedImpact);
+        spawnHologram(victim, String.valueOf(roundedDamage), resolvedImpact);
     }
 
-
-
     private void spawnHologram(Player victim, String phrase, Location impactLocation) {
-        // Small jitter so multiple hologram numbers don't perfectly overlap, but centered
-        // on the REAL impact point instead of a random spot above the head
         float jitterX = (float) ThreadLocalRandom.current().nextDouble(-0.15, 0.15);
         float jitterY = (float) ThreadLocalRandom.current().nextDouble(-0.1, 0.1);
         float jitterZ = (float) ThreadLocalRandom.current().nextDouble(-0.15, 0.15);
 
-        Location baseLocation = impactLocation.clone();
+        Location spawnLoc = impactLocation.clone();
         TextColor color = TextColor.color(0xFF474C);
 
-        TextDisplay hologram = victim.getWorld().spawn(baseLocation, TextDisplay.class, d -> {
+        TextDisplay hologram = victim.getWorld().spawn(spawnLoc, TextDisplay.class, d -> {
             d.text(Component.text(phrase, color));
             d.setBillboard(Display.Billboard.CENTER);
             d.setSeeThrough(true);
@@ -264,17 +259,12 @@ public class CombatService {
         });
         EntityCleanupUtils.markAsArenaEntity(hologram);
 
-        // Offset relative to the victim's feet position, computed once at spawn time,
-        // so we can keep the SAME relative body height while following the victim's movement
-        double relativeHeight = impactLocation.getY() - victim.getLocation().getY();
-
         new BukkitRunnable() {
             int ticksElapsed = 0;
 
             @Override
             public void run() {
-                if (hologram.isDead() || !victim.isOnline()) {
-                    if (!hologram.isDead()) hologram.remove();
+                if (hologram.isDead()) {
                     cancel();
                     return;
                 }
@@ -285,7 +275,7 @@ public class CombatService {
                     return;
                 }
 
-                hologram.teleport(victim.getLocation().add(0, relativeHeight, 0));
+                hologram.teleport(hologram.getLocation().add(0, 0.02, 0));
                 ticksElapsed++;
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);

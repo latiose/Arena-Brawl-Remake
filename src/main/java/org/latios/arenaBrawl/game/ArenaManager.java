@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.game;
 
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
@@ -51,13 +52,14 @@ public class ArenaManager {
     private final SongOfPowerManager songOfPowerManager;
     private final LifeLeechManager lifeLeechManager;
     private final StructureDemolitionService demolitionService;
+    private final EnergyModifierManager energyModifierManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
                         org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, PlayerHealthManager playerHealthManager, HungerManager hungerManager, MatchManager matchManager,ShieldManager shieldManager,
     DebuffManager debuffManager,ArmorTierManager armorTierManager, CombatService combatService,OrbitShieldManager orbitShieldManager, HatSelectionManager hatSelectionManager,
                         CombatUpgradeManager combatUpgradeManager,BroodMotherEntityManager broodMotherEntityManager, ArenaMapManager arenaMapManager, StructureManager structureManager, MovementLockManager movementLockManager, SongOfPowerManager songOfPowerManager,
-                        LifeLeechManager lifeLeechManager, StructureDemolitionService demolitionService) {
+                        LifeLeechManager lifeLeechManager, StructureDemolitionService demolitionService,EnergyModifierManager energyModifierManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -84,6 +86,7 @@ public class ArenaManager {
         this.songOfPowerManager = songOfPowerManager;
         this.lifeLeechManager = lifeLeechManager;
         this.demolitionService = demolitionService;
+        this.energyModifierManager = energyModifierManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -104,7 +107,8 @@ public class ArenaManager {
         teamManager.setTeam(p4, Team.BLUE);
 
         List<Player> allPlayers = List.of(p1, p2, p3, p4);
-        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService);
+        AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,
+                energyModifierManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(false);

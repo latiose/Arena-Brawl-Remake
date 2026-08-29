@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.abilities;
 
 
+import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
@@ -29,5 +30,6 @@ public record AbilityDependencies(
         MovementLockManager movementLockManager,
         SongOfPowerManager songOfPowerManager,
         LifeLeechManager lifeLeechManager,
-        StructureDemolitionService demolitionService
+        StructureDemolitionService demolitionService,
+        EnergyModifierManager energyModifierManager
 ) {}
