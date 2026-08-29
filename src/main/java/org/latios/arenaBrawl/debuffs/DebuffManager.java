@@ -28,13 +28,14 @@ public class DebuffManager {
     private final List<DebuffListener> listeners = new ArrayList<>();
     private SongOfPowerManager songOfPowerManager;
 
-
     public void registerListener(DebuffListener listener) {
         listeners.add(listener);
     }
+
     public void setSongOfPowerManager(SongOfPowerManager songOfPowerManager) {
         this.songOfPowerManager = songOfPowerManager;
     }
+
     public boolean tryApply(Player attacker, Player victim, DebuffType type, long durationMillis) {
         if (songOfPowerManager != null && songOfPowerManager.isActive(victim)) {
             return false;
@@ -70,6 +71,7 @@ public class DebuffManager {
     public boolean tryApply(Player victim, DebuffType type, long durationMillis) {
         return tryApply(null, victim, type, durationMillis);
     }
+
     public boolean hasActiveDebuff(Player player) {
         ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
         if (debuff == null) return false;
@@ -111,6 +113,10 @@ public class DebuffManager {
             player.getWorld().spawnParticle(Particle.ITEM_SLIME, bodyLoc, 2, 0.2, 0.2, 0.2, 0.01);
         }
 
+        if (debuff.type.equals(DebuffType.ANTIHEAL)) {
+            player.getWorld().spawnParticle(Particle.SQUID_INK, bodyLoc, 2, 0.3, 0.5, 0.3, 0.02);
+            player.getWorld().spawnParticle(Particle.SMOKE, bodyLoc, 2, 0.2, 0.4, 0.2, 0.01);
+        }
 
         long elapsed = System.currentTimeMillis() - debuff.startedAt();
         long remaining = debuff.durationMillis() - elapsed;

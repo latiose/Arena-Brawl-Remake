@@ -138,6 +138,10 @@ public class PlayerHealthManager {
         damageSilent(player, amount, null);
     }
 
+    public void clearRegenDisable(Player player) {
+        regenDisabledUntil.remove(player.getUniqueId());
+    }
+
     private void spawnHologram(Player victim, String phrase, Location impactLocation) {
         float jitterX = (float) ThreadLocalRandom.current().nextDouble(-0.15, 0.15);
         float jitterY = (float) ThreadLocalRandom.current().nextDouble(-0.1, 0.1);

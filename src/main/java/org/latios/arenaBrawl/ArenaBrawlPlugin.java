@@ -188,6 +188,9 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new BroodMotherHitListener(broodMotherEntityManager), this);
 
         debuffManager.registerListener(new PoisonListener(playerHealthManager));
+        AntiHealListener antiHealListener = new AntiHealListener(playerHealthManager);
+        debuffManager.registerListener(antiHealListener);
+        Bukkit.getPluginManager().registerEvents(antiHealListener, this);
        getServer().getPluginManager().registerEvents(
                 new CombatUpgradeListener(combatUpgradeGUI, combatUpgradeManager), this
         );

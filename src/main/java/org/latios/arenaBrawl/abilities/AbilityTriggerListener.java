@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.latios.arenaBrawl.abilities.support.HolyWater;
+import org.latios.arenaBrawl.abilities.support.SongOfPowerAbility;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.MatchManager;
@@ -58,7 +59,7 @@ public class AbilityTriggerListener implements Listener {
 
         if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)
                 || debuffManager.hasDebuff(player, DebuffType.STUN)) {
-            if (!(currentAbility instanceof HolyWater)) {
+            if (!(currentAbility instanceof HolyWater) && !(currentAbility instanceof SongOfPowerAbility)) {
                 player.sendMessage("§cYou can't use abilities right now!");
                 return;
             }

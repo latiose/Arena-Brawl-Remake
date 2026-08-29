@@ -78,13 +78,13 @@ public class AbilityRegistry {
                         deps.structureManager(), deps.teamManager(),deps.debuffManager()));
         register(AbilitySlot.SUPPORT, "songofpower",
                 deps -> new SongOfPowerAbility(deps.cooldownManager(), deps.combatUpgradeManager(),
-                        deps.teamManager(), deps.songOfPowerManager(),deps.energyModifierManager()));
+                        deps.teamManager(), deps.songOfPowerManager(),deps.energyModifierManager(),deps.debuffManager()));
         register(AbilitySlot.UTILITY, "sparkbolt",
                 deps -> new SparkBolt(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
                         ,deps.energyModifierManager()));
         register(AbilitySlot.UTILITY, "corruption",
                 deps -> new Corruption(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
-                        ,deps.playerHealthManager()));
+                        ,deps.debuffManager()));
         register(AbilitySlot.SUPPORT, "lifeleech",
                 deps -> new LifeLeechAbility(deps.cooldownManager(), deps.combatUpgradeManager(), deps.lifeLeechManager()));
         register(AbilitySlot.OFFENSIVE, "consume",

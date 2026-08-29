@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.abilities.support;
 
 import org.bukkit.Location;
@@ -14,6 +13,7 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
+import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -31,13 +31,16 @@ public class SongOfPowerAbility implements Ability {
     private final TeamManager teamManager;
     private final SongOfPowerManager songOfPowerManager;
     private final EnergyModifierManager energyModifierManager;
+    private final DebuffManager debuffManager;
 
     public SongOfPowerAbility(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
-                              TeamManager teamManager, SongOfPowerManager songOfPowerManager, EnergyModifierManager energyModifierManager) {
+                              TeamManager teamManager, SongOfPowerManager songOfPowerManager,
+                              EnergyModifierManager energyModifierManager, DebuffManager debuffManager) {
         this.cost = new CooldownCost(cooldownManager, "songofpower", 45000, upgradeManager);
         this.teamManager = teamManager;
         this.songOfPowerManager = songOfPowerManager;
         this.energyModifierManager = energyModifierManager;
+        this.debuffManager = debuffManager;
     }
 
     @Override
@@ -64,6 +67,8 @@ public class SongOfPowerAbility implements Ability {
 
     @Override
     public boolean activate(Player player) {
+        debuffManager.clear(player);
+        debuffManager.setSongOfPowerManager(songOfPowerManager);
         Set<Player> affected = new HashSet<>();
         affected.add(player);
 
@@ -75,6 +80,7 @@ public class SongOfPowerAbility implements Ability {
 
         for (Player target : affected) {
             songOfPowerManager.applyBuff(target, DURATION_MILLIS);
+            debuffManager.clear(target);
             energyModifierManager.addModifier(target, "song_of_power", 2.0, DURATION_MILLIS);
         }
 
@@ -93,7 +99,7 @@ public class SongOfPowerAbility implements Ability {
                     return;
                 }
                 Location loc = caster.getLocation();
-                for(int i = 0; i<5; i++) {
+                for (int i = 0; i < 5; i++) {
                     loc.getWorld().playSound(loc, Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 0.5f);
                     loc.getWorld().spawnParticle(Particle.NOTE, loc.clone().add(0, 1.5, 0), 1, 0.5, 0.3, 0.5, 1.0);
                 }
