@@ -26,6 +26,7 @@ public class PlayerHealthManager {
     private final Map<UUID, UUID> lastAttacker = new HashMap<>();
     private final Map<UUID, Double> currentHealth = new HashMap<>();
     private final Map<UUID, Double> maxHealth = new HashMap<>();
+    private final Map<UUID, Long> regenDisabledUntil = new HashMap<>();
     private final Set<UUID> eliminated = new HashSet<>();
     private static final long HOLOGRAM_LIFETIME_TICKS = 35;
     private Consumer<Player> eliminationCallback = p -> {};
@@ -49,12 +50,30 @@ public class PlayerHealthManager {
         return currentHealth.getOrDefault(player.getUniqueId(), 2000.0);
     }
 
+    public boolean canRegen(Player player) {
+        return !isRegenDisabled(player);
+    }
+
+    public boolean isRegenDisabled(Player player) {
+        Long disabledUntil = regenDisabledUntil.get(player.getUniqueId());
+        if (disabledUntil == null) return false;
+        return System.currentTimeMillis() < disabledUntil;
+    }
+
+    public void disableRegen(Player player, long durationMillis) {
+        regenDisabledUntil.put(player.getUniqueId(), System.currentTimeMillis() + durationMillis);
+    }
+
     public void heal(Player player, double amount) {
         if (eliminated.contains(player.getUniqueId())) return;
+        if (!canRegen(player)) return;
+
         double max = getMaxHealth(player);
         double updated = Math.min(getHealth(player) + amount, max);
         currentHealth.put(player.getUniqueId(), updated);
-        spawnHologram(player, String.valueOf(amount), player.getLocation());
+
+        int roundedHeal = (int) Math.round(amount);
+        spawnHologram(player, String.valueOf(roundedHeal), player.getLocation());
         syncVanilla(player);
     }
 

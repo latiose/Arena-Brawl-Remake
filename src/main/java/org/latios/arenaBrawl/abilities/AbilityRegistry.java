@@ -82,6 +82,9 @@ public class AbilityRegistry {
         register(AbilitySlot.UTILITY, "sparkbolt",
                 deps -> new SparkBolt(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
                         ,deps.energyModifierManager()));
+        register(AbilitySlot.UTILITY, "corruption",
+                deps -> new Corruption(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
+                        ,deps.playerHealthManager()));
         register(AbilitySlot.SUPPORT, "lifeleech",
                 deps -> new LifeLeechAbility(deps.cooldownManager(), deps.combatUpgradeManager(), deps.lifeLeechManager()));
         register(AbilitySlot.OFFENSIVE, "consume",
