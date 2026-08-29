@@ -103,7 +103,7 @@ public class ShieldWall implements Ability {
 
     @Override
     public String getDescription() {
-        return "Reduces incoming damage by 70% for 10 seconds.";
+        return "Reduces incoming damage by a big amount for some time";
     }
 
     @Override

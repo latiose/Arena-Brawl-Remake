@@ -61,7 +61,7 @@ public class GroundSlam implements Ability {
         return List.of(
                 new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
                 new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
-                new AbilityStat("Range", 4 + "")
+                new AbilityStat("Range", "4")
         );
     }
 }

@@ -66,7 +66,7 @@ public class SnowballAbility implements Ability {
                 new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
                 new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
                 new AbilityStat("Slow chance", "20%"),
-                new AbilityStat("Slow duration", "20s")
+                new AbilityStat("Slow duration", "2s")
         );
     }
 }

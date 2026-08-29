@@ -45,16 +45,17 @@ public class RocketChickenAbility implements Ability {
 
     @Override
     public String getDescription() {
-        return "Launches a chicken like a rocket. Deals 80 damage on impact, with a 2.5-block area of effect.";
+        return "Launches a chicken like a rocket.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", "80"),
-                new AbilityStat("AoE Radius", "2.5 blocks"),
-                new AbilityStat("Energy Cost", "30")
-        );
+                new AbilityStat("Damage", String.valueOf(DAMAGE)),
+                new AbilityStat("AoE Radius", String.valueOf(AOE_RADIUS)),
+                new AbilityStat("Energy Cost", String.valueOf(ENERGY_COST)
+                ) );
+
     }
 
     @Override

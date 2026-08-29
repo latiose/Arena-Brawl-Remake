@@ -35,7 +35,7 @@ public class BoneShield implements Ability {
 
     @Override
     public String getDescription() {
-        return "Blocks the 5 next attacks, on hit heals the user for 30 health";
+        return "Blocks the 5 next attacks, on hit heals the user.";
     }
 
     @Override

@@ -48,8 +48,8 @@ public class DivineJudgmentAbility implements Ability {
 
     @Override
     public String getDescription() {
-        return "An ally become immune to damage for 5 seconds. Afterwards, "
-                + "explodes for 200 damage to nearby enemies.";
+        return "An ally becomes immune to damage for 5 seconds. Afterwards, "
+                + "they explode for 200 damage to nearby enemies.";
     }
 
     @Override
@@ -60,9 +60,9 @@ public class DivineJudgmentAbility implements Ability {
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Immunity Duration", "5s"),
-                new AbilityStat("Ally Radius", "20 blocks"),
-                new AbilityStat("Explosion Damage", "200"),
-                new AbilityStat("Explosion Radius", "3 blocks"),
+                new AbilityStat("Ally Radius", String.valueOf(MAX_RANGE)),
+                new AbilityStat("Explosion Damage", String.valueOf(EXPLOSION_DAMAGE)),
+                new AbilityStat("Explosion Radius", String.valueOf(EXPLOSION_RADIUS)),
                 new AbilityStat("Uses", "1 per match")
         );
     }

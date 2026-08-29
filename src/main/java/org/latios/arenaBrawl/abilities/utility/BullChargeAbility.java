@@ -27,9 +27,7 @@ import java.util.List;
 
 public class BullChargeAbility implements Ability {
 
-    private static final double TOTAL_DISTANCE = 15.0;
     private static final long DURATION_TICKS = 20; // 1 second
-
 
     private final AbilityCost cost;
 
@@ -51,7 +49,7 @@ public class BullChargeAbility implements Ability {
 
     @Override
     public String getDescription() {
-        return "Charges forward 15 blocks over 1 second, disguised as a cow. Instantly breaks "
+        return "Charges forward disguised as a cow. Instantly breaks "
                 + "structures in your path and stops if you hit a solid block.";
     }
 

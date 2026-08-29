@@ -52,7 +52,7 @@ public class HealingWindAbility implements Ability {
     @Override
     public String getDescription() {
         return "Instantly pushes back nearby enemies, then heals you and allies in a large radius "
-                + "for 50 HP per second for 6 seconds.";
+                + "healing every second for some time";
     }
 
     @Override
@@ -63,9 +63,9 @@ public class HealingWindAbility implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Push Radius", "6 blocks"),
-                new AbilityStat("Heal Radius", "10 blocks"),
-                new AbilityStat("Heal per second", "50 HP"),
+                new AbilityStat("Push Radius", String.valueOf(PUSH_RADIUS)),
+                new AbilityStat("Heal Radius", String.valueOf(HEAL_RADIUS)),
+                new AbilityStat("Heal per second", String.valueOf(HEAL_PER_SECOND)),
                 new AbilityStat("Duration", "6s"),
                 new AbilityStat("Uses", "1 per match")
         );

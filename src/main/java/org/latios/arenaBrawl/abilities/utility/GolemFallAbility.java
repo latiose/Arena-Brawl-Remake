@@ -59,8 +59,8 @@ public class GolemFallAbility implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Range", "20 blocks"),
-                new AbilityStat("Impact Radius", "5 blocks"),
+                new AbilityStat("Range", String.valueOf(MAX_RANGE)),
+                new AbilityStat("Impact Radius", String.valueOf(IMPACT_RADIUS)),
                 new AbilityStat("Breaks structures", "Yes"),
                 new AbilityStat("Knockback", "Extreme")
         );

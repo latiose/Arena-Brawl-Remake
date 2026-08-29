@@ -48,14 +48,14 @@ public class NanoBoostAbility implements Ability {
     }
     @Override
     public String getDescription() {
-        return "Targets an ally up to 20 blocks away, granting Speed II, 50% damage reduction, "
-                + "and 50% increased damage for 8 seconds.";
+        return "Targets an ally, granting them a speed boost,damage reduction, "
+                + "and increased damage for some time.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Range", "20 blocks"),
+                new AbilityStat("Range", String.valueOf(MAX_RANGE)),
                 new AbilityStat("Duration", "8s"),
                 new AbilityStat("Damage Reduction", "50%"),
                 new AbilityStat("Damage Increase", "50%"),

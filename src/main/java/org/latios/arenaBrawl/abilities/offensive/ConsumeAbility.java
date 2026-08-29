@@ -45,15 +45,15 @@ public class ConsumeAbility implements Ability {
 
     @Override
     public String getDescription() {
-        return "Devours the nearest enemy within 3 blocks, dealing 220 damage and healing yourself for 50 HP.";
+        return "Devours the nearest targetted enemy, dealing damage and healing yourself.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", "220"),
-                new AbilityStat("Self Heal", "50 HP"),
-                new AbilityStat("Range", "3 blocks"),
+                new AbilityStat("Damage", String.valueOf(DAMAGE)),
+                new AbilityStat("Self Heal", String.valueOf(SELF_HEAL)),
+                new AbilityStat("Range", String.valueOf(MAX_RANGE)),
                 new AbilityStat("Energy Cost", "100")
         );
     }
@@ -63,7 +63,7 @@ public class ConsumeAbility implements Ability {
         Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, MAX_RANGE);
 
         if (target == null) {
-            player.sendMessage("§cNo enemy within range to consume.");
+            player.sendMessage("§eThere is no valid player within range!");
             return false;
         }
 

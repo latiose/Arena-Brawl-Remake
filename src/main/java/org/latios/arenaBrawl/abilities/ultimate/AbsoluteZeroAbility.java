@@ -1,4 +1,4 @@
-// abilities/ultimate/AbsoluteZeroAbility.java
+
 package org.latios.arenaBrawl.abilities.ultimate;
 
 import org.bukkit.Location;
@@ -31,7 +31,7 @@ public class AbsoluteZeroAbility implements Ability {
 
     private static final double RADIUS = 6.0;
     private static final long MAX_CHARGE_TICKS = 100;
-    private static final double MAX_DAMAGE = 500.0;
+    private static final double MAX_DAMAGE = 400.0;
     private static final long CHARGE_TIME_MILLIS = 60_000;
 
     private final AbilityCost cost;
@@ -66,28 +66,22 @@ public class AbsoluteZeroAbility implements Ability {
     @Override
     public boolean activate(Player player) {
 
-        if (debuffManager.hasDebuff(player, DebuffType.STUN) || debuffManager.hasDebuff(player, DebuffType.POLYMORPH)) {
-            player.sendMessage("§cYou cannot use Absolute Zero while Crowd Controlled!");
-            return false;
-        }
-
         ChannelTask task = new ChannelTask(player);
         activeChannels.put(player.getUniqueId(), task);
         task.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
-        player.sendMessage("§cYou begin channeling Absolute Zero...");
         return true;
     }
 
     @Override
     public String getDescription() {
-        return "Channels for up to 5 seconds, rooting yourself and slowing all enemies within 6 blocks. "
-                + "Deals up to 500 damage based on channel time.";
+        return "Channels for 5 seconds, rooting yourself and slowing all nearby enemies "
+                + "Deals a big chunk of damage";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Max Damage", "500"),
+                new AbilityStat("Max Damage", String.valueOf(MAX_DAMAGE)),
                 new AbilityStat("Max Channel Time", "5s"),
                 new AbilityStat("Radius", "6 blocks"),
                 new AbilityStat("Charge Time", (CHARGE_TIME_MILLIS / 1000) + "s"),
@@ -114,11 +108,6 @@ public class AbsoluteZeroAbility implements Ability {
                 return;
             }
 
-            if (debuffManager.hasDebuff(player, DebuffType.STUN) || debuffManager.hasDebuff(player, DebuffType.POLYMORPH)) {
-                interrupt();
-                return;
-            }
-
             if (ticksCharged >= MAX_CHARGE_TICKS) {
                 finish();
                 return;
@@ -130,8 +119,7 @@ public class AbsoluteZeroAbility implements Ability {
                 startLocation.setPitch(current.getPitch());
                 player.teleport(startLocation);
             }
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 5, 255, false, false));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 5, 128, false, false));
+           debuffManager.tryApply(player,DebuffType.IMMOBILIZE,5000);
 
             Location center = player.getLocation();
             for (Entity nearby : center.getWorld().getNearbyEntities(center, RADIUS, RADIUS, RADIUS)) {
@@ -150,15 +138,6 @@ public class AbsoluteZeroAbility implements Ability {
 
         private void cleanup() {
             activeChannels.remove(player.getUniqueId());
-            player.removePotionEffect(PotionEffectType.SLOWNESS);
-            player.removePotionEffect(PotionEffectType.JUMP_BOOST);
-        }
-
-        private void interrupt() {
-            cleanup();
-            cancel();
-            player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation(), 20);
-            player.sendMessage("§cYour Absolute Zero was interrupted!");
         }
 
         public void finish() {

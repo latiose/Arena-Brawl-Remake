@@ -51,7 +51,7 @@ public class SongOfPowerAbility implements Ability {
 
     @Override
     public String getDescription() {
-        return "For 7 seconds, you and allies within 6 blocks gain double energy regeneration, "
+        return "For its duration, you and allies within 6 blocks gain double energy regeneration, "
                 + "stop losing hunger, and become immune to negative status effects.";
     }
 

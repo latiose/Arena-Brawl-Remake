@@ -108,11 +108,16 @@ public class AbilityRegistry {
                         deps.teamManager(), deps.playerHealthManager()));
         register(AbilitySlot.OFFENSIVE, "particlebeam",
                 deps -> new ParticleBeamAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
+        register(AbilitySlot.OFFENSIVE, "cookieshotgun",
+                deps -> new CookieShotgunAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
         register(AbilitySlot.SUPPORT, "etheralbody",
                 deps -> new EtherealBodyAbility(deps.cooldownManager(),deps.etherealBodyManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.UTILITY, "violentleap",
                 deps -> new HazardLeapAbility(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
                         ));
+        register(AbilitySlot.UTILITY, "magneticImpulse",
+                deps -> new MagneticImpulseAbility(deps.cooldownManager(), deps.debuffManager() ,deps.combatUpgradeManager()
+                ));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");

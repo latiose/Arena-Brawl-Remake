@@ -33,7 +33,7 @@ public class EtherealBodyAbility implements Ability {
 
     @Override
     public String getDescription() {
-        return "Converts your body into an ethereal state for 4 seconds, absorbing all incoming damage and healing you for the total amount received afterwards.";
+        return "Converts your body into an ethereal state, healing you for the total amount received afterwards.";
     }
 
     @Override

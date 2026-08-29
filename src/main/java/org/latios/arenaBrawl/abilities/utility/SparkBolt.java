@@ -57,7 +57,7 @@ public class SparkBolt implements Ability {
 
     @Override
     public String getDescription() {
-        return "Halves an enemy's energy regeneration for 5 seconds.";
+        return "Halves an enemy's energy regeneration for some time.";
     }
 
     @Override

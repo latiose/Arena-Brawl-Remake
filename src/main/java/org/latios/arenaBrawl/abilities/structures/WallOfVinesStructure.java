@@ -24,7 +24,7 @@ import java.util.UUID;
 public class WallOfVinesStructure extends PlacedStructure {
 
     private static final long DURATION_MILLIS = 5_000;
-    private static final double IMMOBILIZE_RADIUS = 3.0;
+    private static final double IMMOBILIZE_RADIUS = 2.0;
     private static final long IMMOBILIZE_DURATION_MILLIS = 2_000;
     private final DebuffManager debuffManager;
 
@@ -140,24 +140,23 @@ public class WallOfVinesStructure extends PlacedStructure {
     @Override
     public boolean tick() {
         Player owner = org.bukkit.Bukkit.getPlayer(getOwnerId());
-        Location center = getLocation().clone().add(0.5, 0.5, 0.5);
 
         for (Block block : placedBlocks) {
-            if (block.getY() == getLocation().getBlockY()) {
-                block.getWorld().spawnParticle(
-                        Particle.HAPPY_VILLAGER,
-                        block.getLocation().add(0.5, 0.2, 0.5),
-                        2, 0.3, 0.1, 0.3, 0.02
-                );
-            }
-        }
+            Location blockCenter = block.getLocation().add(0.5, 0.5, 0.5);
 
-        if (owner != null && owner.isOnline()) {
-            for (Entity entity : center.getWorld().getNearbyEntities(center, IMMOBILIZE_RADIUS, IMMOBILIZE_RADIUS, IMMOBILIZE_RADIUS)) {
-                if (entity instanceof Player target && teamManager.isEnemy(owner, target)) {
-                    if (!immobilizedEnemies.contains(target.getUniqueId())) {
-                        immobilizePlayer(target);
-                        immobilizedEnemies.add(target.getUniqueId());
+            block.getWorld().spawnParticle(
+                    Particle.HAPPY_VILLAGER,
+                    blockCenter,
+                    2, 0.3, 0.3, 0.3, 0.02
+            );
+
+            if (owner != null && owner.isOnline()) {
+                for (Entity entity : blockCenter.getWorld().getNearbyEntities(blockCenter, IMMOBILIZE_RADIUS, IMMOBILIZE_RADIUS, IMMOBILIZE_RADIUS)) {
+                    if (entity instanceof Player target && teamManager.isEnemy(owner, target)) {
+                        if (!immobilizedEnemies.contains(target.getUniqueId())) {
+                            immobilizePlayer(target);
+                            immobilizedEnemies.add(target.getUniqueId());
+                        }
                     }
                 }
             }

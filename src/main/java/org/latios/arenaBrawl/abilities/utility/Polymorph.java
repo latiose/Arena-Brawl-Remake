@@ -60,7 +60,7 @@ public class Polymorph implements Ability {
 
     @Override
     public String getDescription() {
-        return "Morphs targeted enemy into a sheep for "+(int)DURATION_MILLIS/1000+"s. Morhped players will heal 25 health per second, won't be able to use their abilities or move but they will" +
+        return "Morphs targeted enemy into a sheep. Morphed players will heal every second, won't be able to use their abilities or move but they will" +
                 "break out if they manage to hit an enemy player with a melee attack.";
     }
 
@@ -68,7 +68,9 @@ public class Polymorph implements Ability {
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Cooldown", (DURATION_MILLIS / 1000) + "s"),
-                new AbilityStat("Range", RANGE + " blocks")
+                new AbilityStat("Range", RANGE + " blocks"),
+                new AbilityStat("Duration", String.valueOf(DURATION_MILLIS/1000)),
+                new AbilityStat("Heal per second", "25")
         );
     }
 }

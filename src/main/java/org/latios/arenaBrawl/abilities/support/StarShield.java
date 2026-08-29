@@ -38,16 +38,16 @@ public class StarShield implements Ability {
 
     @Override
     public String getDescription() {
-        return "Blocks the 3 next attacks, on hit heals the user for 50 health and applies a random debuff to the attacker for 4s";
+        return "Blocks the 3 next attacks, on hit heals the user and applies a random debuff to the attacker.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Heal", (int) OrbitShieldType.STAR_SHIELD.getHealPerCharge()*3 + " HP"),
+                new AbilityStat("Heal", (int) OrbitShieldType.STAR_SHIELD.getHealPerCharge() + " HP"),
                 new AbilityStat("Charges", OrbitShieldType.STAR_SHIELD.getChargeCount() + " HP"),
                 new AbilityStat("Cooldown", "45s"),
-                new AbilityStat("Bonus", "Debuffs attackers with slow,immobilization or stun")
+                new AbilityStat("Bonus", "Debuffs attackers with slow,immobilization or stun for 4s each.")
         );
     }
 }

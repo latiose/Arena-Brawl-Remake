@@ -1,4 +1,4 @@
-// abilities/impl/DashAbility.java
+
 package org.latios.arenaBrawl.abilities.offensive;
 
 import org.bukkit.Location;
@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class DashAbility implements Ability {
 
-    private static final double DISTANCE = 3.0;
+    private static final double DISTANCE = 4.0;
     private static final double DAMAGE = 100.0;
     private static final double ENERGY_COST = 40.0;
     private static final double STEP_SIZE = 0.2;
@@ -45,15 +45,15 @@ public class DashAbility implements Ability {
 
     @Override
     public String getDescription() {
-        return "Dashes 3 blocks forward, dealing 100 damage to any enemy caught in your path. Stops at walls.";
+        return "Dashes 4 blocks forward, dealing 100 damage to any enemy caught in your path. Stops at walls.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Distance", "3 blocks"),
-                new AbilityStat("Damage", "100"),
-                new AbilityStat("Energy Cost", "40")
+                new AbilityStat("Distance", String.valueOf(DISTANCE)),
+                new AbilityStat("Damage", String.valueOf(DAMAGE)),
+                new AbilityStat("Energy Cost", String.valueOf(ENERGY_COST))
         );
     }
 

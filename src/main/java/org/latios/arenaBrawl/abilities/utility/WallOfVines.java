@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.abilities.utility;
 
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
@@ -38,8 +39,8 @@ public class WallOfVines implements Ability {
 
     @Override
     public String getDescription() {
-        return "Builds a climbable wall that immobilizes nearby enemies for 2s "
-                + "Cannot be broken by melee attacks";
+        return "Builds a climbable wall that immobilizes nearby enemies. "
+                + "Cannot be broken by melee attacks.";
     }
 
     @Override
@@ -53,12 +54,20 @@ public class WallOfVines implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        Location placementLocation = player.getLocation();
+        Block targetBlock = player.getTargetBlockExact(5);
+
+        if (targetBlock == null || !targetBlock.getType().isSolid()) {
+            player.sendMessage("§eSelect a valid block!");
+            return false;
+        }
+
+
+        Location placementLocation = targetBlock.getRelative(BlockFace.UP).getLocation();
         StructureBlueprint blueprint = Blueprints.defaultWallOfVines();
         BlockFace facing = WallOfVinesStructure.getPlayerFacing(player);
 
-        if (!StructureUtils.isSpaceClearForBlueprint(placementLocation, facing, blueprint)) {
-            player.sendMessage("§cCannot place wall of vines!");
+    if(!StructureUtils.isSpaceClearForBlueprint(placementLocation, facing, blueprint)) {
+            player.sendMessage("§eSelect a valid block!");
             return false;
         }
 

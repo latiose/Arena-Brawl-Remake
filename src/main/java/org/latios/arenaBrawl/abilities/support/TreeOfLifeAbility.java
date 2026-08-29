@@ -1,7 +1,8 @@
-// abilities/support/TreeOfLifeAbility.java
 package org.latios.arenaBrawl.abilities.support;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
@@ -41,8 +42,8 @@ public class TreeOfLifeAbility implements Ability {
 
     @Override
     public String getDescription() {
-        return "Grows a tree over 5 seconds that heals nearby allies for 50 HP every second. "
-                + "After 7 seconds total, it bursts for a final 400 HP heal. Can be chopped down with 8 hits.";
+        return "Grows a tree over 5 seconds that heals nearby allies for a reduced amount of HP every second. "
+                + "After some seconds, it bursts for a big burst. Can be chopped down with melee attacks.";
     }
 
     @Override
@@ -58,10 +59,32 @@ public class TreeOfLifeAbility implements Ability {
 
     @Override
     public boolean activate(Player player) {
+        Block targetBlock = player.getTargetBlockExact(5);
+
+        if (targetBlock == null || !targetBlock.getType().isSolid()) {
+            player.sendMessage("§eSelect a valid block!");
+            return false;
+        }
+
+        Block placementBlock = targetBlock.getRelative(BlockFace.UP);
+
+        if (!isReplaceable(placementBlock.getType())) {
+            player.sendMessage("§eSelect a valid block!");
+            return false;
+        }
+
         var structure = new TreeOfLifeStructure(
-                player, player.getLocation(), Blueprints.growthPhases(), teamManager, healthManager
+                player, placementBlock.getLocation(), Blueprints.growthPhases(), teamManager, healthManager
         );
         structureManager.register(structure);
         return true;
+    }
+
+    private boolean isReplaceable(Material material) {
+        return material.isAir()
+                || material == Material.SHORT_GRASS
+                || material == Material.TALL_GRASS
+                || material == Material.SNOW
+                || material.name().endsWith("_CARPET");
     }
 }

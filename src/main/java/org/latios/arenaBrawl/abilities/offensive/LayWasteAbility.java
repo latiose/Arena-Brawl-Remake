@@ -48,7 +48,7 @@ public class LayWasteAbility implements Ability {
 
     @Override
     public String getDescription() {
-        return "Marks a targeted block that explodes after 0.75 seconds, dealing 120 damage to enemies in the area.";
+        return "Marks a targeted block that explodes after 0.75 seconds, dealing damage to enemies in the area.";
     }
 
     @Override

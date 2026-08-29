@@ -62,7 +62,7 @@ public abstract class AbstractLauncher implements Ability {
                 new AbilityStat("Slice Damage", String.valueOf((int) getSliceDamage())),
                 new AbilityStat("Explosion Radius", String.valueOf((int) getAoeRadius())),
                 new AbilityStat("Slices", "3"),
-                new AbilityStat("Energy Cost", "asd" + "")
+                new AbilityStat("Energy Cost", cost.getBaseCostDescription())
         );
     }
 

@@ -60,7 +60,7 @@ public class SugarRush implements Ability {
 
     @Override
     public String getDescription() {
-        return "Gives the user speed, then crashes giving them slow";
+        return "Gives the user speed, then crashes slowing them down";
     }
 
     @Override

@@ -40,7 +40,7 @@ public class LifeLeechAbility implements Ability {
 
     @Override
     public String getDescription() {
-        return "For 8 seconds, your next 12 melee attacks heal you for 60 HP each.";
+        return "Heal off enemies by attacking them for some time.";
     }
 
     @Override
