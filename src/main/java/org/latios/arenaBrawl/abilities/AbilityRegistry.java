@@ -48,6 +48,10 @@ public class AbilityRegistry {
                 deps -> new StarShield(deps.cooldownManager(), deps.orbitShieldManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.OFFENSIVE, "freezingbreath",
                 deps -> new FreezingBreath(deps.energyManager(), deps.teamManager(), deps.combatService(),deps.debuffManager()));
+        register(AbilitySlot.OFFENSIVE, "evilbreath",
+                deps -> new EvilBreath(deps.energyManager(), deps.teamManager(), deps.combatService(),deps.debuffManager()));
+        register(AbilitySlot.OFFENSIVE, "heavensbreath",
+                deps -> new HeavensBreath(deps.energyManager(), deps.teamManager(), deps.combatService(),deps.playerHealthManager()));
         register(AbilitySlot.OFFENSIVE, "dragonsbreath",
                 deps -> new DragonsBreath(plugin,deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager()));
         register(AbilitySlot.OFFENSIVE, "ancientbreath",
