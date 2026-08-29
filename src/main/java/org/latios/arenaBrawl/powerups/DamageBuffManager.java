@@ -20,11 +20,11 @@ public class DamageBuffManager {
     private final Map<UUID, ActiveBuff> activeBuffs = new HashMap<>();
     private final Map<UUID, BossBar> bossBars = new HashMap<>();
 
-    public void applyBuff(Player player, double multiplier, long durationMillis) {
+    public void applyBuff(Player player, double multiplier, long durationMillis, String Title) {
         long now = System.currentTimeMillis();
         activeBuffs.put(player.getUniqueId(), new ActiveBuff(multiplier, now, durationMillis));
 
-        BossBar bar = Bukkit.createBossBar("§c§lDOUBLE DAMAGE", BarColor.PURPLE, BarStyle.SOLID);
+        BossBar bar = Bukkit.createBossBar("§c§l"+Title, BarColor.PURPLE, BarStyle.SOLID);
         bar.addPlayer(player);
         bar.setProgress(1.0);
         bossBars.put(player.getUniqueId(), bar);
@@ -39,9 +39,11 @@ public class DamageBuffManager {
 
         if (remaining <= 0) {
             clear(player);
+            /*
             player.sendMessage(
                     Component.text("Your double damage powerup has expired!", NamedTextColor.RED, TextDecoration.BOLD)
             );
+            */
             return 1.0;
         }
 

@@ -6,6 +6,7 @@ import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
+import org.latios.arenaBrawl.abilities.support.EtherealBodyManager;
 import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
@@ -16,6 +17,7 @@ import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.hats.HatEquipUtils;
 import org.latios.arenaBrawl.hats.HatSelectionManager;
+import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import org.latios.arenaBrawl.powerups.PowerupType;
 import org.latios.arenaBrawl.team.Team;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -53,13 +55,17 @@ public class ArenaManager {
     private final LifeLeechManager lifeLeechManager;
     private final StructureDemolitionService demolitionService;
     private final EnergyModifierManager energyModifierManager;
+    private final DamageBuffManager damageBuffManager;
+    private final EtherealBodyManager etherealBodyManager;
+
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
                         org.bukkit.plugin.Plugin plugin, EnergyManager energyManager, PlayerHealthManager playerHealthManager, HungerManager hungerManager, MatchManager matchManager,ShieldManager shieldManager,
     DebuffManager debuffManager,ArmorTierManager armorTierManager, CombatService combatService,OrbitShieldManager orbitShieldManager, HatSelectionManager hatSelectionManager,
                         CombatUpgradeManager combatUpgradeManager,BroodMotherEntityManager broodMotherEntityManager, ArenaMapManager arenaMapManager, StructureManager structureManager, MovementLockManager movementLockManager, SongOfPowerManager songOfPowerManager,
-                        LifeLeechManager lifeLeechManager, StructureDemolitionService demolitionService,EnergyModifierManager energyModifierManager) {
+                        LifeLeechManager lifeLeechManager, StructureDemolitionService demolitionService,EnergyModifierManager energyModifierManager, DamageBuffManager damageBuffManager,
+                        EtherealBodyManager etherealBodyManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -87,6 +93,8 @@ public class ArenaManager {
         this.lifeLeechManager = lifeLeechManager;
         this.demolitionService = demolitionService;
         this.energyModifierManager = energyModifierManager;
+        this.damageBuffManager = damageBuffManager;
+        this.etherealBodyManager = etherealBodyManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -108,7 +116,7 @@ public class ArenaManager {
 
         List<Player> allPlayers = List.of(p1, p2, p3, p4);
         AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,
-                energyModifierManager);
+                energyModifierManager,damageBuffManager,etherealBodyManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(false);

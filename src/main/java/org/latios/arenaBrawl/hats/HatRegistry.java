@@ -24,6 +24,9 @@ public class HatRegistry {
         register(new HatDefinition("troll", "Troll Hat", Material.BEDROCK, HatRarity.COMMON, List.of(
                 "umadbro?", "Trolol!", "try harder bro"
         )));
+        register(new HatDefinition("hefney", "Hefney Hat", Material.SAND, HatRarity.COMMON, List.of(
+                "Sand everywhere!", "ALLAHU AKBAR!", "I ride a camel to school"
+        )));
         register(new HatDefinition("compliment", "Compliment Hat", Material.COMMAND_BLOCK, HatRarity.COMMON, List.of(
                 "You're amazing!", "I love your style!", "You smell great!"
         )));
@@ -107,6 +110,10 @@ public class HatRegistry {
         register(new HatDefinition("doge", "Doge Hat", Material.PLAYER_HEAD, HatRarity.RARE, List.of(
                 "such ouch.", "very damage.", "more pain."), null,
                 UUID.fromString("f01fd694-40e7-4245-b687-b7803a9b7491")
+        ));
+        register(new HatDefinition("getmads", "GetMads Hat", Material.PLAYER_HEAD, HatRarity.RARE, List.of(
+                "#KHAZAKASTANNUMBER1", "vodka client", "getmads such pro isnt am i pro"), null,
+                UUID.fromString("576749eb-6728-4773-a41b-b418a62f9c01")
         ));
         register(new HatDefinition("l33t", "l33t Hat", Material.REDSTONE_ORE, HatRarity.RARE, List.of(
                 "GET ON MY LEVEL.", "UR WEAK SON.", "DO U EVEN LIFT"

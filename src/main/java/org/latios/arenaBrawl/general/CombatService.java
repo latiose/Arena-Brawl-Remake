@@ -11,6 +11,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.joml.Vector3f;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
+import org.latios.arenaBrawl.abilities.support.EtherealBodyManager;
 import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldType;
@@ -38,10 +39,11 @@ public class CombatService {
     private static final long STAR_SHIELD_EFFECT_DURATION_MILLIS = 4_000;
     private static final List<DebuffType> STAR_SHIELD_POSSIBLE_DEBUFFS =
             List.of(DebuffType.STUN, DebuffType.IMMOBILIZE, DebuffType.SLOW);
+    private final EtherealBodyManager etherealBodyManager;
 
     public CombatService(PlayerHealthManager healthManager, ShieldManager shieldManager,
                          DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
-                         DamageBuffManager damageBuffManager, MatchManager matchManager, LifeLeechManager lifeLeechManager) {
+                         DamageBuffManager damageBuffManager, MatchManager matchManager, LifeLeechManager lifeLeechManager,EtherealBodyManager etherealBodyManager) {
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
@@ -49,6 +51,7 @@ public class CombatService {
         this.damageBuffManager = damageBuffManager;
         this.matchManager = matchManager;
         this.lifeLeechManager = lifeLeechManager;
+        this.etherealBodyManager = etherealBodyManager;
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
@@ -80,7 +83,7 @@ public class CombatService {
 
         double reduction = shieldManager.getDamageReduction(victim);
         double finalDamage = reduction > 0 ? adjustedDamage * (1 - reduction) : adjustedDamage;
-
+        etherealBodyManager.processIncomingDamage(victim, finalDamage);
         healthManager.damage(victim, finalDamage, attacker);
         if (abilityName.equals("Melee")) {
             playDamageFeedback(victim);

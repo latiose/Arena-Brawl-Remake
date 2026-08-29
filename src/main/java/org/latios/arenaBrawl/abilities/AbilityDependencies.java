@@ -4,6 +4,7 @@ package org.latios.arenaBrawl.abilities;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
+import org.latios.arenaBrawl.abilities.support.EtherealBodyManager;
 import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
@@ -11,6 +12,7 @@ import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
+import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -31,5 +33,7 @@ public record AbilityDependencies(
         SongOfPowerManager songOfPowerManager,
         LifeLeechManager lifeLeechManager,
         StructureDemolitionService demolitionService,
-        EnergyModifierManager energyModifierManager
+        EnergyModifierManager energyModifierManager,
+        DamageBuffManager damageBuffManager,
+        EtherealBodyManager etherealBodyManager
 ) {}

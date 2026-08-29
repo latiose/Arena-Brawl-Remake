@@ -3,10 +3,9 @@ package org.latios.arenaBrawl.abilities;
 import org.bukkit.plugin.Plugin;
 import org.latios.arenaBrawl.abilities.offensive.*;
 import org.latios.arenaBrawl.abilities.support.*;
-import org.latios.arenaBrawl.abilities.ultimate.AbsoluteZeroAbility;
-import org.latios.arenaBrawl.abilities.ultimate.BroodMother;
+import org.latios.arenaBrawl.abilities.ultimate.*;
 import org.latios.arenaBrawl.abilities.utility.*;
-import org.latios.arenaBrawl.abilities.ultimate.ShieldWall;
+import org.latios.arenaBrawl.abilities.utility.HazardLeapAbility;
 
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -96,6 +95,24 @@ public class AbilityRegistry {
                         deps.teamManager(), deps.combatService(), deps.debuffManager()));
         register(AbilitySlot.OFFENSIVE, "rocketchicken",
                 deps -> new RocketChickenAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
+        register(AbilitySlot.OFFENSIVE, "laywaste",
+                deps -> new LayWasteAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
+        register(AbilitySlot.ULTIMATE, "nanoboost",
+                deps -> new NanoBoostAbility(deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                        deps.shieldManager(), deps.damageBuffManager()));
+        register(AbilitySlot.ULTIMATE, "divinejudgment",
+                deps -> new DivineJudgmentAbility(deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                        deps.shieldManager(), deps.combatService()));
+        register(AbilitySlot.ULTIMATE, "healingwind",
+                deps -> new HealingWindAbility(deps.cooldownManager(), deps.usageManager(),
+                        deps.teamManager(), deps.playerHealthManager()));
+        register(AbilitySlot.OFFENSIVE, "particlebeam",
+                deps -> new ParticleBeamAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
+        register(AbilitySlot.SUPPORT, "etheralbody",
+                deps -> new EtherealBodyAbility(deps.cooldownManager(),deps.etherealBodyManager(),deps.combatUpgradeManager()));
+        register(AbilitySlot.UTILITY, "violentleap",
+                deps -> new HazardLeapAbility(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
+                        ));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");

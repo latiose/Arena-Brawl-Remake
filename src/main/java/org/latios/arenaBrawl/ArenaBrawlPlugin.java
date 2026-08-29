@@ -89,6 +89,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private LifeLeechManager lifeLeechManager;
     private StructureDemolitionService demolitionService;
     private EnergyModifierManager energyModifierManager;
+    private EtherealBodyManager etherealBodyManager;
     @Override
     public void onEnable() {
         instance = this;
@@ -119,6 +120,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.energyModifierManager = new EnergyModifierManager();
         this.statsManager = new StatsManager(this);
         this.ratingManager = new RatingManager(this);
+        this.etherealBodyManager = new EtherealBodyManager(playerHealthManager);
         this.combatUpgradeManager = new CombatUpgradeManager(this, statsManager);
         this.combatUpgradeGUI = new CombatUpgradeGUI(combatUpgradeManager);
         this.armorTierManager = new ArmorTierManager(ratingManager);
@@ -146,7 +148,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 armorTierManager, hatSelectionManager, broodMotherEntityManager,this, arenaMapManager,structureManager,songOfPowerManager
         );
         this.combatService = new CombatService(
-                playerHealthManager, shieldManager, debuffManager, orbitShieldManager, damageBuffManager, matchManager,lifeLeechManager
+                playerHealthManager, shieldManager, debuffManager, orbitShieldManager, damageBuffManager, matchManager,lifeLeechManager,etherealBodyManager
         );
         this.demolitionService = new StructureDemolitionService(structureManager, teamManager);
         this.broodMotherEntityManager.setCombatService(combatService);
@@ -174,7 +176,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 usageManager,
                 scoreboardManager,
                 this, energyManager, playerHealthManager, hungerManager, matchManager, shieldManager,debuffManager,armorTierManager,combatService,orbitShieldManager, hatSelectionManager,combatUpgradeManager,broodMotherEntityManager, arenaMapManager,structureManager,movementLockManager,songOfPowerManager,
-                lifeLeechManager,demolitionService,energyModifierManager
+                lifeLeechManager,demolitionService,energyModifierManager,damageBuffManager,etherealBodyManager
         );
 
         this.queueManager = new QueueManager(partyManager, arenaManager,arenaMapManager);
@@ -197,7 +199,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
 
        AbilityDependencies abilityDependencies = new AbilityDependencies(
                 cooldownManager, teamManager, usageManager, energyManager, shieldManager,
-                debuffManager, playerHealthManager, combatService, orbitShieldManager, combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,energyModifierManager);
+                debuffManager, playerHealthManager, combatService, orbitShieldManager, combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,energyModifierManager,damageBuffManager,
+               etherealBodyManager);
         abilityRegistry.setPreviewDependencies(abilityDependencies);
         abilitySelectorGUI.setPreviewDependencies(abilityDependencies);
 

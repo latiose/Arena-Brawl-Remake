@@ -38,7 +38,7 @@ public class PowerupTask extends BukkitRunnable {
 
                 switch (type) {
                     case HEALTH -> healthManager.heal(picker, 200);
-                    case DOUBLE_DAMAGE -> damageBuffManager.applyBuff(picker, 2, 12_000);
+                    case DOUBLE_DAMAGE -> damageBuffManager.applyBuff(picker, 2, 12_000,"DOUBLE DAMAGE");
                 }
 
                 String powerupName = type == PowerupType.HEALTH ? "HEALING" : "DOUBLE DAMAGE";
