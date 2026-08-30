@@ -52,7 +52,7 @@ public class MagicChestListener implements Listener {
             boolean bought = keyManager.buyKey(player);
             if (bought) {
                 player.sendMessage("§aYou bought a key! You now have " + keyManager.getKeys(player) + " keys.");
-                gui.open(player); // refresh the menu with updated counts
+                gui.open(player);
             } else {
                 player.sendMessage("§cYou don't have enough coins (need " + KeyManager.getKeyCost() + ").");
             }
@@ -70,9 +70,17 @@ public class MagicChestListener implements Listener {
                 player.sendMessage("§6§lYou got " + coinsResult.amount() + " coins!");
             } else if (result instanceof MagicChestManager.HatResult hatResult) {
                 if (hatResult.wasNew()) {
+                    String hatName = hatResult.hat().rarity().getColor() + hatResult.hat().displayName();
                     player.sendMessage(hatResult.hat().rarity().getColor() + "§lNEW HAT: " + hatResult.hat().displayName() + "!");
                     player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 150);
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1.0f, 1.0f);
+
+                    String broadcastMessage = "§e" + player.getName() + " §7has unlocked the " + hatName + " §7hat!";
+                    for (Player worldPlayer : player.getWorld().getPlayers()) {
+                        if (!worldPlayer.equals(player)) {
+                            worldPlayer.sendMessage(broadcastMessage);
+                        }
+                    }
                 } else {
                     int amount = 50 + random.nextInt(151);
                     player.sendMessage(hatResult.hat().rarity().getColor() + "You got a duplicate: " + hatResult.hat().displayName()

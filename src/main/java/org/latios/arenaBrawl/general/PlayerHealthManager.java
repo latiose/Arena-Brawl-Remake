@@ -2,7 +2,10 @@ package org.latios.arenaBrawl.general;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
@@ -11,6 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.joml.Vector3f;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
+import org.latios.arenaBrawl.abilities.ultimate.Rewind;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,6 +93,28 @@ public class PlayerHealthManager {
         syncVanilla(player);
 
         if (updated <= 0) {
+            UUID casterUUID = Rewind.ACTIVE_REWUNDS.remove(player.getUniqueId());
+
+            if (casterUUID != null) {
+                currentHealth.put(player.getUniqueId(), Rewind.REVIVE_HEALTH);
+
+                Location loc = player.getLocation();
+
+                loc.getWorld().playSound(loc, Sound.ITEM_TOTEM_USE, 1.0f, 1.2f);
+                loc.getWorld().playSound(loc, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.8f, 1.5f);
+
+                loc.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, loc.add(0, 1, 0), 100, 0.5, 0.8, 0.5, 0.3);
+                loc.getWorld().spawnParticle(Particle.REVERSE_PORTAL, loc, 50, 0.5, 1.0, 0.5, 0.1);
+
+                Player caster = Bukkit.getPlayer(casterUUID);
+                if (caster != null && caster.isOnline()) {
+                    caster.sendMessage(MessageUtils.positive() + String.format("§eYour Rewind revived %s with §a400 HP§3!", player.getName()));
+                }
+                player.sendMessage(MessageUtils.positive() + "§3Rewind saved you from death! Restored §a400 HP§3!");
+                return;
+            }
+        }
+        if (updated <= 0) {
             eliminated.add(player.getUniqueId());
             eliminationCallback.accept(player);
         }
@@ -128,6 +154,28 @@ public class PlayerHealthManager {
         double updated = Math.max(getHealth(player) - amount, 0);
         currentHealth.put(player.getUniqueId(), updated);
 
+        if (updated <= 0) {
+            UUID casterUUID = Rewind.ACTIVE_REWUNDS.remove(player.getUniqueId());
+
+            if (casterUUID != null) {
+                currentHealth.put(player.getUniqueId(), Rewind.REVIVE_HEALTH);
+
+                Location loc = player.getLocation();
+
+                loc.getWorld().playSound(loc, Sound.ITEM_TOTEM_USE, 1.0f, 1.2f);
+                loc.getWorld().playSound(loc, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.8f, 1.5f);
+
+                loc.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, loc.add(0, 1, 0), 100, 0.5, 0.8, 0.5, 0.3);
+                loc.getWorld().spawnParticle(Particle.REVERSE_PORTAL, loc, 50, 0.5, 1.0, 0.5, 0.1);
+
+                Player caster = Bukkit.getPlayer(casterUUID);
+                if (caster != null && caster.isOnline()) {
+                    caster.sendMessage(MessageUtils.positive() + String.format("§eYour Rewind revived %s with §a400 HP§3!", player.getName()));
+                }
+                player.sendMessage(MessageUtils.positive() + "§3Rewind saved you from death! Restored §a400 HP§3!");
+                return;
+            }
+        }
         if (updated <= 0) {
             eliminated.add(player.getUniqueId());
             eliminationCallback.accept(player);

@@ -90,14 +90,11 @@ public class HatRegistry {
         register(new HatDefinition("detective", "Detective Hat", Material.LEATHER_HELMET, HatRarity.COMMON,
                 List.of("Elementary!", "Fetch my diary!", "Case closed!"), Color.fromRGB(128, 128, 128)));
 
-        register(new HatDefinition("teamplayer", "Teamplayer Hat", Material.LEATHER_HELMET, HatRarity.COMMON,
-                List.of("Way to go!", "Good job!", "You're getting there!"), Color.fromRGB(128, 0, 128)));
-
         register(new HatDefinition("orange_hoodie", "Orange Hoodie Hat", Material.LEATHER_HELMET, HatRarity.COMMON,
                 List.of("Mmph mmf, mmph?", "Mmmpf mpph.", "Mmf mpf mommmppf!"), Color.fromRGB(255, 140, 0)));
 
         register(new HatDefinition("wizard", "Wizard Hat", Material.LEATHER_HELMET, HatRarity.COMMON,
-                List.of("Hypixellamus!", "Alohypixel!", "Crucio!"), Color.fromRGB(20, 20, 20)));
+                List.of("Wingardium!", "Protego!", "Crucio!"), Color.fromRGB(20, 20, 20)));
 
         register(new HatDefinition("canada", "Canada Hat", Material.LEATHER_HELMET, HatRarity.COMMON,
                 List.of("I'M SO SORRY.", "Syrup?", "What's that eh?"), Color.fromRGB(200, 0, 0)));

@@ -132,6 +132,9 @@ public class AbilityRegistry {
         register(AbilitySlot.ULTIMATE, "thebox",
                 deps -> new TheBox(plugin,deps.cooldownManager(), deps.teamManager(),deps.combatService(),
                        deps.debuffManager(), deps.usageManager()));
+        register(AbilitySlot.ULTIMATE, "rewind",
+                deps -> new Rewind(plugin,deps.cooldownManager(), deps.teamManager()
+                       , deps.usageManager()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");
