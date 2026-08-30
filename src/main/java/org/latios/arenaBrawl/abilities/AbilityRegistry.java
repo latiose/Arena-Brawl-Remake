@@ -125,6 +125,8 @@ public class AbilityRegistry {
                 deps -> new EtherealBody(deps.cooldownManager(),deps.etherealBodyManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.SUPPORT, "healingrain",
                 deps -> new HealingRain(plugin,deps.cooldownManager(),deps.teamManager(),deps.playerHealthManager(),deps.combatUpgradeManager()));
+        register(AbilitySlot.SUPPORT, "suzu",
+                deps -> new Suzu(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.shieldManager(), deps.combatUpgradeManager()));
         register(AbilitySlot.UTILITY, "violentleap",
                 deps -> new ViolentLeap(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
                         ));

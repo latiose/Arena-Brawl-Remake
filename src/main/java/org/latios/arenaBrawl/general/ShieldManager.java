@@ -51,6 +51,6 @@ public class ShieldManager {
         activeUntil.remove(player.getUniqueId());
         activeReduction.remove(player.getUniqueId());
 
-        player.sendMessage(MessageUtils.negative() + "§3Your Shield Wall ran out!");
+        player.sendMessage(MessageUtils.negative() + "§3Your shield ran out!");
     }
 }
