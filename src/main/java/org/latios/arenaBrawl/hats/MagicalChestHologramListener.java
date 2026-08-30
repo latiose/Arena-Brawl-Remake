@@ -9,7 +9,7 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.TextDisplay;
@@ -18,9 +18,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.plugin.Plugin;
 import org.joml.Vector3f;
-
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +32,7 @@ public class MagicalChestHologramListener implements Listener {
 
     public MagicalChestHologramListener(Plugin plugin) {
         this.plugin = plugin;
-        Bukkit.getScheduler().runTaskLater(plugin, this::scanAllWorlds, 60L);
+        Bukkit.getScheduler().runTaskLater(plugin, this::scanAllWorlds, 40L);
     }
 
     public void scanAllWorlds() {
@@ -43,30 +43,25 @@ public class MagicalChestHologramListener implements Listener {
         }
     }
 
-    private void scanChunk(Chunk chunk) {
-        int minX = chunk.getX() << 4;
-        int minZ = chunk.getZ() << 4;
-        World world = chunk.getWorld();
-
-        for (int x = minX; x < minX + 16; x++) {
-            for (int z = minZ; z < minZ + 16; z++) {
-                for (int y = world.getMinHeight(); y < world.getMaxHeight(); y++) {
-                    Block block = world.getBlockAt(x, y, z);
-                    if (block.getType() == Material.ENDER_CHEST) {
-                        spawnHologram(block.getLocation());
-                    }
-                }
+    public void scanChunk(Chunk chunk) {
+        for (BlockState tileEntity : chunk.getTileEntities()) {
+            if (tileEntity.getType() == Material.ENDER_CHEST) {
+                spawnHologram(tileEntity.getLocation());
             }
         }
     }
 
-    private void spawnHologram(Location chestLoc) {
-        if (holograms.containsKey(chestLoc)) return;
+    public void spawnHologram(Location chestLoc) {
+        if (holograms.containsKey(chestLoc)) {
+            TextDisplay existing = holograms.get(chestLoc);
+            if (existing != null && existing.isValid()) {
+                return;
+            }
+        }
 
         Location holoLoc = chestLoc.clone().add(0.5, 1.25, 0.5);
         World world = chestLoc.getWorld();
         if (world == null) return;
-
 
         for (Entity nearby : world.getNearbyEntities(holoLoc, 0.5, 0.5, 0.5)) {
             if (nearby instanceof TextDisplay) {
@@ -92,9 +87,9 @@ public class MagicalChestHologramListener implements Listener {
                     new org.joml.AxisAngle4f()
             ));
             d.setViewRange(64.0f);
+            d.setPersistent(false);
         });
 
-       // EntityCleanupUtils.markAsArenaEntity(display);
         holograms.put(chestLoc, display);
     }
 
@@ -105,10 +100,18 @@ public class MagicalChestHologramListener implements Listener {
         }
     }
 
-
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
-        Bukkit.getScheduler().runTask(plugin, () -> scanChunk(event.getChunk()));
+        Bukkit.getScheduler().runTaskLater(plugin, () -> scanChunk(event.getChunk()), 1L);
+    }
+
+    @EventHandler
+    public void onChunkUnload(ChunkUnloadEvent event) {
+        for (BlockState tileEntity : event.getChunk().getTileEntities()) {
+            if (tileEntity.getType() == Material.ENDER_CHEST) {
+                removeHologram(tileEntity.getLocation());
+            }
+        }
     }
 
     @EventHandler

@@ -154,7 +154,9 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.broodMotherEntityManager.setCombatService(combatService);
         debuffManager.registerListener(new PolymorphEffectListener(playerHealthManager));
         debuffManager.registerListener(new StunListener());
+        debuffManager.registerListener(new SilenceListener());
         debuffManager.registerListener(new SlowListener());
+        debuffManager.registerListener(new AntiHealListener(playerHealthManager));
         saveDefaultConfig();
 
 
@@ -224,9 +226,10 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         );
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new VanillaHungerBlockListener(matchManager), this);
-      // getServer().getPluginManager().registerEvents(new BlockBreakListener(),this);
+        getServer().getPluginManager().registerEvents(new BlockBreakListener(),this);
 
-        MagicalChestHologramListener hologramListener = new MagicalChestHologramListener(this);getServer().getPluginManager().registerEvents(hologramListener, this);
+        MagicalChestHologramListener hologramListener = new MagicalChestHologramListener(this);
+        getServer().getPluginManager().registerEvents(hologramListener, this);
 
         getServer().getPluginManager().registerEvents(
                 new MatchDisconnectListener(matchManager, playerHealthManager), this
@@ -243,7 +246,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new OrbitShieldHitListener(orbitShieldManager, combatService,teamManager,cooldownManager,debuffManager),
                 this
         );
-      //  getServer().getPluginManager().registerEvents(new StunListener(debuffManager), this);
+       //getServer().getPluginManager().registerEvents(new StunListener(debuffManager), this);
 
         for (Player online : Bukkit.getOnlinePlayers()) {
             abilitySelectionManager.loadForPlayer(online);

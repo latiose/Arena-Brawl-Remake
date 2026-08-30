@@ -14,6 +14,7 @@ import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.CollisionUtils;
 import org.latios.arenaBrawl.hats.HatEquipUtils;
 import org.latios.arenaBrawl.hats.HatSelectionManager;
+import org.latios.arenaBrawl.hats.MagicalChestHologramListener;
 import org.latios.arenaBrawl.team.TeamManager;
 
 
@@ -27,7 +28,6 @@ public class LobbyJoinListener implements Listener {
     private final LobbyScoreboardManager lobbyScoreboardManager;
     private final ArmorTierManager armorTierManager;
     private final HatSelectionManager hatSelectionManager;
-
     public LobbyJoinListener(MatchManager matchManager, TeamManager teamManager,
                              AbilityManager abilityManager, DebuffManager debuffManager, LobbyScoreboardManager lobbyScoreboardManager,ArmorTierManager armorTierManager,
                              HatSelectionManager hatSelectionManager) {
@@ -46,7 +46,6 @@ public class LobbyJoinListener implements Listener {
         if (matchManager.isInMatch(player)) {
             return;
         }
-
         resetToLobbyState(player);
     }
 
