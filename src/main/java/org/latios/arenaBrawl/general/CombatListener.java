@@ -1,6 +1,6 @@
 package org.latios.arenaBrawl.general;
 
-import io.papermc.paper.event.entity.EntityKnockbackEvent;
+
 import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -25,6 +25,7 @@ import org.latios.arenaBrawl.runes.RuneManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeType;
+
 
 public class CombatListener implements Listener {
 
@@ -58,7 +59,6 @@ public class CombatListener implements Listener {
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player victim)) return;
-
         event.setCancelled(true);
 
         if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {

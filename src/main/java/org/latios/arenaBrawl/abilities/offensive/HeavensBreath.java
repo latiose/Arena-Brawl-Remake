@@ -55,7 +55,7 @@ public class HeavensBreath extends Breath {
 
         if (activated) {
             healthManager.heal(player, HEAL_AMOUNT);
-            player.sendMessage(MessageUtils.positive() + String.format("§3Your Heaven's Breath healed you for §a%d §3health!", (int) HEAL_AMOUNT));
+            player.sendMessage(MessageUtils.positive() + String.format("§3Your Heavens Breath healed you for §a%d §3health!", (int) HEAL_AMOUNT));
             player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0, 1.5, 0), 5, 0.3, 0.3, 0.3, 0.0);
         }
 

@@ -2,19 +2,19 @@ package org.latios.arenaBrawl.general;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
+import org.bukkit.util.Vector;
 import org.joml.Vector3f;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
-import org.latios.arenaBrawl.abilities.support.EtherealBodyManager;
-import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
-import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
-import org.latios.arenaBrawl.abilities.support.OrbitShieldType;
+import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.Match;
@@ -24,6 +24,7 @@ import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class CombatService {
@@ -84,7 +85,32 @@ public class CombatService {
         double reduction = shieldManager.getDamageReduction(victim);
         double finalDamage = reduction > 0 ? adjustedDamage * (1 - reduction) : adjustedDamage;
         etherealBodyManager.processIncomingDamage(victim, finalDamage);
+
+        UUID casterUUID = LifeBond.ACTIVE_BONDS.get(victim.getUniqueId());
+        if (casterUUID != null) {
+            Player caster = Bukkit.getPlayer(casterUUID);
+
+            if (caster != null && caster.isOnline() && !caster.isDead()) {
+                double redirectedDamage = finalDamage * 0.30;
+                finalDamage = finalDamage * 0.70;
+
+                healthManager.damage(caster, redirectedDamage, attacker);
+                caster.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, caster.getLocation().add(0, 1, 0), 3);
+
+                caster.sendMessage(MessageUtils.negative() + String.format(
+                        "§3You absorbed §c%d §3damage for §a%s §3via Life Bond!",
+                        (int) Math.round(redirectedDamage), victim.getName()
+                ));
+
+                victim.sendMessage(MessageUtils.positive() + String.format(
+                        "§a%s §3absorbed §c%d §3of your damage via Life Bond!",
+                        caster.getName(), (int) Math.round(redirectedDamage)
+                ));
+            }
+        }
+
         healthManager.damage(victim, finalDamage, attacker);
+
         if (abilityName.equals("Melee")) {
             playDamageFeedback(victim);
             if (lifeLeechManager.consumeCharge(attacker)) {
@@ -178,6 +204,14 @@ public class CombatService {
 
         if (type.rollsDebuffOnBlock()) {
             applyGuaranteedRandomDebuff(attacker, type);
+        }
+        if(type.doesKnockback()){
+            Vector push = attacker.getLocation().toVector().subtract(victim.getLocation().toVector());
+            push.setY(0);
+            if (push.lengthSquared() < 0.0001) push = new Vector(1, 0, 0);
+            push.normalize().multiply(1.3);
+            push.setY(0.4);
+            attacker.setVelocity(push);
         }
     }
 

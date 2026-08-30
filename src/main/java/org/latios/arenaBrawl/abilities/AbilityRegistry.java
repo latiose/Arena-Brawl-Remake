@@ -46,6 +46,10 @@ public class AbilityRegistry {
                 deps -> new CactusShield(deps.cooldownManager(), deps.orbitShieldManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.SUPPORT, "starshield",
                 deps -> new StarShield(deps.cooldownManager(), deps.orbitShieldManager(),deps.combatUpgradeManager()));
+        register(AbilitySlot.SUPPORT, "spongeshield",
+                deps -> new SpongeShield(deps.cooldownManager(), deps.orbitShieldManager(),deps.combatUpgradeManager()));
+        register(AbilitySlot.SUPPORT, "lifebond",
+                deps -> new LifeBond(plugin,deps.cooldownManager(),deps.teamManager(),deps.playerHealthManager(), deps.combatUpgradeManager()));
         register(AbilitySlot.OFFENSIVE, "freezingbreath",
                 deps -> new FreezingBreath(deps.energyManager(), deps.teamManager(), deps.combatService(),deps.debuffManager()));
         register(AbilitySlot.OFFENSIVE, "evilbreath",
@@ -122,6 +126,12 @@ public class AbilityRegistry {
         register(AbilitySlot.UTILITY, "magneticImpulse",
                 deps -> new MagneticImpulseAbility(deps.cooldownManager(), deps.debuffManager() ,deps.combatUpgradeManager()
                 ));
+        register(AbilitySlot.UTILITY, "darkpassage",
+                deps -> new DarkPassage(plugin,deps.cooldownManager(), deps.teamManager() ,deps.combatUpgradeManager()
+                ));
+        register(AbilitySlot.ULTIMATE, "thebox",
+                deps -> new TheBox(plugin,deps.cooldownManager(), deps.teamManager(),deps.combatService(),
+                       deps.debuffManager(), deps.usageManager()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");
