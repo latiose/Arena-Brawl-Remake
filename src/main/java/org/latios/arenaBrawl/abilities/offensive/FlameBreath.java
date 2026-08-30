@@ -69,8 +69,7 @@ public class FlameBreath extends Breath {
         Set<Player> initialHitPlayers = new HashSet<>();
 
         double currentAngle = 0.0;
-
-        for (double distance = -1.0; distance <= MAX_DISTANCE; distance += STEP_SIZE) {
+        for (double distance = -1.0; distance <= getMaxParticleDistance(); distance += STEP_SIZE) {
             double radius = Math.abs(distance) * RADIUS_GROWTH;
             double deltaTheta = 0.35 + (0.05 / (Math.abs(distance) + 0.1));
             currentAngle += deltaTheta;

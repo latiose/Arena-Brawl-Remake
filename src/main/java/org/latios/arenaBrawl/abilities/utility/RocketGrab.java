@@ -20,8 +20,8 @@ import java.util.List;
 public class RocketGrab implements Ability {
 
     private static final long COOLDOWN_MS = 30_000;
-    private static final double MAX_RANGE = 14.0;
-    private static final double STEP = 1;
+    private static final double MAX_RANGE = 20.0;
+    private static final double STEP = 1.5;
     private static final int PULL_TICKS = 20;
 
     private final Plugin plugin;

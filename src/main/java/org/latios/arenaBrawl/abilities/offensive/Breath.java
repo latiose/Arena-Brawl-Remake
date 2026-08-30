@@ -135,6 +135,10 @@ public abstract class Breath implements Ability {
         }
     }
 
+    protected double getMaxParticleDistance() {
+        return MAX_DISTANCE - (HIT_RADIUS / 2.0);
+    }
+
     protected abstract Sound getCastSound();
     protected abstract double getDamage();
     protected abstract void spawnTrailParticles(Location point);
