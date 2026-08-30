@@ -1,12 +1,10 @@
 package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.plugin.Plugin;
-import org.latios.arenaBrawl.abilities.offensive.BurstFire;
 import org.latios.arenaBrawl.abilities.offensive.*;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.*;
 import org.latios.arenaBrawl.abilities.utility.*;
-import org.latios.arenaBrawl.abilities.utility.HazardLeapAbility;
 
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -125,11 +123,16 @@ public class AbilityRegistry {
                 deps -> new SpikeGrenade(plugin,deps.energyManager(), deps.teamManager(), deps.combatService()));
         register(AbilitySlot.SUPPORT, "etheralbody",
                 deps -> new EtherealBody(deps.cooldownManager(),deps.etherealBodyManager(),deps.combatUpgradeManager()));
+        register(AbilitySlot.SUPPORT, "healingrain",
+                deps -> new HealingRain(plugin,deps.cooldownManager(),deps.teamManager(),deps.playerHealthManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.UTILITY, "violentleap",
-                deps -> new HazardLeapAbility(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
+                deps -> new ViolentLeap(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
                         ));
         register(AbilitySlot.UTILITY, "magneticImpulse",
                 deps -> new MagneticImpulse(deps.cooldownManager(), deps.debuffManager() ,deps.combatUpgradeManager()
+                ));
+        register(AbilitySlot.UTILITY, "RocketGrab",
+                deps -> new RocketGrab(plugin,deps.cooldownManager(), deps.teamManager() ,deps.combatUpgradeManager()
                 ));
         register(AbilitySlot.UTILITY, "darkpassage",
                 deps -> new DarkPassage(plugin,deps.cooldownManager(), deps.teamManager() ,deps.combatUpgradeManager()

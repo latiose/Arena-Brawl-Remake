@@ -63,8 +63,8 @@ public class LifeBond implements Ability {
         final Player ally = targetAlly;
         ACTIVE_BONDS.put(ally.getUniqueId(), player.getUniqueId());
 
-        player.sendMessage(MessageUtils.positive() + String.format("§3Linked §e%s §3with Life Bond!", ally.getName()));
-        ally.sendMessage(MessageUtils.positive() + String.format("§e%s §3linked Life Bond with you!", player.getName()));
+        player.sendMessage(MessageUtils.positive() + String.format("§3Linked §a%s §3with Life Bond!", ally.getName()));
+        ally.sendMessage(MessageUtils.positive() + String.format("§a%s §3linked Life Bond with you!", player.getName()));
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 1.0f, 1.2f);
         ally.getWorld().playSound(ally.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 1.0f, 1.2f);

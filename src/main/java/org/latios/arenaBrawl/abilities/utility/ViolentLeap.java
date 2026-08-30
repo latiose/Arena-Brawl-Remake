@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class HazardLeapAbility implements Ability {
+public class ViolentLeap implements Ability {
     ;
     private static final double RADIUS = 3.0;
     private static final int COOLDOWN_SECONDS = 40;
@@ -31,8 +31,8 @@ public class HazardLeapAbility implements Ability {
     private final TeamManager teamManager;
 
 
-    public HazardLeapAbility(CooldownManager cooldownManager, TeamManager teamManager,
-             CombatUpgradeManager combatUpgradeManager) {
+    public ViolentLeap(CooldownManager cooldownManager, TeamManager teamManager,
+                       CombatUpgradeManager combatUpgradeManager) {
         this.cost = new CooldownCost(cooldownManager, "hazard_leap", COOLDOWN_SECONDS * 1000, combatUpgradeManager);
         this.teamManager = teamManager;
     }
