@@ -19,7 +19,7 @@ import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
 
-public class RocketChickenAbility implements Ability {
+public class RocketChicken implements Ability {
 
     private static final double DAMAGE = 80.0;
     private static final double ENERGY_COST = 30.0;
@@ -31,7 +31,7 @@ public class RocketChickenAbility implements Ability {
     private final TeamManager teamManager;
     private final CombatService combatService;
 
-    public RocketChickenAbility(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
+    public RocketChicken(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
         this.cost = new EnergyCost(energyManager, ENERGY_COST);
         this.teamManager = teamManager;
         this.combatService = combatService;

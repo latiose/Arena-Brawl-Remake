@@ -7,7 +7,8 @@ public enum DebuffType {
     POLYMORPH("Polymorph", true),
     SLOW("Slow", false),
     POISON("Poison", false),
-    ANTIHEAL("AntiHeal", false);
+    ANTIHEAL("AntiHeal", false),
+    SILENCE("Silence", false);
 
     private final String displayName;
 

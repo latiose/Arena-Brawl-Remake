@@ -15,7 +15,7 @@ import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
 
-public class NanoBoostAbility implements Ability {
+public class NanoBoost implements Ability {
 
     private static final double MAX_RANGE = 20.0;
     private static final long DURATION_MILLIS = 8_000;
@@ -27,8 +27,8 @@ public class NanoBoostAbility implements Ability {
     private final DamageBuffManager damageBuffManager;
     private final CooldownManager cooldownManager;
     private static final long CHARGE_TIME_MILLIS = 60_000;
-    public NanoBoostAbility(CooldownManager cooldownManager, UsageManager usageManager, TeamManager teamManager,
-                            ShieldManager shieldManager, DamageBuffManager damageBuffManager) {
+    public NanoBoost(CooldownManager cooldownManager, UsageManager usageManager, TeamManager teamManager,
+                     ShieldManager shieldManager, DamageBuffManager damageBuffManager) {
         this.cooldownManager = cooldownManager;
         this.cost = new UltimateCost(cooldownManager, usageManager, "nanoboost");
         this.teamManager = teamManager;

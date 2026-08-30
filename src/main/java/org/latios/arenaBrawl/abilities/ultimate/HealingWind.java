@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class HealingWindAbility implements Ability {
+public class HealingWind implements Ability {
 
     private static final double PUSH_RADIUS = 6.0;
     private static final double PUSH_STRENGTH = 2.2;
@@ -35,8 +35,8 @@ public class HealingWindAbility implements Ability {
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
 
-    public HealingWindAbility(CooldownManager cooldownManager, UsageManager usageManager,
-                              TeamManager teamManager, PlayerHealthManager healthManager) {
+    public HealingWind(CooldownManager cooldownManager, UsageManager usageManager,
+                       TeamManager teamManager, PlayerHealthManager healthManager) {
         this.cooldownManager = cooldownManager;
         this.cost = new UltimateCost(cooldownManager, usageManager, "healingwind");
         this.teamManager = teamManager;

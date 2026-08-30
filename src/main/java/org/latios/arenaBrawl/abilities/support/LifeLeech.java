@@ -17,7 +17,7 @@ import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class LifeLeechAbility implements Ability {
+public class LifeLeech implements Ability {
 
     private static final int HIT_COUNT = 12;
     private static final long DURATION_MILLIS = 8_000;
@@ -26,8 +26,8 @@ public class LifeLeechAbility implements Ability {
     private final AbilityCost cost;
     private final LifeLeechManager lifeLeechManager;
 
-    public LifeLeechAbility(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
-                            LifeLeechManager lifeLeechManager) {
+    public LifeLeech(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
+                     LifeLeechManager lifeLeechManager) {
         this.cost = new CooldownCost(cooldownManager, "lifeleech", 30000, upgradeManager);
         this.lifeLeechManager = lifeLeechManager;
     }

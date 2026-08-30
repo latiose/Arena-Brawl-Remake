@@ -44,7 +44,7 @@ public class DarkPassage implements Ability {
     public boolean activate(Player player) {
         Block targetBlock = player.getTargetBlockExact((int) MAX_RANGE);
         if (targetBlock == null) {
-            player.sendMessage(MessageUtils.negative() + "§eTarget location too far or invalid!");
+            player.sendMessage("§eTarget location too far or invalid!");
             return false;
         }
 

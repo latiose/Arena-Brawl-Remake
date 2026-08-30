@@ -26,7 +26,7 @@ import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
 
-public class GolemFallAbility implements Ability {
+public class GolemFall implements Ability {
 
     private static final double MAX_RANGE = 20.0;
     private static final double SPAWN_HEIGHT_OFFSET = 10.0;
@@ -37,8 +37,8 @@ public class GolemFallAbility implements Ability {
     private final TeamManager teamManager;
     private final StructureDemolitionService demolitionService;
 
-    public GolemFallAbility(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
-                            TeamManager teamManager, StructureDemolitionService demolitionService) {
+    public GolemFall(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
+                     TeamManager teamManager, StructureDemolitionService demolitionService) {
         this.cost = new CooldownCost(cooldownManager, "golemfall", 30000, upgradeManager);
         this.teamManager = teamManager;
         this.demolitionService = demolitionService;

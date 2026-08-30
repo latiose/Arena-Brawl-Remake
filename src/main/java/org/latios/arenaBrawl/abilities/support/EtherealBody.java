@@ -13,14 +13,14 @@ import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
 
-public class EtherealBodyAbility implements Ability {
+public class EtherealBody implements Ability {
 
     private static final long DURATION_MILLIS = 4_000;
     private static final int COOLDOWN_SECONDS = 35;
 
     private final AbilityCost cost;
     private final EtherealBodyManager etherealBodyManager;
-    public EtherealBodyAbility(CooldownManager cooldownManager, EtherealBodyManager etherealBodyManager,CombatUpgradeManager combatUpgradeManager) {
+    public EtherealBody(CooldownManager cooldownManager, EtherealBodyManager etherealBodyManager, CombatUpgradeManager combatUpgradeManager) {
         this.cost = new CooldownCost(cooldownManager, "ethereal_body", COOLDOWN_SECONDS * 1000,combatUpgradeManager);
         this.etherealBodyManager = etherealBodyManager;
     }

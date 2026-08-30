@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.plugin.Plugin;
+import org.latios.arenaBrawl.abilities.offensive.BurstFire;
 import org.latios.arenaBrawl.abilities.offensive.*;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.*;
@@ -70,21 +71,21 @@ public class AbilityRegistry {
                 deps -> new HealingTotem(deps.cooldownManager(), deps.combatUpgradeManager(),
                         deps.structureManager(), deps.teamManager(), deps.playerHealthManager()));
         register(AbilitySlot.UTILITY, "barricade",
-                deps -> new BarricadeAbility(deps.cooldownManager(), deps.combatUpgradeManager(), deps.structureManager()));
+                deps -> new Barricade(deps.cooldownManager(), deps.combatUpgradeManager(), deps.structureManager()));
         register(AbilitySlot.UTILITY, "golemfall",
-                deps -> new GolemFallAbility(deps.cooldownManager(), deps.combatUpgradeManager(),
+                deps -> new GolemFall(deps.cooldownManager(), deps.combatUpgradeManager(),
                         deps.teamManager(), deps.demolitionService()));
         register(AbilitySlot.UTILITY, "bullcharge",
-                deps -> new BullChargeAbility(deps.cooldownManager(), deps.combatUpgradeManager(),
+                deps -> new BullCharge(deps.cooldownManager(), deps.combatUpgradeManager(),
                         deps.demolitionService(), deps.movementLockManager()));
         register(AbilitySlot.SUPPORT, "treeoflife",
-                deps -> new TreeOfLifeAbility(deps.cooldownManager(), deps.combatUpgradeManager(),
+                deps -> new TreeOfLife(deps.cooldownManager(), deps.combatUpgradeManager(),
                         deps.structureManager(), deps.teamManager(), deps.playerHealthManager()));
         register(AbilitySlot.UTILITY, "wallofvines",
                 deps -> new WallOfVines(deps.cooldownManager(), deps.combatUpgradeManager(),
                         deps.structureManager(), deps.teamManager(),deps.debuffManager()));
         register(AbilitySlot.SUPPORT, "songofpower",
-                deps -> new SongOfPowerAbility(deps.cooldownManager(), deps.combatUpgradeManager(),
+                deps -> new SongOfPower(deps.cooldownManager(), deps.combatUpgradeManager(),
                         deps.teamManager(), deps.songOfPowerManager(),deps.energyModifierManager(),deps.debuffManager()));
         register(AbilitySlot.UTILITY, "sparkbolt",
                 deps -> new SparkBolt(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
@@ -93,7 +94,7 @@ public class AbilityRegistry {
                 deps -> new Corruption(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
                         ,deps.debuffManager()));
         register(AbilitySlot.SUPPORT, "lifeleech",
-                deps -> new LifeLeechAbility(deps.cooldownManager(), deps.combatUpgradeManager(), deps.lifeLeechManager()));
+                deps -> new LifeLeech(deps.cooldownManager(), deps.combatUpgradeManager(), deps.lifeLeechManager()));
         register(AbilitySlot.OFFENSIVE, "consume",
                 deps -> new ConsumeAbility(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.playerHealthManager()));
         register(AbilitySlot.OFFENSIVE, "dash",
@@ -102,29 +103,33 @@ public class AbilityRegistry {
                 deps -> new AbsoluteZeroAbility(deps.cooldownManager(), deps.usageManager(),
                         deps.teamManager(), deps.combatService(), deps.debuffManager()));
         register(AbilitySlot.OFFENSIVE, "rocketchicken",
-                deps -> new RocketChickenAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
+                deps -> new RocketChicken(deps.energyManager(), deps.teamManager(), deps.combatService()));
         register(AbilitySlot.OFFENSIVE, "laywaste",
-                deps -> new LayWasteAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
+                deps -> new LayWaste(deps.energyManager(), deps.teamManager(), deps.combatService()));
         register(AbilitySlot.ULTIMATE, "nanoboost",
-                deps -> new NanoBoostAbility(deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                deps -> new NanoBoost(deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
                         deps.shieldManager(), deps.damageBuffManager()));
         register(AbilitySlot.ULTIMATE, "divinejudgment",
-                deps -> new DivineJudgmentAbility(deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                deps -> new DivineJudgment(deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
                         deps.shieldManager(), deps.combatService()));
         register(AbilitySlot.ULTIMATE, "healingwind",
-                deps -> new HealingWindAbility(deps.cooldownManager(), deps.usageManager(),
+                deps -> new HealingWind(deps.cooldownManager(), deps.usageManager(),
                         deps.teamManager(), deps.playerHealthManager()));
         register(AbilitySlot.OFFENSIVE, "particlebeam",
-                deps -> new ParticleBeamAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
+                deps -> new ParticleBeam(deps.energyManager(), deps.teamManager(), deps.combatService()));
+        register(AbilitySlot.OFFENSIVE, "BurstFire",
+                deps -> new BurstFire(plugin,deps.energyManager(), deps.teamManager(), deps.combatService()));
         register(AbilitySlot.OFFENSIVE, "cookieshotgun",
-                deps -> new CookieShotgunAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
+                deps -> new CookieShotgun(deps.energyManager(), deps.teamManager(), deps.combatService()));
+        register(AbilitySlot.OFFENSIVE, "spikegrenade",
+                deps -> new SpikeGrenade(plugin,deps.energyManager(), deps.teamManager(), deps.combatService()));
         register(AbilitySlot.SUPPORT, "etheralbody",
-                deps -> new EtherealBodyAbility(deps.cooldownManager(),deps.etherealBodyManager(),deps.combatUpgradeManager()));
+                deps -> new EtherealBody(deps.cooldownManager(),deps.etherealBodyManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.UTILITY, "violentleap",
                 deps -> new HazardLeapAbility(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
                         ));
         register(AbilitySlot.UTILITY, "magneticImpulse",
-                deps -> new MagneticImpulseAbility(deps.cooldownManager(), deps.debuffManager() ,deps.combatUpgradeManager()
+                deps -> new MagneticImpulse(deps.cooldownManager(), deps.debuffManager() ,deps.combatUpgradeManager()
                 ));
         register(AbilitySlot.UTILITY, "darkpassage",
                 deps -> new DarkPassage(plugin,deps.cooldownManager(), deps.teamManager() ,deps.combatUpgradeManager()
@@ -135,6 +140,9 @@ public class AbilityRegistry {
         register(AbilitySlot.ULTIMATE, "rewind",
                 deps -> new Rewind(plugin,deps.cooldownManager(), deps.teamManager()
                        , deps.usageManager()));
+        register(AbilitySlot.ULTIMATE, "staticfield",
+                deps -> new StaticField(deps.cooldownManager(), deps.teamManager()
+                        ,deps.combatService(), deps.debuffManager(), deps.usageManager()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");
@@ -175,5 +183,17 @@ public class AbilityRegistry {
      */
     public Ability createPreview(AbilitySlot slot, String id) {
         return create(slot, id, previewDependencies);
+    }
+
+    public Ability get(String chosenId) {
+        if (chosenId == null) return null;
+
+        for (AbilitySlot slot : registry.keySet()) {
+            Map<String, AbilityFactory> slotAbilities = registry.get(slot);
+            if (slotAbilities.containsKey(chosenId)) {
+                return createPreview(slot, chosenId);
+            }
+        }
+        return null;
     }
 }

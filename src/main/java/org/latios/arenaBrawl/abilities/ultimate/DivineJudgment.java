@@ -18,7 +18,7 @@ import org.latios.arenaBrawl.team.TeamManager;
 import java.util.List;
 
 
-public class DivineJudgmentAbility implements Ability {
+public class DivineJudgment implements Ability {
 
     private static final long DURATION_MILLIS = 5_000;
     private static final long DURATION_TICKS = 100;
@@ -31,8 +31,8 @@ public class DivineJudgmentAbility implements Ability {
     private final ShieldManager shieldManager;
     private final CombatService combatService;
     private final CooldownManager cooldownManager;
-    public DivineJudgmentAbility(CooldownManager cooldownManager, UsageManager usageManager, TeamManager teamManager,
-                                 ShieldManager shieldManager, CombatService combatService) {
+    public DivineJudgment(CooldownManager cooldownManager, UsageManager usageManager, TeamManager teamManager,
+                          ShieldManager shieldManager, CombatService combatService) {
         this.cooldownManager = cooldownManager;
         this.cost = new UltimateCost(cooldownManager, usageManager, "divinejudgment");
         this.teamManager = teamManager;

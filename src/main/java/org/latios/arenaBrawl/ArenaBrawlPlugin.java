@@ -222,8 +222,6 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(
                 new ProjectileAoeListener(teamManager, combatService), this
         );
-        getServer().getPluginManager().registerEvents(
-                new AbilitySelectorListener(abilityRegistry, abilitySelectionManager, abilitySelectorGUI,runeSelectionManager,hatSelectorGUI,combatUpgradeGUI), this);
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new VanillaHungerBlockListener(matchManager), this);
       // getServer().getPluginManager().registerEvents(new BlockBreakListener(),this);

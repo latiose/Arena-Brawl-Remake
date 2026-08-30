@@ -1,19 +1,18 @@
-
 package org.latios.arenaBrawl.gui;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityRegistry;
 import org.latios.arenaBrawl.abilities.AbilitySelectionManager;
 import org.latios.arenaBrawl.abilities.AbilitySlot;
-
 import org.latios.arenaBrawl.hats.HatSelectorGUI;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeGUI;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,8 @@ public class AbilitySelectorListener implements Listener {
     private final RuneSelectionManager runeManager;
     private final HatSelectorGUI hatManager;
     private final CombatUpgradeGUI combatUpgradeGUI;
-    public AbilitySelectorListener(AbilityRegistry registry, AbilitySelectionManager selectionManager, AbilitySelectorGUI gui, RuneSelectionManager runeManager,HatSelectorGUI hatSelectorGUI,CombatUpgradeGUI combatUpgradeGUI) {
+
+    public AbilitySelectorListener(AbilityRegistry registry, AbilitySelectionManager selectionManager, AbilitySelectorGUI gui, RuneSelectionManager runeManager, HatSelectorGUI hatSelectorGUI, CombatUpgradeGUI combatUpgradeGUI) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.gui = gui;
@@ -41,6 +41,12 @@ public class AbilitySelectorListener implements Listener {
 
         event.setCancelled(true);
 
+        if (event.getClickedInventory() == null || !event.getClickedInventory().equals(event.getView().getTopInventory())) {
+            return;
+        }
+
+        if (event.getAction() == InventoryAction.NOTHING) return;
+
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (event.getCurrentItem() == null || !event.getCurrentItem().hasItemMeta()) return;
 
@@ -51,7 +57,7 @@ public class AbilitySelectorListener implements Listener {
 
             RuneType chosen = runes[index];
             runeManager.select(player, chosen);
-            player.sendMessage("§dRune set to: " + chosen.getDisplayName());
+            player.sendMessage("§aRune set to: " + chosen.getDisplayName());
             player.closeInventory();
             return;
         }
@@ -73,6 +79,7 @@ public class AbilitySelectorListener implements Listener {
                 combatUpgradeGUI.open(player);
                 return;
             }
+
             AbilitySlot slot = switch (rawSlot) {
                 case 0 -> AbilitySlot.OFFENSIVE;
                 case 2 -> AbilitySlot.UTILITY;
@@ -80,6 +87,7 @@ public class AbilitySelectorListener implements Listener {
                 case 6 -> AbilitySlot.ULTIMATE;
                 default -> null;
             };
+
             if (slot != null) {
                 gui.openSlotMenu(player, slot);
             }
@@ -92,7 +100,11 @@ public class AbilitySelectorListener implements Listener {
 
         String chosenId = ids.get(index);
         selectionManager.select(player, holder.slot(), chosenId);
-        player.sendMessage("§a" + holder.slot().name() + " set to: " + chosenId);
+
+        Ability ability = registry.get(chosenId);
+        String displayName = (ability != null) ? ability.getName() : chosenId;
+
+        player.sendMessage("§a" + holder.slot().name() + " set to: " + displayName);
         player.closeInventory();
     }
 }

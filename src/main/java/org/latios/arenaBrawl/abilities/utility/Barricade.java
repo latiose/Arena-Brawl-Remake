@@ -13,13 +13,13 @@ import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
 
-public class BarricadeAbility implements Ability {
+public class Barricade implements Ability {
 
     private final AbilityCost cost;
     private final StructureManager structureManager;
 
-    public BarricadeAbility(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
-                            StructureManager structureManager) {
+    public Barricade(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
+                     StructureManager structureManager) {
         this.cost = new CooldownCost(cooldownManager, "barricade", 30000, upgradeManager);
         this.structureManager = structureManager;
     }

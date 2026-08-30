@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class LayWasteAbility implements Ability {
+public class LayWaste implements Ability {
 
     private static final double DAMAGE = 150.0;
     private static final double ENERGY_COST = 40.0;
@@ -34,7 +34,7 @@ public class LayWasteAbility implements Ability {
     private final TeamManager teamManager;
     private final CombatService combatService;
 
-    public LayWasteAbility(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
+    public LayWaste(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
         this.cost = new EnergyCost(energyManager, ENERGY_COST);
         this.teamManager = teamManager;
         this.combatService = combatService;

@@ -90,8 +90,8 @@ public class LeaderboardSignManager {
         var side = sign.getSide(Side.FRONT);
         side.setLine(0, "§l#" + position);
         side.setLine(1, truncate(cached.entry().name(), 15));
-        side.setLine(2, "§2" + (int) cached.entry().rating());
-        side.setLine(3, "§8" + truncate(abilityName, 15));
+        side.setLine(2, ""+(int) cached.entry().rating());
+        side.setLine(3, "§l" + truncate(abilityName, 15));
 
         sign.update();
     }

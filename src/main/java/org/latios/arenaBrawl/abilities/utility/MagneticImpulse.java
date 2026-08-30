@@ -8,7 +8,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
@@ -23,7 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MagneticImpulseAbility implements Ability {
+public class MagneticImpulse implements Ability {
 
     private static final double RADIUS = 5.0;
     private static final long STUN_DURATION_MILLIS = 2_000;
@@ -32,8 +31,8 @@ public class MagneticImpulseAbility implements Ability {
     private final AbilityCost cost;
     private final DebuffManager debuffManager;
 
-    public MagneticImpulseAbility(CooldownManager cooldownManager, DebuffManager debuffManager,
-                                  CombatUpgradeManager combatUpgradeManager) {
+    public MagneticImpulse(CooldownManager cooldownManager, DebuffManager debuffManager,
+                           CombatUpgradeManager combatUpgradeManager) {
         this.cost = new CooldownCost(cooldownManager, "magnetic_impulse", COOLDOWN_SECONDS * 1000, combatUpgradeManager);
         this.debuffManager = debuffManager;
     }

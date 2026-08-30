@@ -4,12 +4,8 @@ package org.latios.arenaBrawl.abilities.utility;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
@@ -18,14 +14,12 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
-import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.general.MovementLockManager;
-import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
 
-public class BullChargeAbility implements Ability {
+public class BullCharge implements Ability {
 
     private static final long DURATION_TICKS = 20; // 1 second
 
@@ -34,8 +28,8 @@ public class BullChargeAbility implements Ability {
     private final MovementLockManager movementLockManager;
    private final StructureDemolitionService demolitionService;
 
-    public BullChargeAbility(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
-                             StructureDemolitionService demolitionService, MovementLockManager movementLockManager) {
+    public BullCharge(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
+                      StructureDemolitionService demolitionService, MovementLockManager movementLockManager) {
         this.cost = new CooldownCost(cooldownManager, "bullcharge", 30000, upgradeManager);
         this.movementLockManager = movementLockManager;
         this.demolitionService = demolitionService;

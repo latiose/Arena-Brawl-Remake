@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class CookieShotgunAbility implements Ability {
+public class CookieShotgun implements Ability {
 
     private static final double DAMAGE_PER_COOKIE = 25.0;
     private static final double ENERGY_COST = 60.0;
@@ -36,7 +36,7 @@ public class CookieShotgunAbility implements Ability {
     private final TeamManager teamManager;
     private final CombatService combatService;
 
-    public CookieShotgunAbility(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
+    public CookieShotgun(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
         this.cost = new EnergyCost(energyManager, ENERGY_COST);
         this.teamManager = teamManager;
         this.combatService = combatService;

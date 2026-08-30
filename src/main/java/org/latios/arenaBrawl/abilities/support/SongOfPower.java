@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class SongOfPowerAbility implements Ability {
+public class SongOfPower implements Ability {
 
     private static final long DURATION_MILLIS = 7_000;
     private static final long DURATION_TICKS = 140;
@@ -33,9 +33,9 @@ public class SongOfPowerAbility implements Ability {
     private final EnergyModifierManager energyModifierManager;
     private final DebuffManager debuffManager;
 
-    public SongOfPowerAbility(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
-                              TeamManager teamManager, SongOfPowerManager songOfPowerManager,
-                              EnergyModifierManager energyModifierManager, DebuffManager debuffManager) {
+    public SongOfPower(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
+                       TeamManager teamManager, SongOfPowerManager songOfPowerManager,
+                       EnergyModifierManager energyModifierManager, DebuffManager debuffManager) {
         this.cost = new CooldownCost(cooldownManager, "songofpower", 45000, upgradeManager);
         this.teamManager = teamManager;
         this.songOfPowerManager = songOfPowerManager;

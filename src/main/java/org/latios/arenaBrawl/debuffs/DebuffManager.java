@@ -117,6 +117,11 @@ public class DebuffManager {
             player.getWorld().spawnParticle(Particle.SQUID_INK, bodyLoc, 2, 0.3, 0.5, 0.3, 0.02);
             player.getWorld().spawnParticle(Particle.SMOKE, bodyLoc, 2, 0.2, 0.4, 0.2, 0.01);
         }
+        if (debuff.type.equals(DebuffType.SILENCE)) {
+            Location headLoc = player.getLocation().add(0, 2.0, 0);
+            player.getWorld().spawnParticle(Particle.ENCHANT, headLoc, 5, 0.3, 0.3, 0.3, 0.5);
+            player.getWorld().spawnParticle(Particle.WAX_OFF, headLoc, 1, 0.2, 0.2, 0.2, 0.0);
+        }
 
         long elapsed = System.currentTimeMillis() - debuff.startedAt();
         long remaining = debuff.durationMillis() - elapsed;

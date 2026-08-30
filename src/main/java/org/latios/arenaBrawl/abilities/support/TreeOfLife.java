@@ -18,16 +18,16 @@ import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
 
-public class TreeOfLifeAbility implements Ability {
+public class TreeOfLife implements Ability {
 
     private final AbilityCost cost;
     private final StructureManager structureManager;
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
 
-    public TreeOfLifeAbility(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
-                             StructureManager structureManager, TeamManager teamManager,
-                             PlayerHealthManager healthManager) {
+    public TreeOfLife(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
+                      StructureManager structureManager, TeamManager teamManager,
+                      PlayerHealthManager healthManager) {
         this.cost = new CooldownCost(cooldownManager, "treeoflife", 35000, upgradeManager);
         this.structureManager = structureManager;
         this.teamManager = teamManager;

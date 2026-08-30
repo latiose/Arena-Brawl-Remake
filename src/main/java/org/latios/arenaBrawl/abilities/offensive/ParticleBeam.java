@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ParticleBeamAbility implements Ability {
+public class ParticleBeam implements Ability {
 
     private static final double DAMAGE = 130.0;
     private static final double ENERGY_COST = 50.0;
@@ -31,7 +31,7 @@ public class ParticleBeamAbility implements Ability {
     private final TeamManager teamManager;
     private final CombatService combatService;
 
-    public ParticleBeamAbility(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
+    public ParticleBeam(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
         this.cost = new EnergyCost(energyManager, ENERGY_COST);
         this.teamManager = teamManager;
         this.combatService = combatService;
