@@ -9,6 +9,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -68,7 +69,7 @@ public class NanoBoost implements Ability {
         Player target = AbilityTargeting.findAllyAlongRay(player, teamManager, MAX_RANGE);
 
         if (target == null) {
-            player.sendMessage("§eThere is no valid target within range.");
+            player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
 

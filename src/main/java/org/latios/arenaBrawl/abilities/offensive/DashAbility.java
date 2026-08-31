@@ -22,7 +22,7 @@ import java.util.Set;
 public class DashAbility implements Ability {
 
     private static final double DISTANCE = 4.0;
-    private static final double DAMAGE = 100.0;
+    private static final double DAMAGE = 105.0;
     private static final double ENERGY_COST = 40.0;
     private static final double STEP_SIZE = 0.2;
     private static final double HIT_RADIUS = 1.3;

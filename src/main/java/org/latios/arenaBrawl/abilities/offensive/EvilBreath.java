@@ -17,7 +17,7 @@ public class EvilBreath extends Breath {
 
     private static final double DAMAGE = 210.0;
     private static final double ENERGY_COST = 100.0;
-    private static final long STUN_DURATION_TICKS = 2_000;
+    private static final long STUN_DURATION_TICKS = 1_000;
 
     public EvilBreath(EnergyManager energyManager, TeamManager teamManager,
                           CombatService combatService, DebuffManager debuffManager) {

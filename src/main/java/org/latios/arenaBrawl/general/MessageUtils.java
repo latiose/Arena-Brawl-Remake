@@ -12,4 +12,8 @@ public class MessageUtils {
     public static String negative() {
         return "§c" + ARROW + " §f";
     }
+
+    public static String noValidPlayer() {
+        return "§eThere is not valid player within range!";
+    }
 }

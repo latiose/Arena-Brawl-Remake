@@ -9,6 +9,7 @@ import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class Swap implements Ability {
         Player target = AbilityTargeting.findTargetAlongRay(player, MAX_RANGE);
 
         if (target == null) {
-            player.sendMessage("§eThere is no valid player within range!");
+            player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
 

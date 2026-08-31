@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class GroundSlam implements Ability {
             }
         }
         if (!hitSomeone) {
-            player.sendMessage("§cNo player within range!");
+            player.sendMessage(MessageUtils.noValidPlayer());
         }
         return hitSomeone;
     }

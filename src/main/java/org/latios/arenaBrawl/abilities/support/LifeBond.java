@@ -13,6 +13,7 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.AbilityTargeting;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -55,7 +56,7 @@ public class LifeBond implements Ability {
         Player targetAlly = AbilityTargeting.findAllyAlongRay(player, teamManager, RANGE);
 
         if (targetAlly == null) {
-            player.sendMessage("§eThere is not valid player within range!");
+            player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
 

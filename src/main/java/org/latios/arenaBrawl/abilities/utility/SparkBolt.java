@@ -40,7 +40,7 @@ public class SparkBolt implements Ability {
         Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, MAX_RANGE);
 
         if (target == null) {
-            player.sendMessage("§eThere is no valid player within range!");
+            player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
 

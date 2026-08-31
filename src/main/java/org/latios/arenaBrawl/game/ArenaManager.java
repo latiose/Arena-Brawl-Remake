@@ -57,6 +57,7 @@ public class ArenaManager {
     private final EnergyModifierManager energyModifierManager;
     private final DamageBuffManager damageBuffManager;
     private final EtherealBodyManager etherealBodyManager;
+    private final DamageVulnerabilityManager damageVulnerabilityManager;
 
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
@@ -65,7 +66,7 @@ public class ArenaManager {
     DebuffManager debuffManager,ArmorTierManager armorTierManager, CombatService combatService,OrbitShieldManager orbitShieldManager, HatSelectionManager hatSelectionManager,
                         CombatUpgradeManager combatUpgradeManager,BroodMotherEntityManager broodMotherEntityManager, ArenaMapManager arenaMapManager, StructureManager structureManager, MovementLockManager movementLockManager, SongOfPowerManager songOfPowerManager,
                         LifeLeechManager lifeLeechManager, StructureDemolitionService demolitionService,EnergyModifierManager energyModifierManager, DamageBuffManager damageBuffManager,
-                        EtherealBodyManager etherealBodyManager) {
+                        EtherealBodyManager etherealBodyManager, DamageVulnerabilityManager damageVulnerabilityManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -95,6 +96,7 @@ public class ArenaManager {
         this.energyModifierManager = energyModifierManager;
         this.damageBuffManager = damageBuffManager;
         this.etherealBodyManager = etherealBodyManager;
+        this.damageVulnerabilityManager = damageVulnerabilityManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -116,7 +118,7 @@ public class ArenaManager {
 
         List<Player> allPlayers = List.of(p1, p2, p3, p4);
         AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,
-                energyModifierManager,damageBuffManager,etherealBodyManager);
+                energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(false);

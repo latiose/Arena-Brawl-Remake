@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.abilities.AbilityTargeting;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -61,7 +62,7 @@ public class Consume implements Ability {
         Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, MAX_RANGE);
 
         if (target == null) {
-            player.sendMessage("§eThere is no valid player within range!");
+            player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
 

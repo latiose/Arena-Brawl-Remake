@@ -41,10 +41,11 @@ public class CombatService {
     private static final List<DebuffType> STAR_SHIELD_POSSIBLE_DEBUFFS =
             List.of(DebuffType.STUN, DebuffType.IMMOBILIZE, DebuffType.SLOW);
     private final EtherealBodyManager etherealBodyManager;
-
+    private final DamageVulnerabilityManager damageVulnerabilityManager;
     public CombatService(PlayerHealthManager healthManager, ShieldManager shieldManager,
                          DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
-                         DamageBuffManager damageBuffManager, MatchManager matchManager, LifeLeechManager lifeLeechManager,EtherealBodyManager etherealBodyManager) {
+                         DamageBuffManager damageBuffManager, MatchManager matchManager, LifeLeechManager lifeLeechManager,EtherealBodyManager etherealBodyManager,
+                         DamageVulnerabilityManager damageVulnerabilityManager) {
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
@@ -53,6 +54,7 @@ public class CombatService {
         this.matchManager = matchManager;
         this.lifeLeechManager = lifeLeechManager;
         this.etherealBodyManager = etherealBodyManager;
+        this.damageVulnerabilityManager = damageVulnerabilityManager;
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
@@ -60,31 +62,38 @@ public class CombatService {
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName, Location impactLocation) {
-        if (victim == null || victim.getGameMode() == GameMode.SPECTATOR) {
-            return;
-        }
-
-        double multiplier = damageBuffManager.getMultiplier(attacker);
-
-        Match match = matchManager.getMatchFor(attacker);
-        if (match != null && match.isDoubleDamageActive()) {
-            multiplier *= 2.0;
-        }
-
-        double adjustedDamage = rawDamage * multiplier;
-
-        if (orbitShieldManager.hasActiveShield(victim)) {
-            OrbitShieldType type = orbitShieldManager.getActiveType(victim);
-            if (type != null) {
-                orbitShieldManager.consumeCharge(victim);
-                resolveShieldEffect(type, attacker, victim);
+            if (victim == null || victim.getGameMode() == GameMode.SPECTATOR) {
                 return;
             }
-        }
 
-        double reduction = shieldManager.getDamageReduction(victim);
-        double finalDamage = reduction > 0 ? adjustedDamage * (1 - reduction) : adjustedDamage;
-        etherealBodyManager.processIncomingDamage(victim, finalDamage);
+            double multiplier = damageBuffManager.getMultiplier(attacker);
+
+            Match match = matchManager.getMatchFor(attacker);
+            if (match != null && match.isDoubleDamageActive()) {
+                multiplier *= 2.0;
+            }
+
+            double adjustedDamage = rawDamage * multiplier;
+
+            if (orbitShieldManager.hasActiveShield(victim)) {
+                OrbitShieldType type = orbitShieldManager.getActiveType(victim);
+                if (type != null) {
+                    orbitShieldManager.consumeCharge(victim);
+                    resolveShieldEffect(type, attacker, victim);
+                    return;
+                }
+            }
+
+            double reduction = shieldManager.getDamageReduction(victim);
+            double finalDamage = reduction > 0 ? adjustedDamage * (1 - reduction) : adjustedDamage;
+
+            double vulnerabilityBonus = damageVulnerabilityManager.getBonusMultiplier(victim);
+            if (vulnerabilityBonus > 0) {
+                finalDamage *= (1 + vulnerabilityBonus);
+                victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 10, 0.3, 0.5, 0.3, 0.1);
+            }
+
+            etherealBodyManager.processIncomingDamage(victim, finalDamage);
 
         UUID casterUUID = LifeBond.ACTIVE_BONDS.get(victim.getUniqueId());
         if (casterUUID != null) {
@@ -234,6 +243,10 @@ public class CombatService {
         double reduction = shieldManager.getDamageReduction(victim);
 
         double finalDamage = rawDamage * ownerMultiplier * (1 - Math.max(0, reduction));
+        double vulnerabilityBonus = damageVulnerabilityManager.getBonusMultiplier(victim);
+        if (vulnerabilityBonus > 0) {
+            finalDamage *= (1 + vulnerabilityBonus);
+        }
         int roundedDamage = (int) Math.round(finalDamage);
 
         if (orbitShieldManager.hasActiveShield(victim)) {

@@ -59,7 +59,7 @@ public class Rewind implements Ability {
 
 
         if(recipient==null){
-            player.sendMessage("§eThere is not valid player within range!");
+            player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
         ACTIVE_REWUNDS.put(recipient.getUniqueId(), player.getUniqueId());

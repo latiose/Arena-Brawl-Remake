@@ -129,6 +129,8 @@ public class AbilityRegistry {
                 deps -> new HealingRain(plugin,deps.cooldownManager(),deps.teamManager(),deps.playerHealthManager(),deps.combatUpgradeManager()));
         register(AbilitySlot.SUPPORT, "suzu",
                 deps -> new Suzu(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.shieldManager(), deps.combatUpgradeManager()));
+        register(AbilitySlot.SUPPORT, "discordorb",
+                deps -> new DiscordOrb(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(),deps.damageVulnerabilityManager()));
         register(AbilitySlot.UTILITY, "violentleap",
                 deps -> new ViolentLeap(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
                         ));
@@ -153,6 +155,9 @@ public class AbilityRegistry {
         register(AbilitySlot.ULTIMATE, "staticfield",
                 deps -> new StaticField(deps.cooldownManager(), deps.teamManager()
                         ,deps.combatService(), deps.debuffManager(), deps.usageManager()));
+        register(AbilitySlot.ULTIMATE, "myriadtruths",
+                deps -> new MyriadTruths(plugin,deps.cooldownManager(), deps.usageManager(),deps.teamManager()
+                        ,deps.damageVulnerabilityManager()));
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
         defaults.put(AbilitySlot.UTILITY, "shadowstep");
         defaults.put(AbilitySlot.SUPPORT, "holywater");

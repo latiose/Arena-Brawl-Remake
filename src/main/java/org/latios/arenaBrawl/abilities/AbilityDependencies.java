@@ -35,5 +35,6 @@ public record AbilityDependencies(
         StructureDemolitionService demolitionService,
         EnergyModifierManager energyModifierManager,
         DamageBuffManager damageBuffManager,
-        EtherealBodyManager etherealBodyManager
+        EtherealBodyManager etherealBodyManager,
+        DamageVulnerabilityManager damageVulnerabilityManager
 ) {}

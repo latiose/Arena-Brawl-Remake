@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -44,7 +45,7 @@ public class Polymorph implements Ability {
         Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, RANGE);
 
         if (target == null) {
-            player.sendMessage("§eThere is not valid player within range!");
+            player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
 
