@@ -26,7 +26,7 @@ import java.util.UUID;
 public class LifeBond implements Ability {
 
     private static final double RANGE = 25.0;
-    private static final double HEAL_PER_SECOND = 20.0;
+    private static final double HEAL_PER_SECOND = 25.0;
     private static final int DURATION_SECONDS = 8;
     private static final long COOLDOWN_MS = 30_000;
 

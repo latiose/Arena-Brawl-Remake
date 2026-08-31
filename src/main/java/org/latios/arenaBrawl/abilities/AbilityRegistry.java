@@ -102,6 +102,8 @@ public class AbilityRegistry {
                         deps.teamManager(), deps.combatService(), deps.debuffManager()));
         register(AbilitySlot.OFFENSIVE, "rocketchicken",
                 deps -> new RocketChicken(deps.energyManager(), deps.teamManager(), deps.combatService()));
+        register(AbilitySlot.OFFENSIVE, "mysticshot",
+                deps -> new MysticShot(deps.energyManager(), deps.teamManager(), deps.combatService()));
         register(AbilitySlot.OFFENSIVE, "laywaste",
                 deps -> new LayWaste(deps.energyManager(), deps.teamManager(), deps.combatService()));
         register(AbilitySlot.ULTIMATE, "nanoboost",
@@ -130,6 +132,9 @@ public class AbilityRegistry {
         register(AbilitySlot.UTILITY, "violentleap",
                 deps -> new ViolentLeap(deps.cooldownManager(),deps.teamManager(), deps.combatUpgradeManager()
                         ));
+        register(AbilitySlot.UTILITY, "salmonform",
+                deps -> new SalmonForm(deps.cooldownManager(), deps.combatUpgradeManager()
+                ));
         register(AbilitySlot.UTILITY, "magneticImpulse",
                 deps -> new MagneticImpulse(deps.cooldownManager(), deps.debuffManager() ,deps.combatUpgradeManager()
                 ));

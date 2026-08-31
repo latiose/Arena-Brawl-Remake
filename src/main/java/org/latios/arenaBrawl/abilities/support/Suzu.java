@@ -24,7 +24,7 @@ import java.util.List;
 public class Suzu implements Ability {
 
     private static final long COOLDOWN_MS = 30_000;
-    private static final double HEAL_AMOUNT = 150.0;
+    private static final double HEAL_AMOUNT = 175.0;
     private static final long INVULNERABILITY_DURATION_MS = 1_000;
     private static final double RADIUS = 3.0;
     private static final double MAX_RANGE = 12.0;

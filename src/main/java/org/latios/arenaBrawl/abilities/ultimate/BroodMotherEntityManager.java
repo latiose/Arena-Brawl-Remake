@@ -26,7 +26,7 @@ import java.util.UUID;
 
 public class BroodMotherEntityManager {
 
-    private static final int BOSS_HIT_COUNT = 6;
+    private static final int BOSS_HIT_COUNT = 7;
     private static final int SPIDERLING_HIT_COUNT = 3;
     private static final int SPIDERLING_COUNT = 4;
     private static final long POISON_DURATION_MILLIS = 6_000;

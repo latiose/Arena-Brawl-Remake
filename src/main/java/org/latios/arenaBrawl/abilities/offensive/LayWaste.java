@@ -24,8 +24,8 @@ import java.util.Set;
 
 public class LayWaste implements Ability {
 
-    private static final double DAMAGE = 150.0;
-    private static final double ENERGY_COST = 40.0;
+    private static final double DAMAGE = 110.0;
+    private static final double ENERGY_COST = 30.0;
     private static final double MAX_TARGET_DISTANCE = 15.0;
     private static final double RADIUS = 1.0;
     private static final long DELAY_TICKS = 15L;
@@ -54,8 +54,8 @@ public class LayWaste implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", "120"),
-                new AbilityStat("Energy Cost", "40"),
+                new AbilityStat("Damage", String.valueOf((int)DAMAGE)),
+                new AbilityStat("Energy Cost", String.valueOf((int)ENERGY_COST)),
                 new AbilityStat("Delay", "0.75s"),
                 new AbilityStat("Radius", RADIUS + " blocks")
         );

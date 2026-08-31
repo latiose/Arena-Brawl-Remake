@@ -52,7 +52,7 @@ public class BroodMother implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Brood HP", "6"),
+                new AbilityStat("Brood HP", "7"),
                 new AbilityStat("Spiderlings", "4 (3 hits each)"),
                 new AbilityStat("Poison", "33 dmg/s for 6s"),
                 new AbilityStat("Spiderling Damage", "5")
