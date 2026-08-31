@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.abilities.structures;
 
 import org.bukkit.Location;
@@ -8,7 +7,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -20,7 +18,7 @@ public class TreeOfLifeStructure extends PlacedStructure {
     private static final double HEAL_PER_SECOND = 50.0;
     private static final double FINAL_BURST_HEAL = 400.0;
     private static final long TOTAL_LIFETIME_MILLIS = 7_000;
-    private static final long GROWTH_DURATION_MILLIS = 5_000; // animated for the first 5s
+    private static final long GROWTH_DURATION_MILLIS = 5_000;
     private static final int MELEE_HITS_TO_DESTROY = 8;
 
     private final List<StructureBlueprint> growthPhases;
@@ -30,7 +28,7 @@ public class TreeOfLifeStructure extends PlacedStructure {
     private final PlayerHealthManager healthManager;
     private final Location base;
 
-    private int currentPhase = -1; // -1 = nothing placed yet
+    private int currentPhase = -1;
     private long lastHealTickAt;
     private int remainingHits = MELEE_HITS_TO_DESTROY;
     private boolean finished = false;
@@ -44,10 +42,9 @@ public class TreeOfLifeStructure extends PlacedStructure {
         this.healthManager = healthManager;
         this.lastHealTickAt = System.currentTimeMillis();
 
-        advanceToPhase(0); // plant the bare trunk immediately
+        advanceToPhase(0);
     }
 
-    /** Registers a hit from an enemy. Returns true if the tree is destroyed by this hit. */
     public boolean registerHit(Player attacker) {
         if(!canHit(attacker)) return false;
 
@@ -65,13 +62,13 @@ public class TreeOfLifeStructure extends PlacedStructure {
         }
         return true;
     }
+
     @Override
     public boolean tick() {
         if (finished) return true;
 
         long elapsed = System.currentTimeMillis() - getPlacedAt();
 
-        // Growth animation: advance one phase per second during the first 5 seconds
         int expectedPhase = Math.min(
                 growthPhases.size() - 1,
                 (int) (Math.min(elapsed, GROWTH_DURATION_MILLIS) / 1000)
@@ -85,7 +82,6 @@ public class TreeOfLifeStructure extends PlacedStructure {
             healNearbyAllies(HEAL_PER_SECOND, false);
         }
 
-        // Final burst at 7 seconds
         if (elapsed >= TOTAL_LIFETIME_MILLIS) {
             finalBurst();
             finished = true;
@@ -130,27 +126,21 @@ public class TreeOfLifeStructure extends PlacedStructure {
 
         Location center = base.clone().add(0.5, 1, 0.5);
         Set<Player> healed = new HashSet<>();
-        int roundedHeal = (int) Math.round(amount);
 
         for (Entity nearby : center.getWorld().getNearbyEntities(center, HEAL_RADIUS, HEAL_RADIUS, HEAL_RADIUS)) {
             if (nearby instanceof Player candidate
                     && (candidate.equals(owner) || teamManager.isAlly(owner, candidate))
                     && !healed.contains(candidate)) {
-                healthManager.heal(candidate, amount);
+                if (candidate.equals(owner)) {
+                    healthManager.heal(owner, amount, "Tree of life");
+                } else {
+                    healthManager.healAlly(owner, candidate, amount, "Tree of life");
+                }
                 healed.add(candidate);
             }
         }
 
         if (healed.isEmpty()) return;
-
-        for (Player target : healed) {
-            if (target.equals(owner)) {
-                owner.sendMessage(MessageUtils.positive() + String.format("§3Your Tree of life healed you for §a%d §3health!", roundedHeal));
-            } else {
-                target.sendMessage(MessageUtils.positive() + String.format("§a%s§3's Tree of life healed you for §a%d §3health!", owner.getName(), roundedHeal));
-                owner.sendMessage(MessageUtils.positive() + String.format("§3Your Tree of life healed §a%s §3for §a%d §3health!", target.getName(), roundedHeal));
-            }
-        }
 
         if (isBurst) {
             center.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, center, 60, 1, 1.5, 1, 0.1);

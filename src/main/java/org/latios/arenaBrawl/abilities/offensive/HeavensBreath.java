@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -54,8 +53,7 @@ public class HeavensBreath extends Breath {
         boolean activated = super.activate(player);
 
         if (activated) {
-            healthManager.heal(player, HEAL_AMOUNT);
-            player.sendMessage(MessageUtils.positive() + String.format("§3Your Heavens Breath healed you for §a%d §3health!", (int) HEAL_AMOUNT));
+            healthManager.heal(player, HEAL_AMOUNT, getName());
             player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0, 1.5, 0), 5, 0.3, 0.3, 0.3, 0.0);
         }
 
@@ -69,13 +67,7 @@ public class HeavensBreath extends Breath {
             combatService.applyAbilityDamage(caster, target, getDamage(), getName());
             applySpike(target);
         } else {
-            healthManager.heal(target, HEAL_AMOUNT);
-
-            caster.sendMessage(MessageUtils.positive() + String.format("§3Your Heaven's Breath healed §a%s §3for §a%d §3health!",
-                    target.getName(), (int) HEAL_AMOUNT));
-            target.sendMessage(MessageUtils.positive() + String.format("§a%s§3's Heaven's Breath healed you for §a%d §3health!",
-                    caster.getName(), (int) HEAL_AMOUNT));
-
+            healthManager.healAlly(caster, target, HEAL_AMOUNT, getName());
             target.getWorld().spawnParticle(Particle.HEART, target.getLocation().add(0, 1.5, 0), 5, 0.3, 0.3, 0.3, 0.0);
         }
     }

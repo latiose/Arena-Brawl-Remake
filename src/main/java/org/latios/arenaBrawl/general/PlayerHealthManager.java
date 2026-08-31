@@ -81,6 +81,37 @@ public class PlayerHealthManager {
         syncVanilla(player);
     }
 
+    public void heal(Player player, double amount, String sourceName) {
+        if (eliminated.contains(player.getUniqueId())) return;
+        if (!canRegen(player)) return;
+
+        heal(player, amount);
+        int roundedHeal = (int) Math.round(amount);
+
+        player.sendMessage(MessageUtils.positive() + String.format(
+                "§3Your %s healed you for §a%d §3health!",
+                sourceName, roundedHeal
+        ));
+    }
+
+    public void healAlly(Player healer, Player target, double amount, String sourceName) {
+        if (eliminated.contains(target.getUniqueId())) return;
+        if (!canRegen(target)) return;
+
+        heal(target, amount);
+        int roundedHeal = (int) Math.round(amount);
+
+        healer.sendMessage(MessageUtils.positive() + String.format(
+                "§3Your %s healed %s §3for §a%d §3health!",
+                sourceName, target.getName(), roundedHeal
+        ));
+
+        target.sendMessage(MessageUtils.positive() + String.format(
+                "§3%s§3's %s healed you for §a%d §3health!",
+                healer.getName(), sourceName, roundedHeal
+        ));
+    }
+
     public void damage(Player player, double amount, Player attacker) {
         if (eliminated.contains(player.getUniqueId())) return;
 

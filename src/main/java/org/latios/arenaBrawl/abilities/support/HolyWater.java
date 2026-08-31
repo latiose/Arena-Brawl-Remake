@@ -11,7 +11,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
-import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -28,7 +27,7 @@ public class HolyWater implements Ability {
     private static final double ALLY_HEAL = 50;
 
     public HolyWater(CooldownManager cooldownManager, TeamManager teamManager, PlayerHealthManager healthManager, DebuffManager debuffManager, CombatUpgradeManager combatUpgradeManager) {
-        this.cost = new CooldownCost(cooldownManager, "holywater", 30000,combatUpgradeManager);
+        this.cost = new CooldownCost(cooldownManager, "holywater", 30000, combatUpgradeManager);
         this.teamManager = teamManager;
         this.healthManager = healthManager;
         this.debuffManager = debuffManager;
@@ -48,25 +47,19 @@ public class HolyWater implements Ability {
         for (Entity nearby : player.getNearbyEntities(6, 4, 6)) {
             if (nearby instanceof Player nearbyPlayer && teamManager.isAlly(player, nearbyPlayer)) {
                 double distance = nearbyPlayer.getLocation().distanceSquared(player.getLocation());
-                if (distance < closestDistance && nearbyPlayer.getGameMode()!= GameMode.SPECTATOR) {
+                if (distance < closestDistance && nearbyPlayer.getGameMode() != GameMode.SPECTATOR) {
                     closestDistance = distance;
                     closestAlly = nearbyPlayer;
                 }
             }
         }
 
-        healthManager.heal(player, SELF_HEAL);
+        healthManager.heal(player, SELF_HEAL, getName());
         debuffManager.clear(player);
-        player.sendMessage(MessageUtils.positive()+String.format("§3Your Holy Water healed you for §a%d §3health!", (int) SELF_HEAL));
 
         if (closestAlly != null) {
-            healthManager.heal(closestAlly, ALLY_HEAL);
+            healthManager.healAlly(player, closestAlly, ALLY_HEAL, getName());
             debuffManager.clear(closestAlly);
-
-            player.sendMessage(MessageUtils.positive()+String.format("§3Your Holy Water healed §e%s §3for §a%d §3health!",
-                    closestAlly.getName(), (int) ALLY_HEAL));
-            closestAlly.sendMessage(MessageUtils.positive()+String.format("§e%s§3's Holy Water healed you for §a%d §3health!",
-                    player.getName(), (int) ALLY_HEAL));
         }
 
         player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 50);

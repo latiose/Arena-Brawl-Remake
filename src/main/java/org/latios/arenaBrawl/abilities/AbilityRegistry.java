@@ -94,7 +94,7 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "lifeleech",
                 deps -> new LifeLeech(deps.cooldownManager(), deps.combatUpgradeManager(), deps.lifeLeechManager()));
         register(AbilitySlot.OFFENSIVE, "consume",
-                deps -> new ConsumeAbility(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.playerHealthManager()));
+                deps -> new Consume(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.playerHealthManager()));
         register(AbilitySlot.OFFENSIVE, "dash",
                 deps -> new DashAbility(deps.energyManager(), deps.teamManager(), deps.combatService()));
         register(AbilitySlot.ULTIMATE, "absolutezero",

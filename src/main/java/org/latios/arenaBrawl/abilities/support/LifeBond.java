@@ -13,7 +13,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.AbilityTargeting;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -63,9 +62,6 @@ public class LifeBond implements Ability {
         final Player ally = targetAlly;
         ACTIVE_BONDS.put(ally.getUniqueId(), player.getUniqueId());
 
-        player.sendMessage(MessageUtils.positive() + String.format("§3Linked §a%s §3with Life Bond!", ally.getName()));
-        ally.sendMessage(MessageUtils.positive() + String.format("§a%s §3linked Life Bond with you!", player.getName()));
-
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 1.0f, 1.2f);
         ally.getWorld().playSound(ally.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 1.0f, 1.2f);
 
@@ -86,10 +82,8 @@ public class LifeBond implements Ability {
                     drawBondLine(player.getLocation().add(0, 1.0, 0), ally.getLocation().add(0, 1.0, 0));
 
                     if (ticksElapsed % 20 == 0) {
-                        healthManager.heal(player, HEAL_PER_SECOND);
-                        healthManager.heal(ally, HEAL_PER_SECOND);
-                        player.sendMessage(MessageUtils.positive() + String.format("§3Your Life Bond healed you for §a%d §3health!", (int) HEAL_PER_SECOND));
-                        ally.sendMessage(MessageUtils.positive() + String.format("§a%s§3's Life Bond healed you for §a%d §3health!", player.getName(), (int) HEAL_PER_SECOND));
+                        healthManager.heal(player, HEAL_PER_SECOND, getName());
+                        healthManager.healAlly(player, ally, HEAL_PER_SECOND, getName());
                     }
                 }
             }

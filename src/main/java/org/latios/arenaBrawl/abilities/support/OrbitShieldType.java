@@ -10,7 +10,7 @@ public enum OrbitShieldType {
             "Bone Shield", OrbitShieldVisualType.ITEM_DISPLAY, Material.BONE,
             5, 30.0, false,
             18_000, Sound.ENTITY_SKELETON_STEP, Sound.ENTITY_SKELETON_DEATH, Particle.WHITE_ASH,
-            2, 0, true
+            2, 0, false
     ),
 
     CACTUS_SHIELD(

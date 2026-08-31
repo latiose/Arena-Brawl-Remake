@@ -5,7 +5,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -48,7 +47,6 @@ public class HealingTotemStructure extends PlacedStructure {
         }
     }
 
-    /** Registers a hit from an enemy. Returns true if the totem is destroyed by this hit. */
     public boolean registerHit(Player attacker) {
         if(!canHit(attacker)) return false;
 
@@ -66,6 +64,7 @@ public class HealingTotemStructure extends PlacedStructure {
         }
         return true;
     }
+
     @Override
     public boolean tick() {
         if (healPulsesUsed >= MAX_HEAL_PULSES) {
@@ -89,7 +88,11 @@ public class HealingTotemStructure extends PlacedStructure {
             if (nearby instanceof Player candidate
                     && (candidate.equals(owner) || teamManager.isAlly(owner, candidate))
                     && !healed.contains(candidate)) {
-                healthManager.heal(candidate, HEAL_AMOUNT);
+                if (candidate.equals(owner)) {
+                    healthManager.heal(owner, HEAL_AMOUNT, "Healing Totem");
+                } else {
+                    healthManager.healAlly(owner, candidate, HEAL_AMOUNT, "Healing Totem");
+                }
                 healed.add(candidate);
             }
         }
@@ -97,17 +100,6 @@ public class HealingTotemStructure extends PlacedStructure {
         if (!healed.isEmpty()) {
             center.getWorld().spawnParticle(Particle.FIREWORK, center, 40, 0.5, 1, 0.5, 0.05);
             center.getWorld().playSound(center, Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 1f, 1f);
-
-            int healInt = (int) HEAL_AMOUNT;
-
-            for (Player p : healed) {
-                if (p.equals(owner)) {
-                    owner.sendMessage(MessageUtils.positive() + String.format("§3Your Healing Totem healed you for §a%d §3health!", healInt));
-                } else {
-                    p.sendMessage(MessageUtils.positive() + String.format("§a%s§3's Healing Totem healed you for §a%d §3health!", owner.getName(), healInt));
-                    owner.sendMessage(MessageUtils.positive() + String.format("§3Your Healing Totem healed §a%s §3for §a%d §3health!", p.getName(), healInt));
-                }
-            }
         }
 
         return healPulsesUsed >= MAX_HEAL_PULSES;
@@ -118,8 +110,7 @@ public class HealingTotemStructure extends PlacedStructure {
         for (int i = 0; i < standBlocks.size(); i++) {
             standBlocks.get(i).setBlockData(originalBlockData.get(i));
         }
-       getLocation().getWorld().spawnParticle(Particle.FIREWORK, getLocation().clone().add(0.5, 1, 0.5), 15);
-
+        getLocation().getWorld().spawnParticle(Particle.FIREWORK, getLocation().clone().add(0.5, 1, 0.5), 15);
     }
 
     public List<Block> getStandBlocks() {

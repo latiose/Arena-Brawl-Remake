@@ -11,7 +11,6 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -95,17 +94,12 @@ public class HealingRain implements Ability {
                         boolean inVerticalRange = allyLoc.getY() >= groundCenter.getY() - 1.0 && allyLoc.getY() <= cloudCenter.getY();
 
                         if (distance2D <= RADIUS && inVerticalRange) {
-                            healthManager.heal(ally, HEAL_PER_SECOND);
-                            ally.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, ally.getLocation().add(0, 1.0, 0), 5, 0.2, 0.4, 0.2, 0);
-
                             if (ally.equals(player)) {
-                                player.sendMessage(MessageUtils.positive() + String.format("§3Your Healing Rain healed you for §a%d §3health!", (int) HEAL_PER_SECOND));
+                                healthManager.heal(player, HEAL_PER_SECOND, getName());
                             } else {
-                                player.sendMessage(MessageUtils.positive() + String.format("§3Your Healing Rain healed §a%s §3for §a%d §3health!",
-                                        ally.getName(), (int) HEAL_PER_SECOND));
-                                ally.sendMessage(MessageUtils.positive() + String.format("§a%s§3's Healing Rain healed you for §a%d §3health!",
-                                        player.getName(), (int) HEAL_PER_SECOND));
+                                healthManager.healAlly(player, ally, HEAL_PER_SECOND, getName());
                             }
+                            ally.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, ally.getLocation().add(0, 1.0, 0), 5, 0.2, 0.4, 0.2, 0);
                         }
                     }
                 }

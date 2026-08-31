@@ -13,7 +13,6 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -113,17 +112,14 @@ public class Suzu implements Ability {
             if (teamManager.isEnemy(caster, ally)) continue;
 
             if (ally.getLocation().distance(center) <= RADIUS) {
-                healthManager.heal(ally, HEAL_AMOUNT);
+                if (ally.equals(caster)) {
+                    healthManager.heal(caster, HEAL_AMOUNT, getName());
+                } else {
+                    healthManager.healAlly(caster, ally, HEAL_AMOUNT, getName());
+                }
                 ally.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, ally.getLocation().add(0, 1.0, 0), 10, 0.3, 0.5, 0.3, 0);
 
                 shieldManager.applyShield(ally, 1.0, INVULNERABILITY_DURATION_MS);
-
-                if (ally.equals(caster)) {
-                    caster.sendMessage(MessageUtils.positive() + String.format("§3Your Suzu granted you invulnerability and healed you for §a%d §3HP!", (int) HEAL_AMOUNT));
-                } else {
-                    caster.sendMessage(MessageUtils.positive() + String.format("§3Your Suzu protected §a%s §3and healed them for §a%d §3HP!", ally.getName(), (int) HEAL_AMOUNT));
-                    ally.sendMessage(MessageUtils.positive() + String.format("§a%s§3's Suzu granted you invulnerability and healed you for §a%d §3HP!", caster.getName(), (int) HEAL_AMOUNT));
-                }
             }
         }
     }

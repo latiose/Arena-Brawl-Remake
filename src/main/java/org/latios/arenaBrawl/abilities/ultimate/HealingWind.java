@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.abilities.ultimate;
 
 import org.bukkit.Location;
@@ -14,7 +13,6 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -115,14 +113,10 @@ public class HealingWind implements Ability {
     private void healNearbyAllies(Player player) {
         Set<Player> healed = new HashSet<>();
         healed.add(player);
-        healthManager.heal(player, HEAL_PER_SECOND);
-        player.sendMessage(MessageUtils.positive()+String.format("§3Your Healing Wind healed you for §a%d §3health!", (int) HEAL_PER_SECOND));
+        healthManager.heal(player, HEAL_PER_SECOND, getName());
         for (Entity nearby : player.getNearbyEntities(HEAL_RADIUS, HEAL_RADIUS, HEAL_RADIUS)) {
             if (nearby instanceof Player ally && teamManager.isAlly(player, ally) && !healed.contains(ally)) {
-                healthManager.heal(ally, HEAL_PER_SECOND);
-                player.sendMessage(MessageUtils.positive()+String.format("§3Your Healing Wind healed §a" + ally.getName() + " §3for §a%d §3health!", (int) HEAL_PER_SECOND));
-                ally.sendMessage(MessageUtils.positive()+String.format("§e%s§3's Healing Wild healed you for §a%d §3health!",
-                        player.getName(), (int) HEAL_PER_SECOND));
+                healthManager.healAlly(player, ally, HEAL_PER_SECOND, getName());
                 healed.add(ally);
             }
         }

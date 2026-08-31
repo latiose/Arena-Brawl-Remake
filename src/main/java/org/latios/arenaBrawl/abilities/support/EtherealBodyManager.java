@@ -7,7 +7,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
-import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 
 import java.util.HashMap;
@@ -43,13 +42,10 @@ public class EtherealBodyManager {
                 if (ticksElapsed >= durationTicks) {
                     double accumulatedDamage = activeShields.remove(uuid);
                     if (accumulatedDamage > 0) {
-                        healthManager.heal(player, accumulatedDamage);
+                        healthManager.heal(player, accumulatedDamage, "Ethereal Body");
 
                         player.getWorld().playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 0.8f, 1.5f);
                         player.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, player.getLocation().add(0, 1.0, 0), 30, 0.4, 0.6, 0.4, 0.2);
-
-                        int roundedHeal = (int) Math.round(accumulatedDamage);
-                        player.sendMessage(MessageUtils.positive() + "§3Your Ethereal Body healed you for §a" + roundedHeal + " §3health!");
                     }
                     cancel();
                     return;

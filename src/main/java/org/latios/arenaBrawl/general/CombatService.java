@@ -114,8 +114,7 @@ public class CombatService {
         if (abilityName.equals("Melee")) {
             playDamageFeedback(victim);
             if (lifeLeechManager.consumeCharge(attacker)) {
-                healthManager.heal(attacker, 60.0);
-                attacker.sendMessage(MessageUtils.positive() + "§3Your Life Leech healed you for §a60 §3health!");
+                healthManager.heal(attacker, 60.0, "Life Leech");
             }
         }
 
@@ -172,13 +171,7 @@ public class CombatService {
 
         if (type.getHealPerCharge() > 0) {
             double healAmount = type.getHealPerCharge();
-            healthManager.heal(victim, healAmount);
-            int roundedHeal = (int) Math.round(healAmount);
-
-            victim.sendMessage(String.format(
-                    "§3Your %s healed you for §a%d §3health.",
-                    type.getDisplayName(), roundedHeal
-            ));
+            healthManager.heal(victim, healAmount, type.getDisplayName());
         }
 
         if (type.getDamagePerCharge() > 0) {
@@ -186,7 +179,7 @@ public class CombatService {
             int roundedDamage = (int) Math.round(damageAmount);
 
             healthManager.damage(attacker, damageAmount, victim);
-            playDamageFeedback(attacker);
+           // playDamageFeedback(attacker);
 
             Location impactLoc = attacker.getLocation().add(0, attacker.getHeight() * 0.5, 0);
             spawnHologram(attacker, String.valueOf(roundedDamage), impactLoc);
