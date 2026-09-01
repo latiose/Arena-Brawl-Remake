@@ -16,7 +16,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 
 import org.latios.arenaBrawl.abilities.CooldownManager;
-import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.MatchManager;

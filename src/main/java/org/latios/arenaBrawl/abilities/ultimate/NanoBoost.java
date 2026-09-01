@@ -3,11 +3,12 @@ package org.latios.arenaBrawl.abilities.ultimate;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
@@ -18,23 +19,37 @@ import java.util.List;
 
 public class NanoBoost implements Ability {
 
-    private static final double MAX_RANGE = 20.0;
-    private static final long DURATION_MILLIS = 8_000;
-    private static final int SPEED_AMPLIFIER = 1; // Speed II
+    private final double maxRange;
+    private final long durationMillis;
+    private final int speedAmplifier;
+    private final long chargeTimeMillis;
+    private final double damageReduction;
+    private final double damageIncrease;
 
+    private final Plugin plugin;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final ShieldManager shieldManager;
     private final DamageBuffManager damageBuffManager;
     private final CooldownManager cooldownManager;
-    private static final long CHARGE_TIME_MILLIS = 60_000;
-    public NanoBoost(CooldownManager cooldownManager, UsageManager usageManager, TeamManager teamManager,
-                     ShieldManager shieldManager, DamageBuffManager damageBuffManager) {
+
+    public NanoBoost(Plugin plugin, CooldownManager cooldownManager, UsageManager usageManager,
+                     TeamManager teamManager, ShieldManager shieldManager,
+                     DamageBuffManager damageBuffManager, AbilityConfig config) {
+        this.plugin = plugin;
         this.cooldownManager = cooldownManager;
-        this.cost = new UltimateCost(cooldownManager, usageManager, "nanoboost");
         this.teamManager = teamManager;
         this.shieldManager = shieldManager;
         this.damageBuffManager = damageBuffManager;
+
+        this.maxRange = config.getDouble("max-range", 20.0);
+        this.durationMillis = config.getLong("duration-ms", 8000L);
+        this.speedAmplifier = config.getInt("speed-amplifier", 1);
+        this.chargeTimeMillis = config.getLong("charge-time-ms", 60000L);
+        this.damageReduction = config.getDouble("damage-reduction", 0.50);
+        this.damageIncrease = config.getDouble("damage-increase", 1.50);
+
+        this.cost = new UltimateCost(cooldownManager, usageManager, "nanoboost");
     }
 
     @Override
@@ -45,28 +60,28 @@ public class NanoBoost implements Ability {
 
     @Override
     public void onMatchStart(Player player) {
-        cooldownManager.setCooldown(player, "nanoboost", CHARGE_TIME_MILLIS);
+        cooldownManager.setCooldown(player, "nanoboost", chargeTimeMillis);
     }
+
     @Override
     public String getDescription() {
-        return "Targets an ally, granting them a speed boost,damage reduction, "
-                + "and increased damage for some time.";
+        return "Targets an ally, granting them a speed boost, damage reduction, and increased damage for some time.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Range", String.valueOf(MAX_RANGE)),
-                new AbilityStat("Duration", "8s"),
-                new AbilityStat("Damage Reduction", "50%"),
-                new AbilityStat("Damage Increase", "50%"),
+                new AbilityStat("Range", String.valueOf(maxRange)),
+                new AbilityStat("Duration", (durationMillis / 1000L) + "s"),
+                new AbilityStat("Damage Reduction", (int)(damageReduction * 100) + "%"),
+                new AbilityStat("Damage Increase", (int)((damageIncrease - 1.0) * 100) + "%"),
                 new AbilityStat("Uses", "1 per match")
         );
     }
 
     @Override
     public boolean activate(Player player) {
-        Player target = AbilityTargeting.findAllyAlongRay(player, teamManager, MAX_RANGE);
+        Player target = AbilityTargeting.findAllyAlongRay(player, teamManager, maxRange);
 
         if (target == null) {
             player.sendMessage(MessageUtils.noValidPlayer());
@@ -74,10 +89,10 @@ public class NanoBoost implements Ability {
         }
 
         target.addPotionEffect(new PotionEffect(
-                PotionEffectType.SPEED, (int) (DURATION_MILLIS / 50), SPEED_AMPLIFIER, true, false
+                PotionEffectType.SPEED, (int) (durationMillis / 50), speedAmplifier, true, false
         ));
-        shieldManager.applyShield(target, 0.5, DURATION_MILLIS);
-        damageBuffManager.applyBuff(target, 1.5, DURATION_MILLIS, "NANO BOOST");
+        shieldManager.applyShield(target, damageReduction, durationMillis);
+        damageBuffManager.applyBuff(target, damageIncrease, durationMillis, "NANO BOOST");
 
         target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 40, 0.4, 0.8, 0.4);
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.3f);
@@ -91,7 +106,7 @@ public class NanoBoost implements Ability {
     }
 
     private void startAmbientParticles(Player target) {
-        long durationTicks = DURATION_MILLIS / 50L;
+        long durationTicks = durationMillis / 50L;
 
         new BukkitRunnable() {
             int ticksElapsed = 0;
@@ -121,6 +136,6 @@ public class NanoBoost implements Ability {
 
                 ticksElapsed += 3;
             }
-        }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 3L);
+        }.runTaskTimer(plugin, 0L, 3L);
     }
 }

@@ -4,11 +4,8 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.latios.arenaBrawl.abilities.Ability;
-import org.latios.arenaBrawl.abilities.AbilityCost;
-import org.latios.arenaBrawl.abilities.AbilityStat;
-import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
@@ -19,10 +16,10 @@ import java.util.List;
 
 public class StaticField implements Ability {
 
-    private static final double RADIUS = 5.0;
-    private static final double DAMAGE = 300.0;
-    private static final long SILENCE_DURATION_MS = 5_000;
-    private static final long CHARGE_TIME_MILLIS = 60_000;
+    private final double radius;
+    private final double damage;
+    private final long silenceDurationMs;
+    private final long chargeTimeMillis;
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -31,17 +28,24 @@ public class StaticField implements Ability {
     private final CooldownManager cooldownManager;
 
     public StaticField(CooldownManager cooldownManager, TeamManager teamManager,
-                       CombatService combatService, DebuffManager debuffManager, UsageManager usageManager) {
+                       CombatService combatService, DebuffManager debuffManager, UsageManager usageManager,
+                       AbilityConfig config) {
         this.cooldownManager = cooldownManager;
-        this.cost = new UltimateCost(cooldownManager, usageManager, "staticfield");
         this.teamManager = teamManager;
         this.combatService = combatService;
         this.debuffManager = debuffManager;
+
+        this.radius = config.getDouble("radius", 5.0);
+        this.damage = config.getDouble("damage", 300.0);
+        this.silenceDurationMs = config.getLong("silence-duration-ms", 5000L);
+        this.chargeTimeMillis = config.getLong("charge-time-ms", 60000L);
+
+        this.cost = new UltimateCost(cooldownManager, usageManager, "staticfield");
     }
 
     @Override
     public void onMatchStart(Player player) {
-        cooldownManager.setCooldown(player, "staticfield", CHARGE_TIME_MILLIS);
+        cooldownManager.setCooldown(player, "staticfield", chargeTimeMillis);
     }
 
     @Override
@@ -59,8 +63,8 @@ public class StaticField implements Ability {
         int points = 36;
         for (int i = 0; i < points; i++) {
             double angle = 2 * Math.PI * i / points;
-            double x = Math.cos(angle) * RADIUS;
-            double z = Math.sin(angle) * RADIUS;
+            double x = Math.cos(angle) * radius;
+            double z = Math.sin(angle) * radius;
 
             Location particleLoc = center.clone().add(x, 0.2, z);
             center.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, particleLoc, 2, 0.1, 0.1, 0.1, 0.05);
@@ -71,10 +75,10 @@ public class StaticField implements Ability {
         for (Player enemy : center.getWorld().getPlayers()) {
             if (!teamManager.isEnemy(player, enemy) || enemy.isDead()) continue;
 
-            if (enemy.getLocation().distance(center) <= RADIUS) {
-                combatService.applyAbilityDamage(player, enemy, DAMAGE, getName());
+            if (enemy.getLocation().distance(center) <= radius) {
+                combatService.applyAbilityDamage(player, enemy, damage, getName());
 
-                debuffManager.tryApply(enemy, DebuffType.SILENCE, SILENCE_DURATION_MS);
+                debuffManager.tryApply(enemy, DebuffType.SILENCE, silenceDurationMs);
 
                 enemy.getWorld().playSound(enemy.getLocation(), Sound.ENTITY_PLAYER_HURT, 0.8f, 1.5f);
                 enemy.getWorld().spawnParticle(Particle.CRIT, enemy.getLocation().add(0, 1.0, 0), 15, 0.3, 0.3, 0.3, 0.1);
@@ -92,10 +96,10 @@ public class StaticField implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
-                new AbilityStat("Silence Duration", (SILENCE_DURATION_MS / 1000) + "s"),
-                new AbilityStat("Radius", (int) RADIUS + "m"),
-                new AbilityStat("Cooldown", (CHARGE_TIME_MILLIS / 1000) + "s")
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Silence Duration", (silenceDurationMs / 1000) + "s"),
+                new AbilityStat("Radius", (int) radius + "m"),
+                new AbilityStat("Cooldown", (chargeTimeMillis / 1000) + "s")
         );
     }
 }

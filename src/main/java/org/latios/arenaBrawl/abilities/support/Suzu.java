@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.ShieldManager;
@@ -22,12 +23,12 @@ import java.util.List;
 
 public class Suzu implements Ability {
 
-    private static final long COOLDOWN_MS = 30_000;
-    private static final double HEAL_AMOUNT = 175.0;
-    private static final long INVULNERABILITY_DURATION_MS = 1_000;
-    private static final double RADIUS = 3.0;
-    private static final double MAX_RANGE = 12.0;
-    private static final double STEP = 0.6;
+    private final long cooldownMs;
+    private final double healAmount;
+    private final long invulnerabilityDurationMs;
+    private final double radius;
+    private final double maxRange;
+    private final double step;
 
     private final Plugin plugin;
     private final AbilityCost cost;
@@ -37,9 +38,16 @@ public class Suzu implements Ability {
 
     public Suzu(Plugin plugin, CooldownManager cooldownManager, TeamManager teamManager,
                 PlayerHealthManager healthManager, ShieldManager shieldManager,
-                CombatUpgradeManager combatUpgradeManager) {
+                CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
         this.plugin = plugin;
-        this.cost = new CooldownCost(cooldownManager, "suzu", COOLDOWN_MS, combatUpgradeManager);
+        this.cooldownMs = config.getLong("cooldown-ms", 30000L);
+        this.healAmount = config.getDouble("heal-amount", 175.0);
+        this.invulnerabilityDurationMs = config.getLong("invulnerability-duration-ms", 1000L);
+        this.radius = config.getDouble("radius", 3.0);
+        this.maxRange = config.getDouble("max-range", 12.0);
+        this.step = config.getDouble("step", 0.6);
+
+        this.cost = new CooldownCost(cooldownManager, "suzu", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
@@ -68,8 +76,8 @@ public class Suzu implements Ability {
 
             @Override
             public void run() {
-                currentLoc.add(direction.clone().multiply(STEP));
-                distanceTraveled += STEP;
+                currentLoc.add(direction.clone().multiply(step));
+                distanceTraveled += step;
 
                 currentLoc.getWorld().spawnParticle(Particle.FIREWORK, currentLoc, 1, 0.02, 0.02, 0.02, 0.01);
                 currentLoc.getWorld().spawnParticle(Particle.END_ROD, currentLoc, 1, 0, 0, 0, 0);
@@ -90,7 +98,7 @@ public class Suzu implements Ability {
                     }
                 }
 
-                if (distanceTraveled >= MAX_RANGE) {
+                if (distanceTraveled >= maxRange) {
                     triggerProtection(player, currentLoc);
                     cancel();
                 }
@@ -111,15 +119,15 @@ public class Suzu implements Ability {
             if (ally.getGameMode() == GameMode.SPECTATOR || ally.isDead()) continue;
             if (teamManager.isEnemy(caster, ally)) continue;
 
-            if (ally.getLocation().distance(center) <= RADIUS) {
+            if (ally.getLocation().distance(center) <= radius) {
                 if (ally.equals(caster)) {
-                    healthManager.heal(caster, HEAL_AMOUNT, getName());
+                    healthManager.heal(caster, healAmount, getName());
                 } else {
-                    healthManager.healAlly(caster, ally, HEAL_AMOUNT, getName());
+                    healthManager.healAlly(caster, ally, healAmount, getName());
                 }
                 ally.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, ally.getLocation().add(0, 1.0, 0), 10, 0.3, 0.5, 0.3, 0);
 
-                shieldManager.applyShield(ally, 1.0, INVULNERABILITY_DURATION_MS);
+                shieldManager.applyShield(ally, 1.0, invulnerabilityDurationMs);
             }
         }
     }
@@ -132,10 +140,10 @@ public class Suzu implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Heal", (int) HEAL_AMOUNT + " HP"),
-                new AbilityStat("Invulnerability", (INVULNERABILITY_DURATION_MS / 1000.0) + "s"),
-                new AbilityStat("Radius", RADIUS + "m"),
-                new AbilityStat("Cooldown", (COOLDOWN_MS / 1000) + "s")
+                new AbilityStat("Heal", (int) healAmount + " HP"),
+                new AbilityStat("Invulnerability", (invulnerabilityDurationMs / 1000.0) + "s"),
+                new AbilityStat("Radius", (int) radius + "m"),
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 }

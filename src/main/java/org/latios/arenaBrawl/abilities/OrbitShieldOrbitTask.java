@@ -1,5 +1,5 @@
 
-package org.latios.arenaBrawl.abilities.support;
+package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;

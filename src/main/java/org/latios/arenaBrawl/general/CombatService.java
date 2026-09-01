@@ -14,6 +14,8 @@ import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.Vector3f;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
+import org.latios.arenaBrawl.abilities.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.OrbitShieldType;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;

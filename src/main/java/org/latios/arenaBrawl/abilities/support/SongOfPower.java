@@ -11,6 +11,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -23,9 +24,10 @@ import java.util.Set;
 
 public class SongOfPower implements Ability {
 
-    private static final long DURATION_MILLIS = 7_000;
-    private static final long DURATION_TICKS = 140;
-    private static final double RADIUS = 6.0;
+    private final long durationMillis;
+    private final double radius;
+    private final long cooldownMs;
+    private final double energyMultiplier;
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -35,8 +37,14 @@ public class SongOfPower implements Ability {
 
     public SongOfPower(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
                        TeamManager teamManager, SongOfPowerManager songOfPowerManager,
-                       EnergyModifierManager energyModifierManager, DebuffManager debuffManager) {
-        this.cost = new CooldownCost(cooldownManager, "songofpower", 45000, upgradeManager);
+                       EnergyModifierManager energyModifierManager, DebuffManager debuffManager,
+                       AbilityConfig config) {
+        this.durationMillis = config.getLong("duration-millis", 7000L);
+        this.radius = config.getDouble("radius", 6.0);
+        this.cooldownMs = config.getLong("cooldown-ms", 45000L);
+        this.energyMultiplier = config.getDouble("energy-multiplier", 2.0);
+
+        this.cost = new CooldownCost(cooldownManager, "songofpower", cooldownMs, upgradeManager);
         this.teamManager = teamManager;
         this.songOfPowerManager = songOfPowerManager;
         this.energyModifierManager = energyModifierManager;
@@ -51,37 +59,37 @@ public class SongOfPower implements Ability {
 
     @Override
     public String getDescription() {
-        return "For its duration, you and allies within 6 blocks gain double energy regeneration, "
+        return "For its duration, you and allies within " + (int) radius + " blocks gain double energy regeneration, "
                 + "stop losing hunger, and become immune to negative status effects.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Duration", "7s"),
-                new AbilityStat("Radius", "6 blocks"),
-                new AbilityStat("Energy regen", "x2"),
-                new AbilityStat("Debuff immunity", "Yes")
+                new AbilityStat("Duration", (durationMillis / 1000L) + "s"),
+                new AbilityStat("Radius", (int) radius + " blocks"),
+                new AbilityStat("Energy regen", "x" + (int) energyMultiplier),
+                new AbilityStat("Debuff immunity", "Yes"),
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 
     @Override
     public boolean activate(Player player) {
         debuffManager.clear(player);
-        debuffManager.setSongOfPowerManager(songOfPowerManager);
         Set<Player> affected = new HashSet<>();
         affected.add(player);
 
-        for (Entity nearby : player.getNearbyEntities(RADIUS, RADIUS, RADIUS)) {
+        for (Entity nearby : player.getNearbyEntities(radius, radius, radius)) {
             if (nearby instanceof Player ally && teamManager.isAlly(player, ally)) {
                 affected.add(ally);
             }
         }
 
         for (Player target : affected) {
-            songOfPowerManager.applyBuff(target, DURATION_MILLIS);
+            songOfPowerManager.applyBuff(target, durationMillis);
             debuffManager.clear(target);
-            energyModifierManager.addModifier(target, "song_of_power", 2.0, DURATION_MILLIS);
+            energyModifierManager.addModifier(target, "song_of_power", energyMultiplier, durationMillis);
         }
 
         startAmbientEffect(player);
@@ -89,20 +97,20 @@ public class SongOfPower implements Ability {
     }
 
     private void startAmbientEffect(Player caster) {
+        final long durationTicks = (durationMillis / 1000L) * 20L;
         new BukkitRunnable() {
             int ticksElapsed = 0;
 
             @Override
             public void run() {
-                if (!caster.isOnline() || ticksElapsed >= DURATION_TICKS) {
+                if (!caster.isOnline() || ticksElapsed >= durationTicks) {
                     cancel();
                     return;
                 }
                 Location loc = caster.getLocation();
-                for (int i = 0; i < 5; i++) {
-                    loc.getWorld().playSound(loc, Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 0.5f);
-                    loc.getWorld().spawnParticle(Particle.NOTE, loc.clone().add(0, 1.5, 0), 1, 0.5, 0.3, 0.5, 1.0);
-                }
+                loc.getWorld().playSound(loc, Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.2f);
+                loc.getWorld().spawnParticle(Particle.NOTE, loc.clone().add(0, 1.5, 0), 4, 0.5, 0.3, 0.5, 0.1);
+
                 ticksElapsed += 20;
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 20L);

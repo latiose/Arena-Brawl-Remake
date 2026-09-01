@@ -4,7 +4,7 @@ package org.latios.arenaBrawl.abilities.cost;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.CooldownManager;
-import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
+import org.latios.arenaBrawl.abilities.UsageManager;
 
 public class UltimateCost implements AbilityCost {
 

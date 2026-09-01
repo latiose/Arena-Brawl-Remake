@@ -6,6 +6,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.AbilityTargeting;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
@@ -20,15 +21,22 @@ public class LightningStrike implements Ability {
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
-    private static final double ENERGY_COST = 70.0;
-    private static final double DAMAGE = 165;
+    private final double energyCost;
+    private final double damage;
+    private final double immoChance;
+    private final int maxRange;
+    private final long immoDurationTicks;
     private final DebuffManager debuffManager;
     private final CombatService combatService;
-    private final int maxRange = 18;
-    private static final long IMMO_DURATION = 2_000;
 
-    public LightningStrike(TeamManager teamManager, EnergyManager energyManager, CombatService combatService, DebuffManager debuffManager) {
-        this.cost = new EnergyCost(energyManager, ENERGY_COST);
+    public LightningStrike(TeamManager teamManager, EnergyManager energyManager,
+                           CombatService combatService, DebuffManager debuffManager, AbilityConfig config) {
+        this.energyCost = config.getDouble("energy-cost", 70.0);
+        this.damage = config.getDouble("damage", 165.0);
+        this.maxRange = config.getInt("max-range", 18);
+        this.immoChance = config.getDouble("immo-chance", 0.50);
+        this.immoDurationTicks = config.getLong("immo-duration-ticks", 2000L);
+        this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
         this.debuffManager = debuffManager;
@@ -49,10 +57,10 @@ public class LightningStrike implements Ability {
             return false;
         }
 
-        combatService.applyAbilityDamage(player, target, DAMAGE, getName());
+        combatService.applyAbilityDamage(player, target, damage, getName());
 
-        if (Math.random() < 0.50) {
-            debuffManager.tryApply(target, DebuffType.IMMOBILIZE, IMMO_DURATION);
+        if (Math.random() < immoChance) {
+            debuffManager.tryApply(target, DebuffType.IMMOBILIZE, immoDurationTicks);
         }
 
         target.getWorld().strikeLightningEffect(target.getLocation());
@@ -69,11 +77,11 @@ public class LightningStrike implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
-                new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
-                new AbilityStat("Range", maxRange+""),
-                new AbilityStat("Immobilization chance",  "50%"),
-                new AbilityStat("Immobilization duration", (int) IMMO_DURATION/1000 + "")
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Energy Cost", (int) energyCost + ""),
+                new AbilityStat("Range", String.valueOf(maxRange)),
+                new AbilityStat("Immobilization chance", (int) (immoChance * 100) + "%"),
+                new AbilityStat("Immobilization duration", (int) (immoDurationTicks / 1000L) + "s")
         );
     }
 }

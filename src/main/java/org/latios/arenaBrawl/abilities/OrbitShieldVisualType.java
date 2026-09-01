@@ -1,4 +1,4 @@
-package org.latios.arenaBrawl.abilities.support;
+package org.latios.arenaBrawl.abilities;
 
 public enum OrbitShieldVisualType {
     ITEM_DISPLAY,

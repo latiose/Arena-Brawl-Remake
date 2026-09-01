@@ -4,37 +4,47 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
-import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 
 public class SpikeGrenade implements Ability {
 
-    private static final int ENERGY_COST = 30;
-    private static final double GRENADE_DAMAGE = 60.0;
-    private static final double NEEDLE_DAMAGE = 5.0;
-    private static final double MAX_RANGE = 15.0;
-    private static final double STEP = 0.5;
-    private static final int NEEDLE_COUNT = 6;
-    private static final double NEEDLE_RANGE = 6.0;
+    private final double energyCost;
+    private final double grenadeDamage;
+    private final double needleDamage;
+    private final double maxRange;
+    private final double step;
+    private final int needleCount;
+    private final double needleRange;
 
     private final Plugin plugin;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
 
-    public SpikeGrenade(Plugin plugin, EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
+    public SpikeGrenade(Plugin plugin, EnergyManager energyManager, TeamManager teamManager,
+                        CombatService combatService, AbilityConfig config) {
         this.plugin = plugin;
-        this.cost = new EnergyCost(energyManager, ENERGY_COST);
+        this.energyCost = config.getDouble("energy-cost", 30.0);
+        this.grenadeDamage = config.getDouble("grenade-damage", 60.0);
+        this.needleDamage = config.getDouble("needle-damage", 5.0);
+        this.maxRange = config.getDouble("max-range", 15.0);
+        this.step = config.getDouble("step", 0.5);
+        this.needleCount = config.getInt("needle-count", 6);
+        this.needleRange = config.getDouble("needle-range", 6.0);
+
+        this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
@@ -62,8 +72,8 @@ public class SpikeGrenade implements Ability {
 
             @Override
             public void run() {
-                currentLoc.add(direction.clone().multiply(STEP));
-                distanceTraveled += STEP;
+                currentLoc.add(direction.clone().multiply(step));
+                distanceTraveled += step;
 
                 currentLoc.getWorld().spawnParticle(Particle.ITEM_SLIME, currentLoc, 8, 0.2, 0.2, 0.2, 0.05);
                 currentLoc.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, currentLoc, 3, 0.15, 0.15, 0.15, 0);
@@ -79,14 +89,14 @@ public class SpikeGrenade implements Ability {
                     if (!teamManager.isEnemy(player, enemy) || enemy.isDead()) continue;
 
                     if (enemy.getBoundingBox().expand(0.3, 0.3, 0.3).contains(currentLoc.getX(), currentLoc.getY(), currentLoc.getZ())) {
-                        combatService.applyAbilityDamage(player, enemy, GRENADE_DAMAGE, getName(), currentLoc);
+                        combatService.applyAbilityDamage(player, enemy, grenadeDamage, getName(), currentLoc);
                         explode(player, currentLoc);
                         cancel();
                         return;
                     }
                 }
 
-                if (distanceTraveled >= MAX_RANGE) {
+                if (distanceTraveled >= maxRange) {
                     explode(player, currentLoc);
                     cancel();
                 }
@@ -103,8 +113,8 @@ public class SpikeGrenade implements Ability {
         center.getWorld().spawnParticle(Particle.ITEM_SLIME, center, 35, 0.4, 0.4, 0.4, 0.15);
         center.getWorld().spawnParticle(Particle.SCRAPE, center, 20, 0.3, 0.3, 0.3, 0.1);
 
-        double angleStep = 360.0 / NEEDLE_COUNT;
-        for (int i = 0; i < NEEDLE_COUNT; i++) {
+        double angleStep = 360.0 / needleCount;
+        for (int i = 0; i < needleCount; i++) {
             double radians = Math.toRadians(i * angleStep);
             Vector needleDir = new Vector(Math.cos(radians), 0, Math.sin(radians)).normalize();
             launchNeedle(caster, center.clone(), needleDir);
@@ -118,8 +128,8 @@ public class SpikeGrenade implements Ability {
 
             @Override
             public void run() {
-                needleLoc.add(dir.clone().multiply(STEP));
-                dist += STEP;
+                needleLoc.add(dir.clone().multiply(step));
+                dist += step;
 
                 needleLoc.getWorld().spawnParticle(Particle.CRIT, needleLoc, 2, 0.05, 0.05, 0.05, 0.02);
                 needleLoc.getWorld().spawnParticle(Particle.SCRAPE, needleLoc, 2, 0.05, 0.05, 0.05, 0.01);
@@ -134,7 +144,7 @@ public class SpikeGrenade implements Ability {
                     if (!teamManager.isEnemy(caster, enemy) || enemy.isDead()) continue;
 
                     if (enemy.getBoundingBox().expand(0.3, 0.3, 0.3).contains(needleLoc.getX(), needleLoc.getY(), needleLoc.getZ())) {
-                        combatService.applyAbilityDamage(caster, enemy, NEEDLE_DAMAGE, getName(), needleLoc);
+                        combatService.applyAbilityDamage(caster, enemy, needleDamage, getName(), needleLoc);
                         enemy.getWorld().playSound(needleLoc, Sound.ENTITY_PLAYER_HURT, 0.8f, 1.8f);
                         enemy.getWorld().spawnParticle(Particle.CRIT, needleLoc, 8, 0.2, 0.2, 0.2, 0.1);
                         cancel();
@@ -142,7 +152,7 @@ public class SpikeGrenade implements Ability {
                     }
                 }
 
-                if (dist >= NEEDLE_RANGE) {
+                if (dist >= needleRange) {
                     cancel();
                 }
             }
@@ -157,9 +167,9 @@ public class SpikeGrenade implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Direct Damage", String.valueOf((int) GRENADE_DAMAGE)),
-                new AbilityStat("Needle Damage", String.valueOf((int) NEEDLE_DAMAGE)),
-                new AbilityStat("Energy", String.valueOf(ENERGY_COST))
+                new AbilityStat("Direct Damage", String.valueOf((int) grenadeDamage)),
+                new AbilityStat("Needle Damage", String.valueOf((int) needleDamage)),
+                new AbilityStat("Energy", String.valueOf((int) energyCost))
         );
     }
 }

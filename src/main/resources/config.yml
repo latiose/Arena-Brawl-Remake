@@ -4,6 +4,7 @@ worlds:
   highlink: "Highlink"
   zeus: "Zeus"
   lobby: "world"
+
 lobby-spawn:
   x: 0
   y: -60
@@ -34,20 +35,20 @@ leaderboard-signs:
 maps:
   Bridge:
     world: "Bridge"
-    red-spawn-1: {x: -2443, y: 17, z: 709,yaw: 90, pitch: 0}
-    red-spawn-2: {x: -2443, y: 17, z: 708,yaw: 90, pitch: 0}
-    blue-spawn-1: {x: -2499.3, y: 17, z: 686,yaw: -90, pitch: 0}
-    blue-spawn-2: {x: -2499.3, y: 17, z: 685,yaw: -90, pitch: 0}
+    red-spawn-1: {x: -2443, y: 17, z: 709, yaw: 90, pitch: 0}
+    red-spawn-2: {x: -2443, y: 17, z: 708, yaw: 90, pitch: 0}
+    blue-spawn-1: {x: -2499.3, y: 17, z: 686, yaw: -90, pitch: 0}
+    blue-spawn-2: {x: -2499.3, y: 17, z: 685, yaw: -90, pitch: 0}
     health-powerup: {x: -2471.577, y: 17.5, z: 697.445 }
     damage-powerups:
       - { x: -2480.476, y: 24.5, z: 697.423 }
       - { x: -2462.592, y: 24.5, z: -697.423 }
   Jungle:
     world: "Jungle"
-    red-spawn-1: {x: -2421.7, y: 35, z: 753.579,yaw: -90, pitch: 0}
-    red-spawn-2: {x: -2421.7, y: 35, z: 754.579,yaw: -90, pitch: 0}
-    blue-spawn-1: {x: -2385.3, y: 35, z: 723,yaw: 90, pitch: 0}
-    blue-spawn-2: {x: -2385.3, y: 35, z: 722.185,yaw: 90, pitch: 0}
+    red-spawn-1: {x: -2421.7, y: 35, z: 753.579, yaw: -90, pitch: 0}
+    red-spawn-2: {x: -2421.7, y: 35, z: 754.579, yaw: -90, pitch: 0}
+    blue-spawn-1: {x: -2385.3, y: 35, z: 723, yaw: 90, pitch: 0}
+    blue-spawn-2: {x: -2385.3, y: 35, z: 722.185, yaw: 90, pitch: 0}
     health-powerup: {x: -2403.4, y: 36.5, z: 738.43}
     damage-powerups:
       - {x: -2403.4, y: 43.5, z: 738.43}
@@ -56,8 +57,8 @@ maps:
     world: "Highlink"
     red-spawn-1: {x: 1, y: 76, z: 51.5}
     red-spawn-2: {x: 0, y: 76, z: 51.5}
-    blue-spawn-1: {x: 0, y: 76, z: 110.5,yaw: 180, pitch: 0}
-    blue-spawn-2: {x: 1, y: 76, z: 110.5,yaw: 180, pitch: 0}
+    blue-spawn-1: {x: 0, y: 76, z: 110.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 1, y: 76, z: 110.5, yaw: 180, pitch: 0}
     health-powerup: {x: 0.48, y: 77.5, z: 81.5}
     damage-powerups:
       - {x: -13, y: 75.5, z: -81.5}
@@ -66,9 +67,370 @@ maps:
     world: "Zeus"
     red-spawn-1: {x: 16.421, y: 45, z: 91.961}
     red-spawn-2: {x: 15.421, y: 45, z: 91.961}
-    blue-spawn-1: {x: -15, y: 45, z: 148.8,yaw: 180, pitch: 0}
-    blue-spawn-2: {x: -14, y: 45, z: 148.8,yaw: 180, pitch: 0}
+    blue-spawn-1: {x: -15, y: 45, z: 148.8, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: -14, y: 45, z: 148.8, yaw: 180, pitch: 0}
     health-powerup: {x: 0.589, y: 46.5, z: 120.4}
     damage-powerups:
       - {x: 15, y: 55.5, z: 134.91}
       - {x: -13.951, y: 55.5, z: 106.1}
+
+ability-values:
+  # --- OFFENSIVE ---
+  fireball:
+    damage: 105.0
+    aoe-radius: 3.0
+    energy-cost: 40.0
+
+  snowball:
+    damage: 60.0
+    energy-cost: 20.0
+    slow-duration-ticks: 2000
+    slow-chance: 0.20
+
+  melonlauncher:
+    main-damage: 140.0
+    slice-damage: 10.0
+    energy-cost: 60.0
+    aoe-radius: 3.0
+
+  pumpkinlauncher:
+    main-damage: 70.0
+    slice-damage: 5.0
+    energy-cost: 30.0
+    aoe-radius: 3.0
+
+  groundslam:
+    energy-cost: 100.0
+    damage: 250.0
+
+  freezingbreath:
+    energy-cost: 80.0
+    damage: 220.0
+    slow-duration-ticks: 2000
+
+  evilbreath:
+    energy-cost: 100.0
+    damage: 210.0
+    stun-duration-ticks: 1000
+
+  heavensbreath:
+    energy-cost: 100.0
+    damage: 190.0
+    heal-amount: 50.0
+
+  dragonsbreath:
+    energy-cost: 60.0
+    damage: 140.0
+    tick-damage: 25.0
+    slow-duration-ticks: 1000
+    range: 8.0
+
+  ancientbreath:
+    damage: 185.0
+    energy-cost: 75.0
+    immo-duration-ticks: 2000
+    immo-chance: 0.5
+    range: 8.0
+
+  flamebreath:
+    energy-cost: 60.0
+    damage: 150.0
+    tick-damage: 25.0
+
+  lightningstrike:
+    energy-cost: 70.0
+    damage: 165.0
+    max-range: 18
+    immo-chance: 0.50
+    immo-duration-ticks: 2000
+
+  consume:
+    damage: 220.0
+    self-heal: 50.0
+    energy-cost: 100.0
+    max-range: 3.0
+
+  dash:
+    distance: 4.0
+    damage: 105.0
+    energy-cost: 40.0
+    hit-radius: 1.3
+
+  rocketchicken:
+    damage: 80.0
+    energy-cost: 30.0
+    launch-speed: 2.2
+    direct-hit-radius: 1.2
+    aoe-radius: 2.5
+
+  mysticshot:
+    damage: 185.0
+    energy-cost: 70.0
+    max-distance: 25.0
+    step: 1.3
+    hit-box-radius: 1.0
+
+  laywaste:
+    damage: 100.0
+    energy-cost: 30.0
+    max-target-distance: 15.0
+    radius: 1.0
+    delay-ticks: 15
+
+  particlebeam:
+    damage: 130.0
+    energy-cost: 50.0
+    max-range: 256.0
+    step-size: 0.4
+    hit-expansion: 0.4
+
+  burstfire:
+    damage: 55.0
+    max-range: 5.0
+    energy-cost: 20.0
+
+  cookieshotgun:
+    damage-per-cookie: 25.0
+    energy-cost: 60.0
+    cookie-count: 7
+    explosion-radius: 1.8
+
+  spikegrenade:
+    energy-cost: 30.0
+    grenade-damage: 60.0
+    needle-damage: 5.0
+    max-range: 15.0
+    step: 0.5
+    needle-count: 6
+    needle-range: 6.0
+
+  # --- UTILITY ---
+  shadowstep:
+    cooldown-ms: 30000
+    max-range: 20
+    speed-amplifier: 2
+    speed-duration-ticks: 40
+
+  salmonform:
+    cooldown-ms: 27000
+    duration-ticks: 100
+
+  sparkbolt:
+    cooldown-ms: 30000
+    max-range: 20
+    duration-ms: 5000
+
+  sugarrush:
+    cooldown-ms: 30000
+    speed-amplifier: 2
+    speed-duration-ticks: 80
+    slow-duration-ms: 3000
+
+  swap:
+    cooldown-ms: 30000
+    max-range: 30
+    stun-duration-ms: 2000
+    teleport-delay-ticks: 40
+
+  violentleap:
+    cooldown-seconds: 40
+    radius: 3.0
+
+  wallofvines:
+    cooldown-ms: 30000
+
+  polymorph:
+    duration-ms: 8000
+    range: 20.0
+    cooldown-ms: 40000
+
+  barricade:
+    cooldown-ms: 30000
+
+  golemfall:
+    max-range: 20.0
+    spawn-height-offset: 10.0
+    impact-radius: 5.0
+    knockback-strength: 5.0
+    cooldown-ms: 30000
+
+  bullcharge:
+    cooldown-ms: 30000
+
+  corruption:
+    max-range: 20.0
+    duration-ms: 5000
+    cooldown-ms: 35000
+
+  magneticImpulse:
+    radius: 5.0
+    stun-duration-ms: 2000
+    cooldown-ms: 40000
+
+  RocketGrab:
+    cooldown-ms: 30000
+    max-range: 20.0
+    step: 1.5
+    pull-ticks: 20
+
+  darkpassage:
+    max-range: 12.0
+    duration-ticks: 100
+    cooldown-ms: 30000
+
+  # --- SUPPORT ---
+  holywater:
+    cooldown-ms: 30000
+    self-heal: 300.0
+    ally-heal: 50.0
+    radius: 6.0
+
+  boneshield:
+    cooldown-ms: 30000
+
+  cactusshield:
+    cooldown-ms: 30000
+
+  starshield:
+    cooldown-ms: 45000
+
+  spongeshield:
+    cooldown-ms: 45000
+
+  lifebond:
+    range: 25.0
+    heal-per-second: 25.0
+    duration-seconds: 8
+    cooldown-ms: 30000
+    redirect-percent: 0.30
+
+  healingtotem:
+    cooldown-ms: 40000
+    heal-per-pulse: 300.0
+    pulses: 3
+    radius: 4.0
+    hits-to-destroy: 4
+
+  treeoflife:
+    cooldown-ms: 35000
+    heal-per-second: 50.0
+    final-burst-heal: 400.0
+    duration-seconds: 7
+    radius: 5.0
+    hits-to-destroy: 8
+    max-placement-range: 5.0
+
+  songofpower:
+    duration-millis: 7000
+    radius: 6.0
+    cooldown-ms: 45000
+    energy-multiplier: 2.0
+
+  lifeleech:
+    hit-count: 12
+    duration-millis: 8000
+    cooldown-ms: 30000
+    heal-per-hit: 60.0
+
+  etheralbody:
+    duration-millis: 4000
+    cooldown-ms: 35000
+
+  healingrain:
+    cooldown-ms: 30000
+    heal-per-second: 50.0
+    radius: 4.0
+    duration-seconds: 6
+    cloud-height: 3.5
+
+  suzu:
+    cooldown-ms: 30000
+    heal-amount: 175.0
+    invulnerability-duration-ms: 1000
+    radius: 3.0
+    max-range: 12.0
+    step: 0.6
+
+  discordorb:
+    cooldown-ms: 30000
+    duration-seconds: 7
+    damage-bonus: 0.30
+    max-range: 20.0
+
+  # --- ULTIMATE ---
+  shieldwall:
+    damage-reduction: 0.70
+    duration-ms: 10000
+    charge-time-ms: 60000
+
+  broodmother:
+    charge-time-millis: 60000
+    max-range: 30
+    brood-hp: 7
+    spiderling-count: 4
+    spiderling-hits-to-kill: 3
+    poison-damage-per-sec: 33.0
+    poison-duration-sec: 6
+    spiderling-damage: 5.0
+
+  absolutezero:
+    radius: 5.0
+    max-charge-ticks: 100
+    max-damage: 400.0
+    charge-time-millis: 60000
+
+  arenadomain:
+    charge-time-millis: 60000
+    radius: 8.0
+    duration-seconds: 8
+    height: 5.0
+
+  nanoboost:
+    max-range: 20.0
+    duration-ms: 8000
+    speed-amplifier: 1
+    charge-time-ms: 60000
+    damage-reduction: 0.50
+    damage-increase: 1.50
+
+  divinejudgment:
+    duration-millis: 5000
+    duration-ticks: 100
+    max-range: 20.0
+    explosion-damage: 200.0
+    explosion-radius: 3.0
+    charge-time-millis: 60000
+
+  healingwind:
+    push-radius: 6.0
+    push-strength: 2.2
+    heal-radius: 10.0
+    heal-per-second: 50.0
+    heal-duration-millis: 6000
+    charge-time-millis: 60000
+
+  thebox:
+    radius: 4.0
+    damage: 350.0
+    slow-duration-ms: 4000
+    duration-ticks: 100
+    charge-time-ms: 60000
+
+  rewind:
+    range: 14.0
+    duration-ticks: 100
+    charge-time-ms: 60000
+    revive-health: 400.0
+
+  staticfield:
+    radius: 5.0
+    damage: 300.0
+    silence-duration-ms: 5000
+    charge-time-ms: 60000
+
+  myriadtruths:
+    charge-time-ms: 60000
+    radius: 5.0
+    duration-seconds: 7
+    damage-bonus: 0.30
+

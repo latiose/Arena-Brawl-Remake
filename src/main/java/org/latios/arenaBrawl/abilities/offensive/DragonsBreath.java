@@ -8,6 +8,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
@@ -21,13 +22,20 @@ import java.util.Set;
 
 public class DragonsBreath extends Breath {
 
-    private static final double DAMAGE = 140.0;
-    private static final double TICK_DAMAGE = 25.0;
-    private static final double ENERGY_COST = 60.0;
-    private static final long SLOW_DURATION_TICKS = 1_000;
+    private final double damage;
+    private final double tickDamage;
+    private final double energyCost;
+    private final long slowDurationTicks;
+    private final double range;
 
-    public DragonsBreath(Plugin plugin, EnergyManager energyManager, TeamManager teamManager, CombatService combatService, DebuffManager debuffManager) {
-        super(plugin, energyManager, ENERGY_COST, teamManager, combatService, debuffManager);
+    public DragonsBreath(Plugin plugin, EnergyManager energyManager, TeamManager teamManager,
+                         CombatService combatService, DebuffManager debuffManager, AbilityConfig config) {
+        super(plugin, energyManager, config.getDouble("energy-cost", 60.0), teamManager, combatService, debuffManager);
+        this.damage = config.getDouble("damage", 140.0);
+        this.tickDamage = config.getDouble("tick-damage", 25.0);
+        this.energyCost = config.getDouble("energy-cost", 60.0);
+        this.slowDurationTicks = config.getLong("slow-duration-ticks", 1000L);
+        this.range = config.getDouble("range", 8.0);
     }
 
     @Override
@@ -40,7 +48,7 @@ public class DragonsBreath extends Breath {
 
     @Override
     protected double getDamage() {
-        return DAMAGE;
+        return damage;
     }
 
     @Override
@@ -52,7 +60,7 @@ public class DragonsBreath extends Breath {
     @Override
     protected void applyHitEffects(Player target) {
         if (debuffManager != null) {
-            debuffManager.tryApply(target, DebuffType.SLOW, SLOW_DURATION_TICKS);
+            debuffManager.tryApply(target, DebuffType.SLOW, slowDurationTicks);
         }
     }
 
@@ -134,7 +142,7 @@ public class DragonsBreath extends Breath {
                     }
 
                     for (Player target : tickHitPlayers) {
-                        combatService.applyAbilityDamage(player, target, TICK_DAMAGE, getName());
+                        combatService.applyAbilityDamage(player, target, tickDamage, getName());
                     }
                 }
 
@@ -155,11 +163,11 @@ public class DragonsBreath extends Breath {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
-                new AbilityStat("Tick damage", String.valueOf((int) TICK_DAMAGE)),
-                new AbilityStat("Slow duration", String.valueOf(1)),
-                new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
-                new AbilityStat("Range", "8")
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Tick damage", String.valueOf((int) tickDamage)),
+                new AbilityStat("Slow duration", String.valueOf((int) (slowDurationTicks / 1000L)) + "s"),
+                new AbilityStat("Energy Cost", (int) energyCost + ""),
+                new AbilityStat("Range", String.valueOf((int) range))
         );
     }
 }

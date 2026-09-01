@@ -10,30 +10,32 @@ import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
-
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class BurstFire implements Ability {
 
-    private static final double DAMAGE = 55.0;
-    private static final double MAX_RANGE = 5.0;
-    private static final int ENERGY_COST = 20;
-
     private final AbilityCost cost;
+    private final double damage;
+    private final double maxRange;
+    private final double energyCost;
     private final TeamManager teamManager;
     private final CombatService combatService;
     private final Plugin plugin;
 
     public BurstFire(Plugin plugin, EnergyManager energyManager, TeamManager teamManager,
-                     CombatService combatService) {
+                     CombatService combatService, AbilityConfig config) {
         this.plugin = plugin;
-        this.cost = new EnergyCost(energyManager, ENERGY_COST);
+        this.damage = config.getDouble("damage", 55.0);
+        this.maxRange = config.getDouble("max-range", 5.0);
+        this.energyCost = config.getDouble("energy-cost", 20.0);
+        this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
@@ -78,7 +80,7 @@ public class BurstFire implements Ability {
         Vector finalDir = direction.add(new Vector(spreadX, spreadY, spreadZ)).normalize();
         double step = 0.3;
 
-        for (double traveled = 0; traveled <= MAX_RANGE; traveled += step) {
+        for (double traveled = 0; traveled <= maxRange; traveled += step) {
             Location point = origin.add(finalDir.clone().multiply(step));
 
             if (point.getBlock().getType().isSolid()) {
@@ -94,7 +96,7 @@ public class BurstFire implements Ability {
                 }
 
                 if (target.getBoundingBox().expand(0.2, 0.2, 0.2).contains(point.getX(), point.getY(), point.getZ())) {
-                    combatService.applyAbilityDamage(caster, target, DAMAGE / 3.0, getName(), point);
+                    combatService.applyAbilityDamage(caster, target, damage / 3.0, getName(), point);
 
                     point.getWorld().playSound(point, Sound.ENTITY_PLAYER_HURT, 0.8f, 1.5f);
                     return;
@@ -111,9 +113,9 @@ public class BurstFire implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
-                new AbilityStat("Range", (int) MAX_RANGE + "m"),
-                new AbilityStat("Energy Cost", String.valueOf(ENERGY_COST))
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Range", (int) maxRange + "m"),
+                new AbilityStat("Energy Cost", String.valueOf((int) energyCost))
         );
     }
 }

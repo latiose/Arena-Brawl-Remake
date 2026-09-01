@@ -5,6 +5,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
@@ -14,13 +15,17 @@ import java.util.List;
 
 public class HeavensBreath extends Breath {
 
-    private static final double DAMAGE = 190.0;
-    private static final double ENERGY_COST = 100.0;
-    private static final double HEAL_AMOUNT = 50.0;
+    private final double damage;
+    private final double energyCost;
+    private final double healAmount;
     private final PlayerHealthManager healthManager;
 
-    public HeavensBreath(EnergyManager energyManager, TeamManager teamManager, CombatService combatService, PlayerHealthManager healthManager) {
-        super(energyManager, ENERGY_COST, teamManager, combatService, null);
+    public HeavensBreath(EnergyManager energyManager, TeamManager teamManager,
+                         CombatService combatService, PlayerHealthManager healthManager, AbilityConfig config) {
+        super(energyManager, config.getDouble("energy-cost", 100.0), teamManager, combatService, null);
+        this.damage = config.getDouble("damage", 190.0);
+        this.energyCost = config.getDouble("energy-cost", 100.0);
+        this.healAmount = config.getDouble("heal-amount", 50.0);
         this.healthManager = healthManager;
     }
 
@@ -34,7 +39,7 @@ public class HeavensBreath extends Breath {
 
     @Override
     protected double getDamage() {
-        return DAMAGE;
+        return damage;
     }
 
     @Override
@@ -53,7 +58,7 @@ public class HeavensBreath extends Breath {
         boolean activated = super.activate(player);
 
         if (activated) {
-            healthManager.heal(player, HEAL_AMOUNT, getName());
+            healthManager.heal(player, healAmount, getName());
             player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0, 1.5, 0), 5, 0.3, 0.3, 0.3, 0.0);
         }
 
@@ -67,7 +72,7 @@ public class HeavensBreath extends Breath {
             combatService.applyAbilityDamage(caster, target, getDamage(), getName());
             applySpike(target);
         } else {
-            healthManager.healAlly(caster, target, HEAL_AMOUNT, getName());
+            healthManager.healAlly(caster, target, healAmount, getName());
             target.getWorld().spawnParticle(Particle.HEART, target.getLocation().add(0, 1.5, 0), 5, 0.3, 0.3, 0.3, 0.0);
         }
     }
@@ -85,10 +90,10 @@ public class HeavensBreath extends Breath {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
-                new AbilityStat("Energy Cost", String.valueOf((int) ENERGY_COST)),
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Energy Cost", String.valueOf((int) energyCost)),
                 new AbilityStat("Range", "8"),
-                new AbilityStat("Heal Amount", String.valueOf((int) HEAL_AMOUNT))
+                new AbilityStat("Heal Amount", String.valueOf((int) healAmount))
         );
     }
 }

@@ -8,6 +8,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -19,12 +20,16 @@ import java.util.Set;
 
 public class FlameBreath extends Breath {
 
-    private static final double DAMAGE = 150.0;
-    private static final double TICK_DAMAGE = 25.0;
-    private static final double ENERGY_COST = 60.0;
+    private final double damage;
+    private final double tickDamage;
+    private final double energyCost;
 
-    public FlameBreath(Plugin plugin, EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
-        super(plugin, energyManager, ENERGY_COST, teamManager, combatService, null);
+    public FlameBreath(Plugin plugin, EnergyManager energyManager, TeamManager teamManager,
+                       CombatService combatService, AbilityConfig config) {
+        super(plugin, energyManager, config.getDouble("energy-cost", 60.0), teamManager, combatService, null);
+        this.damage = config.getDouble("damage", 150.0);
+        this.tickDamage = config.getDouble("tick-damage", 25.0);
+        this.energyCost = config.getDouble("energy-cost", 60.0);
     }
 
     @Override
@@ -37,7 +42,7 @@ public class FlameBreath extends Breath {
 
     @Override
     protected double getDamage() {
-        return DAMAGE;
+        return damage;
     }
 
     @Override
@@ -125,7 +130,7 @@ public class FlameBreath extends Breath {
                     }
 
                     for (Player target : tickHitPlayers) {
-                        combatService.applyAbilityDamage(player, target, TICK_DAMAGE, getName());
+                        combatService.applyAbilityDamage(player, target, tickDamage, getName());
                     }
                 }
 
@@ -146,9 +151,9 @@ public class FlameBreath extends Breath {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
-                new AbilityStat("Tick damage", String.valueOf((int) TICK_DAMAGE)),
-                new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Tick damage", String.valueOf((int) tickDamage)),
+                new AbilityStat("Energy Cost", (int) energyCost + ""),
                 new AbilityStat("Range", "8")
         );
     }

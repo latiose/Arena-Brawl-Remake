@@ -1,11 +1,8 @@
 package org.latios.arenaBrawl.abilities.utility;
 
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -18,6 +15,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -25,13 +23,15 @@ import java.util.List;
 
 public class SalmonForm implements Ability {
 
-    private static final long COOLDOWN_MS = 27_000;
-    private static final long DURATION_TICKS = 100L;
+    private final long cooldownMs;
+    private final long durationTicks;
 
     private final AbilityCost cost;
 
-    public SalmonForm(CooldownManager cooldownManager, CombatUpgradeManager combatUpgradeManager) {
-        this.cost = new CooldownCost(cooldownManager, "salmon_form", COOLDOWN_MS, combatUpgradeManager);
+    public SalmonForm(CooldownManager cooldownManager, CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
+        this.cooldownMs = config.getLong("cooldown-ms", 27_000L);
+        this.durationTicks = config.getLong("duration-ticks", 100L);
+        this.cost = new CooldownCost(cooldownManager, "salmon_form", cooldownMs, combatUpgradeManager);
     }
 
     @Override
@@ -52,8 +52,8 @@ public class SalmonForm implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Duration", "5s"),
-                new AbilityStat("Cooldown", (COOLDOWN_MS / 1000) + "s")
+                new AbilityStat("Duration", (durationTicks / 20L) + "s"),
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 
@@ -67,7 +67,7 @@ public class SalmonForm implements Ability {
 
         player.getWorld().playSound(startLoc, Sound.ENTITY_SALMON_FLOP, 1.2f, 1.0f);
         player.getWorld().playSound(startLoc, Sound.ITEM_BUCKET_FILL_FISH, 1.0f, 1.2f);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, (int) DURATION_TICKS, 1, false, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, (int) durationTicks, 1, false, false, false));
 
         new BukkitRunnable() {
             int ticksElapsed = 0;
@@ -76,7 +76,7 @@ public class SalmonForm implements Ability {
             public void run() {
                 ticksElapsed += 2;
 
-                if (!player.isOnline() || player.isDead() || ticksElapsed >= DURATION_TICKS) {
+                if (!player.isOnline() || player.isDead() || ticksElapsed >= durationTicks) {
                     if (DisguiseAPI.isDisguised(player)) {
                         DisguiseAPI.undisguiseToAll(player);
                     }

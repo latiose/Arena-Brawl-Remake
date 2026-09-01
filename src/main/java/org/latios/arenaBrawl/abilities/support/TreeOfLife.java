@@ -8,6 +8,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.Blueprints;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
@@ -20,6 +21,14 @@ import java.util.List;
 
 public class TreeOfLife implements Ability {
 
+    private final long cooldownMs;
+    private final double healPerSecond;
+    private final double finalBurstHeal;
+    private final int durationSeconds;
+    private final double radius;
+    private final int hitsToDestroy;
+    private final double maxPlacementRange;
+
     private final AbilityCost cost;
     private final StructureManager structureManager;
     private final TeamManager teamManager;
@@ -27,8 +36,16 @@ public class TreeOfLife implements Ability {
 
     public TreeOfLife(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
                       StructureManager structureManager, TeamManager teamManager,
-                      PlayerHealthManager healthManager) {
-        this.cost = new CooldownCost(cooldownManager, "treeoflife", 35000, upgradeManager);
+                      PlayerHealthManager healthManager, AbilityConfig config) {
+        this.cooldownMs = config.getLong("cooldown-ms", 35000L);
+        this.healPerSecond = config.getDouble("heal-per-second", 50.0);
+        this.finalBurstHeal = config.getDouble("final-burst-heal", 400.0);
+        this.durationSeconds = config.getInt("duration-seconds", 7);
+        this.radius = config.getDouble("radius", 5.0);
+        this.hitsToDestroy = config.getInt("hits-to-destroy", 8);
+        this.maxPlacementRange = config.getDouble("max-placement-range", 5.0);
+
+        this.cost = new CooldownCost(cooldownManager, "treeoflife", cooldownMs, upgradeManager);
         this.structureManager = structureManager;
         this.teamManager = teamManager;
         this.healthManager = healthManager;
@@ -49,17 +66,18 @@ public class TreeOfLife implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Heal per second", "50 HP"),
-                new AbilityStat("Final burst heal", "400 HP"),
-                new AbilityStat("Duration", "7s"),
-                new AbilityStat("Radius", "5 blocks"),
-                new AbilityStat("Melee hits to destroy", "8")
+                new AbilityStat("Heal per second", (int) healPerSecond + " HP"),
+                new AbilityStat("Final burst heal", (int) finalBurstHeal + " HP"),
+                new AbilityStat("Duration", durationSeconds + "s"),
+                new AbilityStat("Radius", (int) radius + " blocks"),
+                new AbilityStat("Melee hits to destroy", String.valueOf(hitsToDestroy)),
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 
     @Override
     public boolean activate(Player player) {
-        Block targetBlock = player.getTargetBlockExact(5);
+        Block targetBlock = player.getTargetBlockExact((int) maxPlacementRange);
 
         if (targetBlock == null || !targetBlock.getType().isSolid()) {
             player.sendMessage("§eSelect a valid block!");

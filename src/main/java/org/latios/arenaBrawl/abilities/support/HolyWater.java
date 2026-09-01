@@ -9,6 +9,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
@@ -19,15 +20,24 @@ import java.util.List;
 
 public class HolyWater implements Ability {
 
+    private final long cooldownMs;
+    private final double selfHeal;
+    private final double allyHeal;
+    private final double radius;
+
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
     private final DebuffManager debuffManager;
-    private static final double SELF_HEAL = 300;
-    private static final double ALLY_HEAL = 50;
 
-    public HolyWater(CooldownManager cooldownManager, TeamManager teamManager, PlayerHealthManager healthManager, DebuffManager debuffManager, CombatUpgradeManager combatUpgradeManager) {
-        this.cost = new CooldownCost(cooldownManager, "holywater", 30000, combatUpgradeManager);
+    public HolyWater(CooldownManager cooldownManager, TeamManager teamManager, PlayerHealthManager healthManager,
+                     DebuffManager debuffManager, CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
+        this.cooldownMs = config.getLong("cooldown-ms", 30000L);
+        this.selfHeal = config.getDouble("self-heal", 300.0);
+        this.allyHeal = config.getDouble("ally-heal", 50.0);
+        this.radius = config.getDouble("radius", 6.0);
+
+        this.cost = new CooldownCost(cooldownManager, "holywater", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
         this.healthManager = healthManager;
         this.debuffManager = debuffManager;
@@ -44,7 +54,7 @@ public class HolyWater implements Ability {
         Player closestAlly = null;
         double closestDistance = Double.MAX_VALUE;
 
-        for (Entity nearby : player.getNearbyEntities(6, 4, 6)) {
+        for (Entity nearby : player.getNearbyEntities(radius, radius, radius)) {
             if (nearby instanceof Player nearbyPlayer && teamManager.isAlly(player, nearbyPlayer)) {
                 double distance = nearbyPlayer.getLocation().distanceSquared(player.getLocation());
                 if (distance < closestDistance && nearbyPlayer.getGameMode() != GameMode.SPECTATOR) {
@@ -54,11 +64,11 @@ public class HolyWater implements Ability {
             }
         }
 
-        healthManager.heal(player, SELF_HEAL, getName());
+        healthManager.heal(player, selfHeal, getName());
         debuffManager.clear(player);
 
         if (closestAlly != null) {
-            healthManager.healAlly(player, closestAlly, ALLY_HEAL, getName());
+            healthManager.healAlly(player, closestAlly, allyHeal, getName());
             debuffManager.clear(closestAlly);
         }
 
@@ -75,9 +85,9 @@ public class HolyWater implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Self Heal", (int) SELF_HEAL + " HP"),
-                new AbilityStat("Ally Heal", (int) ALLY_HEAL + " HP"),
-                new AbilityStat("Cooldown", "30s"),
+                new AbilityStat("Self Heal", (int) selfHeal + " HP"),
+                new AbilityStat("Ally Heal", (int) allyHeal + " HP"),
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s"),
                 new AbilityStat("Bonus", "Cleanses debuffs")
         );
     }

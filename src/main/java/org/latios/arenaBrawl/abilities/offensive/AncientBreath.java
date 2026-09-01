@@ -5,6 +5,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
@@ -15,13 +16,20 @@ import java.util.List;
 
 public class AncientBreath extends Breath {
 
-    private static final double DAMAGE = 185.0;
-    private static final double ENERGY_COST = 75.0;
-    private static final long IMMO_DURATION_TICKS = 2_000;
+    private final double damage;
+    private final double energyCost;
+    private final long immoDurationTicks;
+    private final double immoChance;
+    private final double range;
 
     public AncientBreath(EnergyManager energyManager, TeamManager teamManager,
-                         CombatService combatService, DebuffManager debuffManager) {
-        super(energyManager, ENERGY_COST, teamManager, combatService, debuffManager);
+                         CombatService combatService, DebuffManager debuffManager, AbilityConfig config) {
+        super(energyManager, config.getDouble("energy-cost", 75.0), teamManager, combatService, debuffManager);
+        this.damage = config.getDouble("damage", 185.0);
+        this.energyCost = config.getDouble("energy-cost", 75.0);
+        this.immoDurationTicks = config.getLong("immo-duration-ticks", 2000L);
+        this.immoChance = config.getDouble("immo-chance", 0.50);
+        this.range = config.getDouble("range", 8.0);
     }
 
     @Override
@@ -34,7 +42,7 @@ public class AncientBreath extends Breath {
 
     @Override
     protected double getDamage() {
-        return DAMAGE;
+        return damage;
     }
 
     @Override
@@ -44,8 +52,8 @@ public class AncientBreath extends Breath {
 
     @Override
     protected void applyHitEffects(Player target) {
-        if (Math.random() < 0.50) {
-            debuffManager.tryApply(target, DebuffType.IMMOBILIZE, IMMO_DURATION_TICKS);
+        if (Math.random() < immoChance) {
+            debuffManager.tryApply(target, DebuffType.IMMOBILIZE, immoDurationTicks);
         }
     }
 
@@ -57,11 +65,11 @@ public class AncientBreath extends Breath {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
-                new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
-                new AbilityStat("Range", "8"),
-                new AbilityStat("Immobilization chance", "50%"),
-                new AbilityStat("Immobilization duration", (int) IMMO_DURATION_TICKS / 1000 + "")
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Energy Cost", (int) energyCost + ""),
+                new AbilityStat("Range", String.valueOf((int) range)),
+                new AbilityStat("Immobilization chance", (int) (immoChance * 100) + "%"),
+                new AbilityStat("Immobilization duration", (int) immoDurationTicks / 1000 + "s")
         );
     }
 }

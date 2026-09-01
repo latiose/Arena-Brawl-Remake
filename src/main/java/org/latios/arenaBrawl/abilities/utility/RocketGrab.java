@@ -11,6 +11,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -19,18 +20,24 @@ import java.util.List;
 
 public class RocketGrab implements Ability {
 
-    private static final long COOLDOWN_MS = 30_000;
-    private static final double MAX_RANGE = 20.0;
-    private static final double STEP = 1.5;
-    private static final int PULL_TICKS = 20;
+    private final long cooldownMs;
+    private final double maxRange;
+    private final double step;
+    private final int pullTicks;
 
     private final Plugin plugin;
     private final AbilityCost cost;
     private final TeamManager teamManager;
 
-    public RocketGrab(Plugin plugin, CooldownManager cooldownManager, TeamManager teamManager, CombatUpgradeManager combatUpgradeManager) {
+    public RocketGrab(Plugin plugin, CooldownManager cooldownManager, TeamManager teamManager,
+                      CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
         this.plugin = plugin;
-        this.cost = new CooldownCost(cooldownManager, "rocketgrab", COOLDOWN_MS,combatUpgradeManager);
+        this.cooldownMs = config.getLong("cooldown-ms", 30000L);
+        this.maxRange = config.getDouble("max-range", 20.0);
+        this.step = config.getDouble("step", 1.5);
+        this.pullTicks = config.getInt("pull-ticks", 20);
+
+        this.cost = new CooldownCost(cooldownManager, "rocketgrab", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
     }
 
@@ -57,8 +64,8 @@ public class RocketGrab implements Ability {
 
             @Override
             public void run() {
-                currentLoc.add(direction.clone().multiply(STEP));
-                distanceTraveled += STEP;
+                currentLoc.add(direction.clone().multiply(step));
+                distanceTraveled += step;
 
                 currentLoc.getWorld().spawnParticle(Particle.CRIT, currentLoc, 2, 0.05, 0.05, 0.05, 0.01);
                 currentLoc.getWorld().spawnParticle(Particle.SCRAPE, currentLoc, 1, 0, 0, 0, 0);
@@ -79,7 +86,7 @@ public class RocketGrab implements Ability {
                     }
                 }
 
-                if (distanceTraveled >= MAX_RANGE) {
+                if (distanceTraveled >= maxRange) {
                     cancel();
                 }
             }
@@ -96,7 +103,7 @@ public class RocketGrab implements Ability {
 
             @Override
             public void run() {
-                if (elapsedTicks >= PULL_TICKS || target.isDead() || !target.isOnline()) {
+                if (elapsedTicks >= pullTicks || target.isDead() || !target.isOnline()) {
                     cancel();
                     return;
                 }
@@ -106,7 +113,7 @@ public class RocketGrab implements Ability {
 
                 Vector pullVector = destination.toVector().subtract(targetLoc.toVector());
 
-                int remainingTicks = PULL_TICKS - elapsedTicks;
+                int remainingTicks = pullTicks - elapsedTicks;
                 Vector velocity = pullVector.divide(new Vector(remainingTicks, remainingTicks, remainingTicks));
 
                 target.setVelocity(velocity);
@@ -126,8 +133,8 @@ public class RocketGrab implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Range", (int) MAX_RANGE + "m"),
-                new AbilityStat("Cooldown", (COOLDOWN_MS / 1000) + "s")
+                new AbilityStat("Range", (int) maxRange + "m"),
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 }

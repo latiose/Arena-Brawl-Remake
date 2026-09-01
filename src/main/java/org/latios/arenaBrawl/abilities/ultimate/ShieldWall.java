@@ -6,11 +6,8 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.latios.arenaBrawl.abilities.Ability;
-import org.latios.arenaBrawl.abilities.AbilityCost;
-import org.latios.arenaBrawl.abilities.AbilityStat;
-import org.latios.arenaBrawl.abilities.CooldownManager;
-
+import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.general.ShieldManager;
 
@@ -18,20 +15,26 @@ import java.util.List;
 
 public class ShieldWall implements Ability {
 
-    private static final double DAMAGE_REDUCTION = 0.70;
-    private static final long DURATION_MILLIS = 10_000;
-    private static final long CHARGE_TIME_MILLIS = 60_000;
+    private final double damageReduction;
+    private final long durationMillis;
+    private final long chargeTimeMillis;
 
     private final Plugin plugin;
     private final AbilityCost cost;
     private final CooldownManager cooldownManager;
     private final ShieldManager shieldManager;
 
-    public ShieldWall(Plugin plugin, CooldownManager cooldownManager, UsageManager usageManager, ShieldManager shieldManager) {
+    public ShieldWall(Plugin plugin, CooldownManager cooldownManager, UsageManager usageManager,
+                      ShieldManager shieldManager, AbilityConfig config) {
         this.plugin = plugin;
         this.cooldownManager = cooldownManager;
-        this.cost = new UltimateCost(cooldownManager, usageManager, "shieldwall");
         this.shieldManager = shieldManager;
+
+        this.damageReduction = config.getDouble("damage-reduction", 0.70);
+        this.durationMillis = config.getLong("duration-ms", 10000L);
+        this.chargeTimeMillis = config.getLong("charge-time-ms", 60000L);
+
+        this.cost = new UltimateCost(cooldownManager, usageManager, "shieldwall");
     }
 
     @Override
@@ -42,22 +45,23 @@ public class ShieldWall implements Ability {
 
     @Override
     public void onMatchStart(Player player) {
-        cooldownManager.setCooldown(player, "shieldwall", CHARGE_TIME_MILLIS);
+        cooldownManager.setCooldown(player, "shieldwall", chargeTimeMillis);
     }
 
     @Override
     public boolean activate(Player player) {
-        shieldManager.applyShield(player, DAMAGE_REDUCTION, DURATION_MILLIS);
+        shieldManager.applyShield(player, damageReduction, durationMillis);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 1.0f);
 
         spawnWaterRings(player);
 
         new BukkitRunnable() {
             int secondsElapsed = 0;
+            int maxSeconds = (int) (durationMillis / 1000L);
 
             @Override
             public void run() {
-                if (!player.isOnline() || secondsElapsed >= 10 || !shieldManager.hasShield(player)) {
+                if (!player.isOnline() || secondsElapsed >= maxSeconds || !shieldManager.hasShield(player)) {
                     cancel();
                     return;
                 }
@@ -103,15 +107,15 @@ public class ShieldWall implements Ability {
 
     @Override
     public String getDescription() {
-        return "Reduces incoming damage by a big amount for some time";
+        return "Reduces incoming damage by a big amount for some time.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage Reduction", (int) (DAMAGE_REDUCTION * 100) + "%"),
-                new AbilityStat("Duration", (DURATION_MILLIS / 1000) + "s"),
-                new AbilityStat("Charge Time", (CHARGE_TIME_MILLIS / 1000) + "s"),
+                new AbilityStat("Damage Reduction", (int) (damageReduction * 100) + "%"),
+                new AbilityStat("Duration", (durationMillis / 1000) + "s"),
+                new AbilityStat("Charge Time", (chargeTimeMillis / 1000) + "s"),
                 new AbilityStat("Uses", "1 per match")
         );
     }

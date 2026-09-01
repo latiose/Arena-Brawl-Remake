@@ -8,6 +8,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -15,13 +16,18 @@ import java.util.List;
 
 public class EtherealBody implements Ability {
 
-    private static final long DURATION_MILLIS = 4_000;
-    private static final int COOLDOWN_SECONDS = 35;
+    private final long durationMillis;
+    private final long cooldownMs;
 
     private final AbilityCost cost;
     private final EtherealBodyManager etherealBodyManager;
-    public EtherealBody(CooldownManager cooldownManager, EtherealBodyManager etherealBodyManager, CombatUpgradeManager combatUpgradeManager) {
-        this.cost = new CooldownCost(cooldownManager, "ethereal_body", COOLDOWN_SECONDS * 1000,combatUpgradeManager);
+
+    public EtherealBody(CooldownManager cooldownManager, EtherealBodyManager etherealBodyManager,
+                        CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
+        this.durationMillis = config.getLong("duration-millis", 4000L);
+        this.cooldownMs = config.getLong("cooldown-ms", 35000L);
+
+        this.cost = new CooldownCost(cooldownManager, "ethereal_body", cooldownMs, combatUpgradeManager);
         this.etherealBodyManager = etherealBodyManager;
     }
 
@@ -39,15 +45,15 @@ public class EtherealBody implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Duration", "4s"),
+                new AbilityStat("Duration", (durationMillis / 1000L) + "s"),
                 new AbilityStat("Effect", "Absorbs damage & heals back"),
-                new AbilityStat("Cooldown", COOLDOWN_SECONDS + "s")
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 
     @Override
     public boolean activate(Player player) {
-        etherealBodyManager.activate(player, DURATION_MILLIS);
+        etherealBodyManager.activate(player, durationMillis);
 
         player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.6f);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ILLUSIONER_PREPARE_MIRROR, 1.0f, 1.2f);

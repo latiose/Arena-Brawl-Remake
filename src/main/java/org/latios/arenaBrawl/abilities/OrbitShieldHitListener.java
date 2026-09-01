@@ -1,4 +1,4 @@
-package org.latios.arenaBrawl.abilities.support;
+package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
@@ -10,7 +10,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.latios.arenaBrawl.abilities.CooldownManager;
 
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;

@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.abilities.offensive;
 
 import org.bukkit.Location;
@@ -9,7 +8,7 @@ import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
-
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
@@ -21,18 +20,22 @@ import java.util.Set;
 
 public class DashAbility implements Ability {
 
-    private static final double DISTANCE = 4.0;
-    private static final double DAMAGE = 105.0;
-    private static final double ENERGY_COST = 40.0;
     private static final double STEP_SIZE = 0.2;
-    private static final double HIT_RADIUS = 1.3;
 
     private final AbilityCost cost;
+    private final double distance;
+    private final double damage;
+    private final double energyCost;
+    private final double hitRadius;
     private final TeamManager teamManager;
     private final CombatService combatService;
 
-    public DashAbility(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
-        this.cost = new EnergyCost(energyManager, ENERGY_COST);
+    public DashAbility(EnergyManager energyManager, TeamManager teamManager, CombatService combatService, AbilityConfig config) {
+        this.distance = config.getDouble("distance", 4.0);
+        this.damage = config.getDouble("damage", 105.0);
+        this.energyCost = config.getDouble("energy-cost", 40.0);
+        this.hitRadius = config.getDouble("hit-radius", 1.3);
+        this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
@@ -45,15 +48,15 @@ public class DashAbility implements Ability {
 
     @Override
     public String getDescription() {
-        return "Dashes 4 blocks forward, dealing 100 damage to any enemy caught in your path. Stops at walls.";
+        return "Dashes " + (int) distance + " blocks forward, dealing " + (int) damage + " damage to any enemy caught in your path. Stops at walls.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Distance", String.valueOf(DISTANCE)),
-                new AbilityStat("Damage", String.valueOf(DAMAGE)),
-                new AbilityStat("Energy Cost", String.valueOf(ENERGY_COST))
+                new AbilityStat("Distance", String.valueOf(distance)),
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Energy Cost", String.valueOf((int) energyCost))
         );
     }
 
@@ -66,17 +69,17 @@ public class DashAbility implements Ability {
         Location lastSafe = current.clone();
         Set<Player> hit = new HashSet<>();
 
-        while (traveled < DISTANCE) {
+        while (traveled < distance) {
             Location next = lastSafe.clone().add(direction.clone().multiply(STEP_SIZE));
 
             if (isBlocked(next)) {
                 break;
             }
 
-            for (Entity nearby : next.getWorld().getNearbyEntities(next, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
+            for (Entity nearby : next.getWorld().getNearbyEntities(next, hitRadius, hitRadius, hitRadius)) {
                 if (nearby instanceof Player target && !target.equals(player)
                         && teamManager.isEnemy(player, target) && !hit.contains(target)) {
-                    combatService.applyAbilityDamage(player, target, DAMAGE, getName());
+                    combatService.applyAbilityDamage(player, target, damage, getName());
                     hit.add(target);
                 }
             }

@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.abilities.utility;
 
 import org.bukkit.Location;
@@ -7,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -16,16 +16,22 @@ import java.util.List;
 
 public class ShadowStep implements Ability {
 
-    private static final int MAX_RANGE = 20; 
-    private static final long COOLDOWN_MILLIS = 30_000;
-    private static final int POST_SHADOW_SPEED_AMPLIFIER = 2;
-    private static final int POST_SHADOW_SPEED_DURATION_TICKS = 40; // 2 seconds
+    private final int maxRange;
+    private final long cooldownMillis;
+    private final int speedAmplifier;
+    private final int speedDurationTicks;
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
 
-    public ShadowStep(CooldownManager cooldownManager, TeamManager teamManager, CombatUpgradeManager combatUpgradeManager) {
-        this.cost = new CooldownCost(cooldownManager, "shadowstep", COOLDOWN_MILLIS,combatUpgradeManager);
+    public ShadowStep(CooldownManager cooldownManager, TeamManager teamManager,
+                      CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
+        this.maxRange = config.getInt("max-range", 20);
+        this.cooldownMillis = config.getLong("cooldown-ms", 30_000L);
+        this.speedAmplifier = config.getInt("speed-amplifier", 2);
+        this.speedDurationTicks = config.getInt("speed-duration-ticks", 40);
+
+        this.cost = new CooldownCost(cooldownManager, "shadowstep", cooldownMillis, combatUpgradeManager);
         this.teamManager = teamManager;
     }
 
@@ -37,7 +43,7 @@ public class ShadowStep implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, MAX_RANGE);
+        Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, maxRange);
 
         if (target == null) {
             player.sendMessage(MessageUtils.noValidPlayer());
@@ -51,7 +57,7 @@ public class ShadowStep implements Ability {
         player.getWorld().spawnParticle(Particle.SMOKE, teleportLocation, 20, 0.3, 0.5, 0.3);
 
         player.addPotionEffect(new PotionEffect(
-                PotionEffectType.SPEED, POST_SHADOW_SPEED_DURATION_TICKS, POST_SHADOW_SPEED_AMPLIFIER, true, false
+                PotionEffectType.SPEED, speedDurationTicks, speedAmplifier, true, false
         ));
 
         return true;
@@ -65,9 +71,9 @@ public class ShadowStep implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Cooldown", (COOLDOWN_MILLIS / 1000) + "s"),
-                new AbilityStat("Range", MAX_RANGE + " blocks"),
-                new AbilityStat("Bonus", "Speed III (2s) after teleport")
+                new AbilityStat("Cooldown", (cooldownMillis / 1000L) + "s"),
+                new AbilityStat("Range", maxRange + " blocks"),
+                new AbilityStat("Bonus", "Speed III (" + (speedDurationTicks / 20) + "s) after teleport")
         );
     }
 }

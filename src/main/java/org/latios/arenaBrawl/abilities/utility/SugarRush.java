@@ -8,6 +8,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
@@ -17,16 +18,22 @@ import java.util.List;
 
 public class SugarRush implements Ability {
 
-    private static final long COOLDOWN_MILLIS = 30_000;
-    private static final int SPEED_AMPLIFIER = 2;
-    private static final int SPEED_DURATION_TICKS = 80;
-    private static final long SLOW_DURATION_MS = 3_000;
+    private final long cooldownMillis;
+    private final int speedAmplifier;
+    private final int speedDurationTicks;
+    private final long slowDurationMs;
 
     private final AbilityCost cost;
     private final DebuffManager debuffManager;
 
-    public SugarRush(CooldownManager cooldownManager, CombatUpgradeManager combatUpgradeManager, DebuffManager debuffManager) {
-        this.cost = new CooldownCost(cooldownManager, "sugarrush", COOLDOWN_MILLIS, combatUpgradeManager);
+    public SugarRush(CooldownManager cooldownManager, CombatUpgradeManager combatUpgradeManager,
+                     DebuffManager debuffManager, AbilityConfig config) {
+        this.cooldownMillis = config.getLong("cooldown-ms", 30_000L);
+        this.speedAmplifier = config.getInt("speed-amplifier", 2);
+        this.speedDurationTicks = config.getInt("speed-duration-ticks", 80);
+        this.slowDurationMs = config.getLong("slow-duration-ms", 3_000L);
+
+        this.cost = new CooldownCost(cooldownManager, "sugarrush", cooldownMillis, combatUpgradeManager);
         this.debuffManager = debuffManager;
     }
 
@@ -39,7 +46,7 @@ public class SugarRush implements Ability {
     @Override
     public boolean activate(Player player) {
         player.addPotionEffect(new PotionEffect(
-                PotionEffectType.SPEED, SPEED_DURATION_TICKS, SPEED_AMPLIFIER, true, false
+                PotionEffectType.SPEED, speedDurationTicks, speedAmplifier, true, false
         ));
         player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 1f, 1f);
@@ -48,12 +55,12 @@ public class SugarRush implements Ability {
             @Override
             public void run() {
                 if (player.isOnline()) {
-                    debuffManager.tryApply(player, DebuffType.SLOW, SLOW_DURATION_MS);
+                    debuffManager.tryApply(player, DebuffType.SLOW, slowDurationMs);
                     player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BREATH, 1f, 0.8f);
                 }
             }
-        }.runTaskLater(ArenaBrawlPlugin.getInstance(), SPEED_DURATION_TICKS);
+        }.runTaskLater(ArenaBrawlPlugin.getInstance(), speedDurationTicks);
 
         return true;
     }
@@ -66,10 +73,10 @@ public class SugarRush implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Cooldown", (COOLDOWN_MILLIS / 1000) + "s"),
-                new AbilityStat("Speed duration", (SPEED_DURATION_TICKS / 20) + "s"),
-                new AbilityStat("Speed Level", String.valueOf(SPEED_AMPLIFIER + 1)),
-                new AbilityStat("Slow duration", (SLOW_DURATION_MS / 1000) + "s")
+                new AbilityStat("Cooldown", (cooldownMillis / 1000L) + "s"),
+                new AbilityStat("Speed duration", (speedDurationTicks / 20) + "s"),
+                new AbilityStat("Speed Level", String.valueOf(speedAmplifier + 1)),
+                new AbilityStat("Slow duration", (slowDurationMs / 1000L) + "s")
         );
     }
 }

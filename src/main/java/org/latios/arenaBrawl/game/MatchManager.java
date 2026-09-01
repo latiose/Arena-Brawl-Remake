@@ -12,10 +12,10 @@ import org.latios.arenaBrawl.abilities.AbilityManager;
 
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
-import org.latios.arenaBrawl.abilities.support.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
-import org.latios.arenaBrawl.abilities.ultimate.UsageManager;
+import org.latios.arenaBrawl.abilities.UsageManager;
 
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;

@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.AbilityTargeting;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
@@ -25,12 +26,13 @@ import java.util.UUID;
 
 public class LifeBond implements Ability {
 
-    private static final double RANGE = 25.0;
-    private static final double HEAL_PER_SECOND = 25.0;
-    private static final int DURATION_SECONDS = 8;
-    private static final long COOLDOWN_MS = 30_000;
-
     public static final Map<UUID, UUID> ACTIVE_BONDS = new HashMap<>();
+
+    private final double range;
+    private final double healPerSecond;
+    private final int durationSeconds;
+    private final long cooldownMs;
+    private final double redirectPercent;
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -38,9 +40,16 @@ public class LifeBond implements Ability {
     private final Plugin plugin;
 
     public LifeBond(Plugin plugin, CooldownManager cooldownManager, TeamManager teamManager,
-                    PlayerHealthManager healthManager, CombatUpgradeManager combatUpgradeManager) {
+                    PlayerHealthManager healthManager, CombatUpgradeManager combatUpgradeManager,
+                    AbilityConfig config) {
         this.plugin = plugin;
-        this.cost = new CooldownCost(cooldownManager, "lifebond", COOLDOWN_MS, combatUpgradeManager);
+        this.range = config.getDouble("range", 25.0);
+        this.healPerSecond = config.getDouble("heal-per-second", 25.0);
+        this.durationSeconds = config.getInt("duration-seconds", 8);
+        this.cooldownMs = config.getLong("cooldown-ms", 30000L);
+        this.redirectPercent = config.getDouble("redirect-percent", 0.30);
+
+        this.cost = new CooldownCost(cooldownManager, "lifebond", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
         this.healthManager = healthManager;
     }
@@ -53,7 +62,7 @@ public class LifeBond implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        Player targetAlly = AbilityTargeting.findAllyAlongRay(player, teamManager, RANGE);
+        Player targetAlly = AbilityTargeting.findAllyAlongRay(player, teamManager, range);
 
         if (targetAlly == null) {
             player.sendMessage(MessageUtils.noValidPlayer());
@@ -71,22 +80,31 @@ public class LifeBond implements Ability {
 
             @Override
             public void run() {
-                ticksElapsed += 2;
+                try {
+                    ticksElapsed += 2;
 
-                if (ticksElapsed >= DURATION_SECONDS * 20 || !player.isOnline() || !ally.isOnline() || player.isDead() || ally.isDead()) {
-                    ACTIVE_BONDS.remove(ally.getUniqueId());
-                    cancel();
-                    return;
-                }
-
-                if (player.getLocation().distance(ally.getLocation()) <= RANGE) {
-                    drawBondLine(player.getLocation().add(0, 1.0, 0), ally.getLocation().add(0, 1.0, 0));
-
-                    if (ticksElapsed % 20 == 0) {
-                        healthManager.heal(player, HEAL_PER_SECOND, getName());
-                        healthManager.healAlly(player, ally, HEAL_PER_SECOND, getName());
+                    if (ticksElapsed >= durationSeconds * 20 || !player.isOnline() || !ally.isOnline() || player.isDead() || ally.isDead()) {
+                        cancel();
+                        return;
                     }
+
+                    if (player.getLocation().distance(ally.getLocation()) <= range) {
+                        drawBondLine(player.getLocation().add(0, 1.0, 0), ally.getLocation().add(0, 1.0, 0));
+
+                        if (ticksElapsed % 20 == 0) {
+                            healthManager.heal(player, healPerSecond, getName());
+                            healthManager.healAlly(player, ally, healPerSecond, getName());
+                        }
+                    }
+                } catch (Exception e) {
+                    cancel();
                 }
+            }
+
+            @Override
+            public synchronized void cancel() throws IllegalStateException {
+                ACTIVE_BONDS.remove(ally.getUniqueId());
+                super.cancel();
             }
         }.runTaskTimer(plugin, 0L, 2L);
 
@@ -94,13 +112,17 @@ public class LifeBond implements Ability {
     }
 
     private void drawBondLine(Location start, Location end) {
-        Vector direction = end.toVector().subtract(start.toVector());
-        double length = direction.length();
-        direction.normalize();
+        Vector dir = end.toVector().subtract(start.toVector());
+        double length = dir.length();
+        if (length == 0) return;
 
-        for (double d = 0; d < length; d += 0.5) {
-            Location point = start.clone().add(direction.clone().multiply(d));
-            point.getWorld().spawnParticle(Particle.WAX_ON, point, 1, 0, 0, 0, 0);
+        dir.multiply(0.5 / length);
+        Location current = start.clone();
+        int steps = (int) (length / 0.5);
+
+        for (int i = 0; i < steps; i++) {
+            current.add(dir);
+            current.getWorld().spawnParticle(Particle.WAX_ON, current, 1, 0, 0, 0, 0);
         }
     }
 
@@ -112,10 +134,10 @@ public class LifeBond implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Heal/sec", (int) HEAL_PER_SECOND + " HP"),
-                new AbilityStat("Redirect Damage", "30%"),
-                new AbilityStat("Duration", DURATION_SECONDS + "s"),
-                new AbilityStat("Cooldown", (COOLDOWN_MS / 1000) + "s")
+                new AbilityStat("Heal/sec", (int) healPerSecond + " HP"),
+                new AbilityStat("Redirect Damage", (int) (redirectPercent * 100) + "%"),
+                new AbilityStat("Duration", durationSeconds + "s"),
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 }

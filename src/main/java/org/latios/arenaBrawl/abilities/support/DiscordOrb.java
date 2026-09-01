@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.abilities.support;
 
 import org.bukkit.Location;
@@ -13,6 +12,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.AbilityTargeting;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.general.DamageVulnerabilityManager;
 import org.latios.arenaBrawl.general.MessageUtils;
@@ -23,10 +23,10 @@ import java.util.List;
 
 public class DiscordOrb implements Ability {
 
-    private static final long COOLDOWN_MS = 30_000;
-    private static final int DURATION_SECONDS = 7;
-    private static final double DAMAGE_BONUS = 0.30; // +30% incoming damage
-    private static final double MAX_RANGE = 20.0;
+    private final long cooldownMs;
+    private final int durationSeconds;
+    private final double damageBonus;
+    private final double maxRange;
 
     private final Plugin plugin;
     private final AbilityCost cost;
@@ -34,9 +34,15 @@ public class DiscordOrb implements Ability {
     private final DamageVulnerabilityManager damageVulnerabilityManager;
 
     public DiscordOrb(Plugin plugin, CooldownManager cooldownManager, TeamManager teamManager,
-                      CombatUpgradeManager combatUpgradeManager, DamageVulnerabilityManager damageVulnerabilityManager) {
+                      CombatUpgradeManager combatUpgradeManager, DamageVulnerabilityManager damageVulnerabilityManager,
+                      AbilityConfig config) {
         this.plugin = plugin;
-        this.cost = new CooldownCost(cooldownManager, "discordorb", COOLDOWN_MS, combatUpgradeManager);
+        this.cooldownMs = config.getLong("cooldown-ms", 30000L);
+        this.durationSeconds = config.getInt("duration-seconds", 7);
+        this.damageBonus = config.getDouble("damage-bonus", 0.30);
+        this.maxRange = config.getDouble("max-range", 20.0);
+
+        this.cost = new CooldownCost(cooldownManager, "discordorb", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
         this.damageVulnerabilityManager = damageVulnerabilityManager;
     }
@@ -49,7 +55,7 @@ public class DiscordOrb implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, MAX_RANGE);
+        Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, maxRange);
 
         if (target == null) {
             player.sendMessage(MessageUtils.noValidPlayer());
@@ -75,7 +81,7 @@ public class DiscordOrb implements Ability {
     }
 
     private void applyDiscord(Player caster, Player target) {
-        damageVulnerabilityManager.applyVulnerability(target, DAMAGE_BONUS, DURATION_SECONDS * 1000L, getName());
+        damageVulnerabilityManager.applyVulnerability(target, damageBonus, durationSeconds * 1000L, getName());
 
         caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_WITHER_SHOOT, 0.8f, 1.8f);
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 1.5f);
@@ -100,16 +106,16 @@ public class DiscordOrb implements Ability {
 
     @Override
     public String getDescription() {
-        return "Instantly marks an enemy in your line of sight. The marked target receives 30% additional damage for its duration.";
+        return "Instantly marks an enemy in your line of sight. The marked target receives " + (int)(damageBonus * 100) + "% additional damage for its duration.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Extra Damage", "+30%"),
-                new AbilityStat("Duration", DURATION_SECONDS + "s"),
-                new AbilityStat("Range", (int) MAX_RANGE + "m"),
-                new AbilityStat("Cooldown", (COOLDOWN_MS / 1000) + "s")
+                new AbilityStat("Extra Damage", "+" + (int)(damageBonus * 100) + "%"),
+                new AbilityStat("Duration", durationSeconds + "s"),
+                new AbilityStat("Range", (int) maxRange + "m"),
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 }

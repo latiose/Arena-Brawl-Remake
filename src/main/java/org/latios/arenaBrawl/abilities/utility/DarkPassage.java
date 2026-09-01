@@ -11,8 +11,8 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -20,17 +20,22 @@ import java.util.List;
 
 public class DarkPassage implements Ability {
 
-    private static final double MAX_RANGE = 12.0;
-    private static final long DURATION_TICKS = 100L; //
-    private static final long COOLDOWN_MS = 30_000;
+    private final double maxRange;
+    private final long durationTicks;
+    private final long cooldownMs;
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final Plugin plugin;
 
-    public DarkPassage(Plugin plugin, CooldownManager cooldownManager, TeamManager teamManager, CombatUpgradeManager combatUpgradeManager) {
+    public DarkPassage(Plugin plugin, CooldownManager cooldownManager, TeamManager teamManager,
+                       CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
         this.plugin = plugin;
-        this.cost = new CooldownCost(cooldownManager, "darkpassage", COOLDOWN_MS, combatUpgradeManager);
+        this.maxRange = config.getDouble("max-range", 12.0);
+        this.durationTicks = config.getLong("duration-ticks", 100L);
+        this.cooldownMs = config.getLong("cooldown-ms", 30000L);
+
+        this.cost = new CooldownCost(cooldownManager, "darkpassage", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
     }
 
@@ -42,7 +47,7 @@ public class DarkPassage implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        Block targetBlock = player.getTargetBlockExact((int) MAX_RANGE);
+        Block targetBlock = player.getTargetBlockExact((int) maxRange);
         if (targetBlock == null) {
             player.sendMessage("§eTarget location too far or invalid!");
             return false;
@@ -58,7 +63,7 @@ public class DarkPassage implements Ability {
             public void run() {
                 ticksElapsed += 2;
 
-                if (ticksElapsed >= DURATION_TICKS || !player.isOnline() || player.isDead()) {
+                if (ticksElapsed >= durationTicks || !player.isOnline() || player.isDead()) {
                     lanternLoc.getWorld().spawnParticle(Particle.SMOKE, lanternLoc, 15, 0.2, 0.2, 0.2, 0.05);
                     cancel();
                     return;
@@ -96,9 +101,9 @@ public class DarkPassage implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Duration", "5s"),
-                new AbilityStat("Range", (int) MAX_RANGE + "m"),
-                new AbilityStat("Cooldown", (COOLDOWN_MS / 1000) + "s")
+                new AbilityStat("Duration", (durationTicks / 20L) + "s"),
+                new AbilityStat("Range", (int) maxRange + "m"),
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 }

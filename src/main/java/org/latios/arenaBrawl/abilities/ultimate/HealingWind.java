@@ -12,6 +12,8 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.UsageManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -22,19 +24,28 @@ import java.util.Set;
 
 public class HealingWind implements Ability {
 
-    private static final double PUSH_RADIUS = 6.0;
-    private static final double PUSH_STRENGTH = 2.2;
-    private static final double HEAL_RADIUS = 10.0;
-    private static final double HEAL_PER_SECOND = 50.0;
-    private static final long HEAL_DURATION_MILLIS = 6_000;
-    private static final long CHARGE_TIME_MILLIS = 60_000;
+    private final double pushRadius;
+    private final double pushStrength;
+    private final double healRadius;
+    private final double healPerSecond;
+    private final long healDurationMillis;
+    private final long chargeTimeMillis;
+
     private final CooldownManager cooldownManager;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
 
     public HealingWind(CooldownManager cooldownManager, UsageManager usageManager,
-                       TeamManager teamManager, PlayerHealthManager healthManager) {
+                       TeamManager teamManager, PlayerHealthManager healthManager,
+                       AbilityConfig config) {
+        this.pushRadius = config.getDouble("push-radius", 6.0);
+        this.pushStrength = config.getDouble("push-strength", 2.2);
+        this.healRadius = config.getDouble("heal-radius", 10.0);
+        this.healPerSecond = config.getDouble("heal-per-second", 50.0);
+        this.healDurationMillis = config.getLong("heal-duration-millis", 6000L);
+        this.chargeTimeMillis = config.getLong("charge-time-millis", 60000L);
+
         this.cooldownManager = cooldownManager;
         this.cost = new UltimateCost(cooldownManager, usageManager, "healingwind");
         this.teamManager = teamManager;
@@ -55,16 +66,16 @@ public class HealingWind implements Ability {
 
     @Override
     public void onMatchStart(Player player) {
-        cooldownManager.setCooldown(player, "healingwind", CHARGE_TIME_MILLIS);
+        cooldownManager.setCooldown(player, "healingwind", chargeTimeMillis);
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Push Radius", String.valueOf(PUSH_RADIUS)),
-                new AbilityStat("Heal Radius", String.valueOf(HEAL_RADIUS)),
-                new AbilityStat("Heal per second", String.valueOf(HEAL_PER_SECOND)),
-                new AbilityStat("Duration", "6s"),
+                new AbilityStat("Push Radius", (int) pushRadius + "m"),
+                new AbilityStat("Heal Radius", (int) healRadius + "m"),
+                new AbilityStat("Heal per second", (int) healPerSecond + " HP"),
+                new AbilityStat("Duration", (healDurationMillis / 1000L) + "s"),
                 new AbilityStat("Uses", "1 per match")
         );
     }
@@ -73,12 +84,12 @@ public class HealingWind implements Ability {
     public boolean activate(Player player) {
         Location center = player.getLocation();
 
-        for (Entity nearby : center.getWorld().getNearbyEntities(center, PUSH_RADIUS, PUSH_RADIUS, PUSH_RADIUS)) {
+        for (Entity nearby : center.getWorld().getNearbyEntities(center, pushRadius, pushRadius, pushRadius)) {
             if (nearby instanceof Player target && teamManager.isEnemy(player, target)) {
                 Vector push = target.getLocation().toVector().subtract(center.toVector());
                 push.setY(0);
                 if (push.lengthSquared() < 0.0001) push = new Vector(1, 0, 0);
-                push.normalize().multiply(PUSH_STRENGTH);
+                push.normalize().multiply(pushStrength);
                 push.setY(0.4);
                 target.setVelocity(push);
             }
@@ -92,7 +103,7 @@ public class HealingWind implements Ability {
 
             @Override
             public void run() {
-                if (!player.isOnline() || elapsedMillis >= HEAL_DURATION_MILLIS) {
+                if (!player.isOnline() || elapsedMillis >= healDurationMillis) {
                     cancel();
                     return;
                 }
@@ -113,10 +124,10 @@ public class HealingWind implements Ability {
     private void healNearbyAllies(Player player) {
         Set<Player> healed = new HashSet<>();
         healed.add(player);
-        healthManager.heal(player, HEAL_PER_SECOND, getName());
-        for (Entity nearby : player.getNearbyEntities(HEAL_RADIUS, HEAL_RADIUS, HEAL_RADIUS)) {
+        healthManager.heal(player, healPerSecond, getName());
+        for (Entity nearby : player.getNearbyEntities(healRadius, healRadius, healRadius)) {
             if (nearby instanceof Player ally && teamManager.isAlly(player, ally) && !healed.contains(ally)) {
-                healthManager.healAlly(player, ally, HEAL_PER_SECOND, getName());
+                healthManager.healAlly(player, ally, healPerSecond, getName());
                 healed.add(ally);
             }
         }

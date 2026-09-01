@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
@@ -19,18 +20,25 @@ import java.util.List;
 
 public class MysticShot implements Ability {
 
-    private static final double DAMAGE = 185.0;
-    private static final double ENERGY_COST = 70.0;
-    private static final double MAX_DISTANCE = 25.0;
-    private static final double STEP = 1.3;
-    private static final double HIT_BOX_RADIUS = 1.0;
+    private final double damage;
+    private final double energyCost;
+    private final double maxDistance;
+    private final double step;
+    private final double hitBoxRadius;
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
 
-    public MysticShot(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
-        this.cost = new EnergyCost(energyManager, ENERGY_COST);
+    public MysticShot(EnergyManager energyManager, TeamManager teamManager,
+                      CombatService combatService, AbilityConfig config) {
+        this.damage = config.getDouble("damage", 185.0);
+        this.energyCost = config.getDouble("energy-cost", 70.0);
+        this.maxDistance = config.getDouble("max-distance", 25.0);
+        this.step = config.getDouble("step", 1.3);
+        this.hitBoxRadius = config.getDouble("hit-box-radius", 1.0);
+
+        this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
@@ -53,9 +61,9 @@ public class MysticShot implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
-                new AbilityStat("Energy Cost", String.valueOf((int) ENERGY_COST)),
-                new AbilityStat("Range", (int) MAX_DISTANCE + " blocks")
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Energy Cost", String.valueOf((int) energyCost)),
+                new AbilityStat("Range", (int) maxDistance + " blocks")
         );
     }
 
@@ -72,8 +80,8 @@ public class MysticShot implements Ability {
 
             @Override
             public void run() {
-                currentLoc.add(direction.clone().multiply(STEP));
-                distanceTraveled += STEP;
+                currentLoc.add(direction.clone().multiply(step));
+                distanceTraveled += step;
 
                 currentLoc.getWorld().spawnParticle(Particle.CRIT, currentLoc, 3, 0.05, 0.05, 0.05, 0.01);
                 currentLoc.getWorld().spawnParticle(Particle.END_ROD, currentLoc, 1, 0, 0, 0, 0);
@@ -89,8 +97,8 @@ public class MysticShot implements Ability {
                     if (target.equals(player) || target.isDead()) continue;
                     if (!teamManager.isEnemy(player, target)) continue;
 
-                    if (target.getLocation().add(0, 1.0, 0).distance(currentLoc) <= HIT_BOX_RADIUS) {
-                        combatService.applyAbilityDamage(player, target, DAMAGE, getName());
+                    if (target.getLocation().add(0, 1.0, 0).distance(currentLoc) <= hitBoxRadius) {
+                        combatService.applyAbilityDamage(player, target, damage, getName());
 
                         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f, 1.2f);
                         target.getWorld().spawnParticle(Particle.ENCHANTED_HIT, target.getLocation().add(0, 1.0, 0), 15, 0.3, 0.4, 0.3, 0.1);
@@ -100,7 +108,7 @@ public class MysticShot implements Ability {
                     }
                 }
 
-                if (distanceTraveled >= MAX_DISTANCE) {
+                if (distanceTraveled >= maxDistance) {
                     cancel();
                 }
             }

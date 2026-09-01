@@ -1,4 +1,4 @@
-package org.latios.arenaBrawl.abilities.ultimate;
+package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.entity.Player;
 

@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
@@ -16,16 +17,22 @@ import java.util.List;
 
 public class Swap implements Ability {
 
-    private static final int MAX_RANGE = 30;
-    private static final long COOLDOWN_MILLIS = 30_000;
-    private static final long STUN_DURATION_MILLIS = 2_000;
-    private static final long TELEPORT_DELAY_TICKS = 40L;
+    private final int maxRange;
+    private final long cooldownMillis;
+    private final long stunDurationMillis;
+    private final long teleportDelayTicks;
 
     private final AbilityCost cost;
     private final DebuffManager debuffManager;
 
-    public Swap(CooldownManager cooldownManager, DebuffManager debuffManager, CombatUpgradeManager combatUpgradeManager) {
-        this.cost = new CooldownCost(cooldownManager, "swap", COOLDOWN_MILLIS, combatUpgradeManager);
+    public Swap(CooldownManager cooldownManager, DebuffManager debuffManager,
+                CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
+        this.maxRange = config.getInt("max-range", 30);
+        this.cooldownMillis = config.getLong("cooldown-ms", 30_000L);
+        this.stunDurationMillis = config.getLong("stun-duration-ms", 2_000L);
+        this.teleportDelayTicks = config.getLong("teleport-delay-ticks", 40L);
+
+        this.cost = new CooldownCost(cooldownManager, "swap", cooldownMillis, combatUpgradeManager);
         this.debuffManager = debuffManager;
     }
 
@@ -41,15 +48,15 @@ public class Swap implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        Player target = AbilityTargeting.findTargetAlongRay(player, MAX_RANGE);
+        Player target = AbilityTargeting.findTargetAlongRay(player, maxRange);
 
         if (target == null) {
             player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
 
-        debuffManager.tryApply(target, DebuffType.STUN, STUN_DURATION_MILLIS);
-        debuffManager.tryApply(player, DebuffType.STUN, STUN_DURATION_MILLIS);
+        debuffManager.tryApply(target, DebuffType.STUN, stunDurationMillis);
+        debuffManager.tryApply(player, DebuffType.STUN, stunDurationMillis);
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.5f);
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.5f);
@@ -78,7 +85,7 @@ public class Swap implements Ability {
                 player.getWorld().playSound(newPlayerLoc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.2f);
                 target.getWorld().playSound(newTargetLoc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.2f);
             }
-        }.runTaskLater(ArenaBrawlPlugin.getInstance(), TELEPORT_DELAY_TICKS);
+        }.runTaskLater(ArenaBrawlPlugin.getInstance(), teleportDelayTicks);
 
         return true;
     }
@@ -91,9 +98,9 @@ public class Swap implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Cooldown", (COOLDOWN_MILLIS / 1000) + "s"),
-                new AbilityStat("Range", MAX_RANGE + " blocks"),
-                new AbilityStat("Bonus", "Stun (2s) before teleport")
+                new AbilityStat("Cooldown", (cooldownMillis / 1000L) + "s"),
+                new AbilityStat("Range", maxRange + " blocks"),
+                new AbilityStat("Bonus", "Stun (" + (stunDurationMillis / 1000L) + "s) before teleport")
         );
     }
 }

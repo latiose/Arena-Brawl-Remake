@@ -1,4 +1,4 @@
-package org.latios.arenaBrawl.abilities.support;
+package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.Material;
 import org.bukkit.Particle;

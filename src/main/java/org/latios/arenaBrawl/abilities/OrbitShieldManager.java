@@ -1,9 +1,8 @@
-package org.latios.arenaBrawl.abilities.support;
+package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
-import org.bukkit.Sound;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;

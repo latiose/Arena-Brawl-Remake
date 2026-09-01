@@ -8,10 +8,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.latios.arenaBrawl.abilities.Ability;
-import org.latios.arenaBrawl.abilities.AbilityCost;
-import org.latios.arenaBrawl.abilities.AbilityStat;
-import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.general.DamageVulnerabilityManager;
 import org.latios.arenaBrawl.general.MessageUtils;
@@ -22,10 +20,10 @@ import java.util.List;
 
 public class MyriadTruths implements Ability {
 
-    private static final long CHARGE_TIME_MILLIS = 60_000;
-    private static final double RADIUS = 5.0;
-    private static final int DURATION_SECONDS = 7;
-    private static final double DAMAGE_BONUS = 0.30; // +30% incoming damage
+    private final long chargeTimeMillis;
+    private final double radius;
+    private final int durationSeconds;
+    private final double damageBonus;
 
     private final Plugin plugin;
     private final CooldownManager cooldownManager;
@@ -34,12 +32,19 @@ public class MyriadTruths implements Ability {
     private final DamageVulnerabilityManager damageVulnerabilityManager;
 
     public MyriadTruths(Plugin plugin, CooldownManager cooldownManager, UsageManager usageManager,
-                        TeamManager teamManager, DamageVulnerabilityManager damageVulnerabilityManager) {
+                        TeamManager teamManager, DamageVulnerabilityManager damageVulnerabilityManager,
+                        AbilityConfig config) {
         this.plugin = plugin;
         this.cooldownManager = cooldownManager;
-        this.cost = new UltimateCost(cooldownManager, usageManager, "myriadtruths");
         this.teamManager = teamManager;
         this.damageVulnerabilityManager = damageVulnerabilityManager;
+
+        this.chargeTimeMillis = config.getLong("charge-time-ms", 60000L);
+        this.radius = config.getDouble("radius", 5.0);
+        this.durationSeconds = config.getInt("duration-seconds", 7);
+        this.damageBonus = config.getDouble("damage-bonus", 0.30);
+
+        this.cost = new UltimateCost(cooldownManager, usageManager, "myriadtruths");
     }
 
     @Override
@@ -54,7 +59,7 @@ public class MyriadTruths implements Ability {
 
     @Override
     public void onMatchStart(Player player) {
-        cooldownManager.setCooldown(player, "myriadtruths", CHARGE_TIME_MILLIS);
+        cooldownManager.setCooldown(player, "myriadtruths", chargeTimeMillis);
     }
 
     @Override
@@ -68,13 +73,13 @@ public class MyriadTruths implements Ability {
 
         List<Player> affectedEnemies = new ArrayList<>();
 
-        for (Entity nearby : center.getWorld().getNearbyEntities(center, RADIUS, RADIUS, RADIUS)) {
+        for (Entity nearby : center.getWorld().getNearbyEntities(center, radius, radius, radius)) {
             if (nearby instanceof Player target) {
                 if (target.getGameMode() == GameMode.SPECTATOR || target.isDead()) continue;
                 if (!teamManager.isEnemy(player, target)) continue;
 
-                damageVulnerabilityManager.applyVulnerability(target, DAMAGE_BONUS, DURATION_SECONDS * 1000L, getName());
-                target.sendMessage(MessageUtils.negative() + String.format("§3%s §3unleashed §5Myriad Truths§3! You receive 30%% extra damage!", player.getName()));
+                damageVulnerabilityManager.applyVulnerability(target, damageBonus, durationSeconds * 1000L, getName());
+                target.sendMessage(MessageUtils.negative() + String.format("§3%s §3unleashed §5Myriad Truths§3! You receive %d%% extra damage!", player.getName(), (int)(damageBonus * 100)));
                 affectedEnemies.add(target);
 
                 new BukkitRunnable() {
@@ -102,15 +107,16 @@ public class MyriadTruths implements Ability {
 
     @Override
     public String getDescription() {
-        return "Unleashes a surge of dark energy, applying 30% damage vulnerability to all enemies within 5 blocks for 7 seconds.";
+        return String.format("Unleashes a surge of dark energy, applying %d%% damage vulnerability to all enemies within %d blocks for %ds.",
+                (int)(damageBonus * 100), (int)radius, durationSeconds);
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Extra Damage", "+30%"),
-                new AbilityStat("Radius", RADIUS + "m"),
-                new AbilityStat("Duration", DURATION_SECONDS + "s"),
+                new AbilityStat("Extra Damage", "+" + (int)(damageBonus * 100) + "%"),
+                new AbilityStat("Radius", radius + "m"),
+                new AbilityStat("Duration", durationSeconds + "s"),
                 new AbilityStat("Uses", "1 per match")
         );
     }

@@ -8,6 +8,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.*;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -18,14 +19,17 @@ import java.util.List;
 
 public class WallOfVines implements Ability {
 
+    private final long cooldownMs;
     private final AbilityCost cost;
     private final StructureManager structureManager;
     private final DebuffManager debuffManager;
     private final TeamManager teamManager;
 
     public WallOfVines(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
-                       StructureManager structureManager, TeamManager teamManager, DebuffManager debuffManager) {
-        this.cost = new CooldownCost(cooldownManager, "wallofvines", 30000, upgradeManager);
+                       StructureManager structureManager, TeamManager teamManager, DebuffManager debuffManager,
+                       AbilityConfig config) {
+        this.cooldownMs = config.getLong("cooldown-ms", 30000L);
+        this.cost = new CooldownCost(cooldownManager, "wallofvines", cooldownMs, upgradeManager);
         this.structureManager = structureManager;
         this.debuffManager = debuffManager;
         this.teamManager = teamManager;
@@ -48,7 +52,8 @@ public class WallOfVines implements Ability {
         return List.of(
                 new AbilityStat("Duration", "5s"),
                 new AbilityStat("Melee resistant", "Yes"),
-                new AbilityStat("Immobilize duration", "2s")
+                new AbilityStat("Immobilize duration", "2s"),
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 
@@ -61,12 +66,11 @@ public class WallOfVines implements Ability {
             return false;
         }
 
-
         Location placementLocation = targetBlock.getRelative(BlockFace.UP).getLocation();
         StructureBlueprint blueprint = Blueprints.defaultWallOfVines();
         BlockFace facing = WallOfVinesStructure.getPlayerFacing(player);
 
-    if(!StructureUtils.isSpaceClearForBlueprint(placementLocation, facing, blueprint)) {
+        if (!StructureUtils.isSpaceClearForBlueprint(placementLocation, facing, blueprint)) {
             player.sendMessage("§eSelect a valid block!");
             return false;
         }

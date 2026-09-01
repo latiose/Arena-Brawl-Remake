@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.abilities.ultimate;
 
 import org.bukkit.Location;
@@ -8,32 +7,45 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
-import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.Ability;
+import org.latios.arenaBrawl.abilities.AbilityCost;
+import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.AbilityTargeting;
+import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.UsageManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
-
 import java.util.List;
-
 
 public class DivineJudgment implements Ability {
 
-    private static final long DURATION_MILLIS = 5_000;
-    private static final long DURATION_TICKS = 100;
-    private static final double MAX_RANGE = 20.0;
-    private static final double EXPLOSION_DAMAGE = 200.0;
-    private static final double EXPLOSION_RADIUS = 3.0;
-    private static final long CHARGE_TIME_MILLIS = 60_000;
+    private final long durationMillis;
+    private final long durationTicks;
+    private final double maxRange;
+    private final double explosionDamage;
+    private final double explosionRadius;
+    private final long chargeTimeMillis;
+
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final ShieldManager shieldManager;
     private final CombatService combatService;
     private final CooldownManager cooldownManager;
+
     public DivineJudgment(CooldownManager cooldownManager, UsageManager usageManager, TeamManager teamManager,
-                          ShieldManager shieldManager, CombatService combatService) {
+                          ShieldManager shieldManager, CombatService combatService, AbilityConfig config) {
+        this.durationMillis = config.getLong("duration-millis", 5000L);
+        this.durationTicks = config.getLong("duration-ticks", 100L);
+        this.maxRange = config.getDouble("max-range", 20.0);
+        this.explosionDamage = config.getDouble("explosion-damage", 200.0);
+        this.explosionRadius = config.getDouble("explosion-radius", 3.0);
+        this.chargeTimeMillis = config.getLong("charge-time-millis", 60000L);
+
         this.cooldownManager = cooldownManager;
         this.cost = new UltimateCost(cooldownManager, usageManager, "divinejudgment");
         this.teamManager = teamManager;
@@ -49,34 +61,35 @@ public class DivineJudgment implements Ability {
 
     @Override
     public String getDescription() {
-        return "An ally becomes immune to damage for 5 seconds. Afterwards, "
-                + "they explode for 200 damage to nearby enemies.";
+        return "An ally becomes immune to damage for " + (durationMillis / 1000L) + " seconds. Afterwards, "
+                + "they explode for " + (int) explosionDamage + " damage to nearby enemies.";
     }
 
     @Override
     public void onMatchStart(Player player) {
-        cooldownManager.setCooldown(player, "divinejudgment", CHARGE_TIME_MILLIS);
+        cooldownManager.setCooldown(player, "divinejudgment", chargeTimeMillis);
     }
+
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Immunity Duration", "5s"),
-                new AbilityStat("Ally Radius", String.valueOf(MAX_RANGE)),
-                new AbilityStat("Explosion Damage", String.valueOf(EXPLOSION_DAMAGE)),
-                new AbilityStat("Explosion Radius", String.valueOf(EXPLOSION_RADIUS)),
+                new AbilityStat("Immunity Duration", (durationMillis / 1000L) + "s"),
+                new AbilityStat("Ally Radius", (int) maxRange + "m"),
+                new AbilityStat("Explosion Damage", String.valueOf((int) explosionDamage)),
+                new AbilityStat("Explosion Radius", (int) explosionRadius + "m"),
                 new AbilityStat("Uses", "1 per match")
         );
     }
 
     @Override
     public boolean activate(Player player) {
-        Player target = AbilityTargeting.findAllyAlongRay(player,teamManager,MAX_RANGE);
+        Player target = AbilityTargeting.findAllyAlongRay(player, teamManager, maxRange);
 
         if (target == null) {
             player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
-        shieldManager.applyShield(target, 1.0, DURATION_MILLIS); // 100% damage reduction = immunity
+        shieldManager.applyShield(target, 1.0, durationMillis);
         target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 30, 0.3, 1, 0.3);
         target.sendMessage("§eYou are protected by Divine Judgment! Go!");
 
@@ -87,12 +100,12 @@ public class DivineJudgment implements Ability {
 
             @Override
             public void run() {
-                if (ticksElapsed >= DURATION_TICKS) {
+                if (ticksElapsed >= durationTicks) {
                     triggerExplosion(target);
                     cancel();
                     return;
                 }
-                if(ticksElapsed%20==0) {
+                if (ticksElapsed % 20 == 0) {
                     player.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, target.getLocation().add(0, 1, 0), 30, 0.3, 1, 0.3);
                 }
                 ticksElapsed++;
@@ -107,9 +120,9 @@ public class DivineJudgment implements Ability {
         center.getWorld().spawnParticle(Particle.EXPLOSION, center, 5);
         center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.8f);
 
-        for (Entity nearby : center.getWorld().getNearbyEntities(center, EXPLOSION_RADIUS, EXPLOSION_RADIUS, EXPLOSION_RADIUS)) {
+        for (Entity nearby : center.getWorld().getNearbyEntities(center, explosionRadius, explosionRadius, explosionRadius)) {
             if (nearby instanceof Player target && teamManager.isEnemy(caster, target)) {
-                combatService.applyAbilityDamage(caster, target, EXPLOSION_DAMAGE, getName());
+                combatService.applyAbilityDamage(caster, target, explosionDamage, getName());
             }
         }
     }

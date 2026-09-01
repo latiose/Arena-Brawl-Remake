@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
@@ -21,18 +22,25 @@ import java.util.List;
 
 public class RocketChicken implements Ability {
 
-    private static final double DAMAGE = 80.0;
-    private static final double ENERGY_COST = 30.0;
-    private static final double LAUNCH_SPEED = 2.2;
-    private static final double DIRECT_HIT_RADIUS = 1.2;
-    private static final double AOE_RADIUS = 2.5;
+    private final double damage;
+    private final double energyCost;
+    private final double launchSpeed;
+    private final double directHitRadius;
+    private final double aoeRadius;
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
 
-    public RocketChicken(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
-        this.cost = new EnergyCost(energyManager, ENERGY_COST);
+    public RocketChicken(EnergyManager energyManager, TeamManager teamManager,
+                         CombatService combatService, AbilityConfig config) {
+        this.damage = config.getDouble("damage", 80.0);
+        this.energyCost = config.getDouble("energy-cost", 30.0);
+        this.launchSpeed = config.getDouble("launch-speed", 2.2);
+        this.directHitRadius = config.getDouble("direct-hit-radius", 1.2);
+        this.aoeRadius = config.getDouble("aoe-radius", 2.5);
+
+        this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
@@ -51,11 +59,10 @@ public class RocketChicken implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf(DAMAGE)),
-                new AbilityStat("AoE Radius", String.valueOf(AOE_RADIUS)),
-                new AbilityStat("Energy Cost", String.valueOf(ENERGY_COST)
-                ) );
-
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("AoE Radius", String.valueOf(aoeRadius)),
+                new AbilityStat("Energy Cost", String.valueOf((int) energyCost))
+        );
     }
 
     @Override
@@ -75,7 +82,7 @@ public class RocketChicken implements Ability {
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_CHICKEN_HURT, 1f, 1.4f);
 
         new TrackedLivingProjectileTask(
-                chicken, player, direction, LAUNCH_SPEED, DAMAGE, DIRECT_HIT_RADIUS, AOE_RADIUS,
+                chicken, player, direction, launchSpeed, damage, directHitRadius, aoeRadius,
                 getName(), teamManager, combatService,
                 Particle.POOF, 15,
                 Sound.ENTITY_CHICKEN_HURT, 1.0f, 0.6f

@@ -15,6 +15,7 @@ import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
@@ -27,17 +28,20 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class CookieShotgun implements Ability {
 
-    private static final double DAMAGE_PER_COOKIE = 25.0;
-    private static final double ENERGY_COST = 60.0;
-    private static final int COOKIE_COUNT = 7;
-    private static final double EXPLOSION_RADIUS = 1.8;
-
     private final AbilityCost cost;
+    private final double damagePerCookie;
+    private final double energyCost;
+    private final int cookieCount;
+    private final double explosionRadius;
     private final TeamManager teamManager;
     private final CombatService combatService;
 
-    public CookieShotgun(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
-        this.cost = new EnergyCost(energyManager, ENERGY_COST);
+    public CookieShotgun(EnergyManager energyManager, TeamManager teamManager, CombatService combatService, AbilityConfig config) {
+        this.damagePerCookie = config.getDouble("damage-per-cookie", 25.0);
+        this.energyCost = config.getDouble("energy-cost", 60.0);
+        this.cookieCount = config.getInt("cookie-count", 7);
+        this.explosionRadius = config.getDouble("explosion-radius", 1.8);
+        this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
@@ -50,16 +54,16 @@ public class CookieShotgun implements Ability {
 
     @Override
     public String getDescription() {
-        return "Fires 7 explosive cookies in a shotgun spread pattern. Each cookie explodes upon impact, dealing area damage.";
+        return "Fires " + cookieCount + " explosive cookies in a shotgun spread pattern. Each cookie explodes upon impact, dealing area damage.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage / Cookie", "25"),
-                new AbilityStat("Cookies Fired", String.valueOf(COOKIE_COUNT)),
-                new AbilityStat("Energy Cost", "60"),
-                new AbilityStat("AoE Radius", EXPLOSION_RADIUS + " blocks")
+                new AbilityStat("Damage / Cookie", String.valueOf((int) damagePerCookie)),
+                new AbilityStat("Cookies Fired", String.valueOf(cookieCount)),
+                new AbilityStat("Energy Cost", String.valueOf((int) energyCost)),
+                new AbilityStat("AoE Radius", explosionRadius + " blocks")
         );
     }
 
@@ -71,7 +75,7 @@ public class CookieShotgun implements Ability {
         player.getWorld().playSound(eyeLoc, Sound.ENTITY_GENERIC_EXPLODE, 0.7f, 1.8f);
         player.getWorld().playSound(eyeLoc, Sound.ENTITY_ITEM_BREAK, 1.2f, 0.6f);
 
-        for (int i = 0; i < COOKIE_COUNT; i++) {
+        for (int i = 0; i < cookieCount; i++) {
             Vector spreadDir = applySpread(direction.clone(), 0.28);
             double speed = 1.3 + (ThreadLocalRandom.current().nextDouble() * 0.4);
 
@@ -130,7 +134,7 @@ public class CookieShotgun implements Ability {
         impactLoc.getWorld().playSound(impactLoc, Sound.ENTITY_GENERIC_EXPLODE, 0.3f, 2.0f);
 
         Set<Player> targets = new HashSet<>();
-        for (Entity entity : impactLoc.getWorld().getNearbyEntities(impactLoc, EXPLOSION_RADIUS, EXPLOSION_RADIUS, EXPLOSION_RADIUS)) {
+        for (Entity entity : impactLoc.getWorld().getNearbyEntities(impactLoc, explosionRadius, explosionRadius, explosionRadius)) {
             if (entity instanceof Player victim && !victim.equals(owner)) {
                 if (teamManager.isEnemy(owner, victim)) {
                     targets.add(victim);
@@ -139,7 +143,7 @@ public class CookieShotgun implements Ability {
         }
 
         for (Player victim : targets) {
-            combatService.applyAbilityDamage(owner, victim, DAMAGE_PER_COOKIE, getName(), impactLoc);
+            combatService.applyAbilityDamage(owner, victim, damagePerCookie, getName(), impactLoc);
         }
     }
 

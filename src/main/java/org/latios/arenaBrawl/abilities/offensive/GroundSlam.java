@@ -6,10 +6,10 @@ import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -19,13 +19,15 @@ public class GroundSlam implements Ability {
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
-    private static final double ENERGY_COST = 100.0;
-    private static final double DAMAGE = 250;
-
+    private final double energyCost;
+    private final double damage;
     private final CombatService combatService;
 
-    public GroundSlam(TeamManager teamManager, EnergyManager energyManager, CombatService combatService) {
-        this.cost = new EnergyCost(energyManager, ENERGY_COST);
+    public GroundSlam(TeamManager teamManager, EnergyManager energyManager,
+                      CombatService combatService, AbilityConfig config) {
+        this.energyCost = config.getDouble("energy-cost", 100.0);
+        this.damage = config.getDouble("damage", 250.0);
+        this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
@@ -41,7 +43,7 @@ public class GroundSlam implements Ability {
         boolean hitSomeone = false;
         for (Entity nearby : player.getNearbyEntities(4, 3, 4)) {
             if (nearby instanceof Player target && teamManager.isEnemy(player, target) && target.getGameMode() != GameMode.SPECTATOR) {
-                combatService.applyAbilityDamage(player, target, DAMAGE, getName());
+                combatService.applyAbilityDamage(player, target, damage, getName());
                 target.setVelocity(target.getVelocity().setY(0.5));
                 hitSomeone = true;
             }
@@ -60,8 +62,8 @@ public class GroundSlam implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
-                new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Energy Cost", (int) energyCost + ""),
                 new AbilityStat("Range", "4")
         );
     }

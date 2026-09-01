@@ -13,6 +13,7 @@ import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
@@ -24,18 +25,24 @@ import java.util.Set;
 
 public class LayWaste implements Ability {
 
-    private static final double DAMAGE = 110.0;
-    private static final double ENERGY_COST = 30.0;
-    private static final double MAX_TARGET_DISTANCE = 15.0;
-    private static final double RADIUS = 1.0;
-    private static final long DELAY_TICKS = 15L;
+    private final double damage;
+    private final double energyCost;
+    private final double maxTargetDistance;
+    private final double radius;
+    private final long delayTicks;
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
 
-    public LayWaste(EnergyManager energyManager, TeamManager teamManager, CombatService combatService) {
-        this.cost = new EnergyCost(energyManager, ENERGY_COST);
+    public LayWaste(EnergyManager energyManager, TeamManager teamManager,
+                    CombatService combatService, AbilityConfig config) {
+        this.damage = config.getDouble("damage", 110.0);
+        this.energyCost = config.getDouble("energy-cost", 30.0);
+        this.maxTargetDistance = config.getDouble("max-target-distance", 15.0);
+        this.radius = config.getDouble("radius", 1.0);
+        this.delayTicks = config.getLong("delay-ticks", 15L);
+        this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
@@ -48,16 +55,16 @@ public class LayWaste implements Ability {
 
     @Override
     public String getDescription() {
-        return "Marks a targeted block that explodes after 0.75 seconds, dealing damage to enemies in the area.";
+        return "Marks a targeted block that explodes after " + (delayTicks * 0.05) + " seconds, dealing damage to enemies in the area.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int)DAMAGE)),
-                new AbilityStat("Energy Cost", String.valueOf((int)ENERGY_COST)),
-                new AbilityStat("Delay", "0.75s"),
-                new AbilityStat("Radius", RADIUS + " blocks")
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Energy Cost", String.valueOf((int) energyCost)),
+                new AbilityStat("Delay", (delayTicks * 0.05) + "s"),
+                new AbilityStat("Radius", radius + " blocks")
         );
     }
 
@@ -66,7 +73,7 @@ public class LayWaste implements Ability {
         RayTraceResult result = player.getWorld().rayTraceBlocks(
                 player.getEyeLocation(),
                 player.getEyeLocation().getDirection(),
-                MAX_TARGET_DISTANCE,
+                maxTargetDistance,
                 FluidCollisionMode.NEVER,
                 true
         );
@@ -94,8 +101,8 @@ public class LayWaste implements Ability {
             public void run() {
                 ticksElapsed++;
 
-                if (ticksElapsed < DELAY_TICKS) {
-                    drawIndicatorCircle(targetLocation, RADIUS);
+                if (ticksElapsed < delayTicks) {
+                    drawIndicatorCircle(targetLocation, radius);
                     if (ticksElapsed % 3 == 0) {
                         targetLocation.getWorld().playSound(targetLocation, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.4f, 2.0f);
                     }
@@ -110,7 +117,7 @@ public class LayWaste implements Ability {
                 targetLocation.getWorld().playSound(targetLocation, Sound.ENTITY_EVOKER_CAST_SPELL, 1.0f, 1.2f);
 
                 Set<Player> targetsToHit = new HashSet<>();
-                for (Entity entity : targetLocation.getWorld().getNearbyEntities(targetLocation, RADIUS, RADIUS + 1.5, RADIUS)) {
+                for (Entity entity : targetLocation.getWorld().getNearbyEntities(targetLocation, radius, radius + 1.5, radius)) {
                     if (entity instanceof Player victim && !victim.equals(player)) {
                         if (teamManager.isEnemy(player, victim)) {
                             targetsToHit.add(victim);
@@ -119,7 +126,7 @@ public class LayWaste implements Ability {
                 }
 
                 for (Player victim : targetsToHit) {
-                    combatService.applyAbilityDamage(player, victim, DAMAGE, getName(), targetLocation);
+                    combatService.applyAbilityDamage(player, victim, damage, getName(), targetLocation);
                 }
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);

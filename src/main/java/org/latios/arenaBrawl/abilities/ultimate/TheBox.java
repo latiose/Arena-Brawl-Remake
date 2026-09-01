@@ -7,29 +7,24 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
-import org.latios.arenaBrawl.abilities.Ability;
-import org.latios.arenaBrawl.abilities.AbilityCost;
-import org.latios.arenaBrawl.abilities.AbilityStat;
-import org.latios.arenaBrawl.abilities.CooldownManager;
-
+import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
-
 import org.latios.arenaBrawl.team.TeamManager;
-
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TheBox implements Ability {
 
-    private static final double RADIUS = 4.0;
-    private static final double DAMAGE = 350.0;
-    private static final long SLOW_DURATION_MS = 4_000;
-    private static final long DURATION_TICKS = 100L; // 5
-    private static final long CHARGE_TIME_MILLIS = 60_000;
+    private final double radius;
+    private final double damage;
+    private final long slowDurationMs;
+    private final long durationTicks;
+    private final long chargeTimeMillis;
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -37,19 +32,28 @@ public class TheBox implements Ability {
     private final DebuffManager debuffManager;
     private final Plugin plugin;
     private final CooldownManager cooldownManager;
+
     public TheBox(Plugin plugin, CooldownManager cooldownManager, TeamManager teamManager,
-                  CombatService combatService, DebuffManager debuffManager, UsageManager usageManager) {
+                  CombatService combatService, DebuffManager debuffManager, UsageManager usageManager,
+                  AbilityConfig config) {
         this.plugin = plugin;
-        this.cost = new UltimateCost(cooldownManager,usageManager,"thebox");
         this.teamManager = teamManager;
         this.combatService = combatService;
         this.debuffManager = debuffManager;
         this.cooldownManager = cooldownManager;
+
+        this.radius = config.getDouble("radius", 4.0);
+        this.damage = config.getDouble("damage", 350.0);
+        this.slowDurationMs = config.getLong("slow-duration-ms", 4000L);
+        this.durationTicks = config.getLong("duration-ticks", 100L);
+        this.chargeTimeMillis = config.getLong("charge-time-ms", 60000L);
+
+        this.cost = new UltimateCost(cooldownManager, usageManager, "thebox");
     }
 
     @Override
     public void onMatchStart(Player player) {
-        cooldownManager.setCooldown(player, "thebox", CHARGE_TIME_MILLIS);
+        cooldownManager.setCooldown(player, "thebox", chargeTimeMillis);
     }
 
     @Override
@@ -66,8 +70,8 @@ public class TheBox implements Ability {
         List<Location> vertices = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             double angle = Math.toRadians(i * 72);
-            double x = Math.cos(angle) * RADIUS;
-            double z = Math.sin(angle) * RADIUS;
+            double x = Math.cos(angle) * radius;
+            double z = Math.sin(angle) * radius;
             vertices.add(center.clone().add(x, 0, z));
         }
 
@@ -86,7 +90,7 @@ public class TheBox implements Ability {
             public void run() {
                 ticksElapsed += 2;
 
-                if (ticksElapsed >= DURATION_TICKS || triggered || !player.isOnline()) {
+                if (ticksElapsed >= durationTicks || triggered || !player.isOnline()) {
                     cancel();
                     return;
                 }
@@ -102,8 +106,8 @@ public class TheBox implements Ability {
                         if (wall.isNear(enemy.getLocation())) {
                             triggered = true;
 
-                            combatService.applyAbilityDamage(player, enemy, DAMAGE, getName());
-                            debuffManager.tryApply(enemy, DebuffType.SLOW, SLOW_DURATION_MS);
+                            combatService.applyAbilityDamage(player, enemy, damage, getName());
+                            debuffManager.tryApply(enemy, DebuffType.SLOW, slowDurationMs);
 
                             enemy.getWorld().playSound(enemy.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.2f, 0.6f);
                             enemy.getWorld().spawnParticle(Particle.SOUL, enemy.getLocation().add(0, 1, 0), 40, 0.4, 0.6, 0.4, 0.1);
@@ -165,9 +169,9 @@ public class TheBox implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
-                new AbilityStat("Slow Duration", (SLOW_DURATION_MS / 1000) + "s"),
-                new AbilityStat("Wall Lifetime", "5s")
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Slow Duration", (slowDurationMs / 1000) + "s"),
+                new AbilityStat("Wall Lifetime", (durationTicks / 20) + "s")
         );
     }
 }

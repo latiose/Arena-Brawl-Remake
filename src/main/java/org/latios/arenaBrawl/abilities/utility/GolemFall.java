@@ -1,4 +1,3 @@
-// abilities/utility/GolemFallAbility.java
 package org.latios.arenaBrawl.abilities.utility;
 
 import org.bukkit.Location;
@@ -7,16 +6,17 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
-import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.PlacedStructure;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
@@ -28,18 +28,28 @@ import java.util.List;
 
 public class GolemFall implements Ability {
 
-    private static final double MAX_RANGE = 20.0;
-    private static final double SPAWN_HEIGHT_OFFSET = 10.0;
-    private static final double IMPACT_RADIUS = 5.0;
-    private static final double KNOCKBACK_STRENGTH = 5.0;
+    private final double maxRange;
+    private final double spawnHeightOffset;
+    private final double impactRadius;
+    private final double knockbackStrength;
+    private final long cooldownMs;
 
+    private final Plugin plugin;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final StructureDemolitionService demolitionService;
 
-    public GolemFall(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
-                     TeamManager teamManager, StructureDemolitionService demolitionService) {
-        this.cost = new CooldownCost(cooldownManager, "golemfall", 30000, upgradeManager);
+    public GolemFall(Plugin plugin, CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
+                     TeamManager teamManager, StructureDemolitionService demolitionService,
+                     AbilityConfig config) {
+        this.plugin = plugin;
+        this.maxRange = config.getDouble("max-range", 20.0);
+        this.spawnHeightOffset = config.getDouble("spawn-height-offset", 10.0);
+        this.impactRadius = config.getDouble("impact-radius", 5.0);
+        this.knockbackStrength = config.getDouble("knockback-strength", 5.0);
+        this.cooldownMs = config.getLong("cooldown-ms", 30000L);
+
+        this.cost = new CooldownCost(cooldownManager, "golemfall", cooldownMs, upgradeManager);
         this.teamManager = teamManager;
         this.demolitionService = demolitionService;
     }
@@ -52,24 +62,24 @@ public class GolemFall implements Ability {
 
     @Override
     public String getDescription() {
-        return "Summons a golem above where you're aiming. On landing, it destroys nearby enemy "
-                + "structures and knocks back enemies caught in the blast radius.";
+        return "Summons a golem above where you're aiming. On landing, it destroys nearby enemy structures and knocks back enemies caught in the blast radius.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Range", String.valueOf(MAX_RANGE)),
-                new AbilityStat("Impact Radius", String.valueOf(IMPACT_RADIUS)),
+                new AbilityStat("Range", (int) maxRange + "m"),
+                new AbilityStat("Impact Radius", (int) impactRadius + "m"),
                 new AbilityStat("Breaks structures", "Yes"),
-                new AbilityStat("Knockback", "Extreme")
+                new AbilityStat("Knockback", "Extreme"),
+                new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 
     @Override
     public boolean activate(Player player) {
         Location target = resolveTargetLocation(player);
-        Location spawnLocation = target.clone().add(0, SPAWN_HEIGHT_OFFSET, 0);
+        Location spawnLocation = target.clone().add(0, spawnHeightOffset, 0);
 
         IronGolem golem = spawnLocation.getWorld().spawn(spawnLocation, IronGolem.class, g -> {
             g.setAI(true);
@@ -91,8 +101,6 @@ public class GolemFall implements Ability {
                     return;
                 }
 
-              //  golem.setVelocity(new Vector(0, -1.5, 0));
-
                 Location loc = golem.getLocation();
                 boolean hitGround = golem.isOnGround()
                         || loc.getBlock().getType().isSolid()
@@ -107,21 +115,21 @@ public class GolemFall implements Ability {
 
                 ticks++;
             }
-        }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
+        }.runTaskTimer(plugin, 0L, 1L);
 
         return true;
     }
 
     private Location resolveTargetLocation(Player player) {
         RayTraceResult result = player.getWorld().rayTraceBlocks(
-                player.getEyeLocation(), player.getEyeLocation().getDirection(), MAX_RANGE
+                player.getEyeLocation(), player.getEyeLocation().getDirection(), maxRange
         );
 
         if (result != null && result.getHitPosition() != null) {
             return result.getHitPosition().toLocation(player.getWorld());
         }
 
-        Vector direction = player.getEyeLocation().getDirection().normalize().multiply(MAX_RANGE);
+        Vector direction = player.getEyeLocation().getDirection().normalize().multiply(maxRange);
         return player.getEyeLocation().add(direction);
     }
 
@@ -130,14 +138,14 @@ public class GolemFall implements Ability {
         impactLocation.getWorld().playSound(impactLocation, Sound.BLOCK_ANVIL_LAND, 1.5f, 0.8f);
         impactLocation.getWorld().playSound(impactLocation, Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
 
-        List<PlacedStructure> nearbyStructures = demolitionService.findStructuresInRadius(impactLocation, IMPACT_RADIUS);
+        List<PlacedStructure> nearbyStructures = demolitionService.findStructuresInRadius(impactLocation, impactRadius);
         for (PlacedStructure structure : nearbyStructures) {
             if (demolitionService.isEnemyStructure(caster, structure)) {
                 demolitionService.demolish(structure, impactLocation);
             }
         }
 
-        for (Entity nearby : impactLocation.getWorld().getNearbyEntities(impactLocation, IMPACT_RADIUS, IMPACT_RADIUS, IMPACT_RADIUS)) {
+        for (Entity nearby : impactLocation.getWorld().getNearbyEntities(impactLocation, impactRadius, impactRadius, impactRadius)) {
             if (nearby instanceof Player target && teamManager.isEnemy(caster, target)) {
                 Vector direction = target.getLocation().toVector().subtract(impactLocation.toVector());
 
@@ -145,7 +153,7 @@ public class GolemFall implements Ability {
                     direction = new Vector(Math.random() - 0.5, 0, Math.random() - 0.5);
                 }
 
-                Vector knockback = direction.normalize().multiply(KNOCKBACK_STRENGTH);
+                Vector knockback = direction.normalize().multiply(knockbackStrength);
                 knockback.setY(1.2);
 
                 target.setVelocity(knockback);

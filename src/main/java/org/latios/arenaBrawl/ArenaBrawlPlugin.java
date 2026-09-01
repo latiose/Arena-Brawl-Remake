@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.abilities.config.AbilityConfigManager;
+import org.latios.arenaBrawl.abilities.config.ReloadAbilitiesCommand;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.abilities.cost.EnergyRegenTask;
 import org.latios.arenaBrawl.abilities.structures.*;
@@ -91,6 +93,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private EnergyModifierManager energyModifierManager;
     private EtherealBodyManager etherealBodyManager;
     private DamageVulnerabilityManager damageVulnerabilityManager;
+    private AbilityConfigManager abilityConfigManager;
     @Override
     public void onEnable() {
         instance = this;
@@ -98,7 +101,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         Location lobbySpawn = new Location(Bukkit.getWorld("world"), 0, -60, 0);
 
         this.arenaLocation = new ArenaLocation(this);
-        this.abilityRegistry = new AbilityRegistry(this);
+        this.abilityConfigManager = new AbilityConfigManager(this);
+        this.abilityRegistry = new AbilityRegistry(this,abilityConfigManager);
         this.hatRegistry = new HatRegistry();
         this.arenaMapManager = new ArenaMapManager(this);
         this.shieldManager = new ShieldManager();
@@ -112,7 +116,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.usageManager = new UsageManager();
         this.lifeLeechManager = new LifeLeechManager();
         this.damageVulnerabilityManager = new DamageVulnerabilityManager();
-        this.playerHealthManager = new PlayerHealthManager();
+        this.playerHealthManager = new PlayerHealthManager(abilityConfigManager.get("rewind"));
         this.hungerManager = new HungerManager();
         this.partyManager = new PartyManager();
         this.movementLockManager = new MovementLockManager();
@@ -301,6 +305,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getCommand("abilities").setExecutor(new AbilityMenuCommand(abilitySelectorGUI, matchManager));
         getCommand("rating").setExecutor(new RatingCommand(ratingManager));
         getCommand("leaderboard").setExecutor(new LeaderboardCommand(ratingManager));
+        getCommand("reloadabilities").setExecutor(new ReloadAbilitiesCommand(abilityConfigManager));
         getCommand("capturestructure").setExecutor(new org.latios.arenaBrawl.abilities.structures.CaptureStructureCommand(this));
 
 

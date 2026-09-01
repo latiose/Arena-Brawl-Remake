@@ -12,9 +12,9 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
-
+import org.latios.arenaBrawl.abilities.UsageManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -24,18 +24,24 @@ import java.util.UUID;
 
 public class ArenaDomain implements Ability {
 
-    private static final long CHARGE_TIME_MILLIS = 60_000;
-    private static final double RADIUS = 8.0;
-    private static final int DURATION_SECONDS = 8;
-    private static final double HEIGHT = 5.0;
+    private final long chargeTimeMillis;
+    private final double radius;
+    private final int durationSeconds;
+    private final double height;
 
     private final Plugin plugin;
     private final CooldownManager cooldownManager;
     private final AbilityCost cost;
     private final TeamManager teamManager;
 
-    public ArenaDomain(Plugin plugin, CooldownManager cooldownManager, UsageManager usageManager, TeamManager teamManager) {
+    public ArenaDomain(Plugin plugin, CooldownManager cooldownManager, UsageManager usageManager,
+                       TeamManager teamManager, AbilityConfig config) {
         this.plugin = plugin;
+        this.chargeTimeMillis = config.getLong("charge-time-millis", 60000L);
+        this.radius = config.getDouble("radius", 8.0);
+        this.durationSeconds = config.getInt("duration-seconds", 8);
+        this.height = config.getDouble("height", 5.0);
+
         this.cooldownManager = cooldownManager;
         this.cost = new UltimateCost(cooldownManager, usageManager, "arenadomain");
         this.teamManager = teamManager;
@@ -53,23 +59,24 @@ public class ArenaDomain implements Ability {
 
     @Override
     public void onMatchStart(Player player) {
-        cooldownManager.setCooldown(player, "arenadomain", CHARGE_TIME_MILLIS);
+        cooldownManager.setCooldown(player, "arenadomain", chargeTimeMillis);
     }
 
     @Override
     public boolean activate(Player player) {
         Location center = player.getLocation().clone();
         center.getWorld().playSound(center, Sound.BLOCK_BEACON_ACTIVATE, 1.5f, 0.8f);
+
         new BukkitRunnable() {
             int ticks = 0;
             final Set<UUID> trappedEnemies = new HashSet<>();
-            final double radiusSquared = RADIUS * RADIUS;
+            final double radiusSquared = radius * radius;
 
             @Override
             public void run() {
                 ticks++;
 
-                if (ticks >= DURATION_SECONDS * 20 || !player.isOnline() || player.isDead()) {
+                if (ticks >= durationSeconds * 20 || !player.isOnline() || player.isDead()) {
                     center.getWorld().playSound(center, Sound.BLOCK_BEACON_DEACTIVATE, 1.5f, 1.2f);
                     cancel();
                     return;
@@ -91,7 +98,7 @@ public class ArenaDomain implements Ability {
 
                     Location targetLoc = target.getLocation();
                     Vector fromCenterToTarget = targetLoc.toVector().subtract(center.toVector());
-                    fromCenterToTarget.setY(0); // Ignore Y for horizontal radius check
+                    fromCenterToTarget.setY(0);
 
                     double distanceSquared = fromCenterToTarget.lengthSquared();
 
@@ -100,7 +107,7 @@ public class ArenaDomain implements Ability {
                     }
 
                     if (trappedEnemies.contains(target.getUniqueId()) && distanceSquared > radiusSquared) {
-                        fromCenterToTarget.normalize().multiply(RADIUS - 0.2);
+                        fromCenterToTarget.normalize().multiply(radius - 0.2);
 
                         Location newLoc = center.clone().add(fromCenterToTarget);
                         newLoc.setY(targetLoc.getY());
@@ -120,12 +127,12 @@ public class ArenaDomain implements Ability {
 
     private void drawCylinder(Location center) {
         for (double angle = 0; angle < 2 * Math.PI; angle += Math.PI / 16) {
-            double x = Math.cos(angle) * RADIUS;
-            double z = Math.sin(angle) * RADIUS;
+            double x = Math.cos(angle) * radius;
+            double z = Math.sin(angle) * radius;
 
             Location pointGround = center.clone().add(x, 0, z);
-            Location pointMid = center.clone().add(x, HEIGHT / 2, z);
-            Location pointTop = center.clone().add(x, HEIGHT, z);
+            Location pointMid = center.clone().add(x, height / 2, z);
+            Location pointTop = center.clone().add(x, height, z);
 
             center.getWorld().spawnParticle(Particle.FLAME, pointGround, 1, 0, 0, 0, 0);
 
@@ -144,8 +151,8 @@ public class ArenaDomain implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Radius", RADIUS + "m"),
-                new AbilityStat("Duration", DURATION_SECONDS + "s"),
+                new AbilityStat("Radius", (int) radius + "m"),
+                new AbilityStat("Duration", durationSeconds + "s"),
                 new AbilityStat("Uses", "1 per match")
         );
     }

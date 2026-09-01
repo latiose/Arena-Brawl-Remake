@@ -5,6 +5,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
@@ -15,13 +16,16 @@ import java.util.List;
 
 public class FreezingBreath extends Breath {
 
-    private static final double DAMAGE = 220.0;
-    private static final double ENERGY_COST = 80.0;
-    private static final long SLOW_DURATION_TICKS = 2_000;
+    private final double damage;
+    private final double energyCost;
+    private final long slowDurationTicks;
 
     public FreezingBreath(EnergyManager energyManager, TeamManager teamManager,
-                          CombatService combatService, DebuffManager debuffManager) {
-        super(energyManager, ENERGY_COST, teamManager, combatService, debuffManager);
+                          CombatService combatService, DebuffManager debuffManager, AbilityConfig config) {
+        super(energyManager, config.getDouble("energy-cost", 80.0), teamManager, combatService, debuffManager);
+        this.damage = config.getDouble("damage", 220.0);
+        this.energyCost = config.getDouble("energy-cost", 80.0);
+        this.slowDurationTicks = config.getLong("slow-duration-ticks", 2000L);
     }
 
     @Override
@@ -34,7 +38,7 @@ public class FreezingBreath extends Breath {
 
     @Override
     protected double getDamage() {
-        return DAMAGE;
+        return damage;
     }
 
     @Override
@@ -45,7 +49,7 @@ public class FreezingBreath extends Breath {
 
     @Override
     protected void applyHitEffects(Player target) {
-        debuffManager.tryApply(target, DebuffType.SLOW, SLOW_DURATION_TICKS);
+        debuffManager.tryApply(target, DebuffType.SLOW, slowDurationTicks);
     }
 
     @Override
@@ -56,10 +60,10 @@ public class FreezingBreath extends Breath {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Damage", String.valueOf((int) DAMAGE)),
-                new AbilityStat("Energy Cost", (int) ENERGY_COST + ""),
+                new AbilityStat("Damage", String.valueOf((int) damage)),
+                new AbilityStat("Energy Cost", (int) energyCost + ""),
                 new AbilityStat("Range", "8"),
-                new AbilityStat("Slow duration", (int) SLOW_DURATION_TICKS / 1000 + "")
+                new AbilityStat("Slow duration", (int) (slowDurationTicks / 1000L) + "s")
         );
     }
 }

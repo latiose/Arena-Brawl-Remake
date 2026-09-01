@@ -14,6 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.joml.Vector3f;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.ultimate.Rewind;
 
 import java.util.HashMap;
@@ -34,11 +35,14 @@ public class PlayerHealthManager {
     private final Set<UUID> eliminated = new HashSet<>();
     private static final long HOLOGRAM_LIFETIME_TICKS = 35;
     private Consumer<Player> eliminationCallback = p -> {};
-
+    private AbilityConfig config;
     public void setEliminationCallback(Consumer<Player> callback) {
         this.eliminationCallback = callback;
     }
 
+    public PlayerHealthManager(AbilityConfig config) {
+        this.config = config;
+    }
     public void setMaxHealth(Player player, double max) {
         maxHealth.put(player.getUniqueId(), max);
         currentHealth.put(player.getUniqueId(), max);
@@ -127,7 +131,7 @@ public class PlayerHealthManager {
             UUID casterUUID = Rewind.ACTIVE_REWUNDS.remove(player.getUniqueId());
 
             if (casterUUID != null) {
-                currentHealth.put(player.getUniqueId(), Rewind.REVIVE_HEALTH);
+                currentHealth.put(player.getUniqueId(),  config.getDouble("revive-health", 400.0));
 
                 Location loc = player.getLocation();
 
@@ -189,7 +193,7 @@ public class PlayerHealthManager {
             UUID casterUUID = Rewind.ACTIVE_REWUNDS.remove(player.getUniqueId());
 
             if (casterUUID != null) {
-                currentHealth.put(player.getUniqueId(), Rewind.REVIVE_HEALTH);
+                currentHealth.put(player.getUniqueId(), config.getDouble("revive-health", 400.0));
 
                 Location loc = player.getLocation();
 

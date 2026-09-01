@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
@@ -22,9 +23,19 @@ public abstract class AbstractLauncher implements Ability {
     protected final AbilityCost cost;
     protected final TeamManager teamManager;
     protected final CombatService combatService;
+    protected final double mainDamage;
+    protected final double sliceDamage;
+    protected final double energyCost;
+    protected final double aoeRadius;
 
-    public AbstractLauncher(EnergyManager energyManager, double energyCost, TeamManager teamManager, CombatService combatService) {
-        this.cost = new EnergyCost(energyManager, energyCost);
+    public AbstractLauncher(EnergyManager energyManager, TeamManager teamManager, CombatService combatService,
+                            AbilityConfig config, double defaultMainDamage, double defaultSliceDamage,
+                            double defaultEnergyCost, double defaultAoeRadius) {
+        this.mainDamage = config.getDouble("main-damage", defaultMainDamage);
+        this.sliceDamage = config.getDouble("slice-damage", defaultSliceDamage);
+        this.energyCost = config.getDouble("energy-cost", defaultEnergyCost);
+        this.aoeRadius = config.getDouble("aoe-radius", defaultAoeRadius);
+        this.cost = new EnergyCost(energyManager, this.energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
@@ -66,9 +77,9 @@ public abstract class AbstractLauncher implements Ability {
         );
     }
 
-    protected abstract double getMainDamage();
-    protected abstract double getSliceDamage();
-    protected abstract double getAoeRadius();
+    protected double getMainDamage() { return mainDamage; }
+    protected double getSliceDamage() { return sliceDamage; }
+    protected double getAoeRadius() { return aoeRadius; }
     protected abstract Material getHeadMaterial();
     protected abstract Material getSliceMaterial();
 }

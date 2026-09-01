@@ -4,7 +4,6 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -14,6 +13,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -23,17 +23,21 @@ import java.util.List;
 import java.util.Set;
 
 public class ViolentLeap implements Ability {
-    ;
-    private static final double RADIUS = 3.0;
-    private static final int COOLDOWN_SECONDS = 40;
+
+    private final double radius;
+    private final int cooldownSeconds;
+    private final long cooldownMs;
 
     private final AbilityCost cost;
     private final TeamManager teamManager;
 
-
     public ViolentLeap(CooldownManager cooldownManager, TeamManager teamManager,
-                       CombatUpgradeManager combatUpgradeManager) {
-        this.cost = new CooldownCost(cooldownManager, "hazard_leap", COOLDOWN_SECONDS * 1000, combatUpgradeManager);
+                       CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
+        this.radius = config.getDouble("radius", 3.0);
+        this.cooldownSeconds = config.getInt("cooldown-seconds", 40);
+        this.cooldownMs = cooldownSeconds * 1000L;
+
+        this.cost = new CooldownCost(cooldownManager, "hazard_leap", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
     }
 
@@ -51,8 +55,8 @@ public class ViolentLeap implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Radius", RADIUS + " blocks"),
-                new AbilityStat("Cooldown", COOLDOWN_SECONDS + "s")
+                new AbilityStat("Radius", radius + " blocks"),
+                new AbilityStat("Cooldown", cooldownSeconds + "s")
         );
     }
 
@@ -104,10 +108,10 @@ public class ViolentLeap implements Ability {
                             new Particle.DustOptions(Color.fromRGB(120, 30, 10), 1.8f)
                     );
 
-                    drawSpikeRing(impactLoc, RADIUS);
+                    drawSpikeRing(impactLoc, radius);
 
                     Set<Player> targets = new HashSet<>();
-                    for (Entity entity : impactLoc.getWorld().getNearbyEntities(impactLoc, RADIUS, 2.5, RADIUS)) {
+                    for (Entity entity : impactLoc.getWorld().getNearbyEntities(impactLoc, radius, 2.5, radius)) {
                         if (entity instanceof Player victim && !victim.equals(player)) {
                             if (teamManager.isEnemy(player, victim)) {
                                 targets.add(victim);
@@ -116,7 +120,6 @@ public class ViolentLeap implements Ability {
                     }
 
                     for (Player victim : targets) {
-
                         Vector kb = victim.getLocation().toVector().subtract(impactLoc.toVector()).setY(0);
                         if (kb.lengthSquared() > 0) {
                             kb.normalize().multiply(1.1).setY(0.4);

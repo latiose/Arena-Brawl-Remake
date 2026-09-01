@@ -24,3 +24,6 @@ commands:
   capturestructure:
     description: Captures blocks around you into BlockOffset code for a structure blueprint
     usage: /capturestructure [radiusX radiusY radiusZ]
+  reloadabilities:
+    description: Reloads ability values from config file
+    usage: /reloadabilities
