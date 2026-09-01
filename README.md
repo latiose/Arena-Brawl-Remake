@@ -20,7 +20,6 @@ Paper plugin (version 26.2) that implements a 2v2 combat minigame featuring abil
 - [Lobby and Matchmaking](#lobby-and-matchmaking)
 - [Multi-Map System](#multi-map-system)
 - [Entity Cleanup and Management](#entity-cleanup-and-management)
-- [Intentionally Reused Patterns](#intentionally-reused-patterns)
 - [How to Add New Features](#how-to-add-new-features)
 
 ---
