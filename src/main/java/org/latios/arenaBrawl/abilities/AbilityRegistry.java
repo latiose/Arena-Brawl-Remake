@@ -133,6 +133,8 @@ public class AbilityRegistry {
                 deps -> new Suzu(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.shieldManager(), deps.combatUpgradeManager(), configManager.get("suzu")));
         register(AbilitySlot.SUPPORT, "discordorb",
                 deps -> new DiscordOrb(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), deps.damageVulnerabilityManager(), configManager.get("discordorb")));
+        register(AbilitySlot.SUPPORT, "healingbeam",
+                deps -> new HealingBeam(deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.combatUpgradeManager(),configManager.get("healingbeam")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",

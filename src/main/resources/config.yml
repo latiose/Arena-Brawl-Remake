@@ -357,6 +357,13 @@ ability-values:
     damage-bonus: 0.30
     max-range: 20.0
 
+  healingbeam:
+    cooldown-ms: 10000
+    max-range: 256.0
+    heal-amount: 80
+    step-size: 0.4
+    hit-expansion: 0.6
+
   # --- ULTIMATE ---
   shieldwall:
     damage-reduction: 0.70
