@@ -49,7 +49,7 @@ public class DamageBuffManager {
             buffs.removeAll(expiredBuffs);
             for (ActiveBuff expired : expiredBuffs) {
                 Component expireMessage = Component.text("Your ", NamedTextColor.YELLOW)
-                        .append(Component.text("§l"+expired.title(), NamedTextColor.RED))
+                        .append(Component.text("§l"+expired.title().toUpperCase(), NamedTextColor.RED))
                         .append(Component.text(" has expired!", NamedTextColor.YELLOW));
                 player.sendMessage(expireMessage);
             }

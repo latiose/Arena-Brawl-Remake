@@ -332,6 +332,12 @@ ability-values:
     cooldown-ms: 30000
     heal-per-hit: 60.0
 
+  berserkerrage:
+    self-damage: 50.0
+    damage-increase: 1.20
+    duration-ms: 5000
+    cooldown-ms: 0
+
   etheralbody:
     duration-millis: 4000
     cooldown-ms: 35000

@@ -134,7 +134,9 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "discordorb",
                 deps -> new DiscordOrb(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), deps.damageVulnerabilityManager(), configManager.get("discordorb")));
         register(AbilitySlot.SUPPORT, "healingbeam",
-                deps -> new HealingBeam(deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.combatUpgradeManager(),configManager.get("healingbeam")));
+                deps -> new HealingBeam(deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("healingbeam")));
+        register(AbilitySlot.SUPPORT, "berserkerrage",
+                deps -> new BerserkerRage(deps.playerHealthManager(), deps.damageBuffManager(), deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("berserkerrage")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
@@ -144,7 +146,7 @@ public class AbilityRegistry {
         register(AbilitySlot.ULTIMATE, "absolutezero",
                 deps -> new AbsoluteZeroAbility(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("absolutezero")));
         register(AbilitySlot.ULTIMATE, "nanoboost",
-                deps -> new NanoBoost(plugin,deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.shieldManager(), deps.damageBuffManager(), configManager.get("nanoboost")));
+                deps -> new NanoBoost(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.shieldManager(), deps.damageBuffManager(), configManager.get("nanoboost")));
         register(AbilitySlot.ULTIMATE, "divinejudgment",
                 deps -> new DivineJudgment(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.shieldManager(), deps.combatService(), configManager.get("divinejudgment")));
         register(AbilitySlot.ULTIMATE, "healingwind",

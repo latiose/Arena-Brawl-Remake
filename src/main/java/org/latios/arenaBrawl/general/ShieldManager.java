@@ -53,7 +53,7 @@ public class ShieldManager {
                 if (player != null && player.isOnline()) {
                     for (ActiveShield expired : expiredShields) {
                         Component expireMessage = Component.text("Your ", NamedTextColor.YELLOW)
-                                .append(Component.text("§l"+expired.title(), NamedTextColor.AQUA))
+                                .append(Component.text("§l"+expired.title().toUpperCase(), NamedTextColor.AQUA))
                                 .append(Component.text(" has expired!", NamedTextColor.YELLOW));
                         player.sendMessage(expireMessage);
                     }
