@@ -211,6 +211,11 @@ ability-values:
     speed-amplifier: 2
     speed-duration-ticks: 40
 
+  dodgeroll:
+    cooldown-ms: 22000
+    dash-speed: 1.3
+    iframe-duration-ms: 600
+
   salmonform:
     cooldown-ms: 27000
     duration-ticks: 100

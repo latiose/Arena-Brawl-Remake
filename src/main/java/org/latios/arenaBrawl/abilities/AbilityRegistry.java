@@ -103,6 +103,8 @@ public class AbilityRegistry {
                 deps -> new RocketGrab(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("RocketGrab")));
         register(AbilitySlot.UTILITY, "darkpassage",
                 deps -> new DarkPassage(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("darkpassage")));
+        register(AbilitySlot.UTILITY, "dodgeroll",
+                deps -> new DodgeRoll(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.shieldManager(), configManager.get("dodgeroll")));
 
         // --- SUPPORT ---
         register(AbilitySlot.SUPPORT, "holywater",
