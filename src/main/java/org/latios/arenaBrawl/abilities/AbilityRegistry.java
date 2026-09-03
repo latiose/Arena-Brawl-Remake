@@ -7,17 +7,15 @@ import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.*;
 import org.latios.arenaBrawl.abilities.utility.*;
 
-import java.util.EnumMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class AbilityRegistry {
     private final AbilityConfigManager configManager;
     private final Map<AbilitySlot, Map<String, AbilityFactory>> registry = new EnumMap<>(AbilitySlot.class);
     private final Map<AbilitySlot, String> defaults = new EnumMap<>(AbilitySlot.class);
     private final Plugin plugin;
-
+    private final Map<String, Ability> previewCache = new HashMap<>();
+    private AbilityDependencies previewDependencies;
     public AbilityRegistry(Plugin plugin, AbilityConfigManager abilityConfigManager) {
         for (AbilitySlot slot : AbilitySlot.values()) {
             registry.put(slot, new LinkedHashMap<>());
@@ -185,6 +183,10 @@ public class AbilityRegistry {
         return factory.create(deps);
     }
 
+    public void clearPreviewCache() {
+        previewCache.clear();
+    }
+
     public String getDefault(AbilitySlot slot) {
         return defaults.get(slot);
     }
@@ -193,14 +195,13 @@ public class AbilityRegistry {
         return registry.get(slot).keySet();
     }
 
-    private AbilityDependencies previewDependencies;
-
     public void setPreviewDependencies(AbilityDependencies deps) {
         this.previewDependencies = deps;
     }
 
+    /** Builds (or reuses a cached) throwaway instance of an ability purely to read its name/description/stats for menus. */
     public Ability createPreview(AbilitySlot slot, String id) {
-        return create(slot, id, previewDependencies);
+        return previewCache.computeIfAbsent(slot.name() + ":" + id, k -> create(slot, id, previewDependencies));
     }
 
     public Ability get(String chosenId) {

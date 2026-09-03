@@ -307,7 +307,9 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getCommand("abilities").setExecutor(new AbilityMenuCommand(abilitySelectorGUI, matchManager));
         getCommand("rating").setExecutor(new RatingCommand(ratingManager));
         getCommand("leaderboard").setExecutor(new LeaderboardCommand(ratingManager));
-        getCommand("reloadabilities").setExecutor(new ReloadAbilitiesCommand(abilityConfigManager));
+        getCommand("reloadabilities").setExecutor(
+                new ReloadAbilitiesCommand(abilityConfigManager, abilityRegistry, abilitySelectorGUI)
+        );
         getCommand("capturestructure").setExecutor(new org.latios.arenaBrawl.abilities.structures.CaptureStructureCommand(this));
 
 
