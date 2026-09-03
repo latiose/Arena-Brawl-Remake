@@ -127,7 +127,7 @@ public class Suzu implements Ability {
                 }
                 ally.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, ally.getLocation().add(0, 1.0, 0), 10, 0.3, 0.5, 0.3, 0);
 
-                shieldManager.applyShield(ally, 1.0, invulnerabilityDurationMs);
+                shieldManager.applyShield(ally, 1.0, invulnerabilityDurationMs,"Suzu");
             }
         }
     }

@@ -1,4 +1,3 @@
-// powerups/PowerupTask.java
 package org.latios.arenaBrawl.powerups;
 
 import org.bukkit.entity.Player;
@@ -38,7 +37,7 @@ public class PowerupTask extends BukkitRunnable {
 
                 switch (type) {
                     case HEALTH -> healthManager.heal(picker, 200);
-                    case DOUBLE_DAMAGE -> damageBuffManager.applyBuff(picker, 2, 12_000,"DOUBLE DAMAGE");
+                    case DOUBLE_DAMAGE -> damageBuffManager.applyBuff(picker, 2.0, 12_000, "DOUBLE DAMAGE", true);
                 }
 
                 String powerupName = type == PowerupType.HEALTH ? "HEALING" : "DOUBLE DAMAGE";
@@ -51,10 +50,10 @@ public class PowerupTask extends BukkitRunnable {
                     if (p.equals(picker)) {
 
                         if (type == PowerupType.HEALTH) {
-                            p.sendMessage("§eYou activated the §aHealing §epowerup!");
+                            p.sendMessage("§eYou activated the §a§l"+powerupName+" §epowerup!");
                             p.sendMessage("§a+200 health!");
                         } else if (type == PowerupType.DOUBLE_DAMAGE) {
-                            p.sendMessage("§eYou activated the §cDouble Damage powerup!");
+                            p.sendMessage("§eYou activated the §c§l"+powerupName+" §epowerup!");
                         }
                     } else {
                         boolean isViewerRed = match.getRed().contains(p);
@@ -62,7 +61,7 @@ public class PowerupTask extends BukkitRunnable {
                         boolean isHP = (type == PowerupType.HEALTH);
                         String color = isTeammate ? "§a" : "§c";
                         String color2 = isHP ? "§a" : "§c";
-                        p.sendMessage(color + picker.getName() + " §eactivated the " +color2 + powerupName + " §epowerup!");
+                        p.sendMessage(color + picker.getName() + " §eactivated the " +color2 + "§l"+powerupName + " §epowerup!");
                     }
                 }
             }

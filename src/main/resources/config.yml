@@ -42,7 +42,7 @@ maps:
     health-powerup: {x: -2471.577, y: 17.5, z: 697.445 }
     damage-powerups:
       - { x: -2480.476, y: 24.5, z: 697.423 }
-      - { x: -2462.592, y: 24.5, z: -697.423 }
+      - { x: -2462.592, y: 24.5, z: 697.423 }
   Jungle:
     world: "Jungle"
     red-spawn-1: {x: -2421.7, y: 35, z: 753.579, yaw: -90, pitch: 0}
@@ -61,7 +61,7 @@ maps:
     blue-spawn-2: {x: 1, y: 76, z: 110.5, yaw: 180, pitch: 0}
     health-powerup: {x: 0.48, y: 77.5, z: 81.5}
     damage-powerups:
-      - {x: -13, y: 75.5, z: -81.5}
+      - {x: -13, y: 75.5, z: 81.5}
       - {x: 14, y: 75.5, z: 81.5}
   Zeus:
     world: "Zeus"
@@ -178,7 +178,7 @@ ability-values:
     delay-ticks: 15
 
   particlebeam:
-    damage: 130.0
+    damage: 120.0
     energy-cost: 50.0
     max-range: 256.0
     step-size: 0.4

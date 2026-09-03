@@ -89,7 +89,7 @@ public class DivineJudgment implements Ability {
             player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
-        shieldManager.applyShield(target, 1.0, durationMillis);
+        shieldManager.applyShield(target, 1.0, durationMillis,"Divine judgment");
         target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 30, 0.3, 1, 0.3);
         target.sendMessage("§eYou are protected by Divine Judgment! Go!");
 

@@ -2,66 +2,93 @@ package org.latios.arenaBrawl.powerups;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
+import org.latios.arenaBrawl.general.StatusBarUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class DamageBuffManager {
 
-    private record ActiveBuff(double multiplier, long startedAt, long durationMillis) {}
+    public record ActiveBuff(double multiplier, long startedAt, long durationMillis, String title, boolean isPowerup) {
+        public boolean isExpired() {
+            return System.currentTimeMillis() - startedAt >= durationMillis;
+        }
 
-    private final Map<UUID, ActiveBuff> activeBuffs = new HashMap<>();
-    private final Map<UUID, BossBar> bossBars = new HashMap<>();
+        public long getRemainingMillis() {
+            return Math.max(0, durationMillis - (System.currentTimeMillis() - startedAt));
+        }
+    }
 
-    public void applyBuff(Player player, double multiplier, long durationMillis, String Title) {
-        long now = System.currentTimeMillis();
-        activeBuffs.put(player.getUniqueId(), new ActiveBuff(multiplier, now, durationMillis));
+    private final Map<UUID, List<ActiveBuff>> activeBuffs = new HashMap<>();
 
-        BossBar bar = Bukkit.createBossBar("§c§l"+Title, BarColor.PURPLE, BarStyle.SOLID);
-        bar.addPlayer(player);
-        bar.setProgress(1.0);
-        bossBars.put(player.getUniqueId(), bar);
+    public void applyBuff(Player player, double multiplier, long durationMillis, String title) {
+        applyBuff(player, multiplier, durationMillis, title, false);
+    }
+
+    public void applyBuff(Player player, double multiplier, long durationMillis, String title, boolean isPowerup) {
+        activeBuffs.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>())
+                .add(new ActiveBuff(multiplier, System.currentTimeMillis(), durationMillis, title, isPowerup));
     }
 
     public double getMultiplier(Player player) {
-        ActiveBuff buff = activeBuffs.get(player.getUniqueId());
-        if (buff == null) return 1.0;
+        List<ActiveBuff> buffs = activeBuffs.get(player.getUniqueId());
+        if (buffs == null || buffs.isEmpty()) return 1.0;
 
-        long elapsed = System.currentTimeMillis() - buff.startedAt();
-        long remaining = buff.durationMillis() - elapsed;
+        List<ActiveBuff> expiredBuffs = new ArrayList<>();
+        for (ActiveBuff buff : buffs) {
+            if (buff.isExpired()) {
+                expiredBuffs.add(buff);
+            }
+        }
 
-        if (remaining <= 0) {
-            clear(player);
-            /*
-            player.sendMessage(
-                    Component.text("Your double damage powerup has expired!", NamedTextColor.RED, TextDecoration.BOLD)
-            );
-            */
+        if (!expiredBuffs.isEmpty()) {
+            buffs.removeAll(expiredBuffs);
+            for (ActiveBuff expired : expiredBuffs) {
+                Component expireMessage = Component.text("Your ", NamedTextColor.YELLOW)
+                        .append(Component.text("§l"+expired.title(), NamedTextColor.RED))
+                        .append(Component.text(" has expired!", NamedTextColor.YELLOW));
+                player.sendMessage(expireMessage);
+            }
+        }
+
+        if (buffs.isEmpty()) {
+            activeBuffs.remove(player.getUniqueId());
             return 1.0;
         }
 
-        BossBar bar = bossBars.get(player.getUniqueId());
-        if (bar != null) {
-            double progress = (double) remaining / buff.durationMillis();
-            bar.setProgress(Math.max(0.0, Math.min(1.0, progress)));
+        ActiveBuff highestRegularBuff = null;
+        ActiveBuff powerupBuff = null;
+
+        for (ActiveBuff buff : buffs) {
+            if (buff.isPowerup()) {
+                if (powerupBuff == null || buff.multiplier() > powerupBuff.multiplier()) {
+                    powerupBuff = buff;
+                }
+            } else {
+                if (highestRegularBuff == null || buff.multiplier() > highestRegularBuff.multiplier()) {
+                    highestRegularBuff = buff;
+                }
+            }
         }
 
-        return buff.multiplier();
-    }
+        double baseMultiplier = (highestRegularBuff != null) ? highestRegularBuff.multiplier() : 1.0;
+        double extraPowerupMultiplier = (powerupBuff != null) ? powerupBuff.multiplier() - 1 : 0.0;
+        double finalMultiplier = baseMultiplier + extraPowerupMultiplier;
 
+        ActiveBuff buffToDisplay = (powerupBuff != null) ? powerupBuff : highestRegularBuff;
+        if (buffToDisplay != null) {
+            double progress = (double) buffToDisplay.getRemainingMillis() / buffToDisplay.durationMillis();
+            StatusBarUtil.sendStatusBar(player, buffToDisplay.title(), progress, "#FFA500");
+        }
+
+        return finalMultiplier;
+    }
 
     public void clear(Player player) {
         activeBuffs.remove(player.getUniqueId());
-        BossBar bar = bossBars.remove(player.getUniqueId());
-        if (bar != null) {
-            bar.removeAll();
-        }
     }
 }

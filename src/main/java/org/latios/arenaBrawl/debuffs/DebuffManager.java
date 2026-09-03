@@ -3,13 +3,11 @@ package org.latios.arenaBrawl.debuffs;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
+import org.latios.arenaBrawl.general.StatusBarUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,11 +17,9 @@ import java.util.UUID;
 
 public class DebuffManager {
 
-    private record ActiveDebuff(DebuffType type, UUID attackerId, long startedAt, long durationMillis) {
-    }
+    private record ActiveDebuff(DebuffType type, UUID attackerId, long startedAt, long durationMillis) {}
 
     private final Map<UUID, ActiveDebuff> activeDebuffs = new HashMap<>();
-    private final Map<UUID, BossBar> bossBars = new HashMap<>();
     private final Map<UUID, Double> accumulatedDamage = new HashMap<>();
     private final List<DebuffListener> listeners = new ArrayList<>();
     private SongOfPowerManager songOfPowerManager;
@@ -51,11 +47,6 @@ public class DebuffManager {
         UUID attackerId = attacker != null ? attacker.getUniqueId() : null;
         activeDebuffs.put(victim.getUniqueId(), new ActiveDebuff(type, attackerId, System.currentTimeMillis(), durationMillis));
         accumulatedDamage.put(victim.getUniqueId(), 0.0);
-
-        BossBar bar = Bukkit.createBossBar(type.getDisplayName(), BarColor.PURPLE, BarStyle.SOLID);
-        bar.addPlayer(victim);
-        bar.setProgress(1.0);
-        bossBars.put(victim.getUniqueId(), bar);
 
         for (DebuffListener listener : listeners) {
             if (listener instanceof PoisonListener poisonListener) {
@@ -95,33 +86,6 @@ public class DebuffManager {
     public void tick(Player player) {
         ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
         if (debuff == null) return;
-        Location bodyLoc = player.getLocation().add(0, 1.0, 0);
-
-        if (debuff.type.equals(DebuffType.SLOW)) {
-            player.getWorld().spawnParticle(Particle.WITCH, bodyLoc, 2, 0.3, 0.5, 0.3, 0.05);
-        }
-
-        if (debuff.type.equals(DebuffType.IMMOBILIZE)) {
-            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, bodyLoc, 2, 0.3, 0.5, 0.3, 0.05);
-        }
-
-        if (debuff.type.equals(DebuffType.STUN) || debuff.type.equals(DebuffType.POLYMORPH)) {
-            player.getWorld().spawnParticle(Particle.WHITE_ASH, bodyLoc, 10, 0.2, 0.2, 0.2, 0.01);
-        }
-
-        if (debuff.type.equals(DebuffType.POISON)) {
-            player.getWorld().spawnParticle(Particle.ITEM_SLIME, bodyLoc, 2, 0.2, 0.2, 0.2, 0.01);
-        }
-
-        if (debuff.type.equals(DebuffType.ANTIHEAL)) {
-            player.getWorld().spawnParticle(Particle.SQUID_INK, bodyLoc, 2, 0.3, 0.5, 0.3, 0.02);
-            player.getWorld().spawnParticle(Particle.SMOKE, bodyLoc, 2, 0.2, 0.4, 0.2, 0.01);
-        }
-        if (debuff.type.equals(DebuffType.SILENCE)) {
-            Location headLoc = player.getLocation().add(0, 2.0, 0);
-            player.getWorld().spawnParticle(Particle.ENCHANT, headLoc, 5, 0.3, 0.3, 0.3, 0.5);
-            player.getWorld().spawnParticle(Particle.WAX_OFF, headLoc, 1, 0.2, 0.2, 0.2, 0.0);
-        }
 
         long elapsed = System.currentTimeMillis() - debuff.startedAt();
         long remaining = debuff.durationMillis() - elapsed;
@@ -131,20 +95,32 @@ public class DebuffManager {
             return;
         }
 
-        double progress = (double) remaining / debuff.durationMillis();
-        BossBar bar = bossBars.get(player.getUniqueId());
-        if (bar != null) {
-            bar.setProgress(Math.max(0.0, Math.min(1.0, progress)));
+        Location bodyLoc = player.getLocation().add(0, 1.0, 0);
+
+        if (debuff.type.equals(DebuffType.SLOW)) {
+            player.getWorld().spawnParticle(Particle.WITCH, bodyLoc, 2, 0.3, 0.5, 0.3, 0.05);
+        } else if (debuff.type.equals(DebuffType.IMMOBILIZE)) {
+            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, bodyLoc, 2, 0.3, 0.5, 0.3, 0.05);
+        } else if (debuff.type.equals(DebuffType.STUN) || debuff.type.equals(DebuffType.POLYMORPH)) {
+            player.getWorld().spawnParticle(Particle.WHITE_ASH, bodyLoc, 10, 0.2, 0.2, 0.2, 0.01);
+        } else if (debuff.type.equals(DebuffType.POISON)) {
+            player.getWorld().spawnParticle(Particle.ITEM_SLIME, bodyLoc, 2, 0.2, 0.2, 0.2, 0.01);
+        } else if (debuff.type.equals(DebuffType.ANTIHEAL)) {
+            player.getWorld().spawnParticle(Particle.SQUID_INK, bodyLoc, 2, 0.3, 0.5, 0.3, 0.02);
+            player.getWorld().spawnParticle(Particle.SMOKE, bodyLoc, 2, 0.2, 0.4, 0.2, 0.01);
+        } else if (debuff.type.equals(DebuffType.SILENCE)) {
+            Location headLoc = player.getLocation().add(0, 2.0, 0);
+            player.getWorld().spawnParticle(Particle.ENCHANT, headLoc, 5, 0.3, 0.3, 0.3, 0.5);
+            player.getWorld().spawnParticle(Particle.WAX_OFF, headLoc, 1, 0.2, 0.2, 0.2, 0.0);
         }
+
+        double progress = (double) remaining / debuff.durationMillis();
+        StatusBarUtil.sendStatusBar(player, debuff.type().getDisplayName(), progress, debuff.type.getColor()); //color
     }
 
     public void clear(Player player) {
         ActiveDebuff debuff = activeDebuffs.remove(player.getUniqueId());
         accumulatedDamage.remove(player.getUniqueId());
-        BossBar bar = bossBars.remove(player.getUniqueId());
-        if (bar != null) {
-            bar.removeAll();
-        }
 
         if (debuff != null) {
             for (DebuffListener listener : listeners) {

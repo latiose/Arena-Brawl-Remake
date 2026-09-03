@@ -1,4 +1,3 @@
-// powerups/PowerupType.java
 package org.latios.arenaBrawl.powerups;
 
 import org.bukkit.Material;

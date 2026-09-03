@@ -164,6 +164,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         debuffManager.registerListener(new SilenceListener());
         debuffManager.registerListener(new SlowListener());
         debuffManager.registerListener(new AntiHealListener(playerHealthManager));
+        debuffManager.setSongOfPowerManager(songOfPowerManager);
         saveDefaultConfig();
 
 
@@ -287,6 +288,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new PolymorphHealTask(debuffManager, playerHealthManager).runTaskTimer(this, 20L, 20L);
         new OrbitShieldOrbitTask(orbitShieldManager).runTaskTimer(this, 0L, 1L);
         new OrbitShieldSoundTask(orbitShieldManager).runTaskTimer(this, 0L, 20L);
+        Bukkit.getScheduler().runTaskTimer(this, () -> {shieldManager.tick();;}, 0L, 1L);
         new PowerupTask(matchManager, playerHealthManager, damageBuffManager).runTaskTimer(this, 20L, 0L);
         new PowerupRotationTask(matchManager).runTaskTimer(this, 0L, 2L);
         new MatchTimerTask(matchManager).runTaskTimer(this, 20L, 20L);
@@ -314,6 +316,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
             world.setGameRule(GameRules.ADVANCE_WEATHER, false);
             EntityCleanupUtils.sweepArenaEntities(world);
         }
+
         for (World world : Bukkit.getWorlds()) {
             EntityCleanupUtils.sweepArenaEntities(world); //powerups
         }getServer().getPluginManager().registerEvents(new ArenaCleanupListener(), this);

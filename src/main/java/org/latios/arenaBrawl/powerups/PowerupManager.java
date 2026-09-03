@@ -32,7 +32,6 @@ public class PowerupManager {
         TextDisplay hologramEntity;
         Location spawnedAt;
         double rotationAngle = 0.0;
-
         long lastHandledCycleStart = -1;
         boolean pickedUpThisWindow = false;
         long spawnTimeInCycle = -1;

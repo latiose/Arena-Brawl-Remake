@@ -50,16 +50,16 @@ public class RuneManager {
                 attacker.addPotionEffect(new PotionEffect(
                         PotionEffectType.SPEED, SPEED_DURATION_TICKS, SPEED_AMPLIFIER, true, false
                 ));
-                attacker.sendMessage("§eYour §f" + rune.getDisplayName() + " §ewas activated");
+                attacker.sendMessage("§eYour §f" + rune.getDisplayName() + " §ewas activated!");
             }
             case SLOW -> {
                 debuffManager.tryApply(victim, DebuffType.SLOW, SLOW_DURATION_TICKS);
-                attacker.sendMessage("§eYour §5" + rune.getDisplayName() + " §ewas activated");
+                attacker.sendMessage("§eYour §5" + rune.getDisplayName() + " §ewas activated!");
             }
-            case DAMAGE -> attacker.sendMessage("§eYour §c" + rune.getDisplayName() + " §ewas activated");
+            case DAMAGE -> attacker.sendMessage("§eYour §c" + rune.getDisplayName() + " §ewas activated!");
             case ENERGY -> {
                 energyManager.addEnergy(attacker, ENERGY_AMOUNT);
-                attacker.sendMessage("§eYour §e" + rune.getDisplayName() + " §ewas activated");
+                attacker.sendMessage("§eYour §e" + rune.getDisplayName() + " §ewas activated!");
             }
         }
     }

@@ -50,7 +50,7 @@ public class ShieldWall implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        shieldManager.applyShield(player, damageReduction, durationMillis);
+        shieldManager.applyShield(player, damageReduction, durationMillis,"Shield Wall");
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 1.0f);
 
         spawnWaterRings(player);

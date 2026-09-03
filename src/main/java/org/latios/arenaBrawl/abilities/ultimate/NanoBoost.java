@@ -91,14 +91,14 @@ public class NanoBoost implements Ability {
         target.addPotionEffect(new PotionEffect(
                 PotionEffectType.SPEED, (int) (durationMillis / 50), speedAmplifier, true, false
         ));
-        shieldManager.applyShield(target, damageReduction, durationMillis);
-        damageBuffManager.applyBuff(target, damageIncrease, durationMillis, "NANO BOOST");
+        shieldManager.applyShield(target, damageReduction, durationMillis,"Nano boost");
+        damageBuffManager.applyBuff(target, damageIncrease, durationMillis, "Nano boost");
 
         target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 40, 0.4, 0.8, 0.4);
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.3f);
 
         target.sendMessage("§eYou're powered up! Get in there!");
-        player.sendMessage("§eYou nano boosted §e" + target.getName() + "§3!");
+        player.sendMessage("§eYou nano boosted §e" + target.getName() + "§e!");
 
         startAmbientParticles(target);
 
