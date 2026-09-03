@@ -163,6 +163,8 @@ public class AbilityRegistry {
                 deps -> new MyriadTruths(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.damageVulnerabilityManager(), configManager.get("myriadtruths")));
         register(AbilitySlot.ULTIMATE, "arenadomain",
                 deps -> new ArenaDomain(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), configManager.get("arenadomain")));
+        register(AbilitySlot.ULTIMATE, "ninjadash",
+                deps -> new NinjaDash(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.combatService(), configManager.get("ninjadash")));
 
         // --- DEFAULTS ---
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");

@@ -452,3 +452,8 @@ ability-values:
     duration-seconds: 7
     damage-bonus: 0.30
 
+  ninjadash:
+    charge-time-millis: 60000
+    damage: 300.0
+    dash-distance: 15.0
+    hit-radius: 2.0
