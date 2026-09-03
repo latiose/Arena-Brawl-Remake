@@ -2,6 +2,7 @@ package org.latios.arenaBrawl.powerups;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.general.StatusBarUtil;
 
@@ -49,7 +50,7 @@ public class DamageBuffManager {
             buffs.removeAll(expiredBuffs);
             for (ActiveBuff expired : expiredBuffs) {
                 Component expireMessage = Component.text("Your ", NamedTextColor.YELLOW)
-                        .append(Component.text("§l"+expired.title().toUpperCase(), NamedTextColor.RED))
+                        .append(Component.text(expired.title().toUpperCase(), NamedTextColor.RED, TextDecoration.BOLD))
                         .append(Component.text(" has expired!", NamedTextColor.YELLOW));
                 player.sendMessage(expireMessage);
             }

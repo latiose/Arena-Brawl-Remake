@@ -2,6 +2,7 @@ package org.latios.arenaBrawl.general;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -53,7 +54,7 @@ public class ShieldManager {
                 if (player != null && player.isOnline()) {
                     for (ActiveShield expired : expiredShields) {
                         Component expireMessage = Component.text("Your ", NamedTextColor.YELLOW)
-                                .append(Component.text("§l"+expired.title().toUpperCase(), NamedTextColor.AQUA))
+                                .append(Component.text(expired.title().toUpperCase(), NamedTextColor.AQUA, TextDecoration.BOLD))
                                 .append(Component.text(" has expired!", NamedTextColor.YELLOW));
                         player.sendMessage(expireMessage);
                     }

@@ -56,7 +56,7 @@ public class Corruption implements Ability {
         target.getWorld().spawnParticle(Particle.SMOKE, target.getLocation().add(0, 1, 0), 15);
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_WITHER_HURT, 0.5f, 2.0f);
 
-        player.sendMessage(MessageUtils.positive() + "§3Your Corruption hit §3" + target.getName() + " §3!");
+        player.sendMessage(MessageUtils.positive() + "§3You corrupted §3" + target.getName() + "§3!");
         target.sendMessage(MessageUtils.negative() + "§3You were hit by §a" + player.getName() + "§3's Corruption! Cannot heal for " + (durationMillis / 1000L) + "s.");
 
         return true;
