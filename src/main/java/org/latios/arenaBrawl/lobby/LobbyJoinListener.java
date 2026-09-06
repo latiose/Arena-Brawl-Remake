@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.lobby;
 
 import org.bukkit.Bukkit;
@@ -7,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.plugin.Plugin;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -17,8 +17,6 @@ import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.hats.MagicalChestHologramListener;
 import org.latios.arenaBrawl.team.TeamManager;
 
-
-
 public class LobbyJoinListener implements Listener {
 
     private final MatchManager matchManager;
@@ -28,9 +26,13 @@ public class LobbyJoinListener implements Listener {
     private final LobbyScoreboardManager lobbyScoreboardManager;
     private final ArmorTierManager armorTierManager;
     private final HatSelectionManager hatSelectionManager;
+    private final MagicalChestHologramListener hologramListener;
+    private final Plugin plugin;
     public LobbyJoinListener(MatchManager matchManager, TeamManager teamManager,
-                             AbilityManager abilityManager, DebuffManager debuffManager, LobbyScoreboardManager lobbyScoreboardManager,ArmorTierManager armorTierManager,
-                             HatSelectionManager hatSelectionManager) {
+                             AbilityManager abilityManager, DebuffManager debuffManager,
+                             LobbyScoreboardManager lobbyScoreboardManager, ArmorTierManager armorTierManager,
+                             HatSelectionManager hatSelectionManager,
+                             MagicalChestHologramListener hologramListener, Plugin plugin) {
         this.matchManager = matchManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -38,6 +40,8 @@ public class LobbyJoinListener implements Listener {
         this.lobbyScoreboardManager = lobbyScoreboardManager;
         this.armorTierManager = armorTierManager;
         this.hatSelectionManager = hatSelectionManager;
+        this.hologramListener = hologramListener;
+        this.plugin = plugin;
     }
 
     @EventHandler(priority = org.bukkit.event.EventPriority.NORMAL)
@@ -47,6 +51,12 @@ public class LobbyJoinListener implements Listener {
             return;
         }
         resetToLobbyState(player);
+
+        Bukkit.getScheduler().runTaskLater(
+                plugin,
+                hologramListener::scanAllWorlds,
+                2L
+        );
     }
 
     private void resetToLobbyState(Player player) {
@@ -60,11 +70,9 @@ public class LobbyJoinListener implements Listener {
         player.setLevel(0);
         player.setExp(0f);
 
-        LobbyKit.giveLobbyKit(player,armorTierManager);
+        LobbyKit.giveLobbyKit(player, armorTierManager);
         HatEquipUtils.applyEquippedHat(player, hatSelectionManager);
         lobbyScoreboardManager.show(player);
         CollisionUtils.disableCollision(player);
     }
-
-
 }

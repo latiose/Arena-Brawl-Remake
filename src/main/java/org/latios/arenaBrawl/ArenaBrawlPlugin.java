@@ -269,7 +269,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new WeatherListener(), this
         );
         getServer().getPluginManager().registerEvents(new LobbyJoinListener(matchManager,  teamManager,
-                 abilityManager,  debuffManager,lobbyScoreboardManager,armorTierManager,hatSelectionManager), this);
+                 abilityManager,  debuffManager,lobbyScoreboardManager,armorTierManager,hatSelectionManager,hologramListener,this), this);
         getServer().getPluginManager().registerEvents(
                 new LobbyItemListener(queueManager, abilitySelectorGUI,matchManager), this
         );

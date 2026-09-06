@@ -467,8 +467,8 @@ rune-values:
     proc-chance: 0.15
     duration-ticks: 3000
   damage:
-    proc-chance: 0.48
-    damage-multiplier: 2.0
+    proc-chance: 0.40
+    damage-multiplier: 1.75
   energy:
     proc-chance: 0.15
     energy-amount: 10.0
