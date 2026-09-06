@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.runes;
 
 import org.bukkit.entity.Player;
@@ -13,54 +12,76 @@ import java.util.Random;
 
 public class RuneManager {
 
-    private static final int SPEED_DURATION_TICKS = 60;
-    private static final int SPEED_AMPLIFIER = 2;
-    private static final int SLOW_DURATION_TICKS = 3000;
-    private static final double ENERGY_AMOUNT = 10.0;
-
     private final EnergyManager energyManager;
     private final RuneSelectionManager selectionManager;
+    private final RuneConfigManager runeConfigManager;
     private final Random random = new Random();
     private final DebuffManager debuffManager;
-
-    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager,DebuffManager debuffManager) {
+    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager,RuneConfigManager runeConfigManager) {
         this.energyManager = energyManager;
         this.selectionManager = selectionManager;
+        this.runeConfigManager = runeConfigManager;
         this.debuffManager = debuffManager;
     }
 
     /**
      * Rolls the proc chance for whichever rune the attacker has equipped.
-     * Returns the damage multiplier to apply to this hit (2.0 if Rune of Damage procced, 1.0 otherwise).
+     * Returns the damage multiplier to apply to this hit (>1.0 if Rune of Damage procced, 1.0 otherwise).
      */
     public double tryProc(Player attacker, Player victim) {
         RuneType equipped = selectionManager.getSelection(attacker);
+        RuneConfig config = runeConfigManager.get(equipped.getConfigId());
 
-        if (random.nextDouble() >= equipped.getProcChance()) {
+        double procChance = config.getDouble("proc-chance", getDefaultProcChance(equipped));
+
+        if (random.nextDouble() >= procChance) {
             return 1.0; // did not proc
         }
 
-        applyRune(equipped, attacker, victim);
-        return equipped == RuneType.DAMAGE ? 2.0 : 1.0;
+        return applyRune(equipped, config, attacker, victim);
     }
 
-    private void applyRune(RuneType rune, Player attacker, Player victim) {
+    private double applyRune(RuneType rune, RuneConfig config, Player attacker, Player victim) {
+
         switch (rune) {
             case SPEED -> {
+                long durationTicks = config.getLong("duration-ticks", 60);
+                int amplifier = config.getInt("amplifier", 2);
+
                 attacker.addPotionEffect(new PotionEffect(
-                        PotionEffectType.SPEED, SPEED_DURATION_TICKS, SPEED_AMPLIFIER, true, false
+                        PotionEffectType.SPEED, (int) durationTicks, amplifier, true, false
                 ));
                 attacker.sendMessage("§eYour §f" + rune.getDisplayName() + " §ewas activated!");
+                return 1.0;
             }
             case SLOW -> {
-                debuffManager.tryApply(victim, DebuffType.SLOW, SLOW_DURATION_TICKS);
+                long durationTicks = config.getLong("duration-ticks", 3000);
+                debuffManager.tryApply(victim, DebuffType.SLOW, durationTicks);
                 attacker.sendMessage("§eYour §5" + rune.getDisplayName() + " §ewas activated!");
+                return 1.0;
             }
-            case DAMAGE -> attacker.sendMessage("§eYour §c" + rune.getDisplayName() + " §ewas activated!");
+            case DAMAGE -> {
+                double multiplier = config.getDouble("damage-multiplier", 2.0);
+                attacker.sendMessage("§eYour §c" + rune.getDisplayName() + " §ewas activated!");
+                return multiplier;
+            }
             case ENERGY -> {
-                energyManager.addEnergy(attacker, ENERGY_AMOUNT);
+                double amount = config.getDouble("energy-amount", 10.0);
+                energyManager.addEnergy(attacker, amount);
                 attacker.sendMessage("§eYour §e" + rune.getDisplayName() + " §ewas activated!");
+                return 1.0;
+            }
+            default -> {
+                return 1.0;
             }
         }
+    }
+
+    private double getDefaultProcChance(RuneType rune) {
+        return switch (rune) {
+            case SPEED -> 0.2;
+            case SLOW, ENERGY -> 0.15;
+            case DAMAGE -> 0.48;
+        };
     }
 }

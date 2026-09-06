@@ -29,6 +29,7 @@ import org.latios.arenaBrawl.queue.QueueManager;
 import org.latios.arenaBrawl.rating.LeaderboardCommand;
 import org.latios.arenaBrawl.rating.RatingCommand;
 import org.latios.arenaBrawl.rating.RatingManager;
+import org.latios.arenaBrawl.runes.RuneConfigManager;
 import org.latios.arenaBrawl.runes.RuneManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.stats.StatsManager;
@@ -94,6 +95,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private EtherealBodyManager etherealBodyManager;
     private DamageVulnerabilityManager damageVulnerabilityManager;
     private AbilityConfigManager abilityConfigManager;
+    private RuneConfigManager runeConfigManager;
     @Override
     public void onEnable() {
         instance = this;
@@ -134,17 +136,18 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.keyManager = new KeyManager(this, statsManager);
         this.nametagManager = new NametagManager(teamManager, playerHealthManager);
         this.leaderboardSignManager = new LeaderboardSignManager(ratingManager, abilityPersistenceManager, abilityRegistry);
+        this.runeConfigManager = new RuneConfigManager(this);
         leaderboardSignManager.configureSignLocations(arenaLocation.getLeaderboardSignLocations());
 
         this.lobbyScoreboardManager = new LobbyScoreboardManager(ratingManager, statsManager);
         this.runeSelectionManager = new RuneSelectionManager(this);
-        this.runeManager = new RuneManager(energyManager, runeSelectionManager,debuffManager);
+        this.runeManager = new RuneManager(energyManager, runeSelectionManager,debuffManager,runeConfigManager);
         this.abilitySelectionManager = new AbilitySelectionManager(abilityRegistry, abilityPersistenceManager);
         this.hatSelectionManager = new HatSelectionManager(this, hatRegistry);
         this.hatPhraseListener = new HatPhraseListener(hatSelectionManager);
 
         this.hatSelectorGUI = new HatSelectorGUI(hatRegistry, hatSelectionManager);
-        this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager, runeSelectionManager);
+        this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager, runeSelectionManager,runeConfigManager);
         this.magicChestManager = new MagicChestManager(statsManager, hatRegistry, hatSelectionManager);
         this.magicChestGUI = new MagicChestGUI(keyManager, statsManager);
 

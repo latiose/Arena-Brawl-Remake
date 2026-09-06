@@ -10,6 +10,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jspecify.annotations.NonNull;
 import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.runes.RuneConfig;
+import org.latios.arenaBrawl.runes.RuneConfigManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
 import java.util.ArrayList;
@@ -23,7 +25,7 @@ public class AbilitySelectorGUI {
     private final AbilitySelectionManager selectionManager;
     private AbilityDependencies previewDependencies;
     private final Map<String, Ability> previewCache = new HashMap<>();
-
+    private final RuneConfigManager runeConfigManager;
     public Ability createPreview(AbilitySlot slot, String id) {
         return previewCache.computeIfAbsent(slot.name() + ":" + id, k -> registry.create(slot, id,previewDependencies));
     }
@@ -33,10 +35,11 @@ public class AbilitySelectorGUI {
 
 
 
-    public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager, RuneSelectionManager runeSelectionManager) {
+    public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager, RuneSelectionManager runeSelectionManager,RuneConfigManager runeConfig) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.runeSelectionManager = runeSelectionManager;
+        this.runeConfigManager = runeConfig;
     }
     public void openSlotMenu(Player player, AbilitySlot slot) {
         List<String> ids = new ArrayList<>(registry.getAvailableIds(slot));
@@ -140,10 +143,13 @@ public class AbilitySelectorGUI {
             RuneType rune = runes[i];
             boolean selected = rune == current;
 
+            RuneConfig runeConfig = runeConfigManager.get(rune.getConfigId());
+            double procChance = runeConfig.getDouble("proc-chance", 0.10);
+
             ItemStack item = new ItemStack(selected ? Material.LIME_DYE : Material.GRAY_DYE);
             ItemMeta meta = item.getItemMeta();
             meta.setDisplayName((selected ? "§a✔ " : "§f") + rune.getDisplayName());
-            meta.setLore(List.of("§7Proc chance: §f" + (int) (rune.getProcChance() * 100) + "%"));
+            meta.setLore(List.of("§7Proc chance: §f" + (int) (procChance * 100) + "%"));
             item.setItemMeta(meta);
 
             inv.setItem(i, item);

@@ -457,3 +457,18 @@ ability-values:
     damage: 300.0
     dash-distance: 15.0
     hit-radius: 2.0
+
+rune-values:
+  speed:
+    proc-chance: 0.2
+    duration-ticks: 60
+    amplifier: 2
+  slow:
+    proc-chance: 0.15
+    duration-ticks: 3000
+  damage:
+    proc-chance: 0.48
+    damage-multiplier: 2.0
+  energy:
+    proc-chance: 0.15
+    energy-amount: 10.0
