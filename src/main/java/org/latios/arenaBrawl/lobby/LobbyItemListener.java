@@ -60,9 +60,9 @@ public class LobbyItemListener implements Listener {
             queueManager.leaveQueue(player);
             player.sendMessage("§eYou left the queue.");
         } else {
-            boolean joined = queueManager.joinQueue(player);
-            if (joined) {
-                player.sendMessage("§aYou joined the queue (" + queueManager.getQueueSize() + "/4).");
+            int queueSize = queueManager.joinQueue(player);
+            if (queueSize != -1) {
+                player.sendMessage("§aYou joined the queue (" + queueSize + "/4).");
             } else {
                 player.sendMessage("§cA member of your party is already in queue.");
             }

@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities;
 
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
@@ -30,7 +31,9 @@ public class AbilityManager {
             player.sendMessage("§cYou have no ability assigned to that slot.");
             return;
         }
-
+        if(player.getGameMode() ==  GameMode.SPECTATOR) {
+            return;
+        }
         Ability ability = abilities.get(slot);
         AbilityCost cost = ability.getCost();
 

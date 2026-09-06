@@ -1,4 +1,3 @@
-// queue/QueueManager.java
 package org.latios.arenaBrawl.queue;
 
 import org.bukkit.entity.Player;
@@ -32,23 +31,25 @@ public class QueueManager {
         return queuedPlayers.contains(player.getUniqueId());
     }
 
-    public boolean joinQueue(Player player) {
+    public int joinQueue(Player player) {
         Party party = partyManager.getParty(player);
         List<UUID> toQueue = new ArrayList<>();
 
         if (party != null && partyManager.isLeader(player)) {
             for (UUID memberId : party.getMembers()) {
-                if (queuedPlayers.contains(memberId)) return false;
+                if (queuedPlayers.contains(memberId)) return -1;
                 toQueue.add(memberId);
             }
         } else {
-            if (queuedPlayers.contains(player.getUniqueId())) return false;
+            if (queuedPlayers.contains(player.getUniqueId())) return -1;
             toQueue.add(player.getUniqueId());
         }
 
         queuedPlayers.addAll(toQueue);
+        int currentSize = queuedPlayers.size();
+
         tryStartMatch();
-        return true;
+        return currentSize;
     }
 
     public void leaveQueue(Player player) {
@@ -69,7 +70,6 @@ public class QueueManager {
     private void tryStartMatch() {
         if (queuedPlayers.size() < MATCH_SIZE) return;
         if (arenaMapManager.getAvailableMapCount() == 0) return; // wait until a map frees up, don't dequeue anyone
-
 
         List<UUID> selected = new ArrayList<>();
         for (UUID id : queuedPlayers) {
@@ -95,7 +95,6 @@ public class QueueManager {
 
         arenaManager.startMatch(team1.get(0), team1.get(1), team2.get(0), team2.get(1));
     }
-
 
     private void assignTeams(List<Player> players, List<Player> team1, List<Player> team2) {
         for (Player player : players) {

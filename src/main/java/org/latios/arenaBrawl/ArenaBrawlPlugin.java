@@ -96,6 +96,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private DamageVulnerabilityManager damageVulnerabilityManager;
     private AbilityConfigManager abilityConfigManager;
     private RuneConfigManager runeConfigManager;
+    private DrawVoteManager drawVoteManager;
     @Override
     public void onEnable() {
         instance = this;
@@ -127,6 +128,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.songOfPowerManager = new SongOfPowerManager();
         this.energyModifierManager = new EnergyModifierManager();
         this.statsManager = new StatsManager(this);
+        this.drawVoteManager = new DrawVoteManager();
         this.ratingManager = new RatingManager(this);
         this.etherealBodyManager = new EtherealBodyManager(playerHealthManager);
         this.combatUpgradeManager = new CombatUpgradeManager(this, statsManager);
@@ -154,7 +156,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.broodMotherEntityManager = new BroodMotherEntityManager(debuffManager, teamManager, combatService);
         this.matchManager = new MatchManager(
                 playerHealthManager, teamManager, abilityManager, lobbySpawn, ratingManager, debuffManager, orbitShieldManager, cooldownManager, usageManager, statsManager, lobbyScoreboardManager, damageBuffManager,
-                armorTierManager, hatSelectionManager, broodMotherEntityManager,this, arenaMapManager,structureManager,songOfPowerManager
+                armorTierManager, hatSelectionManager, broodMotherEntityManager,this, arenaMapManager,structureManager,songOfPowerManager, drawVoteManager
         );
         this.combatService = new CombatService(
                 playerHealthManager, shieldManager, debuffManager, orbitShieldManager, damageBuffManager, matchManager,lifeLeechManager,etherealBodyManager,
@@ -308,6 +310,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getCommand("party").setExecutor(new PartyCommand(partyManager, queueManager));
         getCommand("queue").setExecutor(new QueueCommand(queueManager, matchManager));
         getCommand("abilities").setExecutor(new AbilityMenuCommand(abilitySelectorGUI, matchManager));
+        getCommand("draw").setExecutor(new DrawCommand(matchManager, drawVoteManager));
         getCommand("rating").setExecutor(new RatingCommand(ratingManager));
         getCommand("leaderboard").setExecutor(new LeaderboardCommand(ratingManager));
         getCommand("reloadabilities").setExecutor(

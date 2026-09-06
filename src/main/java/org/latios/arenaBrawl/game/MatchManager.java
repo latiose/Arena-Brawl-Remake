@@ -55,11 +55,12 @@ public class MatchManager {
     private final List<Match> activeMatchesList = new ArrayList<>();
     private final StructureManager structureManager;
     private final SongOfPowerManager songOfPowerManager;
+    private final DrawVoteManager drawVoteManager;
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
                         ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin,ArenaMapManager arenaMapManager, StructureManager structureManager,
-                        SongOfPowerManager songOfPowerManager) {
+                        SongOfPowerManager songOfPowerManager, DrawVoteManager drawVoteManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -79,6 +80,7 @@ public class MatchManager {
         this.arenaMapManager = arenaMapManager;
         this.structureManager = structureManager;
         this.songOfPowerManager = songOfPowerManager;
+        this.drawVoteManager = drawVoteManager;
     }
 
 
@@ -201,6 +203,7 @@ public class MatchManager {
         LobbyKit.giveLobbyKit(player, armorTierManager);
         lobbyScoreboardManager.show(player);
         HatEquipUtils.applyEquippedHat(player, hatSelectionManager);
+        CollisionUtils.disableCollision(player);
     }
 
     public void registerMatch(Match match, BukkitTask scoreboardTask) {
@@ -265,7 +268,7 @@ public class MatchManager {
     public void endMatchAsDraw(Match match) {
         if (match.isEnded()) return;
         match.setEnded(true);
-
+        drawVoteManager.clear(match);
         for (Player player : match.getAllPlayers()) {
             if (player.isOnline()) {
                 player.sendMessage("§6#§7--------------------------§6#");

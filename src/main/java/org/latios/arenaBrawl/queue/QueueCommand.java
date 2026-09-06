@@ -1,4 +1,3 @@
-// queue/QueueCommand.java
 package org.latios.arenaBrawl.queue;
 
 import org.bukkit.command.Command;
@@ -40,9 +39,11 @@ public class QueueCommand implements CommandExecutor {
                 player.sendMessage("§cYou are already in the queue.");
                 return true;
             }
-            boolean joined = queueManager.joinQueue(player);
-            if (joined) {
-                player.sendMessage("§aYou joined the queue (" + queueManager.getQueueSize() + "/4).");
+
+            int queueSize = queueManager.joinQueue(player);
+
+            if (queueSize != -1) {
+                player.sendMessage("§aYou joined the queue (" + queueSize + "/4).");
             } else {
                 player.sendMessage("§cA member of your party is already in queue.");
             }
