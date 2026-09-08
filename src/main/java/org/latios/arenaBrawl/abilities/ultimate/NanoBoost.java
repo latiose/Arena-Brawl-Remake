@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
+import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -25,7 +26,7 @@ public class NanoBoost implements Ability {
     private final long chargeTimeMillis;
     private final double damageReduction;
     private final double damageIncrease;
-
+    private final SpeedBuffManager speedBuffManager;
     private final Plugin plugin;
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -35,7 +36,7 @@ public class NanoBoost implements Ability {
 
     public NanoBoost(Plugin plugin, CooldownManager cooldownManager, UsageManager usageManager,
                      TeamManager teamManager, ShieldManager shieldManager,
-                     DamageBuffManager damageBuffManager, AbilityConfig config) {
+                     DamageBuffManager damageBuffManager, AbilityConfig config, SpeedBuffManager speedBuffManager) {
         this.plugin = plugin;
         this.cooldownManager = cooldownManager;
         this.teamManager = teamManager;
@@ -48,7 +49,7 @@ public class NanoBoost implements Ability {
         this.chargeTimeMillis = config.getLong("charge-time-ms", 60000L);
         this.damageReduction = config.getDouble("damage-reduction", 0.50);
         this.damageIncrease = config.getDouble("damage-increase", 1.50);
-
+        this.speedBuffManager = speedBuffManager;
         this.cost = new UltimateCost(cooldownManager, usageManager, "nanoboost");
     }
 
@@ -88,9 +89,7 @@ public class NanoBoost implements Ability {
             return false;
         }
 
-        target.addPotionEffect(new PotionEffect(
-                PotionEffectType.SPEED, (int) (durationMillis / 50), speedAmplifier, true, false
-        ));
+        speedBuffManager.applyBuff(target, speedAmplifier, durationMillis);
         shieldManager.applyShield(target, damageReduction, durationMillis,"Nano boost");
         damageBuffManager.applyBuff(target, damageIncrease, durationMillis, "Nano boost");
 

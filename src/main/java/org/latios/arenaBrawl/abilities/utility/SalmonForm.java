@@ -7,8 +7,6 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
@@ -17,6 +15,7 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
@@ -27,11 +26,14 @@ public class SalmonForm implements Ability {
     private final long durationTicks;
 
     private final AbilityCost cost;
+    private final SpeedBuffManager speedBuffManager;
 
-    public SalmonForm(CooldownManager cooldownManager, CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
+    public SalmonForm(CooldownManager cooldownManager, CombatUpgradeManager combatUpgradeManager,
+                      SpeedBuffManager speedBuffManager, AbilityConfig config) {
         this.cooldownMs = config.getLong("cooldown-ms", 27_000L);
         this.durationTicks = config.getLong("duration-ticks", 100L);
         this.cost = new CooldownCost(cooldownManager, "salmon_form", cooldownMs, combatUpgradeManager);
+        this.speedBuffManager = speedBuffManager;
     }
 
     @Override
@@ -67,7 +69,10 @@ public class SalmonForm implements Ability {
 
         player.getWorld().playSound(startLoc, Sound.ENTITY_SALMON_FLOP, 1.2f, 1.0f);
         player.getWorld().playSound(startLoc, Sound.ITEM_BUCKET_FILL_FISH, 1.0f, 1.2f);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, (int) durationTicks, 1, false, false, false));
+
+        // Aplica el efecto de velocidad a través de SpeedBuffManager (Speed II = amplifier 1)
+        long durationMillis = durationTicks * 50L;
+        speedBuffManager.applyBuff(player, 1, durationMillis);
 
         new BukkitRunnable() {
             int ticksElapsed = 0;

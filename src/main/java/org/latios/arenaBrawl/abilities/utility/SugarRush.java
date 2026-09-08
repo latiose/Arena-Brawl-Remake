@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
+import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
@@ -22,18 +23,19 @@ public class SugarRush implements Ability {
     private final int speedAmplifier;
     private final int speedDurationTicks;
     private final long slowDurationMs;
-
+    private final SpeedBuffManager speedBuffManager;
     private final AbilityCost cost;
     private final DebuffManager debuffManager;
 
     public SugarRush(CooldownManager cooldownManager, CombatUpgradeManager combatUpgradeManager,
-                     DebuffManager debuffManager, AbilityConfig config) {
+                     DebuffManager debuffManager, AbilityConfig config, SpeedBuffManager speedBuffManager) {
         this.cooldownMillis = config.getLong("cooldown-ms", 30_000L);
         this.speedAmplifier = config.getInt("speed-amplifier", 2);
         this.speedDurationTicks = config.getInt("speed-duration-ticks", 80);
         this.slowDurationMs = config.getLong("slow-duration-ms", 3_000L);
 
         this.cost = new CooldownCost(cooldownManager, "sugarrush", cooldownMillis, combatUpgradeManager);
+        this.speedBuffManager = speedBuffManager;
         this.debuffManager = debuffManager;
     }
 
@@ -45,9 +47,7 @@ public class SugarRush implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        player.addPotionEffect(new PotionEffect(
-                PotionEffectType.SPEED, speedDurationTicks, speedAmplifier, true, false
-        ));
+        speedBuffManager.applyBuff(player, speedAmplifier, speedDurationTicks * 50L);
         player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 1f, 1f);
 

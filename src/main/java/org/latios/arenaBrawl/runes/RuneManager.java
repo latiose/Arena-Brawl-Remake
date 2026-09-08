@@ -6,6 +6,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.SpeedBuffManager;
 
 
 import java.util.Random;
@@ -17,11 +18,13 @@ public class RuneManager {
     private final RuneConfigManager runeConfigManager;
     private final Random random = new Random();
     private final DebuffManager debuffManager;
-    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager,RuneConfigManager runeConfigManager) {
+    private final SpeedBuffManager speedBuffManager;
+    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager,RuneConfigManager runeConfigManager, SpeedBuffManager speedBuffManager) {
         this.energyManager = energyManager;
         this.selectionManager = selectionManager;
         this.runeConfigManager = runeConfigManager;
         this.debuffManager = debuffManager;
+        this.speedBuffManager = speedBuffManager;
     }
 
     /**
@@ -48,9 +51,7 @@ public class RuneManager {
                 long durationTicks = config.getLong("duration-ticks", 60);
                 int amplifier = config.getInt("amplifier", 2);
 
-                attacker.addPotionEffect(new PotionEffect(
-                        PotionEffectType.SPEED, (int) durationTicks, amplifier, true, false
-                ));
+                speedBuffManager.applyBuff(attacker, amplifier, durationTicks * 50L);
                 attacker.sendMessage("§eYour §f" + rune.getDisplayName() + " §ewas activated!");
                 return 1.0;
             }

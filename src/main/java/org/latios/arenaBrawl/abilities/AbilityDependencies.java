@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.abilities;
 
 
+import org.checkerframework.checker.units.qual.Speed;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
@@ -34,5 +35,6 @@ public record AbilityDependencies(
         EnergyModifierManager energyModifierManager,
         DamageBuffManager damageBuffManager,
         EtherealBodyManager etherealBodyManager,
-        DamageVulnerabilityManager damageVulnerabilityManager
+        DamageVulnerabilityManager damageVulnerabilityManager,
+        SpeedBuffManager speedBuffManager
 ) {}

@@ -72,13 +72,13 @@ public class AbilityRegistry {
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
-                deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("shadowstep")));
+                deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("shadowstep"),deps.speedBuffManager()));
         register(AbilitySlot.UTILITY, "salmonform",
-                deps -> new SalmonForm(deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("salmon_form")));
+                deps -> new SalmonForm(deps.cooldownManager(), deps.combatUpgradeManager(), deps.speedBuffManager(),configManager.get("salmon_form")));
         register(AbilitySlot.UTILITY, "sparkbolt",
                 deps -> new SparkBolt(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), deps.energyModifierManager(), configManager.get("sparkbolt")));
         register(AbilitySlot.UTILITY, "sugarrush",
-                deps -> new SugarRush(deps.cooldownManager(), deps.combatUpgradeManager(), deps.debuffManager(), configManager.get("sugarrush")));
+                deps -> new SugarRush(deps.cooldownManager(), deps.combatUpgradeManager(), deps.debuffManager(), configManager.get("sugarrush"),deps.speedBuffManager()));
         register(AbilitySlot.UTILITY, "swap",
                 deps -> new Swap(deps.cooldownManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("swap")));
         register(AbilitySlot.UTILITY, "violentleap",
@@ -146,7 +146,7 @@ public class AbilityRegistry {
         register(AbilitySlot.ULTIMATE, "absolutezero",
                 deps -> new AbsoluteZeroAbility(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("absolutezero")));
         register(AbilitySlot.ULTIMATE, "nanoboost",
-                deps -> new NanoBoost(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.shieldManager(), deps.damageBuffManager(), configManager.get("nanoboost")));
+                deps -> new NanoBoost(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.shieldManager(), deps.damageBuffManager(), configManager.get("nanoboost"),deps.speedBuffManager()));
         register(AbilitySlot.ULTIMATE, "divinejudgment",
                 deps -> new DivineJudgment(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.shieldManager(), deps.combatService(), configManager.get("divinejudgment")));
         register(AbilitySlot.ULTIMATE, "healingwind",

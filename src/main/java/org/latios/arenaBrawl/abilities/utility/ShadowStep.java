@@ -9,6 +9,7 @@ import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.general.MessageUtils;
+import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -20,12 +21,12 @@ public class ShadowStep implements Ability {
     private final long cooldownMillis;
     private final int speedAmplifier;
     private final int speedDurationTicks;
-
+    private final SpeedBuffManager speedBuffManager;
     private final AbilityCost cost;
     private final TeamManager teamManager;
 
     public ShadowStep(CooldownManager cooldownManager, TeamManager teamManager,
-                      CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
+                      CombatUpgradeManager combatUpgradeManager, AbilityConfig config, SpeedBuffManager speedBuffManager) {
         this.maxRange = config.getInt("max-range", 20);
         this.cooldownMillis = config.getLong("cooldown-ms", 30_000L);
         this.speedAmplifier = config.getInt("speed-amplifier", 2);
@@ -33,6 +34,7 @@ public class ShadowStep implements Ability {
 
         this.cost = new CooldownCost(cooldownManager, "shadowstep", cooldownMillis, combatUpgradeManager);
         this.teamManager = teamManager;
+        this.speedBuffManager = speedBuffManager;
     }
 
     @Override
@@ -56,9 +58,7 @@ public class ShadowStep implements Ability {
         player.teleport(teleportLocation);
         player.getWorld().spawnParticle(Particle.SMOKE, teleportLocation, 20, 0.3, 0.5, 0.3);
 
-        player.addPotionEffect(new PotionEffect(
-                PotionEffectType.SPEED, speedDurationTicks, speedAmplifier, true, false
-        ));
+        speedBuffManager.applyBuff(player, speedAmplifier, speedDurationTicks * 50L);
 
         return true;
     }
