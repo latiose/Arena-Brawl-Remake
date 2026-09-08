@@ -16,7 +16,7 @@ public class AbilityConfigManager {
      * If no section exists, returns an AbilityConfig that always falls back to defaults.
      */
     public AbilityConfig get(String abilityId) {
-        ConfigurationSection root = plugin.getConfig().getConfigurationSection("ability-values");
+        ConfigurationSection root = plugin.getConfig().getConfigurationSection("");
         ConfigurationSection section = root != null ? root.getConfigurationSection(abilityId) : null;
         return new AbilityConfig(section);
     }

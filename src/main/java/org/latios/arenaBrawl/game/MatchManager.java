@@ -166,7 +166,8 @@ public class MatchManager {
             // Uses the winner's own rating against the opponent team's average
             double gain = ratingManager.calculateGain(ratingManager.getRating(winner), losersAvg);
             ratingManager.applyDelta(winner, gain);
-            winner.sendMessage(String.format("§6Your new rating is %.0f (+%.2f)", ratingManager.getRating(winner), gain));
+            long currentRating = (long) Math.floor(ratingManager.getRating(winner));
+            winner.sendMessage(String.format("§6Your new rating is %d (+%.2f)", currentRating, gain));
         }
 
         for (Player loser : losers) {
@@ -174,7 +175,8 @@ public class MatchManager {
             // Uses the loser's own rating against the opponent team's average
             double loss = ratingManager.calculateLoss(ratingManager.getRating(loser), winnersAvg);
             ratingManager.applyDelta(loser, loss);
-            loser.sendMessage(String.format("§6Your new rating is %.0f (%.2f)", ratingManager.getRating(loser), loss));
+            long currentRating = (long) Math.floor(ratingManager.getRating(loser));
+            loser.sendMessage(String.format("§6Your new rating is %d (%.2f)", currentRating, loss));
         }
     }
 

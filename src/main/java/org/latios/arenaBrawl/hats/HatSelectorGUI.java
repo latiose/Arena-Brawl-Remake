@@ -58,8 +58,6 @@ public class HatSelectorGUI {
         player.openInventory(inv);
     }
 
-    // hats/HatSelectorGUI.java (update buildDisplayItem)
-
     private ItemStack buildDisplayItem(HatDefinition hat, boolean unlocked, boolean isEquipped) {
         Material displayMaterial = unlocked ? hat.material() : Material.GRAY_DYE;
 

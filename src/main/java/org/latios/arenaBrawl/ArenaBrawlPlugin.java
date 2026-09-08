@@ -97,6 +97,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private AbilityConfigManager abilityConfigManager;
     private RuneConfigManager runeConfigManager;
     private DrawVoteManager drawVoteManager;
+    private HatConfigManager hatConfigManager;
     @Override
     public void onEnable() {
         instance = this;
@@ -104,9 +105,11 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         Location lobbySpawn = new Location(Bukkit.getWorld("world"), 0, -60, 0);
 
         this.arenaLocation = new ArenaLocation(this);
+        this.hatRegistry = new HatRegistry();
+        this.hatConfigManager = new HatConfigManager(this,hatRegistry);
+        hatConfigManager.loadHats();
         this.abilityConfigManager = new AbilityConfigManager(this);
         this.abilityRegistry = new AbilityRegistry(this,abilityConfigManager);
-        this.hatRegistry = new HatRegistry();
         this.arenaMapManager = new ArenaMapManager(this);
         this.shieldManager = new ShieldManager();
         this.orbitShieldManager = new OrbitShieldManager();
@@ -314,7 +317,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getCommand("rating").setExecutor(new RatingCommand(ratingManager));
         getCommand("leaderboard").setExecutor(new LeaderboardCommand(ratingManager));
         getCommand("reloadabilities").setExecutor(
-                new ReloadAbilitiesCommand(abilityConfigManager, abilityRegistry, abilitySelectorGUI)
+                new ReloadAbilitiesCommand(abilityConfigManager, abilityRegistry, abilitySelectorGUI,hatConfigManager,hatSelectorGUI,runeConfigManager)
         );
         getCommand("capturestructure").setExecutor(new org.latios.arenaBrawl.abilities.structures.CaptureStructureCommand(this));
 

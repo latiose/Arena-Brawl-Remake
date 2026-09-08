@@ -472,3 +472,369 @@ rune-values:
   energy:
     proc-chance: 0.15
     energy-amount: 10.0
+
+hats:
+  # --- COMMON HATS ---
+  troll:
+    name: "Troll Hat"
+    material: "BEDROCK"
+    rarity: "COMMON"
+    lore:
+      - "umadbro?"
+      - "Trolol!"
+      - "try harder bro"
+
+  hefney:
+    name: "Hefney Hat"
+    material: "SAND"
+    rarity: "COMMON"
+    lore:
+      - "Sand in my eyes!"
+      - "نزال الساحة"
+      - "I ride a camel everywhere!"
+
+  compliment:
+    name: "Compliment Hat"
+    material: "COMMAND_BLOCK"
+    rarity: "COMMON"
+    lore:
+      - "You're amazing!"
+      - "I love your style!"
+      - "You smell great!"
+
+  insult:
+    name: "Insult Hat"
+    material: "OBSIDIAN"
+    rarity: "COMMON"
+    lore:
+      - "You suck!"
+      - "I'm better!"
+      - "You smell bad!"
+
+  robot:
+    name: "Robot Hat"
+    material: "IRON_HELMET"
+    rarity: "COMMON"
+    lore:
+      - "I'll be back."
+      - "Get out."
+      - "Hasta la vista."
+
+  fox:
+    name: "Fox Hat"
+    material: "ORANGE_WOOL"
+    rarity: "COMMON"
+    lore:
+      - "RING A DING DING!"
+      - "SAY WHAT?"
+      - "I WANT TO KNOW!"
+
+  mr_toad:
+    name: "Mr. Toad Hat"
+    material: "GREEN_TERRACOTTA"
+    rarity: "COMMON"
+    lore:
+      - "Ribbet."
+      - "Croak."
+      - "Ribbet-ribbet."
+
+  teamplayer:
+    name: "Teamplayer Hat"
+    material: "LEATHER_HELMET"
+    rarity: "COMMON"
+    lore:
+      - "Way to go!"
+      - "Good job!"
+      - "You're getting there!"
+
+  n00b:
+    name: "n00b Hat"
+    material: "COAL_ORE"
+    rarity: "COMMON"
+    lore:
+      - "OMG HAX!"
+      - "1v1 me!"
+      - "HACKER!"
+
+  scotland:
+    name: "Scotland Hat"
+    material: "LAPIS_BLOCK"
+    rarity: "COMMON"
+    lore:
+      - "Haggis!"
+      - "Kilts!"
+      - "Whiskey!"
+
+  potty_mouth:
+    name: "Potty Mouth Hat"
+    material: "DIRT"
+    rarity: "COMMON"
+    lore:
+      - "#&^$@(!."
+      - "!*#&#(!&*."
+      - "@*#!?#@*!"
+
+  kim_jong_il:
+    name: "Kim Jong-Il Hat"
+    material: "LEATHER_HELMET"
+    rarity: "COMMON"
+    lore:
+      - "Why Harro there."
+      - "I'm so ronernee."
+      - "Cake? Cake!"
+
+  gold_rush:
+    name: "Gold Rush Hat"
+    material: "GOLD_BLOCK"
+    rarity: "COMMON"
+    lore:
+      - "Budder."
+      - "Budder."
+      - "Mushroom."
+
+  spartan:
+    name: "Spartan Hat"
+    material: "CHAINMAIL_HELMET"
+    rarity: "COMMON"
+    lore:
+      - "Madness? This is..."
+      - "Arena!"
+      - "Prepare for glory!"
+
+  hipster:
+    name: "Hipster Hat"
+    material: "GRASS_BLOCK"
+    rarity: "COMMON"
+    lore:
+      - "The underground!"
+      - "Starbucks!"
+      - "Before it was cool!"
+
+  try_hard:
+    name: "Try Hard Hat"
+    material: "TURTLE_HELMET"
+    rarity: "COMMON"
+    lore:
+      - "FITE ME."
+      - "UWOTM8."
+      - "UDED"
+
+  librarian:
+    name: "Librarian Hat"
+    material: "BOOKSHELF"
+    rarity: "COMMON"
+    lore:
+      - "Shhh!"
+      - "Knowledge is power!"
+      - "Go read a book!"
+
+  grumpy_cat:
+    name: "Grumpy Cat Hat"
+    material: "LEATHER_HELMET"
+    rarity: "COMMON"
+    lore:
+      - "I hate games!"
+      - "I hate swords!"
+      - "I hate mondays!"
+    color: "#008000"
+
+  detective:
+    name: "Detective Hat"
+    material: "LEATHER_HELMET"
+    rarity: "COMMON"
+    lore:
+      - "Elementary!"
+      - "Fetch my diary!"
+      - "Case closed!"
+    color: "#808080"
+
+  orange_hoodie:
+    name: "Orange Hoodie Hat"
+    material: "LEATHER_HELMET"
+    rarity: "COMMON"
+    lore:
+      - "Mmph mmf, mmph?"
+      - "Mmmpf mpph."
+      - "Mmf mpf mommmppf!"
+    color: "#FF8C00"
+
+  wizard:
+    name: "Wizard Hat"
+    material: "LEATHER_HELMET"
+    rarity: "COMMON"
+    lore:
+      - "Wingardium!"
+      - "Protego!"
+      - "Crucio!"
+    color: "#141414"
+
+  canada:
+    name: "Canada Hat"
+    material: "LEATHER_HELMET"
+    rarity: "COMMON"
+    lore:
+      - "I'M SO SORRY."
+      - "Syrup?"
+      - "What's that eh?"
+    color: "#C80000"
+
+  # --- RARE HATS ---
+  doge:
+    name: "Doge Hat"
+    material: "PLAYER_HEAD"
+    rarity: "RARE"
+    lore:
+      - "such ouch."
+      - "very damage."
+      - "more pain."
+    texture-uuid: "f01fd694-40e7-4245-b687-b7803a9b7491"
+
+  getmads:
+    name: "GetMads Hat"
+    material: "PLAYER_HEAD"
+    rarity: "RARE"
+    lore:
+      - "#KHAZAKASTANNUMBER1"
+      - "vodka client"
+      - "getmads such pro isnt am i pro"
+    texture-uuid: "576749eb-6728-4773-a41b-b418a62f9c01"
+
+  l33t:
+    name: "l33t Hat"
+    material: "REDSTONE_ORE"
+    rarity: "RARE"
+    lore:
+      - "GET ON MY LEVEL."
+      - "UR WEAK SON."
+      - "DO U EVEN LIFT"
+
+  nukem:
+    name: "Nukem Hat"
+    material: "TNT"
+    rarity: "RARE"
+    lore:
+      - "Out of gum."
+      - "Time to kick butt!"
+      - "Not quite."
+
+  bebopvox:
+    name: "BebopVox Hat"
+    material: "PLAYER_HEAD"
+    rarity: "RARE"
+    lore:
+      - "Diamonds to you!"
+      - "Game on!"
+      - "So many to come stuff!"
+    texture-uuid: "6835219e-d8c1-44be-8780-16fe069f9725"
+
+  kevinkool:
+    name: "Kevinkool Hat"
+    material: "PLAYER_HEAD"
+    rarity: "RARE"
+    lore:
+      - "More Fish!"
+      - "I'm kool!"
+      - "#KoolParty"
+    texture-uuid: "796589fa-87a1-4d48-8d40-f934b54322cc"
+
+  thorlon:
+    name: "Thorlon Hat"
+    material: "PLAYER_HEAD"
+    rarity: "RARE"
+    lore:
+      - "I am a god!"
+      - "I will smite you!"
+      - "Smited!"
+    texture-uuid: "d3be5ef3-db9b-48d3-a668-019bf3ce0495"
+
+  cactus:
+    name: "Cactus Hat"
+    material: "CACTUS"
+    rarity: "RARE"
+    lore:
+      - "Spikey!"
+      - "Oy-oy!"
+      - "Pyoing!"
+
+  space:
+    name: "Space Helmet"
+    material: "IRON_BLOCK"
+    rarity: "RARE"
+    lore:
+      - "Ground control?"
+      - "Blast-off!"
+      - "Houston? We have a problem."
+
+  polar_bear:
+    name: "Polar Bear Hat"
+    material: "SNOW_BLOCK"
+    rarity: "RARE"
+    lore:
+      - "Ice Ice Baby."
+      - "#FROZEN"
+      - "Let it go!"
+
+  anger:
+    name: "Anger Hat"
+    material: "RED_STAINED_GLASS"
+    rarity: "RARE"
+    lore:
+      - "RAAAAAWR."
+      - "So angry!"
+      - "Smash!"
+      - "GRAAAAWR."
+
+  # --- EPIC HATS ---
+  helix:
+    name: "Helix Hat"
+    material: "PLAYER_HEAD"
+    rarity: "EPIC"
+    lore:
+      - "Praise Helix!"
+      - "up up"
+      - "anarchy"
+      - "a a start9"
+    texture-uuid: "7297edb1-aa5e-4265-aaf8-33f9cbc6c81b"
+
+  sweg:
+    name: "Sweg Hat"
+    material: "GOLDEN_HELMET"
+    rarity: "EPIC"
+    lore:
+      - "Sweg."
+      - "Swooty."
+      - "Swiggity."
+      - "Sweggity."
+
+  diamond_helmet:
+    name: "Diamond Helmet"
+    material: "DIAMOND_HELMET"
+    rarity: "EPIC"
+    lore:
+      - "See you on the leaderboard!"
+      - "What's your rating?"
+      - "There can be only one!"
+
+  bee_king:
+    name: "Bee King Hat"
+    material: "YELLOW_STAINED_GLASS"
+    rarity: "EPIC"
+    lore:
+      - "Bzzz."
+      - "Honey, plz."
+      - "Send in the drones"
+      -
+  edupa:
+    name: "Edupa Hat"
+    material: "PLAYER_HEAD"
+    rarity: "EPIC"
+    lore:
+      - "stop cry stop lie"
+      - "learn queue"
+      - "dargon under mine bed"
+      - "spend 50 beer money on 2 frog"
+      - "minecraft more important than gf xD"
+      - "hit me up with an chocolate"
+      - "im rune like one saxobeat"
+      - "im speak brazil"
+    texture-uuid: "747709c7-3449-4480-bfe0-58265d0e6509"
