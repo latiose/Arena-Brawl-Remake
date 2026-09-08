@@ -25,7 +25,7 @@ public class HatRegistry {
                 "umadbro?", "Trolol!", "try harder bro"
         )));
         register(new HatDefinition("hefney", "Hefney Hat", Material.SAND, HatRarity.COMMON, List.of(
-                "Sand everywhere!", "ALLAHU AKBAR!", "I ride a camel to school"
+                "Sand everywhere!", "نزال الساحة", "I ride a camel everywhere!"
         )));
         register(new HatDefinition("compliment", "Compliment Hat", Material.COMMAND_BLOCK, HatRarity.COMMON, List.of(
                 "You're amazing!", "I love your style!", "You smell great!"
@@ -42,23 +42,11 @@ public class HatRegistry {
         register(new HatDefinition("mr_toad", "Mr. Toad Hat", Material.GREEN_TERRACOTTA, HatRarity.COMMON, List.of(
                 "Ribbet.", "Croak.", "Ribbet-ribbet."
         )));
-        register(new HatDefinition("detective", "Detective Hat", Material.LEATHER_HELMET, HatRarity.COMMON, List.of(
-                "Elementary!", "Fetch my diary!", "Case closed!"
-        )));
         register(new HatDefinition("teamplayer", "Teamplayer Hat", Material.LEATHER_HELMET, HatRarity.COMMON, List.of(
                 "Way to go!", "Good job!", "You're getting there!"
         )));
         register(new HatDefinition("n00b", "n00b Hat", Material.COAL_ORE, HatRarity.COMMON, List.of(
                 "OMG HAX!", "1v1 me!", "HACKER!"
-        )));
-        register(new HatDefinition("orange_hoodie", "Orange Hoodie Hat", Material.LEATHER_HELMET, HatRarity.COMMON, List.of(
-                "Mmph mmf, mmph?", "Mmmpf mpph.", "Mmf mpf mommmppf!"
-        )));
-        register(new HatDefinition("wizard", "Wizard Hat", Material.LEATHER_HELMET, HatRarity.COMMON, List.of(
-                "Hypixellamus!", "Alohypixel!", "Crucio!"
-        )));
-        register(new HatDefinition("canada", "Canada Hat", Material.LEATHER_HELMET, HatRarity.COMMON, List.of(
-                "I'M SO SORRY.", "Syrup?", "What's that eh?"
         )));
         register(new HatDefinition("scotland", "Scotland Hat", Material.LAPIS_BLOCK, HatRarity.COMMON, List.of(
                 "Haggis!", "Kilts!", "Whiskey!"
@@ -78,7 +66,7 @@ public class HatRegistry {
         register(new HatDefinition("hipster", "Hipster Hat", Material.GRASS_BLOCK, HatRarity.COMMON, List.of(
                 "The underground!", "Starbucks!", "Before it was cool!"
         )));
-        register(new HatDefinition("try_hard", "Try Hard Hat", Material.IRON_HELMET, HatRarity.COMMON, List.of(
+        register(new HatDefinition("try_hard", "Try Hard Hat", Material.TURTLE_HELMET, HatRarity.COMMON, List.of(
                 "FITE ME.", "UWOTM8.", "UDED"
         )));
         register(new HatDefinition("librarian", "Librarian Hat", Material.BOOKSHELF, HatRarity.COMMON, List.of(
@@ -99,8 +87,6 @@ public class HatRegistry {
         register(new HatDefinition("canada", "Canada Hat", Material.LEATHER_HELMET, HatRarity.COMMON,
                 List.of("I'M SO SORRY.", "Syrup?", "What's that eh?"), Color.fromRGB(200, 0, 0)));
 
-        register(new HatDefinition("kim_jong_il", "Kim Jong-Il Hat", Material.LEATHER_HELMET, HatRarity.COMMON,
-                List.of("Why Harro there.", "I'm so ronernee.", "Cake? Cake!"), Color.fromRGB(255, 215, 0)));
     }
 
     private void registerRareHats() {

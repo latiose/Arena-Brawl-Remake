@@ -1,13 +1,18 @@
-
 package org.latios.arenaBrawl.rating;
 
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.latios.arenaBrawl.database.DatabaseManager;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class RatingManager {
@@ -18,62 +23,51 @@ public class RatingManager {
     private static final double MAX_CHANGE = 32.0;
 
     private final Plugin plugin;
-    private final File file;
-    private final YamlConfiguration config;
+    private final DatabaseManager db;
     private final Map<UUID, Double> cache = new HashMap<>();
 
-    public RatingManager(Plugin plugin) {
+    public RatingManager(Plugin plugin, DatabaseManager db) {
         this.plugin = plugin;
-        this.file = new File(plugin.getDataFolder(), "ratings.yml");
+        this.db = db;
+    }
 
-        if (!file.exists()) {
-            plugin.getDataFolder().mkdirs();
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                plugin.getLogger().log(Level.SEVERE, "Could not create ratings.yml", e);
+    public void loadForPlayer(Player player) {
+        UUID id = player.getUniqueId();
+        double rating = STARTING_RATING;
+
+        String sql = "SELECT rating FROM ratings WHERE uuid = ?";
+        try (PreparedStatement ps = db.getConnection().prepareStatement(sql)) {
+            ps.setString(1, id.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) rating = rs.getDouble("rating");
             }
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "Could not load rating for " + player.getName(), e);
         }
 
-        this.config = YamlConfiguration.loadConfiguration(file);
+        cache.put(id, rating);
+    }
+
+    public void unloadPlayer(Player player) {
+        cache.remove(player.getUniqueId());
     }
 
     public double getRating(Player player) {
-        UUID id = player.getUniqueId();
-        if (cache.containsKey(id)) return cache.get(id);
-
-        double rating = config.getDouble(id.toString(), STARTING_RATING);
-        cache.put(id, rating);
-        return rating;
+        return cache.computeIfAbsent(player.getUniqueId(), id -> STARTING_RATING);
     }
 
-    /**
-     * Expected win probability of ratingA against ratingB.
-     * Standard Elo formula: 1 / (1 + 10^((ratingB - ratingA) / 400))
-     */
     public double getWinChance(double ratingA, double ratingB) {
         return 1.0 / (1.0 + Math.pow(10, (ratingB - ratingA) / 400.0));
     }
 
-    /**
-     * Rating gain for a single player who won, based only on their OWN rating
-     * vs the opponent team's average rating. Clamped between MIN_CHANGE and MAX_CHANGE.
-     * Equal ratings (own vs opponent average) always yield exactly +16.
-     */
     public double calculateGain(double playerRating, double opponentAverageRating) {
         double c = getWinChance(playerRating, opponentAverageRating);
-        double gain = K_FACTOR * (1 - c);
-        return clamp(gain, MIN_CHANGE, MAX_CHANGE);
+        return clamp(K_FACTOR * (1 - c), MIN_CHANGE, MAX_CHANGE);
     }
 
-    /**
-     * Rating loss for a single player who lost, based only on their OWN rating
-     * vs the opponent team's average rating. Clamped between -MAX_CHANGE and -MIN_CHANGE.
-     */
     public double calculateLoss(double playerRating, double opponentAverageRating) {
         double d = getWinChance(playerRating, opponentAverageRating);
-        double loss = K_FACTOR * (0 - d);
-        return -clamp(-loss, MIN_CHANGE, MAX_CHANGE);
+        return -clamp(K_FACTOR * d, MIN_CHANGE, MAX_CHANGE);
     }
 
     private double clamp(double value, double min, double max) {
@@ -81,58 +75,50 @@ public class RatingManager {
     }
 
     public void applyDelta(Player player, double delta) {
+        UUID id = player.getUniqueId();
         double newRating = getRating(player) + delta;
-        cache.put(player.getUniqueId(), newRating);
-        config.set(player.getUniqueId().toString(), newRating);
-        saveToDisk();
-    }
+        cache.put(id, newRating);
 
-    private void saveToDisk() {
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "Could not save ratings.yml", e);
-        }
-    }
-
-    public List<Map.Entry<String, Double>> getTopRatings(int limit) {
-        List<Map.Entry<String, Double>> entries = new ArrayList<>();
-
-        for (String key : config.getKeys(false)) {
-            try {
-                UUID id = UUID.fromString(key);
-                double rating = config.getDouble(key, STARTING_RATING);
-                String name = org.bukkit.Bukkit.getOfflinePlayer(id).getName();
-                if (name != null) {
-                    entries.add(Map.entry(name, rating));
-                }
-            } catch (IllegalArgumentException ignored) {
-
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            String sql = """
+                INSERT INTO ratings (uuid, rating) VALUES (?, ?)
+                ON CONFLICT(uuid) DO UPDATE SET rating = excluded.rating
+            """;
+            try (PreparedStatement ps = db.getConnection().prepareStatement(sql)) {
+                ps.setString(1, id.toString());
+                ps.setDouble(2, newRating);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                plugin.getLogger().log(Level.SEVERE, "Could not save rating for " + id, e);
             }
-        }
-
-        entries.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
-
-        return entries.size() > limit ? entries.subList(0, limit) : entries;
+        });
     }
 
+    /**
+     * Fetches the top N players by rating directly from the database — the query itself
+     * runs on the calling thread, so call this from an async task (e.g. the 5-minute
+     * leaderboard refresh already runs on a scheduled task, not a hot path).
+     */
     public List<LeaderboardEntry> getTopRatingsDetailed(int limit) {
         List<LeaderboardEntry> entries = new ArrayList<>();
 
-        for (String key : config.getKeys(false)) {
-            try {
-                UUID id = UUID.fromString(key);
-                double rating = config.getDouble(key, STARTING_RATING);
-                String name = org.bukkit.Bukkit.getOfflinePlayer(id).getName();
-                if (name != null) {
-                    entries.add(new LeaderboardEntry(id, name, rating));
+        String sql = "SELECT uuid, rating FROM ratings ORDER BY rating DESC LIMIT ?";
+        try (PreparedStatement ps = db.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    UUID id = UUID.fromString(rs.getString("uuid"));
+                    double rating = rs.getDouble("rating");
+                    String name = Bukkit.getOfflinePlayer(id).getName();
+                    if (name != null) {
+                        entries.add(new LeaderboardEntry(id, name, rating));
+                    }
                 }
-            } catch (IllegalArgumentException ignored) {
             }
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "Could not fetch leaderboard", e);
         }
 
-        entries.sort((a, b) -> Double.compare(b.rating(), a.rating()));
-
-        return entries.size() > limit ? entries.subList(0, limit) : entries;
+        return entries;
     }
 }

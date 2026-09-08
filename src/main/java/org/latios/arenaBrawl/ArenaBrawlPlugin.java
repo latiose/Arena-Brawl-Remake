@@ -13,6 +13,7 @@ import org.latios.arenaBrawl.abilities.structures.*;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.*;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
+import org.latios.arenaBrawl.database.DatabaseManager;
 import org.latios.arenaBrawl.debuffs.*;
 import org.latios.arenaBrawl.game.*;
 import org.latios.arenaBrawl.general.*;
@@ -97,6 +98,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private AbilityConfigManager abilityConfigManager;
     private RuneConfigManager runeConfigManager;
     private DrawVoteManager drawVoteManager;
+    private DatabaseManager databaseManager;
     @Override
     public void onEnable() {
         instance = this;
@@ -111,6 +113,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.shieldManager = new ShieldManager();
         this.orbitShieldManager = new OrbitShieldManager();
         this.debuffManager = new DebuffManager();
+        this.databaseManager = new DatabaseManager(this);
+        databaseManager.connect();
         this.damageBuffManager = new DamageBuffManager();
         this.energyManager = new EnergyManager();
         this.cooldownManager = new CooldownManager();
@@ -127,25 +131,25 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.movementLockManager = new MovementLockManager();
         this.songOfPowerManager = new SongOfPowerManager();
         this.energyModifierManager = new EnergyModifierManager();
-        this.statsManager = new StatsManager(this);
+        this.statsManager = new StatsManager(this,databaseManager);
         this.drawVoteManager = new DrawVoteManager();
-        this.ratingManager = new RatingManager(this);
+        this.ratingManager = new RatingManager(this,databaseManager);
         this.etherealBodyManager = new EtherealBodyManager(playerHealthManager);
-        this.combatUpgradeManager = new CombatUpgradeManager(this, statsManager);
+        this.combatUpgradeManager = new CombatUpgradeManager(this, databaseManager,statsManager);
         this.combatUpgradeGUI = new CombatUpgradeGUI(combatUpgradeManager);
         this.armorTierManager = new ArmorTierManager(ratingManager);
-        this.abilityPersistenceManager = new AbilityPersistenceManager(this);
-        this.keyManager = new KeyManager(this, statsManager);
+        this.abilityPersistenceManager = new AbilityPersistenceManager(this,databaseManager);
+        this.keyManager = new KeyManager(this,databaseManager, statsManager);
         this.nametagManager = new NametagManager(teamManager, playerHealthManager);
         this.leaderboardSignManager = new LeaderboardSignManager(ratingManager, abilityPersistenceManager, abilityRegistry);
         this.runeConfigManager = new RuneConfigManager(this);
         leaderboardSignManager.configureSignLocations(arenaLocation.getLeaderboardSignLocations());
 
         this.lobbyScoreboardManager = new LobbyScoreboardManager(ratingManager, statsManager);
-        this.runeSelectionManager = new RuneSelectionManager(this);
+        this.runeSelectionManager = new RuneSelectionManager(this,databaseManager);
         this.runeManager = new RuneManager(energyManager, runeSelectionManager,debuffManager,runeConfigManager);
         this.abilitySelectionManager = new AbilitySelectionManager(abilityRegistry, abilityPersistenceManager);
-        this.hatSelectionManager = new HatSelectionManager(this, hatRegistry);
+        this.hatSelectionManager = new HatSelectionManager(this, hatRegistry,databaseManager);
         this.hatPhraseListener = new HatPhraseListener(hatSelectionManager);
 
         this.hatSelectorGUI = new HatSelectorGUI(hatRegistry, hatSelectionManager);
@@ -194,7 +198,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 lifeLeechManager,demolitionService,energyModifierManager,damageBuffManager,etherealBodyManager, damageVulnerabilityManager
         );
 
-        this.queueManager = new QueueManager(partyManager, arenaManager,arenaMapManager);
+        this.queueManager = new QueueManager(this,partyManager, arenaManager,arenaMapManager);
         // Listeners
         getServer().getPluginManager().registerEvents(
                 new AbilityTriggerListener(abilityManager,debuffManager,matchManager), this
@@ -219,16 +223,17 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         abilityRegistry.setPreviewDependencies(abilityDependencies);
         abilitySelectorGUI.setPreviewDependencies(abilityDependencies);
 
+        /*
         for (Player online : Bukkit.getOnlinePlayers()) {
             combatUpgradeManager.loadForPlayer(online);
         }
-
+        */
         getServer().getPluginManager().registerEvents(
                 new CombatListener(teamManager, debuffManager,
                         combatService, cooldownManager, matchManager, orbitShieldManager, runeManager,hatPhraseListener,combatUpgradeManager), this
         );
         getServer().getPluginManager().registerEvents(
-                new AbilitySelectionLoadListener(abilitySelectionManager,runeSelectionManager,hatSelectionManager,keyManager,combatUpgradeManager,matchManager), this
+                new AbilitySelectionLoadListener(abilitySelectionManager,runeSelectionManager,hatSelectionManager,keyManager,combatUpgradeManager,matchManager,statsManager,ratingManager,abilitySelectionManager,runeSelectionManager,this), this
         );
         getServer().getPluginManager().registerEvents(
                 new NaturalRegenListener(), this
@@ -260,10 +265,12 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 this
         );
        //getServer().getPluginManager().registerEvents(new StunListener(debuffManager), this);
-
+/*
         for (Player online : Bukkit.getOnlinePlayers()) {
             abilitySelectionManager.loadForPlayer(online);
         }
+
+ */
         getServer().getPluginManager().registerEvents(
                 new MobSpawnListener(), this
         );
@@ -330,10 +337,12 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         }getServer().getPluginManager().registerEvents(new ArenaCleanupListener(), this);
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "kill @e[type=minecraft:item_display]"); //powerups stay forever if the server closes mid match idk why
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "kill @e[type=minecraft:text_display]");
-        for (Player online : Bukkit.getOnlinePlayers()) {
+        /*for (Player online : Bukkit.getOnlinePlayers()) {
             hatSelectionManager.loadForPlayer(online);
             runeSelectionManager.loadForPlayer(online);
         }
+
+         */
         structureManager.clearAll();
         getLogger().info("ArenaBrawl on.");
 
@@ -351,6 +360,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
             EntityCleanupUtils.sweepArenaEntities(world); //powerups
         }
         structureManager.clearAll();
+        databaseManager.close();
         getLogger().info(
 
                 "ArenaBrawl off.");

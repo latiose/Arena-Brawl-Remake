@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.latios.arenaBrawl.rating.LeaderboardEntry;
 import org.latios.arenaBrawl.rating.RatingManager;
 
 import java.util.List;
@@ -34,8 +35,8 @@ public class ArmorTierManager {
     }
 
     private boolean isInTop10(Player player) {
-        List<java.util.Map.Entry<String, Double>> top = ratingManager.getTopRatings(TOP_SIZE_FOR_GLOW);
-        return top.stream().anyMatch(entry -> entry.getKey().equals(player.getName()));
+        List<LeaderboardEntry> top = ratingManager.getTopRatingsDetailed(TOP_SIZE_FOR_GLOW);
+        return top.stream().anyMatch(entry -> entry.name().equals(player.getName()));
     }
 
     public void equipCosmeticArmor(Player player) {

@@ -5,6 +5,8 @@ api-version: '26.2'
 load: POSTWORLD
 softdepend: [LibsDisguises]
 enable-player-collisions: false
+libraries:
+  - org.xerial:sqlite-jdbc:3.46.0.0
 commands:
   party:
     description: Manage your party

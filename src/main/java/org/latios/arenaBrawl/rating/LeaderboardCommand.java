@@ -21,7 +21,7 @@ public class LeaderboardCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
-        List<Map.Entry<String, Double>> top = ratingManager.getTopRatings(TOP_SIZE);
+        List<LeaderboardEntry> top = ratingManager.getTopRatingsDetailed(TOP_SIZE);
 
         if (top.isEmpty()) {
             sender.sendMessage("§eThe leaderboard is empty!.");
@@ -30,8 +30,8 @@ public class LeaderboardCommand implements CommandExecutor {
 
         sender.sendMessage("§6§l== Top " + TOP_SIZE + " Rating ==");
         int position = 1;
-        for (Map.Entry<String, Double> entry : top) {
-            sender.sendMessage("§7#" + position + " §f" + entry.getKey() + " §7- §e" + Math.round(entry.getValue()));
+        for (LeaderboardEntry entry : top) {
+            sender.sendMessage("§7#" + position + " §f" + entry.name() + " §7- §e" + Math.round(entry.rating()));
             position++;
         }
 

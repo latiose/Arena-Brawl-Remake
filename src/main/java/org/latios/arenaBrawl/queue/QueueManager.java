@@ -1,6 +1,10 @@
 package org.latios.arenaBrawl.queue;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
 import org.latios.arenaBrawl.game.ArenaManager;
 import org.latios.arenaBrawl.game.ArenaMapManager;
 import org.latios.arenaBrawl.party.Party;
@@ -12,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class QueueManager {
+public class QueueManager implements Listener {
 
     private static final int MATCH_SIZE = 4;
 
@@ -21,10 +25,20 @@ public class QueueManager {
     private final ArenaManager arenaManager;
     private final ArenaMapManager arenaMapManager;
 
-    public QueueManager(PartyManager partyManager, ArenaManager arenaManager, ArenaMapManager arenaMapManager) {
+    public QueueManager(Plugin plugin, PartyManager partyManager, ArenaManager arenaManager, ArenaMapManager arenaMapManager) {
         this.partyManager = partyManager;
         this.arenaManager = arenaManager;
         this.arenaMapManager = arenaMapManager;
+
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        if (isQueued(player)) {
+            leaveQueue(player);
+        }
     }
 
     public boolean isQueued(Player player) {
@@ -69,7 +83,7 @@ public class QueueManager {
 
     private void tryStartMatch() {
         if (queuedPlayers.size() < MATCH_SIZE) return;
-        if (arenaMapManager.getAvailableMapCount() == 0) return; // wait until a map frees up, don't dequeue anyone
+        if (arenaMapManager.getAvailableMapCount() == 0) return;
 
         List<UUID> selected = new ArrayList<>();
         for (UUID id : queuedPlayers) {
