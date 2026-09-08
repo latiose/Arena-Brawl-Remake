@@ -2,10 +2,7 @@ package org.latios.arenaBrawl.general;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
@@ -17,6 +14,7 @@ import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldType;
 import org.latios.arenaBrawl.abilities.support.*;
+import org.latios.arenaBrawl.abilities.ultimate.Berserk;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.Match;
@@ -64,38 +62,42 @@ public class CombatService {
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName, Location impactLocation) {
-            if (victim == null || victim.getGameMode() == GameMode.SPECTATOR) {
+        if (victim == null || victim.getGameMode() == GameMode.SPECTATOR) {
+            return;
+        }
+
+        double multiplier = damageBuffManager.getMultiplier(attacker);
+
+        if (abilityName.equals("Melee") && Berserk.BERSERK_ACTIVE_PLAYERS.contains(attacker.getUniqueId())) {
+            multiplier *= 2.0;
+        }
+
+        Match match = matchManager.getMatchFor(attacker);
+        if (match != null && match.isDoubleDamageActive()) {
+            multiplier *= 2.0;
+        }
+
+        double adjustedDamage = rawDamage * multiplier;
+
+        if (orbitShieldManager.hasActiveShield(victim)) {
+            OrbitShieldType type = orbitShieldManager.getActiveType(victim);
+            if (type != null) {
+                orbitShieldManager.consumeCharge(victim);
+                resolveShieldEffect(type, attacker, victim);
                 return;
             }
+        }
 
-            double multiplier = damageBuffManager.getMultiplier(attacker);
+        double reduction = shieldManager.getDamageReduction(victim);
+        double finalDamage = reduction > 0 ? adjustedDamage * (1 - reduction) : adjustedDamage;
 
-            Match match = matchManager.getMatchFor(attacker);
-            if (match != null && match.isDoubleDamageActive()) {
-                multiplier *= 2.0;
-            }
+        double vulnerabilityBonus = damageVulnerabilityManager.getBonusMultiplier(victim);
+        if (vulnerabilityBonus > 0) {
+            finalDamage *= (1 + vulnerabilityBonus);
+            victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 10, 0.3, 0.5, 0.3, 0.1);
+        }
 
-            double adjustedDamage = rawDamage * multiplier;
-
-            if (orbitShieldManager.hasActiveShield(victim)) {
-                OrbitShieldType type = orbitShieldManager.getActiveType(victim);
-                if (type != null) {
-                    orbitShieldManager.consumeCharge(victim);
-                    resolveShieldEffect(type, attacker, victim);
-                    return;
-                }
-            }
-
-            double reduction = shieldManager.getDamageReduction(victim);
-            double finalDamage = reduction > 0 ? adjustedDamage * (1 - reduction) : adjustedDamage;
-
-            double vulnerabilityBonus = damageVulnerabilityManager.getBonusMultiplier(victim);
-            if (vulnerabilityBonus > 0) {
-                finalDamage *= (1 + vulnerabilityBonus);
-                victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 10, 0.3, 0.5, 0.3, 0.1);
-            }
-
-            etherealBodyManager.processIncomingDamage(victim, finalDamage);
+        etherealBodyManager.processIncomingDamage(victim, finalDamage);
 
         UUID casterUUID = LifeBond.ACTIVE_BONDS.get(victim.getUniqueId());
         if (casterUUID != null) {
@@ -126,6 +128,19 @@ public class CombatService {
             playDamageFeedback(victim);
             if (lifeLeechManager.consumeCharge(attacker)) {
                 healthManager.heal(attacker, 60.0, "Life Leech");
+            }
+
+            if (Berserk.BERSERK_ACTIVE_PLAYERS.contains(attacker.getUniqueId())) {
+                Location impactLoc = (impactLocation != null) ? impactLocation : victim.getLocation().add(0, 1.0, 0);
+                victim.getWorld().spawnParticle(
+                        Particle.BLOCK_CRUMBLE,
+                        impactLoc,
+                        30,
+                        0.35, 0.15, 0.12,
+                        0.05,
+                        Material.REDSTONE_BLOCK.createBlockData()
+                );
+                victim.getWorld().playSound(impactLoc, Sound.BLOCK_STONE_BREAK, 2f, 2f);
             }
         }
 

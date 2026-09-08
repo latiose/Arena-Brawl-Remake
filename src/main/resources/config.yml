@@ -458,6 +458,12 @@ ability-values:
     dash-distance: 15.0
     hit-radius: 2.0
 
+  berserk:
+    charge-time-ms: 60000
+    duration-ms: 15000
+    damage-multiplier: 2.0
+    speed-amplifier: 1
+
 rune-values:
   speed:
     proc-chance: 0.2
@@ -823,7 +829,8 @@ hats:
       - "Bzzz."
       - "Honey, plz."
       - "Send in the drones"
-      -
+      - "and 1"
+
   edupa:
     name: "Edupa Hat"
     material: "PLAYER_HEAD"

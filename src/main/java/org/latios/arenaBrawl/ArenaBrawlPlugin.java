@@ -106,7 +106,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         Location lobbySpawn = new Location(Bukkit.getWorld("world"), 0, -60, 0);
 
         this.arenaLocation = new ArenaLocation(this);
-        this.speedBuffManager = new SpeedBuffManager();
+        this.speedBuffManager = new SpeedBuffManager(this);
         this.hatRegistry = new HatRegistry();
         this.hatConfigManager = new HatConfigManager(this,hatRegistry);
         hatConfigManager.loadHats();

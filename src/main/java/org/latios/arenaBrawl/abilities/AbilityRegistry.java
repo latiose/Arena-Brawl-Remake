@@ -163,6 +163,8 @@ public class AbilityRegistry {
                 deps -> new ArenaDomain(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), configManager.get("arenadomain")));
         register(AbilitySlot.ULTIMATE, "ninjadash",
                 deps -> new NinjaDash(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.combatService(), configManager.get("ninjadash")));
+        register(AbilitySlot.ULTIMATE, "berserk",
+                deps -> new Berserk(plugin, deps.cooldownManager(), deps.usageManager(), deps.speedBuffManager(), configManager.get("berserk")));
 
         // --- DEFAULTS ---
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");
