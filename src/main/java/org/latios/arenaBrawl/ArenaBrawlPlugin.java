@@ -194,7 +194,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 lifeLeechManager,demolitionService,energyModifierManager,damageBuffManager,etherealBodyManager, damageVulnerabilityManager
         );
 
-        this.queueManager = new QueueManager(partyManager, arenaManager,arenaMapManager);
+        this.queueManager = new QueueManager(this,partyManager, arenaManager,arenaMapManager);
         // Listeners
         getServer().getPluginManager().registerEvents(
                 new AbilityTriggerListener(abilityManager,debuffManager,matchManager), this
