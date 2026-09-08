@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 public class StatsManager {
@@ -18,6 +19,7 @@ public class StatsManager {
     private final Plugin plugin;
     private final DatabaseManager db;
     private final Map<UUID, PlayerStats> cache = new HashMap<>();
+    private final Map<UUID, Object> saveLocks = new ConcurrentHashMap<>();
 
     public StatsManager(Plugin plugin, DatabaseManager db) {
         this.plugin = plugin;
@@ -103,8 +105,18 @@ public class StatsManager {
     private void saveAsync(Player player, PlayerStats stats) {
         UUID id = player.getUniqueId();
 
+        // Snapshot: nunca pasamos el objeto mutable al hilo async
+        int wins = stats.wins;
+        int losses = stats.losses;
+        int kills = stats.kills;
+        int deaths = stats.deaths;
+        int coins = stats.coins;
+
+        Object lock = saveLocks.computeIfAbsent(id, k -> new Object());
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String sql = """
+            synchronized (lock) {
+                String sql = """
                 INSERT INTO stats (uuid, wins, losses, kills, deaths, coins)
                 VALUES (?, ?, ?, ?, ?, ?)
                 ON CONFLICT(uuid) DO UPDATE SET
@@ -115,16 +127,25 @@ public class StatsManager {
                     coins = excluded.coins
             """;
 
-            try (PreparedStatement ps = db.getConnection().prepareStatement(sql)) {
-                ps.setString(1, id.toString());
-                ps.setInt(2, stats.wins);
-                ps.setInt(3, stats.losses);
-                ps.setInt(4, stats.kills);
-                ps.setInt(5, stats.deaths);
-                ps.setInt(6, stats.coins);
-                ps.executeUpdate();
-            } catch (SQLException e) {
-                plugin.getLogger().log(Level.SEVERE, "Could not save stats for " + id, e);
+                try (PreparedStatement ps =
+                             db.getConnection().prepareStatement(sql)) {
+
+                    ps.setString(1, id.toString());
+                    ps.setInt(2, wins);
+                    ps.setInt(3, losses);
+                    ps.setInt(4, kills);
+                    ps.setInt(5, deaths);
+                    ps.setInt(6, coins);
+
+                    ps.executeUpdate();
+
+                } catch (SQLException e) {
+                    plugin.getLogger().log(
+                            Level.SEVERE,
+                            "Could not save stats for " + id,
+                            e
+                    );
+                }
             }
         });
     }

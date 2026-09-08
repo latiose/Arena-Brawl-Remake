@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.game;
 
 import org.bukkit.Bukkit;
@@ -9,14 +8,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.latios.arenaBrawl.abilities.AbilityManager;
-
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
-
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
@@ -56,10 +53,12 @@ public class MatchManager {
     private final StructureManager structureManager;
     private final SongOfPowerManager songOfPowerManager;
     private final DrawVoteManager drawVoteManager;
+
+
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
-                        ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin,ArenaMapManager arenaMapManager, StructureManager structureManager,
+                        ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin, ArenaMapManager arenaMapManager, StructureManager structureManager,
                         SongOfPowerManager songOfPowerManager, DrawVoteManager drawVoteManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
@@ -83,10 +82,21 @@ public class MatchManager {
         this.drawVoteManager = drawVoteManager;
     }
 
+    public Location getLobbySpawn() {
+        return lobbySpawn;
+    }
 
     public void onPlayerEliminated(Player player) {
         Match match = activeMatches.get(player.getUniqueId());
         if (match == null) return;
+
+        boolean isOnline = player.isOnline();
+        String playerName = player.getName();
+        Location deathLoc = isOnline ? player.getLocation() : null;
+
+        if (deathLoc == null) {
+            deathLoc = match.getArenaMap().getRedSpawn1();
+        }
 
         Player killer = null;
         UUID attackerId = healthManager.getLastAttacker(player);
@@ -94,23 +104,26 @@ public class MatchManager {
             killer = Bukkit.getPlayer(attackerId);
             if (killer != null && killer.isOnline() && !killer.equals(player)) {
                 statsManager.addKill(killer);
-                killer.sendMessage(String.format("§3You killed §c%s§3!", player.getName()));
+                killer.sendMessage(String.format("§3You killed §c%s§3!", playerName));
             }
         }
         statsManager.addDeath(player);
 
-        if (killer != null && killer.isOnline() && !killer.equals(player)) {
-            player.sendMessage(String.format("§3You were killed by §c%s§3!", killer.getName()));
-        } else {
-            player.sendMessage("§3You were killed!");
+        if (isOnline) {
+            if (killer != null && killer.isOnline() && !killer.equals(player)) {
+                player.sendMessage(String.format("§3You were killed by §c%s§3!", killer.getName()));
+            } else {
+                player.sendMessage("§3You were killed!");
+            }
         }
 
         for (Player viewer : match.getAllPlayers()) {
+            if (!viewer.isOnline()) continue;
             if (viewer.equals(player)) continue;
             if (viewer.equals(killer)) continue;
 
             String victimColor = teamManager.isAlly(viewer, player) ? "§a" : "§c";
-            String victimName = victimColor + player.getName();
+            String victimName = victimColor + playerName;
 
             if (killer != null && killer.isOnline()) {
                 String killerColor = teamManager.isAlly(viewer, killer) ? "§a" : "§c";
@@ -121,36 +134,42 @@ public class MatchManager {
             }
         }
 
-        Location loc = player.getLocation();
-        player.getWorld().playSound(loc, Sound.BLOCK_GLASS_BREAK, 1.0f, 1.0f);
-        org.bukkit.entity.Firework fw = loc.getWorld().spawn(loc, org.bukkit.entity.Firework.class);
-        org.bukkit.inventory.meta.FireworkMeta meta = fw.getFireworkMeta();
-        meta.addEffect(org.bukkit.FireworkEffect.builder()
-                .with(org.bukkit.FireworkEffect.Type.BALL)
-                .withColor(org.bukkit.Color.RED)
-                .build());
-        fw.setFireworkMeta(meta);
-        fw.detonate();
+        if (deathLoc != null && deathLoc.getWorld() != null) {
+            deathLoc.getWorld().playSound(deathLoc, Sound.BLOCK_GLASS_BREAK, 1.0f, 1.0f);
+            org.bukkit.entity.Firework fw = deathLoc.getWorld().spawn(deathLoc, org.bukkit.entity.Firework.class);
+            org.bukkit.inventory.meta.FireworkMeta meta = fw.getFireworkMeta();
+            meta.addEffect(org.bukkit.FireworkEffect.builder()
+                    .with(org.bukkit.FireworkEffect.Type.BALL)
+                    .withColor(org.bukkit.Color.RED)
+                    .build());
+            fw.setFireworkMeta(meta);
+            fw.detonate();
 
-        org.bukkit.Material[] materials = {
-                org.bukkit.Material.PORKCHOP, org.bukkit.Material.PORKCHOP,
-                org.bukkit.Material.BONE, org.bukkit.Material.BONE,
-                org.bukkit.Material.POPPY, org.bukkit.Material.POPPY
-        };
+            org.bukkit.Material[] materials = {
+                    org.bukkit.Material.PORKCHOP, org.bukkit.Material.PORKCHOP,
+                    org.bukkit.Material.BONE, org.bukkit.Material.BONE,
+                    org.bukkit.Material.POPPY, org.bukkit.Material.POPPY
+            };
 
-        java.util.Random random = new java.util.Random();
-        for (org.bukkit.Material mat : materials) {
-            org.bukkit.entity.Item item = loc.getWorld().dropItem(loc, new org.bukkit.inventory.ItemStack(mat, 1));
+            java.util.Random random = new java.util.Random();
+            for (org.bukkit.Material mat : materials) {
+                org.bukkit.entity.Item item = deathLoc.getWorld().dropItem(deathLoc, new org.bukkit.inventory.ItemStack(mat, 1));
 
-            double vx = (random.nextDouble() - 0.5) * 0.5;
-            double vy = 0.75 + (random.nextDouble() * 0.15);
-            double vz = (random.nextDouble() - 0.5) * 0.5;
+                double vx = (random.nextDouble() - 0.5) * 0.5;
+                double vy = 0.75 + (random.nextDouble() * 0.15);
+                double vz = (random.nextDouble() - 0.5) * 0.5;
 
-            item.setVelocity(new org.bukkit.util.Vector(vx, vy, vz));
+                item.setVelocity(new org.bukkit.util.Vector(vx, vy, vz));
+            }
         }
 
-        player.setGameMode(GameMode.SPECTATOR);
+        if (isOnline) {
+            player.setGameMode(GameMode.SPECTATOR);
+            player.getInventory().clear();
+        }
+
         debuffManager.clear(player);
+
         String winner = match.eliminate(player);
         if (winner != null) {
             endMatch(match, winner);
@@ -163,18 +182,16 @@ public class MatchManager {
 
         for (Player winner : winners) {
             if (!winner.isOnline()) continue;
-            // Uses the winner's own rating against the opponent team's average
             double gain = ratingManager.calculateGain(ratingManager.getRating(winner), losersAvg);
             ratingManager.applyDelta(winner, gain);
-            winner.sendMessage(String.format("§6Your new rating is %.0f (+%.2f)", ratingManager.getRating(winner), gain));
+            winner.sendMessage(String.format("§6Your new rating is %.0f (+%.2f)", Math.floor(ratingManager.getRating(winner)), gain));
         }
 
         for (Player loser : losers) {
             if (!loser.isOnline()) continue;
-            // Uses the loser's own rating against the opponent team's average
             double loss = ratingManager.calculateLoss(ratingManager.getRating(loser), winnersAvg);
             ratingManager.applyDelta(loser, loss);
-            loser.sendMessage(String.format("§6Your new rating is %.0f (%.2f)", ratingManager.getRating(loser), loss));
+            loser.sendMessage(String.format("§6Your new rating is %.0f (%.2f)", Math.floor(ratingManager.getRating(loser)), loss));
         }
     }
 
@@ -189,15 +206,19 @@ public class MatchManager {
         orbitShieldManager.clear(player);
         broodMotherEntityManager.clearAll();
         songOfPowerManager.clear(player);
-        EntityCleanupUtils.sweepArenaEntities(player.getWorld());
+
+        healthManager.reset(player);
+
         if (!player.isOnline()) return;
 
+        EntityCleanupUtils.sweepArenaEntities(player.getWorld());
         player.setGameMode(org.bukkit.GameMode.SURVIVAL);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         player.setFoodLevel(20);
-        healthManager.setMaxHealth(player, 20.0);
+        player.setHealth(20.0);
         player.setLevel(0);
         player.setExp(0f);
+        player.getInventory().clear();
         player.teleport(lobbySpawn);
 
         LobbyKit.giveLobbyKit(player, armorTierManager);
@@ -214,12 +235,10 @@ public class MatchManager {
         activeMatchesList.add(match);
     }
 
-    /** Returns the match a specific player is currently in, or null. */
     public Match getMatchFor(Player player) {
         return activeMatches.get(player.getUniqueId());
     }
 
-    /** Returns all matches currently running (needed for tasks that iterate every active game). */
     public List<Match> getActiveMatches() {
         return new ArrayList<>(activeMatchesList);
     }
@@ -262,9 +281,6 @@ public class MatchManager {
         }, 140L);
     }
 
-
-
-    /** Ends the match in a draw due to the 10-minute time limit. No rating changes are applied. */
     public void endMatchAsDraw(Match match) {
         if (match.isEnded()) return;
         match.setEnded(true);
@@ -286,7 +302,6 @@ public class MatchManager {
     }
 
     private void finishMatch(Match match) {
-
         BukkitTask task = scoreboardTasks.remove(match);
         if (task != null) task.cancel();
 
@@ -296,12 +311,41 @@ public class MatchManager {
         arenaMapManager.releaseMap(match.getArenaMap());
 
         if (!match.getAllPlayers().isEmpty()) {
-            EntityCleanupUtils.sweepArenaEntities(match.getAllPlayers().getFirst().getWorld());
+            for (Player p : match.getAllPlayers()) {
+                if (p.isOnline()) {
+                    EntityCleanupUtils.sweepArenaEntities(p.getWorld());
+                    break;
+                }
+            }
         }
         structureManager.clearAll();
+    }
 
+    public void handleMidMatchReconnect(Player player) {
+        Match match = activeMatches.get(player.getUniqueId());
+        if (match == null) return;
 
+        match.refreshPlayerReference(player);
 
+        player.setGameMode(GameMode.SPECTATOR);
+        player.getInventory().clear();
+        player.setHealth(20.0);
+        player.setFoodLevel(20);
+
+        if (match.getArenaMap() != null) {
+            player.teleport(match.getArenaMap().getRedSpawn1());
+        }
+
+        match.applyScoreboardTo(player);
+    }
+
+    public void handleDisconnect(Player player) {
+        Match match = activeMatches.get(player.getUniqueId());
+
+        if (match == null) return;
+        if (healthManager.isEliminated(player)) return;
+
+        healthManager.damage(player, healthManager.getHealth(player));
     }
 
     public boolean isInMatch(Player player) {

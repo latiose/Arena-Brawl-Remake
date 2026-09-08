@@ -5,10 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.latios.arenaBrawl.powerups.PowerupManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class Match {
@@ -67,7 +64,43 @@ public class Match {
         return null;
     }
 
+    public void refreshPlayerReference(Player freshPlayer) {
+        UUID id = freshPlayer.getUniqueId();
 
+        replaceInList(red, id, freshPlayer);
+        replaceInList(blue, id, freshPlayer);
+        replaceInList(aliveRed, id, freshPlayer);
+        replaceInList(aliveBlue, id, freshPlayer);
+
+        Scoreboard existingBoard = null;
+        var iterator = individualScoreboards.entrySet().iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+            if (entry.getKey().getUniqueId().equals(id)) {
+                existingBoard = entry.getValue();
+                iterator.remove();
+            }
+        }
+        if (existingBoard != null) {
+            individualScoreboards.put(freshPlayer, existingBoard);
+        }
+    }
+
+    private void replaceInList(List<Player> list, UUID id, Player freshPlayer) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getUniqueId().equals(id)) {
+                list.set(i, freshPlayer);
+                return;
+            }
+        }
+    }
+
+    public void applyScoreboardTo(Player player) {
+        Scoreboard board = individualScoreboards.get(player);
+        if (board != null) {
+            player.setScoreboard(board);
+        }
+    }
 
     public Map<Player, Scoreboard> getIndividualScoreboards() {
         return individualScoreboards;

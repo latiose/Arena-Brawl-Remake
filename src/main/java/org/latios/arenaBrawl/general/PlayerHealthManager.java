@@ -85,6 +85,21 @@ public class PlayerHealthManager {
         syncVanilla(player);
     }
 
+    public void reset(Player player) {
+        UUID uuid = player.getUniqueId();
+        currentHealth.remove(uuid);
+        maxHealth.remove(uuid);
+        eliminated.remove(uuid);
+        lastAttacker.remove(uuid);
+        regenDisabledUntil.remove(uuid);
+
+        var attribute = player.getAttribute(Attribute.MAX_HEALTH);
+        if (attribute != null) {
+            attribute.setBaseValue(VANILLA_MAX);
+        }
+        player.setHealth(VANILLA_MAX);
+    }
+
     public void heal(Player player, double amount, String sourceName) {
         if (eliminated.contains(player.getUniqueId())) return;
         if (!canRegen(player)) return;

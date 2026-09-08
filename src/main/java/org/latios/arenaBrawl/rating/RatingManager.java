@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 public class RatingManager {
@@ -25,6 +26,7 @@ public class RatingManager {
     private final Plugin plugin;
     private final DatabaseManager db;
     private final Map<UUID, Double> cache = new HashMap<>();
+    private final Map<UUID, Object> saveLocks = new ConcurrentHashMap<>();
 
     public RatingManager(Plugin plugin, DatabaseManager db) {
         this.plugin = plugin;
@@ -76,20 +78,32 @@ public class RatingManager {
 
     public void applyDelta(Player player, double delta) {
         UUID id = player.getUniqueId();
+
         double newRating = getRating(player) + delta;
         cache.put(id, newRating);
 
+        Object lock = saveLocks.computeIfAbsent(id, k -> new Object());
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String sql = """
-                INSERT INTO ratings (uuid, rating) VALUES (?, ?)
-                ON CONFLICT(uuid) DO UPDATE SET rating = excluded.rating
+            synchronized (lock) {
+                String sql = """
+                INSERT INTO ratings (uuid, rating)
+                VALUES (?, ?)
+                ON CONFLICT(uuid) DO UPDATE SET
+                    rating = excluded.rating
             """;
-            try (PreparedStatement ps = db.getConnection().prepareStatement(sql)) {
-                ps.setString(1, id.toString());
-                ps.setDouble(2, newRating);
-                ps.executeUpdate();
-            } catch (SQLException e) {
-                plugin.getLogger().log(Level.SEVERE, "Could not save rating for " + id, e);
+
+                try (PreparedStatement ps = db.getConnection().prepareStatement(sql)) {
+                    ps.setString(1, id.toString());
+                    ps.setDouble(2, newRating);
+                    ps.executeUpdate();
+                } catch (SQLException e) {
+                    plugin.getLogger().log(
+                            Level.SEVERE,
+                            "Could not save rating for " + id,
+                            e
+                    );
+                }
             }
         });
     }
