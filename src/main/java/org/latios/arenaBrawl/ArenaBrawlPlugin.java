@@ -241,7 +241,6 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(
                 new NaturalRegenListener(), this
         );
-        getServer().getPluginManager().registerEvents(new HealingTotemHitListener(structureManager), this);
         getServer().getPluginManager().registerEvents(
                 new ProjectileAoeListener(teamManager, combatService), this
         );
@@ -291,7 +290,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         );
         com.github.retrooper.packetevents.PacketEvents.getAPI().getEventManager()
                 .registerListener(new AttackSoundBlockListener());
-        getServer().getPluginManager().registerEvents(new TreeOfLifeHitListener(structureManager), this);
+        getServer().getPluginManager().registerEvents(new StructureHitListener(structureManager), this);
         getServer().getPluginManager().registerEvents(new ItemCleanupListener(this), this);
         getServer().getPluginManager().registerEvents(new MobTargetListener(broodMotherEntityManager), this);
         // Tasks

@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.general;
 
 import org.bukkit.block.Container;
+import org.bukkit.block.EnchantingTable;
 import org.bukkit.block.EnderChest;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
@@ -20,6 +21,8 @@ public class BlockInteractionListener implements Listener {
         }
     }
 
+
+
     @EventHandler
     public void onBlockInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
@@ -27,7 +30,7 @@ public class BlockInteractionListener implements Listener {
 
         var state = event.getClickedBlock().getState();
 
-        if (state instanceof Sign || state instanceof Container) {
+        if (state instanceof Sign || state instanceof Container || state  instanceof EnchantingTable) {
             event.setCancelled(true);
         }
         if(state instanceof EnderChest) {

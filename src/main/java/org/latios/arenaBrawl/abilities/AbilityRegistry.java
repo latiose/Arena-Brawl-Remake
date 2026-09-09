@@ -137,6 +137,8 @@ public class AbilityRegistry {
                 deps -> new HealingBeam(deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("healingbeam")));
         register(AbilitySlot.SUPPORT, "berserkerrage",
                 deps -> new BerserkerRage(deps.playerHealthManager(), deps.damageBuffManager(), deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("berserkerrage")));
+        register(AbilitySlot.SUPPORT, "magictable",
+                deps -> new MagicTable(deps.cooldownManager(), deps.combatUpgradeManager(), deps.structureManager(), deps.teamManager(), deps.playerHealthManager(), configManager.get("magictable")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",

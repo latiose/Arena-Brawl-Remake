@@ -114,7 +114,7 @@ public class Berserk implements Ability {
 
     @Override
     public String getDescription() {
-        return "Enters a rage state, doubling melee damage, boosting speed, and spawning lava particles.";
+        return "Enters a rage state, doubling melee damage and boosting speed";
     }
 
     @Override
