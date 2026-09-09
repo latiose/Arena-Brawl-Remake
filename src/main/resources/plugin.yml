@@ -30,3 +30,6 @@ commands:
   draw:
     description: Vote to end the current match in a draw
     usage: /draw
+  addcoins:
+    description: Adds coins to a player's balance
+    usage: /addcoins <player> <amount>

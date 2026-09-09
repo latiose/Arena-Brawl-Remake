@@ -32,6 +32,7 @@ import org.latios.arenaBrawl.rating.RatingManager;
 import org.latios.arenaBrawl.runes.RuneConfigManager;
 import org.latios.arenaBrawl.runes.RuneManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
+import org.latios.arenaBrawl.stats.AddCoinsCommand;
 import org.latios.arenaBrawl.stats.StatsManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeGUI;
@@ -286,6 +287,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(
                 new MagicChestListener(magicChestGUI, keyManager, magicChestManager,statsManager), this
         );
+        com.github.retrooper.packetevents.PacketEvents.getAPI().getEventManager()
+                .registerListener(new AttackSoundBlockListener());
         getServer().getPluginManager().registerEvents(new TreeOfLifeHitListener(structureManager), this);
         getServer().getPluginManager().registerEvents(new ItemCleanupListener(this), this);
         getServer().getPluginManager().registerEvents(new MobTargetListener(broodMotherEntityManager), this);
@@ -309,6 +312,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new LeaderboardRotationTask(leaderboardSignManager).runTaskTimer(this, 20L * 6, 20L * 2);
         new DamageBuffParticleTask(damageBuffManager).runTaskTimer(this, 0L, 20L);
         new StructureTickTask(structureManager).runTaskTimer(this, 0L, 20L);
+
         Bukkit.getPluginManager().registerEvents(new ItemCleanupListener(this), this);
 
         // Commands
@@ -322,7 +326,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new ReloadAbilitiesCommand(abilityConfigManager, abilityRegistry, abilitySelectorGUI,hatConfigManager,hatSelectorGUI,runeConfigManager)
         );
         getCommand("capturestructure").setExecutor(new org.latios.arenaBrawl.abilities.structures.CaptureStructureCommand(this));
-
+        getCommand("addcoins").setExecutor(new AddCoinsCommand(statsManager));
 
         for (World world : getServer().getWorlds()) {
             world.setGameRule(GameRules.ADVANCE_TIME, false);

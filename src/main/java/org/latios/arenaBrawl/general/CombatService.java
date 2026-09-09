@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.general;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
@@ -21,10 +22,7 @@ import org.latios.arenaBrawl.game.Match;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class CombatService {
@@ -131,6 +129,48 @@ public class CombatService {
             }
 
             if (Berserk.BERSERK_ACTIVE_PLAYERS.contains(attacker.getUniqueId())) {
+
+                Location center = (impactLocation != null)
+                        ? impactLocation.clone()
+                        : victim.getLocation().add(0, 1.0, 0);
+
+                BlockData redstoneData = Material.REDSTONE_BLOCK.createBlockData();
+
+                Random random = ThreadLocalRandom.current();
+
+                for (int i = 0; i < 35; i++) {
+
+                    Location particleLoc = center.clone().add(
+                            (random.nextDouble() - 0.5) * 0.7,
+                            random.nextDouble() * 0.8,
+                            (random.nextDouble() - 0.5) * 0.7
+                    );
+
+                    double x = (random.nextDouble() - 0.5) * 1.4;
+                    double y = 0.5 + random.nextDouble() * 1.2;
+                    double z = (random.nextDouble() - 0.5) * 1.4;
+
+                    victim.getWorld().spawnParticle(
+                            Particle.BLOCK,
+                            particleLoc,
+                            0,
+                            x,
+                            y,
+                            z,
+                            0.35,
+                            redstoneData
+                    );
+                }
+                victim.getWorld().playSound(
+                        center,
+                        Sound.BLOCK_STONE_BREAK,
+                        1.0f,
+                        1.1f
+                );
+            }
+        }
+
+        /* if (Berserk.BERSERK_ACTIVE_PLAYERS.contains(attacker.getUniqueId())) {
                 Location impactLoc = (impactLocation != null) ? impactLocation : victim.getLocation().add(0, 1.0, 0);
                 victim.getWorld().spawnParticle(
                         Particle.BLOCK_CRUMBLE,
@@ -142,8 +182,7 @@ public class CombatService {
                 );
                 victim.getWorld().playSound(impactLoc, Sound.BLOCK_STONE_BREAK, 2f, 2f);
             }
-        }
-
+         */
         if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
             boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, finalDamage, 30.0);
             if (shouldBreak) {

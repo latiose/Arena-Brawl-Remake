@@ -112,4 +112,9 @@ public class StatsManager {
             plugin.getLogger().log(Level.SEVERE, "Could not save stats.yml", e);
         }
     }
+
+    public void addCoins(Player target, int amount) {
+        PlayerStats stats = getStats(target);
+        stats.coins += amount;
+    }
 }

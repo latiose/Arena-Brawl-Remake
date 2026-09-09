@@ -2,6 +2,7 @@ package org.latios.arenaBrawl.general;
 
 
 import org.bukkit.GameMode;
+import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
@@ -69,7 +70,6 @@ public class CombatListener implements Listener {
 
         Player attacker = resolveAttacker(entityEvent);
         if (attacker == null) return;
-
         if (!matchManager.isInMatch(attacker) || !matchManager.isInMatch(victim)) return;
         if (attacker.equals(victim) || teamManager.isAlly(attacker, victim)) return;
         if(victim.getGameMode() == GameMode.SPECTATOR) return;
