@@ -171,7 +171,7 @@ ability-values:
     hit-box-radius: 1.0
 
   laywaste:
-    damage: 100.0
+    damage: 110.0
     energy-cost: 30.0
     max-target-distance: 15.0
     radius: 1.0
@@ -310,7 +310,7 @@ ability-values:
     redirect-percent: 0.30
 
   healingtotem:
-    cooldown-ms: 40000
+    cooldown-ms: 35000
     heal-per-pulse: 300.0
     pulses: 3
     radius: 4.0
@@ -374,6 +374,13 @@ ability-values:
     heal-amount: 80
     step-size: 0.4
     hit-expansion: 0.6
+
+  magictable:
+    cooldown-ms: 35000
+    heal-amount: 1000.0
+    radius: 5.0
+    hits-to-destroy: 4
+    delay-seconds: 9
 
   # --- ULTIMATE ---
   shieldwall:
