@@ -69,7 +69,8 @@ public class Berserk implements Ability {
 
         BERSERK_ACTIVE_PLAYERS.add(uuid);
 
-        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_STONE_BREAK, 1.0f, 0.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 0.8f);
+        spawnFlameRings(player);
         spawnLavaRing(player);
 
         new BukkitRunnable() {
@@ -125,5 +126,29 @@ public class Berserk implements Ability {
                 new AbilityStat("Charge Time", (chargeTimeMillis / 1000) + "s"),
                 new AbilityStat("Uses", "1 per match")
         );
+    }
+
+    private void spawnFlameRings(Player player) {
+        Location loc = player.getLocation();
+        int circleCount = 8;
+        int pointsPerCircle = 15;
+        double radius = 1.3;
+
+        double minHeight = 0.2;
+        double maxHeight = 2.2;
+        double heightStep = (maxHeight - minHeight) / (circleCount - 1);
+
+        for (int i = 0; i < circleCount; i++) {
+            double yOffset = minHeight + (i * heightStep);
+
+            for (int j = 0; j < pointsPerCircle; j++) {
+                double angle = (2 * Math.PI / pointsPerCircle) * j;
+                double x = Math.cos(angle) * radius;
+                double z = Math.sin(angle) * radius;
+
+                Location particleLoc = loc.clone().add(x, yOffset, z);
+                player.getWorld().spawnParticle(Particle.FLAME, particleLoc, 1, 0, 0, 0, 0);
+            }
+        }
     }
 }

@@ -40,6 +40,12 @@ public class CombatService {
             List.of(DebuffType.STUN, DebuffType.IMMOBILIZE, DebuffType.SLOW);
     private final EtherealBodyManager etherealBodyManager;
     private final DamageVulnerabilityManager damageVulnerabilityManager;
+    private final List<MeleeHitEffect> meleeHitEffects = new ArrayList<>();
+
+    public void registerMeleeHitEffect(MeleeHitEffect effect) {
+        meleeHitEffects.add(effect);
+    }
+
     public CombatService(PlayerHealthManager healthManager, ShieldManager shieldManager,
                          DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                          DamageBuffManager damageBuffManager, MatchManager matchManager, LifeLeechManager lifeLeechManager,EtherealBodyManager etherealBodyManager,
@@ -66,8 +72,12 @@ public class CombatService {
 
         double multiplier = damageBuffManager.getMultiplier(attacker);
 
-        if (abilityName.equals("Melee") && Berserk.BERSERK_ACTIVE_PLAYERS.contains(attacker.getUniqueId())) {
-            multiplier *= 2.0;
+
+        if (abilityName.equals("Melee")) {
+            for (MeleeHitEffect effect : meleeHitEffects) {
+                double effectMultiplier = effect.getMultiplier(attacker);
+                multiplier *= effectMultiplier;
+            }
         }
 
         Match match = matchManager.getMatchFor(attacker);
@@ -121,7 +131,7 @@ public class CombatService {
         }
 
         healthManager.damage(victim, finalDamage, attacker);
-
+/*
         if (abilityName.equals("Melee")) {
             playDamageFeedback(victim);
             if (lifeLeechManager.consumeCharge(attacker)) {
@@ -169,20 +179,16 @@ public class CombatService {
                 );
             }
         }
+    */
 
-        /* if (Berserk.BERSERK_ACTIVE_PLAYERS.contains(attacker.getUniqueId())) {
-                Location impactLoc = (impactLocation != null) ? impactLocation : victim.getLocation().add(0, 1.0, 0);
-                victim.getWorld().spawnParticle(
-                        Particle.BLOCK_CRUMBLE,
-                        impactLoc,
-                        30,
-                        0.35, 0.15, 0.12,
-                        0.05,
-                        Material.REDSTONE_BLOCK.createBlockData()
-                );
-                victim.getWorld().playSound(impactLoc, Sound.BLOCK_STONE_BREAK, 2f, 2f);
+        if (abilityName.equals("Melee")) {
+            playDamageFeedback(victim);
+
+            Location impactLoc = impactLocation != null ? impactLocation : victim.getLocation().add(0, 1.0, 0);
+            for (MeleeHitEffect effect : meleeHitEffects) {
+                effect.onMeleeHit(attacker, victim, finalDamage, impactLoc);
             }
-         */
+        }
         if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
             boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, finalDamage, 30.0);
             if (shouldBreak) {

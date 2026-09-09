@@ -170,6 +170,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         );
         this.demolitionService = new StructureDemolitionService(structureManager, teamManager);
         this.broodMotherEntityManager.setCombatService(combatService);
+        combatService.registerMeleeHitEffect(new LifeLeechMeleeEffect(lifeLeechManager, playerHealthManager));
+        combatService.registerMeleeHitEffect(new BerserkMeleeEffect());
         debuffManager.registerListener(new PolymorphEffectListener(playerHealthManager));
         debuffManager.registerListener(new StunListener());
         debuffManager.registerListener(new SilenceListener());
