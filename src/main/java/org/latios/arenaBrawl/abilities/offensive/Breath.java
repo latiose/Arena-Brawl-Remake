@@ -128,10 +128,21 @@ public abstract class Breath implements Ability {
         applySpike(target);
     }
 
+    /*
     protected void applySpike(Player target) {
         Vector velocity = target.getVelocity();
         if (velocity.getY() < 0) {
             target.setVelocity(velocity.setY(velocity.getY() * 2.0));
+        }
+    }
+    */
+
+    protected void applySpike(Player target) {
+        if (!target.isOnGround()) {
+            Vector velocity = target.getVelocity();
+            velocity.setY(-1.5);
+
+            target.setVelocity(velocity);
         }
     }
 

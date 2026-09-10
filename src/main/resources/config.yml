@@ -204,6 +204,13 @@ ability-values:
     needle-count: 6
     needle-range: 6.0
 
+  void:
+    damage: 250.0
+    pull-damage: 10.0
+    pull-radius: 5.0
+    pull-duration-seconds: 3.0
+    energy-cost: 100.0
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -310,7 +317,7 @@ ability-values:
     redirect-percent: 0.30
 
   healingtotem:
-    cooldown-ms: 35000
+    cooldown-ms: 40000
     heal-per-pulse: 300.0
     pulses: 3
     radius: 4.0

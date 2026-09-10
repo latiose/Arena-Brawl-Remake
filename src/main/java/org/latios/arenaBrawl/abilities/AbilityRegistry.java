@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.abilities;
 import org.bukkit.plugin.Plugin;
 import org.latios.arenaBrawl.abilities.config.AbilityConfigManager;
 import org.latios.arenaBrawl.abilities.offensive.*;
+import org.latios.arenaBrawl.abilities.offensive.Void;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.*;
 import org.latios.arenaBrawl.abilities.utility.*;
@@ -63,13 +64,14 @@ public class AbilityRegistry {
                 deps -> new LayWaste(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("laywaste")));
         register(AbilitySlot.OFFENSIVE, "particlebeam",
                 deps -> new ParticleBeam(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("particlebeam")));
-        register(AbilitySlot.OFFENSIVE, "BurstFire",
+        register(AbilitySlot.OFFENSIVE, "burstfire",
                 deps -> new BurstFire(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("BurstFire")));
         register(AbilitySlot.OFFENSIVE, "cookieshotgun",
                 deps -> new CookieShotgun(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("cookieshotgun")));
         register(AbilitySlot.OFFENSIVE, "spikegrenade",
                 deps -> new SpikeGrenade(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("spikegrenade")));
-
+        register(AbilitySlot.OFFENSIVE, "Void",
+                deps -> new Void(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("Void")));
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
                 deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("shadowstep"),deps.speedBuffManager()));
