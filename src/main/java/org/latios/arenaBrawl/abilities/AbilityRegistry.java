@@ -70,8 +70,10 @@ public class AbilityRegistry {
                 deps -> new CookieShotgun(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("cookieshotgun")));
         register(AbilitySlot.OFFENSIVE, "spikegrenade",
                 deps -> new SpikeGrenade(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("spikegrenade")));
-        register(AbilitySlot.OFFENSIVE, "Void",
+        register(AbilitySlot.OFFENSIVE, "void",
                 deps -> new Void(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("Void")));
+        register(AbilitySlot.OFFENSIVE, "cowthrow",
+                deps -> new CowThrow(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("CowThrow")));
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
                 deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("shadowstep"),deps.speedBuffManager()));
