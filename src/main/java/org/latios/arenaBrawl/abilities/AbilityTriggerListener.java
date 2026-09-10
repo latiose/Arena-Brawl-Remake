@@ -12,7 +12,6 @@ import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.MatchManager;
 
 public class AbilityTriggerListener implements Listener {
-
     private final AbilityManager abilityManager;
     private final MatchManager matchManager;
     private final DebuffManager debuffManager;
@@ -25,7 +24,8 @@ public class AbilityTriggerListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+        if (event.getAction() != Action.RIGHT_CLICK_AIR
+                && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
 
@@ -58,13 +58,21 @@ public class AbilityTriggerListener implements Listener {
         Ability currentAbility = abilityManager.getAbility(player, abilitySlot);
 
         if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)
-                || debuffManager.hasDebuff(player, DebuffType.STUN) || debuffManager.hasDebuff(player, DebuffType.SILENCE)) {
-            if (!(currentAbility instanceof HolyWater) && !(currentAbility instanceof SongOfPower)) {
+                || debuffManager.hasDebuff(player, DebuffType.STUN)
+                || debuffManager.hasDebuff(player, DebuffType.SILENCE)) {
+
+            if (!(currentAbility instanceof HolyWater)
+                    && !(currentAbility instanceof SongOfPower)) {
+
                 player.sendMessage("§cYou can't use abilities right now!");
                 return;
             }
         }
 
+        if (abilitySlot == AbilitySlot.OFFENSIVE) {
+            abilityManager.tryActivate(player, abilitySlot);
+            return;
+        }
 
         event.setCancelled(true);
         abilityManager.tryActivate(player, abilitySlot);

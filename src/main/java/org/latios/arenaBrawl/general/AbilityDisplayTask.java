@@ -74,19 +74,8 @@ public class AbilityDisplayTask extends BukkitRunnable {
     }
 
     private void setItem(Player player, AbilitySlot slot, Material material, int amount, String name) {
-        ItemStack current = player.getInventory().getItem(slot.ordinal());
-
-        if (current != null && current.getType() == material && current.getAmount() == amount
-                && current.hasItemMeta() && name.equals(current.getItemMeta().getDisplayName())) {
-            return;
-        }
-
-        ItemStack item = new ItemStack(material, amount);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(name);
-            item.setItemMeta(meta);
-        }
+        ItemStack item = AbilityKit.createAbilityItem(material, name);
+        item.setAmount(amount);
         player.getInventory().setItem(slot.ordinal(), item);
     }
 }

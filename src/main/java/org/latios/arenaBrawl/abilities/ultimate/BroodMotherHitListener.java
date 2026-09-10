@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.abilities.ultimate;
 
 import io.papermc.paper.event.entity.EntityKnockbackEvent;
@@ -8,19 +7,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import org.latios.arenaBrawl.abilities.CooldownManager;
 
 public class BroodMotherHitListener implements Listener {
 
-    private static final long HIT_COOLDOWN_MS = 500;
-    private final Map<UUID, Long> lastHitTimes = new HashMap<>();
     private final BroodMotherEntityManager entityManager;
+    private final CooldownManager cooldownManager;
 
-    public BroodMotherHitListener(BroodMotherEntityManager entityManager) {
+    public BroodMotherHitListener(
+            BroodMotherEntityManager entityManager,
+            CooldownManager cooldownManager
+    ) {
         this.entityManager = entityManager;
+        this.cooldownManager = cooldownManager;
     }
 
     @EventHandler
@@ -34,15 +33,12 @@ public class BroodMotherHitListener implements Listener {
         if (!(entityEvent.getDamager() instanceof Player attacker)) return;
         if (entityEvent.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) return;
 
-        UUID entityId = living.getUniqueId();
-        long now = System.currentTimeMillis();
-        long lastHit = lastHitTimes.getOrDefault(entityId, 0L);
-
-        if (now - lastHit < HIT_COOLDOWN_MS) {
+        if (cooldownManager.isOnCooldown(attacker, "melee_hit")) {
             return;
         }
 
-        lastHitTimes.put(entityId, now);
+        cooldownManager.setCooldown(attacker, "melee_hit", 500);
+
         entityManager.registerHit(living, attacker);
     }
 
@@ -63,6 +59,7 @@ public class BroodMotherHitListener implements Listener {
         if (!(event.getEntity() instanceof Player victim)) return;
 
         if (!entityManager.canAttack(attacker)) return;
+
         entityManager.onControlledAttack(attacker, victim);
         entityManager.markAttacked(attacker);
     }

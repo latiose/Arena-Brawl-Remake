@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.latios.arenaBrawl.abilities.CooldownManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,34 +15,43 @@ import java.util.UUID;
 
 public class ZombieHitListener implements Listener {
 
-    private static final long HIT_COOLDOWN_MS = 500;
-    private final Map<UUID, Long> lastHitTimes = new HashMap<>();
     private final ZombieEntityManager entityManager;
-
-    public ZombieHitListener(ZombieEntityManager entityManager) {
+    private final CooldownManager cooldownManager;
+    public ZombieHitListener(ZombieEntityManager entityManager, CooldownManager cooldownManager) {
         this.entityManager = entityManager;
+        this.cooldownManager = cooldownManager;
     }
 
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof LivingEntity living)) return;
-        if (!entityManager.isControlledEntity(living)) return;
-
-        event.setCancelled(true);
-
-        if (!(event instanceof EntityDamageByEntityEvent entityEvent)) return;
-        if (!(entityEvent.getDamager() instanceof Player attacker)) return;
-        if (entityEvent.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) return;
-
-        UUID entityId = living.getUniqueId();
-        long now = System.currentTimeMillis();
-        long lastHit = lastHitTimes.getOrDefault(entityId, 0L);
-
-        if (now - lastHit < HIT_COOLDOWN_MS) {
+        if (!(event.getEntity() instanceof LivingEntity living)) {
             return;
         }
 
-        lastHitTimes.put(entityId, now);
+        if (!entityManager.isControlledEntity(living)) {
+            return;
+        }
+
+        event.setCancelled(true);
+
+        if (!(event instanceof EntityDamageByEntityEvent entityEvent)) {
+            return;
+        }
+
+        if (!(entityEvent.getDamager() instanceof Player attacker)) {
+            return;
+        }
+
+        if (entityEvent.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
+            return;
+        }
+
+        if (cooldownManager.isOnCooldown(attacker, "melee_hit")) {
+            return;
+        }
+
+        cooldownManager.setCooldown(attacker, "melee_hit", 500);
+
         entityManager.registerHit(living, attacker);
     }
 

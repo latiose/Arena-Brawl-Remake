@@ -1,13 +1,17 @@
 package org.latios.arenaBrawl.general;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 import org.latios.arenaBrawl.abilities.AbilitySlot;
-
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.Consumable;
+import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -37,9 +41,47 @@ public class AbilityKit {
 
     private static ItemStack namedItem(Material material, String name) {
         ItemStack item = new ItemStack(material);
+
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(name);
-        item.setItemMeta(meta);
+        if (meta != null) {
+            meta.setDisplayName(name);
+            item.setItemMeta(meta);
+        }
+
+        if (material.name().endsWith("_SWORD")) {
+            item.setData(
+                    DataComponentTypes.CONSUMABLE,
+                    Consumable.consumable()
+                            .consumeSeconds(72000.0f)
+                            .animation(ItemUseAnimation.BLOCK)
+                            .hasConsumeParticles(false)
+                            .build()
+            );
+        }
+
+        return item;
+    }
+
+    public static ItemStack createAbilityItem(Material material, String name) {
+        ItemStack item = new ItemStack(material);
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(name);
+            item.setItemMeta(meta);
+        }
+
+        if (material.name().endsWith("_SWORD")) {
+            item.setData(
+                    DataComponentTypes.CONSUMABLE,
+                    Consumable.consumable()
+                            .consumeSeconds(72000.0f)
+                            .animation(ItemUseAnimation.BLOCK)
+                            .hasConsumeParticles(false)
+                            .build()
+            );
+        }
+
         return item;
     }
 }
