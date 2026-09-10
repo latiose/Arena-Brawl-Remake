@@ -204,12 +204,19 @@ ability-values:
     needle-count: 6
     needle-range: 6.0
 
-  Void:
+  void:
     damage: 250.0
     pull-damage: 10.0
     pull-radius: 5.0
     pull-duration-seconds: 3.0
     energy-cost: 100.0
+
+  zombieapocalypse:
+    charge-time-millis: 60000
+    max-range: 30
+    zombie-count: 4
+    zombie-hits-to-kill: 4
+    zombie-damage: 20.0
 
   cowthrow:
     damage: 150.0

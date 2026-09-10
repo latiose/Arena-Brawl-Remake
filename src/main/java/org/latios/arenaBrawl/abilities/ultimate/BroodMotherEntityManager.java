@@ -220,13 +220,12 @@ public class BroodMotherEntityManager {
         boolean isBoss = bossEntities.contains(attackerEntity.getUniqueId());
         UUID ownerId = ownerOf.get(attackerEntity.getUniqueId());
         Player owner = ownerId != null ? org.bukkit.Bukkit.getPlayer(ownerId) : null;
-
+        if(teamManager.isAlly(owner,victim)) { return;}
         if (isBoss) {
             boolean applied = debuffManager.tryApply(owner, victim, DebuffType.POISON, POISON_DURATION_MILLIS);
             if (!applied) return;
             victim.sendMessage(MessageUtils.negative() + "§3You were poisoned by a Broodmother!");
         } else {
-
             combatService.applyMinionDamage(owner, victim, SPIDERLING_DAMAGE, "Spiderling",victim.getLocation());
         }
     }

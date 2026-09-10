@@ -128,7 +128,6 @@ public class CombatListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         AttributeInstance attackSpeed = player.getAttribute(Attribute.ATTACK_SPEED);
-
         if (attackSpeed != null) {
             attackSpeed.setBaseValue(1024.0);
         }

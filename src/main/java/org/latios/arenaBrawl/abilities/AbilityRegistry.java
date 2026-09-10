@@ -171,6 +171,8 @@ public class AbilityRegistry {
                 deps -> new NinjaDash(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.combatService(), configManager.get("ninjadash")));
         register(AbilitySlot.ULTIMATE, "berserk",
                 deps -> new Berserk(plugin, deps.cooldownManager(), deps.usageManager(), deps.speedBuffManager(), configManager.get("berserk")));
+        register(AbilitySlot.ULTIMATE, "zombieapocalypse",
+                deps -> new ZombieApocalypse(deps.cooldownManager(), deps.usageManager(), deps.zombieEntityManager(), deps.teamManager(), configManager.get("zombieapocalypse")));
 
         // --- DEFAULTS ---
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");

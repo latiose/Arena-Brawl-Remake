@@ -101,6 +101,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private DrawVoteManager drawVoteManager;
     private HatConfigManager hatConfigManager;
     private SpeedBuffManager speedBuffManager;
+    private ZombieEntityManager zombieEntityManager;
     @Override
     public void onEnable() {
         instance = this;
@@ -159,7 +160,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager, runeSelectionManager,runeConfigManager);
         this.magicChestManager = new MagicChestManager(statsManager, hatRegistry, hatSelectionManager);
         this.magicChestGUI = new MagicChestGUI(keyManager, statsManager);
-
+        this.zombieEntityManager = new ZombieEntityManager(teamManager,combatService);
         this.broodMotherEntityManager = new BroodMotherEntityManager(debuffManager, teamManager, combatService);
         this.matchManager = new MatchManager(
                 playerHealthManager, teamManager, abilityManager, lobbySpawn, ratingManager, debuffManager, orbitShieldManager, cooldownManager, usageManager, statsManager, lobbyScoreboardManager, damageBuffManager,
@@ -171,6 +172,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         );
         this.demolitionService = new StructureDemolitionService(structureManager, teamManager);
         this.broodMotherEntityManager.setCombatService(combatService);
+        this.zombieEntityManager.setCombatService(combatService);
         combatService.registerMeleeHitEffect(new LifeLeechMeleeEffect(lifeLeechManager, playerHealthManager));
         combatService.registerMeleeHitEffect(new BerserkMeleeEffect());
         debuffManager.registerListener(new PolymorphEffectListener(playerHealthManager));
@@ -200,7 +202,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 usageManager,
                 scoreboardManager,
                 this, energyManager, playerHealthManager, hungerManager, matchManager, shieldManager,debuffManager,armorTierManager,combatService,orbitShieldManager, hatSelectionManager,combatUpgradeManager,broodMotherEntityManager, arenaMapManager,structureManager,movementLockManager,songOfPowerManager,
-                lifeLeechManager,demolitionService,energyModifierManager,damageBuffManager,etherealBodyManager, damageVulnerabilityManager,speedBuffManager
+                lifeLeechManager,demolitionService,energyModifierManager,damageBuffManager,etherealBodyManager, damageVulnerabilityManager,speedBuffManager,zombieEntityManager
         );
 
         this.queueManager = new QueueManager(this,partyManager, arenaManager,arenaMapManager);
@@ -212,7 +214,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new InventoryLockListener(), this
         );
         getServer().getPluginManager().registerEvents(new BroodMotherHitListener(broodMotherEntityManager), this);
-
+        getServer().getPluginManager().registerEvents(new ZombieHitListener(zombieEntityManager), this);
         debuffManager.registerListener(new PoisonListener(playerHealthManager));
         AntiHealListener antiHealListener = new AntiHealListener(playerHealthManager);
         debuffManager.registerListener(antiHealListener);
@@ -224,7 +226,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
        AbilityDependencies abilityDependencies = new AbilityDependencies(
                 cooldownManager, teamManager, usageManager, energyManager, shieldManager,
                 debuffManager, playerHealthManager, combatService, orbitShieldManager, combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,energyModifierManager,damageBuffManager,
-               etherealBodyManager,damageVulnerabilityManager,speedBuffManager);
+               etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager);
         abilityRegistry.setPreviewDependencies(abilityDependencies);
         abilitySelectorGUI.setPreviewDependencies(abilityDependencies);
 
@@ -310,6 +312,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new NametagUpdateTask(matchManager, nametagManager).runTaskTimer(this, 0L, 4L);
         new PolymorphNameUpdateTask(debuffManager, playerHealthManager).runTaskTimer(this, 0L, 20L);
         new BroodMotherAI(broodMotherEntityManager).runTaskTimer(this, 0L, 4L);
+        new ZombieAI(zombieEntityManager).runTaskTimer(this, 0L, 4L);
         new LeaderboardRefreshTask(leaderboardSignManager).runTaskTimer(this, 20L, 20L * 60 * 5);
         new LeaderboardRotationTask(leaderboardSignManager).runTaskTimer(this, 20L * 6, 20L * 2);
         new DamageBuffParticleTask(damageBuffManager).runTaskTimer(this, 0L, 20L);

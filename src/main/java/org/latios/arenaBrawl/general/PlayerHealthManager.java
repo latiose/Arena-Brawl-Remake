@@ -188,7 +188,7 @@ public class PlayerHealthManager {
 
         double updated = Math.max(getHealth(player) - amount, 0);
         currentHealth.put(player.getUniqueId(), updated);
-
+        syncVanilla(player);
         if (updated <= 0) {
             UUID casterUUID = Rewind.ACTIVE_REWUNDS.remove(player.getUniqueId());
 
@@ -205,6 +205,7 @@ public class PlayerHealthManager {
 
                 Player caster = Bukkit.getPlayer(casterUUID);
                 if (caster != null && caster.isOnline()) {
+                    syncVanilla(player);
                     caster.sendMessage(MessageUtils.positive() + String.format("§eYour Rewind revived %s with §a400 HP§3!", player.getName()));
                 }
                 player.sendMessage(MessageUtils.positive() + "§3Rewind saved you from death! Restored §a400 HP§3!");

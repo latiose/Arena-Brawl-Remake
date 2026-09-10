@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
+import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
@@ -59,6 +60,7 @@ public class ArenaManager {
     private final EtherealBodyManager etherealBodyManager;
     private final DamageVulnerabilityManager damageVulnerabilityManager;
     private final SpeedBuffManager speedBuffManager;
+    private final ZombieEntityManager zombieEntityManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
@@ -66,7 +68,7 @@ public class ArenaManager {
     DebuffManager debuffManager,ArmorTierManager armorTierManager, CombatService combatService,OrbitShieldManager orbitShieldManager, HatSelectionManager hatSelectionManager,
                         CombatUpgradeManager combatUpgradeManager,BroodMotherEntityManager broodMotherEntityManager, ArenaMapManager arenaMapManager, StructureManager structureManager, MovementLockManager movementLockManager, SongOfPowerManager songOfPowerManager,
                         LifeLeechManager lifeLeechManager, StructureDemolitionService demolitionService,EnergyModifierManager energyModifierManager, DamageBuffManager damageBuffManager,
-                        EtherealBodyManager etherealBodyManager, DamageVulnerabilityManager damageVulnerabilityManager,SpeedBuffManager speedBuffManager) {
+                        EtherealBodyManager etherealBodyManager, DamageVulnerabilityManager damageVulnerabilityManager,SpeedBuffManager speedBuffManager,ZombieEntityManager zombieEntityManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -98,6 +100,7 @@ public class ArenaManager {
         this.etherealBodyManager = etherealBodyManager;
         this.damageVulnerabilityManager = damageVulnerabilityManager;
         this.speedBuffManager = speedBuffManager;
+        this.zombieEntityManager = zombieEntityManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -119,7 +122,7 @@ public class ArenaManager {
 
         List<Player> allPlayers = List.of(p1, p2, p3, p4);
         AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,
-                energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager,speedBuffManager);
+                energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(false);
