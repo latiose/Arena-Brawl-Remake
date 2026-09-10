@@ -29,6 +29,7 @@ import org.latios.arenaBrawl.queue.QueueManager;
 import org.latios.arenaBrawl.rating.LeaderboardCommand;
 import org.latios.arenaBrawl.rating.RatingCommand;
 import org.latios.arenaBrawl.rating.RatingManager;
+import org.latios.arenaBrawl.rating.SetRatingCommand;
 import org.latios.arenaBrawl.runes.RuneConfigManager;
 import org.latios.arenaBrawl.runes.RuneManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
@@ -327,7 +328,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new ReloadAbilitiesCommand(abilityConfigManager, abilityRegistry, abilitySelectorGUI,hatConfigManager,hatSelectorGUI,runeConfigManager)
         );
         getCommand("capturestructure").setExecutor(new org.latios.arenaBrawl.abilities.structures.CaptureStructureCommand(this));
-        getCommand("addcoins").setExecutor(new AddCoinsCommand(statsManager));
+        getCommand("addcoins").setExecutor(new AddCoinsCommand(statsManager,lobbyScoreboardManager));
+        getCommand("setrating").setExecutor(new SetRatingCommand(ratingManager,lobbyScoreboardManager));
 
         for (World world : getServer().getWorlds()) {
             world.setGameRule(GameRules.ADVANCE_TIME, false);

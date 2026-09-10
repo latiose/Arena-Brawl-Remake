@@ -5,13 +5,15 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.latios.arenaBrawl.lobby.LobbyScoreboardManager;
 
 public class AddCoinsCommand implements CommandExecutor {
 
     private final StatsManager statsManager;
-
-    public AddCoinsCommand(StatsManager statsManager) {
+    private final LobbyScoreboardManager lobybyScoreboardManager;
+    public AddCoinsCommand(StatsManager statsManager, LobbyScoreboardManager lobybyScoreboardManager) {
         this.statsManager = statsManager;
+        this.lobybyScoreboardManager = lobybyScoreboardManager;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class AddCoinsCommand implements CommandExecutor {
         statsManager.addCoins(target, amount);
 
         sender.sendMessage(String.format("§aAdded %d coins to %s.", amount, target.getName()));
-
+        lobybyScoreboardManager.update(target);
         return true;
     }
 }

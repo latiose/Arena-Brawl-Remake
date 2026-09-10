@@ -33,3 +33,6 @@ commands:
   addcoins:
     description: Adds coins to a player's balance
     usage: /addcoins <player> <amount>
+  setrating:
+    description: Modifies a player's rating
+    usage: /setrating <player> <amount>

@@ -35,4 +35,20 @@ public class LobbyScoreboardManager {
 
         player.setScoreboard(board);
     }
+
+    public void update(Player player){
+        Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+        Objective obj = board.registerNewObjective("lobby_stats", "dummy", "§6§lArenaBrawl");
+        obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+        PlayerStats stats = statsManager.getStats(player);
+        int rating = (int) ratingManager.getRating(player);
+
+        obj.getScore("§fRating: §e" + rating).setScore(4);
+        obj.getScore("§fWins: §a" + stats.wins).setScore(3);
+        obj.getScore("§fKills: §c" + stats.kills).setScore(2);
+        obj.getScore("§fCoins: §6" + stats.coins).setScore(1);
+
+        player.setScoreboard(board);
+    }
 }

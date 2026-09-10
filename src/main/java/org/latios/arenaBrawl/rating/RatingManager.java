@@ -135,4 +135,9 @@ public class RatingManager {
 
         return entries.size() > limit ? entries.subList(0, limit) : entries;
     }
+
+    public void setRating(Player target, double amount) {
+        UUID id = target.getUniqueId();
+        cache.put(id, amount);
+    }
 }
