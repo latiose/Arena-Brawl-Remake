@@ -136,7 +136,7 @@ public class BroodMotherEntityManager {
         UUID targetId = currentTarget.get(spider.getUniqueId());
         if (targetId == null) return null;
         Player target = org.bukkit.Bukkit.getPlayer(targetId);
-        return (target != null && target.isOnline() && !target.isDead()) ? target : null;
+        return (target != null && target.isOnline() && !target.isDead() && !target.getGameMode().equals(GameMode.SPECTATOR)) ? target : null;
     }
 
     /** True if this spider hasn't landed a hit within the timeout window — caller should teleport it to its target. */

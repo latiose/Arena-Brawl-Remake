@@ -214,7 +214,7 @@ ability-values:
   zombieapocalypse:
     charge-time-millis: 60000
     max-range: 30
-    zombie-count: 4
+    zombie-count: 6
     zombie-hits-to-kill: 4
     zombie-damage: 20.0
 
@@ -302,6 +302,12 @@ ability-values:
     max-range: 12.0
     duration-ticks: 100
     cooldown-ms: 30000
+
+  scavenger:
+    cooldown-ms: 35000
+    duration-ms: 6000
+    energy-per-hit: 10.0
+
 
   # --- SUPPORT ---
   holywater:
@@ -401,6 +407,18 @@ ability-values:
     radius: 5.0
     hits-to-destroy: 4
     delay-seconds: 9
+
+  skittles:
+    cooldown-ms: 40000
+    red-heal: 200.0
+    red-energy: 30.0
+    blue-heal: 400.0
+    blue-slow-duration-ticks: 120
+    yellow-heal: 300.0
+    yellow-speed-duration-ticks: 40
+    orange-heal: 200.0
+    orange-damage-bonus: 0.25
+    orange-damage-duration-millis: 5000
 
   # --- ULTIMATE ---
   shieldwall:

@@ -33,7 +33,6 @@ public class CombatService {
     private final OrbitShieldManager orbitShieldManager;
     private final DamageBuffManager damageBuffManager;
     private final MatchManager matchManager;
-    private final LifeLeechManager lifeLeechManager;
     private static final long HOLOGRAM_LIFETIME_TICKS = 35;
     private static final long STAR_SHIELD_EFFECT_DURATION_MILLIS = 4_000;
     private static final List<DebuffType> STAR_SHIELD_POSSIBLE_DEBUFFS =
@@ -48,7 +47,7 @@ public class CombatService {
 
     public CombatService(PlayerHealthManager healthManager, ShieldManager shieldManager,
                          DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
-                         DamageBuffManager damageBuffManager, MatchManager matchManager, LifeLeechManager lifeLeechManager,EtherealBodyManager etherealBodyManager,
+                         DamageBuffManager damageBuffManager, MatchManager matchManager, EtherealBodyManager etherealBodyManager,
                          DamageVulnerabilityManager damageVulnerabilityManager) {
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
@@ -56,7 +55,6 @@ public class CombatService {
         this.orbitShieldManager = orbitShieldManager;
         this.damageBuffManager = damageBuffManager;
         this.matchManager = matchManager;
-        this.lifeLeechManager = lifeLeechManager;
         this.etherealBodyManager = etherealBodyManager;
         this.damageVulnerabilityManager = damageVulnerabilityManager;
     }
@@ -131,55 +129,6 @@ public class CombatService {
         }
 
         healthManager.damage(victim, finalDamage, attacker);
-/*
-        if (abilityName.equals("Melee")) {
-            playDamageFeedback(victim);
-            if (lifeLeechManager.consumeCharge(attacker)) {
-                healthManager.heal(attacker, 60.0, "Life Leech");
-            }
-
-            if (Berserk.BERSERK_ACTIVE_PLAYERS.contains(attacker.getUniqueId())) {
-
-                Location center = (impactLocation != null)
-                        ? impactLocation.clone()
-                        : victim.getLocation().add(0, 1.0, 0);
-
-                BlockData redstoneData = Material.REDSTONE_BLOCK.createBlockData();
-
-                Random random = ThreadLocalRandom.current();
-
-                for (int i = 0; i < 35; i++) {
-
-                    Location particleLoc = center.clone().add(
-                            (random.nextDouble() - 0.5) * 0.7,
-                            random.nextDouble() * 0.8,
-                            (random.nextDouble() - 0.5) * 0.7
-                    );
-
-                    double x = (random.nextDouble() - 0.5) * 1.4;
-                    double y = 0.5 + random.nextDouble() * 1.2;
-                    double z = (random.nextDouble() - 0.5) * 1.4;
-
-                    victim.getWorld().spawnParticle(
-                            Particle.BLOCK,
-                            particleLoc,
-                            0,
-                            x,
-                            y,
-                            z,
-                            0.35,
-                            redstoneData
-                    );
-                }
-                victim.getWorld().playSound(
-                        center,
-                        Sound.BLOCK_STONE_BREAK,
-                        1.0f,
-                        1.1f
-                );
-            }
-        }
-    */
 
         if (abilityName.equals("Melee")) {
             playDamageFeedback(victim);
@@ -329,10 +278,16 @@ public class CombatService {
             }
         }
 
-        victim.sendMessage(String.format(
-                "%s§3A %s hit §3you §3for §c%d §3damage.",
-                MessageUtils.negative(), sourceName, roundedDamage
+        owner.sendMessage(MessageUtils.positive() + String.format(
+                "§3Your %s hit §3%s §3for §c%d §3damage.",
+                sourceName, victim.getName(), roundedDamage
         ));
+
+        victim.sendMessage(MessageUtils.negative() + String.format(
+                "§3%s's %s hit §3you §3for §c%d §3damage.",
+                owner.getName(), sourceName, roundedDamage
+        ));
+
         Location resolvedImpact = impactLocation != null ? impactLocation : victim.getLocation().add(0, victim.getHeight() * 0.5, 0);
         spawnHologram(victim, String.valueOf(roundedDamage), resolvedImpact);
     }

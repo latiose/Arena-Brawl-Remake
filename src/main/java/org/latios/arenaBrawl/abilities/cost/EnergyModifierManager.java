@@ -34,7 +34,8 @@ public class EnergyModifierManager {
         Map<String, ModifierEntry> map = activeModifiers.get(player.getUniqueId());
         if (map == null || map.isEmpty()) return 1.0;
 
-        double totalMultiplier = 1.0;
+        double maxMultiplier = 1.0;
+        double negativePenalties = 0.0;
 
         var iterator = map.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -43,12 +44,14 @@ public class EnergyModifierManager {
 
             if (mod.isExpired()) {
                 iterator.remove();
+            } else if (mod.multiplier >= 1.0) {
+                maxMultiplier = Math.max(maxMultiplier, mod.multiplier);
             } else {
-                totalMultiplier *= mod.multiplier;
+                negativePenalties += (1.0 - mod.multiplier);
             }
         }
 
-        return totalMultiplier;
+        return maxMultiplier - negativePenalties;
     }
 
     public void clear(Player player) {

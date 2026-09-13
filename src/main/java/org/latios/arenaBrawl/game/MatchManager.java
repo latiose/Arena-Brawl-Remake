@@ -17,6 +17,7 @@ import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 
+import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
@@ -56,11 +57,12 @@ public class MatchManager {
     private final StructureManager structureManager;
     private final SongOfPowerManager songOfPowerManager;
     private final DrawVoteManager drawVoteManager;
+    private final ZombieEntityManager zombieEntityManager;
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
                         ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin,ArenaMapManager arenaMapManager, StructureManager structureManager,
-                        SongOfPowerManager songOfPowerManager, DrawVoteManager drawVoteManager) {
+                        SongOfPowerManager songOfPowerManager, DrawVoteManager drawVoteManager,ZombieEntityManager zombieEntityManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -81,6 +83,7 @@ public class MatchManager {
         this.structureManager = structureManager;
         this.songOfPowerManager = songOfPowerManager;
         this.drawVoteManager = drawVoteManager;
+        this.zombieEntityManager = zombieEntityManager;
     }
 
 
@@ -190,6 +193,7 @@ public class MatchManager {
         usageManager.resetPlayer(player);
         orbitShieldManager.clear(player);
         broodMotherEntityManager.clearAll();
+        zombieEntityManager.clearAll();
         songOfPowerManager.clear(player);
         EntityCleanupUtils.sweepArenaEntities(player.getWorld());
         if (!player.isOnline()) return;

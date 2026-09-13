@@ -107,6 +107,12 @@ public class AbilityRegistry {
                 deps -> new DarkPassage(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("darkpassage")));
         register(AbilitySlot.UTILITY, "dodgeroll",
                 deps -> new DodgeRoll(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.shieldManager(), configManager.get("dodgeroll")));
+        register(AbilitySlot.UTILITY, "scavenger",
+                deps -> new Scavenger(deps.cooldownManager(), deps.combatUpgradeManager(), deps.scavengerManager(),
+                      configManager.get("scavenger")));
+        register(AbilitySlot.SUPPORT, "skittles",
+                deps -> new Skittles(deps.cooldownManager(), deps.combatUpgradeManager(),
+                        deps.playerHealthManager(), deps.damageBuffManager(), deps.energyManager(), configManager.get("skittles")));
 
         // --- SUPPORT ---
         register(AbilitySlot.SUPPORT, "holywater",

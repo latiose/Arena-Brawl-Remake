@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
+import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
@@ -38,5 +39,6 @@ public record AbilityDependencies(
         EtherealBodyManager etherealBodyManager,
         DamageVulnerabilityManager damageVulnerabilityManager,
         SpeedBuffManager speedBuffManager,
-        ZombieEntityManager zombieEntityManager
+        ZombieEntityManager zombieEntityManager,
+        ScavengerManager scavengerManager
 ) {}

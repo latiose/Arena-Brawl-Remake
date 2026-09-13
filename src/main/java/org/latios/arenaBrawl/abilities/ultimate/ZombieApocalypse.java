@@ -31,7 +31,7 @@ public class ZombieApocalypse implements Ability {
                             AbilityConfig config) {
         this.chargeTimeMillis = config.getLong("charge-time-millis", 60000L);
         this.maxRange = config.getInt("max-range", 30);
-        this.zombieCount = config.getInt("zombie-count", 4);
+        this.zombieCount = config.getInt("zombie-count", 6);
         this.zombieHitsToKill = config.getInt("zombie-hits-to-kill", 4);
         this.zombieDamage = config.getDouble("zombie-damage", 20.0);
 

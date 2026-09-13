@@ -117,7 +117,7 @@ public class ZombieEntityManager {
         UUID targetId = currentTarget.get(zombie.getUniqueId());
         if (targetId == null) return null;
         Player target = org.bukkit.Bukkit.getPlayer(targetId);
-        return (target != null && target.isOnline() && !target.isDead()) ? target : null;
+        return (target != null && target.isOnline() && !target.getGameMode().equals(GameMode.SPECTATOR) && !target.isDead()) ? target : null;
     }
 
     public boolean canAttack(LivingEntity entity) {
