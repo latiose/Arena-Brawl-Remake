@@ -304,8 +304,8 @@ ability-values:
     cooldown-ms: 30000
 
   scavenger:
-    cooldown-ms: 35000
-    duration-ms: 6000
+    cooldown-ms: 40000
+    duration-ms: 5000
     energy-per-hit: 10.0
 
 

@@ -22,8 +22,8 @@ public class Scavenger implements Ability {
 
     public Scavenger(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
                      ScavengerManager scavengerManager, AbilityConfig config) {
-        long cooldownMs = config.getLong("cooldown-ms", 35000L);
-        this.durationMillis = config.getLong("duration-ms", 6000L);
+        long cooldownMs = config.getLong("cooldown-ms", 40000L);
+        this.durationMillis = config.getLong("duration-ms", 5000L);
         this.energyPerHit = config.getDouble("energy-per-hit", 10.0);
         this.cost = new CooldownCost(cooldownManager, "scavenger", cooldownMs, upgradeManager);
         this.scavengerManager = scavengerManager;
