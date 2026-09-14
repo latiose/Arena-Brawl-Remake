@@ -5,6 +5,8 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
@@ -26,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class AbsoluteZeroAbility implements Ability {
+public class AbsoluteZero implements Ability {
 
     private final double radius;
     private final long maxChargeTicks;
@@ -41,12 +43,12 @@ public class AbsoluteZeroAbility implements Ability {
 
     private final Map<UUID, ChannelTask> activeChannels = new HashMap<>();
 
-    public AbsoluteZeroAbility(CooldownManager cooldownManager, UsageManager usageManager,
-                               TeamManager teamManager, CombatService combatService,
-                               DebuffManager debuffManager, AbilityConfig config) {
+    public AbsoluteZero(CooldownManager cooldownManager, UsageManager usageManager,
+                        TeamManager teamManager, CombatService combatService,
+                        DebuffManager debuffManager, AbilityConfig config) {
         this.radius = config.getDouble("radius", 5.0);
         this.maxChargeTicks = config.getLong("max-charge-ticks", 100L);
-        this.maxDamage = config.getDouble("max-damage", 400.0);
+        this.maxDamage = config.getDouble("max-damage", 500.0);
         this.chargeTimeMillis = config.getLong("charge-time-millis", 60000L);
 
         this.cooldownManager = cooldownManager;
@@ -122,7 +124,9 @@ public class AbsoluteZeroAbility implements Ability {
                 startLocation.setPitch(current.getPitch());
                 player.teleport(startLocation);
             }
-            debuffManager.tryApply(player, DebuffType.IMMOBILIZE, 5000);
+
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 10, 10, false, false, false));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 10, 250, false, false, false));
 
             Location center = player.getLocation();
             for (Entity nearby : center.getWorld().getNearbyEntities(center, radius, radius, radius)) {
@@ -141,6 +145,8 @@ public class AbsoluteZeroAbility implements Ability {
 
         private void cleanup() {
             activeChannels.remove(player.getUniqueId());
+            player.removePotionEffect(PotionEffectType.SLOWNESS);
+            player.removePotionEffect(PotionEffectType.JUMP_BOOST);
         }
 
         public void finish() {

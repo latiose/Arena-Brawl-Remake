@@ -11,8 +11,11 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
+import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -43,7 +46,8 @@ public class Skittles implements Ability {
     private final DamageBuffManager damageBuffManager;
     private final EnergyManager energyManager;
     private final Random random = new Random();
-
+    private final DebuffManager debuffManager;
+    private final SpeedBuffManager speedBuffManager;
     private final double redHeal;
     private final double redEnergy;
     private final double blueHeal;
@@ -56,19 +60,20 @@ public class Skittles implements Ability {
 
     public Skittles(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
                            PlayerHealthManager healthManager, DamageBuffManager damageBuffManager,
-                           EnergyManager energyManager, AbilityConfig config) {
+                           EnergyManager energyManager, DebuffManager debuffManager, SpeedBuffManager speedBuffManager, AbilityConfig config) {
         long cooldownMs = config.getLong("cooldown-ms", 40000L);
         this.cost = new CooldownCost(cooldownManager, "skittles", cooldownMs, upgradeManager);
         this.healthManager = healthManager;
         this.damageBuffManager = damageBuffManager;
         this.energyManager = energyManager;
-
+        this.debuffManager = debuffManager;
+        this.speedBuffManager = speedBuffManager;
         this.redHeal = config.getDouble("red-heal", 200.0);
         this.redEnergy = config.getDouble("red-energy", 30.0);
         this.blueHeal = config.getDouble("blue-heal", 400.0);
-        this.blueSlowDurationTicks = config.getLong("blue-slow-duration-ticks", 120L);
+        this.blueSlowDurationTicks = config.getLong("blue-slow-duration-ticks", 4000L);
         this.yellowHeal = config.getDouble("yellow-heal", 300.0);
-        this.yellowSpeedDurationTicks = config.getLong("yellow-speed-duration-ticks", 40L);
+        this.yellowSpeedDurationTicks = config.getLong("yellow-speed-duration-ticks", 4000L);
         this.orangeHeal = config.getDouble("orange-heal", 200.0);
         this.orangeDamageBonus = config.getDouble("orange-damage-bonus", 0.25);
         this.orangeDamageDurationMillis = config.getLong("orange-damage-duration-millis", 5000L);
@@ -94,7 +99,7 @@ public class Skittles implements Ability {
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Red", (int) redHeal + " HP + " + (int) redEnergy + " energy"),
-                new AbilityStat("Blue", (int) blueHeal + " HP, Slowness " + (blueSlowDurationTicks / 20) + "s"),
+                new AbilityStat("Blue", (int) blueHeal + " HP, Slowness " + (blueSlowDurationTicks / 1000) + "s"),
                 new AbilityStat("Yellow", (int) yellowHeal + " HP, Speed II " + (yellowSpeedDurationTicks / 20) + "s"),
                 new AbilityStat("Orange", (int) orangeHeal + " HP, +" + (int) (orangeDamageBonus * 100) + "% damage "
                         + (orangeDamageDurationMillis / 1000) + "s"),
@@ -125,15 +130,12 @@ public class Skittles implements Ability {
             }
             case BLUE -> {
                 healthManager.heal(player, blueHeal, "Skittles");
-                player.addPotionEffect(new PotionEffect(
-                        PotionEffectType.SLOWNESS, (int) blueSlowDurationTicks, 1, true, false
-                ));
+                debuffManager.tryApply(player, DebuffType.SLOW,blueSlowDurationTicks);
             }
             case YELLOW -> {
                 healthManager.heal(player, yellowHeal, "Skittles");
-                player.addPotionEffect(new PotionEffect(
-                        PotionEffectType.SPEED, (int) yellowSpeedDurationTicks, 1, true, false
-                ));
+                speedBuffManager.applyBuff(player,1,yellowSpeedDurationTicks);
+
             }
             case ORANGE -> {
                 healthManager.heal(player, orangeHeal, "Skittles");

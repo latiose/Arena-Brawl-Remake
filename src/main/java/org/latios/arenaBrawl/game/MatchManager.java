@@ -11,6 +11,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
@@ -58,11 +59,12 @@ public class MatchManager {
     private final SongOfPowerManager songOfPowerManager;
     private final DrawVoteManager drawVoteManager;
     private final ZombieEntityManager zombieEntityManager;
+    private final SkeletonEntityManager skeletonEntityManager;
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
                         ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin,ArenaMapManager arenaMapManager, StructureManager structureManager,
-                        SongOfPowerManager songOfPowerManager, DrawVoteManager drawVoteManager,ZombieEntityManager zombieEntityManager) {
+                        SongOfPowerManager songOfPowerManager, DrawVoteManager drawVoteManager,ZombieEntityManager zombieEntityManager, SkeletonEntityManager skeletonEntityManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -84,6 +86,7 @@ public class MatchManager {
         this.songOfPowerManager = songOfPowerManager;
         this.drawVoteManager = drawVoteManager;
         this.zombieEntityManager = zombieEntityManager;
+        this.skeletonEntityManager = skeletonEntityManager;
     }
 
 
@@ -194,6 +197,7 @@ public class MatchManager {
         orbitShieldManager.clear(player);
         broodMotherEntityManager.clearAll();
         zombieEntityManager.clearAll();
+        skeletonEntityManager.clearAll();
         songOfPowerManager.clear(player);
         EntityCleanupUtils.sweepArenaEntities(player.getWorld());
         if (!player.isOnline()) return;

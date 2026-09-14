@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.abilities;
 
 import org.checkerframework.checker.units.qual.Speed;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
+import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.support.EtherealBodyManager;
@@ -40,5 +41,6 @@ public record AbilityDependencies(
         DamageVulnerabilityManager damageVulnerabilityManager,
         SpeedBuffManager speedBuffManager,
         ZombieEntityManager zombieEntityManager,
-        ScavengerManager scavengerManager
+        ScavengerManager scavengerManager,
+        SkeletonEntityManager skeletonEntityManager
 ) {}

@@ -4,6 +4,7 @@ package org.latios.arenaBrawl.game;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
+import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.support.EtherealBodyManager;
@@ -63,6 +64,7 @@ public class ArenaManager {
     private final SpeedBuffManager speedBuffManager;
     private final ZombieEntityManager zombieEntityManager;
     private final ScavengerManager scavengerManager;
+    private final SkeletonEntityManager skeletonEntityManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
@@ -71,7 +73,7 @@ public class ArenaManager {
                         CombatUpgradeManager combatUpgradeManager,BroodMotherEntityManager broodMotherEntityManager, ArenaMapManager arenaMapManager, StructureManager structureManager, MovementLockManager movementLockManager, SongOfPowerManager songOfPowerManager,
                         LifeLeechManager lifeLeechManager, StructureDemolitionService demolitionService,EnergyModifierManager energyModifierManager, DamageBuffManager damageBuffManager,
                         EtherealBodyManager etherealBodyManager, DamageVulnerabilityManager damageVulnerabilityManager,SpeedBuffManager speedBuffManager,ZombieEntityManager zombieEntityManager,
-                        ScavengerManager scavengerManager) {
+                        ScavengerManager scavengerManager,SkeletonEntityManager skeletonEntityManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -105,6 +107,7 @@ public class ArenaManager {
         this.speedBuffManager = speedBuffManager;
         this.zombieEntityManager = zombieEntityManager;
         this.scavengerManager = scavengerManager;
+        this.skeletonEntityManager = skeletonEntityManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -126,7 +129,7 @@ public class ArenaManager {
 
         List<Player> allPlayers = List.of(p1, p2, p3, p4);
         AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,
-                energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager,scavengerManager);
+                energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager,scavengerManager,skeletonEntityManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(false);

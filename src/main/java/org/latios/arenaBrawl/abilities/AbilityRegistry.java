@@ -65,15 +65,17 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "particlebeam",
                 deps -> new ParticleBeam(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("particlebeam")));
         register(AbilitySlot.OFFENSIVE, "burstfire",
-                deps -> new BurstFire(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("BurstFire")));
+                deps -> new BurstFire(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("burstfire")));
         register(AbilitySlot.OFFENSIVE, "cookieshotgun",
                 deps -> new CookieShotgun(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("cookieshotgun")));
         register(AbilitySlot.OFFENSIVE, "spikegrenade",
                 deps -> new SpikeGrenade(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("spikegrenade")));
         register(AbilitySlot.OFFENSIVE, "void",
-                deps -> new Void(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("Void")));
+                deps -> new Void(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("void")));
         register(AbilitySlot.OFFENSIVE, "cowthrow",
-                deps -> new CowThrow(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("CowThrow")));
+                deps -> new CowThrow(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("cowthrow")));
+        register(AbilitySlot.OFFENSIVE, "necromancy",
+                deps -> new Necromancy(deps.energyManager(),deps.skeletonEntityManager(), configManager.get("necromancy")));
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
                 deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("shadowstep"),deps.speedBuffManager()));
@@ -102,7 +104,7 @@ public class AbilityRegistry {
         register(AbilitySlot.UTILITY, "magneticImpulse",
                 deps -> new MagneticImpulse(plugin, deps.cooldownManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("magneticImpulse")));
         register(AbilitySlot.UTILITY, "RocketGrab",
-                deps -> new RocketGrab(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("RocketGrab")));
+                deps -> new RocketGrab(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("rocketgrab")));
         register(AbilitySlot.UTILITY, "darkpassage",
                 deps -> new DarkPassage(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("darkpassage")));
         register(AbilitySlot.UTILITY, "dodgeroll",
@@ -112,7 +114,7 @@ public class AbilityRegistry {
                       configManager.get("scavenger")));
         register(AbilitySlot.SUPPORT, "skittles",
                 deps -> new Skittles(deps.cooldownManager(), deps.combatUpgradeManager(),
-                        deps.playerHealthManager(), deps.damageBuffManager(), deps.energyManager(), configManager.get("skittles")));
+                        deps.playerHealthManager(), deps.damageBuffManager(), deps.energyManager(), deps.debuffManager(), deps.speedBuffManager(), configManager.get("skittles")));
 
         // --- SUPPORT ---
         register(AbilitySlot.SUPPORT, "holywater",
@@ -156,7 +158,7 @@ public class AbilityRegistry {
         register(AbilitySlot.ULTIMATE, "broodmother",
                 deps -> new BroodMother(deps.cooldownManager(), deps.usageManager(), deps.broodMotherEntityManager(), deps.teamManager(), configManager.get("broodmother")));
         register(AbilitySlot.ULTIMATE, "absolutezero",
-                deps -> new AbsoluteZeroAbility(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("absolutezero")));
+                deps -> new AbsoluteZero(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("absolutezero")));
         register(AbilitySlot.ULTIMATE, "nanoboost",
                 deps -> new NanoBoost(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.shieldManager(), deps.damageBuffManager(), configManager.get("nanoboost"),deps.speedBuffManager()));
         register(AbilitySlot.ULTIMATE, "divinejudgment",

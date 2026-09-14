@@ -211,18 +211,16 @@ ability-values:
     pull-duration-seconds: 3.0
     energy-cost: 100.0
 
-  zombieapocalypse:
-    charge-time-millis: 60000
-    max-range: 30
-    zombie-count: 6
-    zombie-hits-to-kill: 4
-    zombie-damage: 20.0
-
   cowthrow:
     damage: 150.0
     speed: 1.8
     explosion-radius: 4.0
     energy-cost: 60.0
+
+  necromancy:
+    energy-cost: 100.0
+    arrow-damage: 100.0
+    skeleton-hits-to-kill: 6
 
   # --- UTILITY ---
   shadowstep:
@@ -292,7 +290,7 @@ ability-values:
     stun-duration-ms: 2000
     cooldown-ms: 40000
 
-  RocketGrab:
+  rocketgrab:
     cooldown-ms: 30000
     max-range: 20.0
     step: 1.5
@@ -413,9 +411,9 @@ ability-values:
     red-heal: 200.0
     red-energy: 30.0
     blue-heal: 400.0
-    blue-slow-duration-ticks: 120
+    blue-slow-duration-ticks: 4000
     yellow-heal: 300.0
-    yellow-speed-duration-ticks: 40
+    yellow-speed-duration-ticks: 4000
     orange-heal: 200.0
     orange-damage-bonus: 0.25
     orange-damage-duration-millis: 5000
@@ -508,6 +506,13 @@ ability-values:
     duration-ms: 15000
     damage-multiplier: 2.0
     speed-amplifier: 1
+
+  zombieapocalypse:
+    charge-time-millis: 60000
+    max-range: 30
+    zombie-count: 6
+    zombie-hits-to-kill: 3
+    zombie-damage: 20.0
 
 rune-values:
   speed:
