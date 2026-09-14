@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.latios.arenaBrawl.abilities.*;
+
 import org.latios.arenaBrawl.abilities.config.AbilityConfigManager;
 import org.latios.arenaBrawl.abilities.config.ReloadAbilitiesCommand;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
@@ -16,7 +17,7 @@ import org.latios.arenaBrawl.abilities.offensive.SkeletonHitListener;
 import org.latios.arenaBrawl.abilities.structures.*;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.*;
-import org.latios.arenaBrawl.abilities.utility.Scavenger;
+
 import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
 import org.latios.arenaBrawl.abilities.utility.ScavengerMeleeEffect;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
@@ -110,6 +111,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private SpeedBuffManager speedBuffManager;
     private ZombieEntityManager zombieEntityManager;
     private SkeletonEntityManager skeletonEntityManager;
+    private AbilityIconRegistry abilityIconRegistry;
     @Override
     public void onEnable() {
         instance = this;
@@ -120,6 +122,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.speedBuffManager = new SpeedBuffManager(this);
         this.hatRegistry = new HatRegistry();
         this.hatConfigManager = new HatConfigManager(this,hatRegistry);
+        this.abilityIconRegistry = new AbilityIconRegistry();
         hatConfigManager.loadHats();
         this.abilityConfigManager = new AbilityConfigManager(this);
         this.abilityRegistry = new AbilityRegistry(this,abilityConfigManager);
@@ -166,7 +169,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.hatPhraseListener = new HatPhraseListener(hatSelectionManager);
 
         this.hatSelectorGUI = new HatSelectorGUI(hatRegistry, hatSelectionManager);
-        this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager, runeSelectionManager,runeConfigManager);
+        this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager, runeSelectionManager,runeConfigManager,abilityIconRegistry);
         this.magicChestManager = new MagicChestManager(statsManager, hatRegistry, hatSelectionManager);
         this.magicChestGUI = new MagicChestGUI(keyManager, statsManager);
         this.zombieEntityManager = new ZombieEntityManager(teamManager, combatService, abilityConfigManager.get("zombieapocalypse"));
@@ -313,6 +316,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new MobTargetListener(broodMotherEntityManager), this);
         // Tasks
         new BaseSpeedTask(speedBuffManager).runTaskTimer(this, 0L, 10L);
+        new HoldToActivateTask(abilityManager, matchManager, debuffManager).runTaskTimer(this, 0L, 1L);
         new EnergyRegenTask(energyManager,matchManager,energyModifierManager).runTaskTimer(this, 20L, 5L);
         new HungerTask(hungerManager,matchManager,songOfPowerManager).runTaskTimer(this, 20L, 20L);
         new AbilityDisplayTask(abilityManager).runTaskTimer(this, 0L, 2L);

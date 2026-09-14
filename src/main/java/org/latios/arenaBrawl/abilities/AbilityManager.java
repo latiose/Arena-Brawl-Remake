@@ -25,25 +25,25 @@ public class AbilityManager {
         playerAbilities.remove(player.getUniqueId());
     }
 
-    public void tryActivate(Player player, AbilitySlot slot) {
+    public boolean tryActivate(Player player, AbilitySlot slot) {
         Map<AbilitySlot, Ability> abilities = playerAbilities.get(player.getUniqueId());
         if (abilities == null || !abilities.containsKey(slot)) {
             player.sendMessage("§cYou have no ability assigned to that slot.");
-            return;
+            return false;
         }
         if(player.getGameMode() ==  GameMode.SPECTATOR) {
-            return;
+            return false;
         }
         Ability ability = abilities.get(slot);
         AbilityCost cost = ability.getCost();
 
         if (!cost.canPay(player) && (cost instanceof CooldownCost)) {
             player.sendMessage("§eWait another " + cost.describeRemaining(player));
-            return;
+            return false;
         }
         else if(!cost.canPay(player) && cost instanceof EnergyCost){
             player.sendMessage("§e" + cost.describeRemaining(player));
-            return;
+            return false;
         }
         else if(!cost.canPay(player) && cost instanceof UltimateCost){
             if(cost.isPermanentlyUnavailable(player)){
@@ -52,7 +52,7 @@ public class AbilityManager {
           else{
                 player.sendMessage("§eWait another " + cost.describeRemaining(player));
             }
-            return;
+            return false;
         }
 
         boolean success = ability.activate(player);
@@ -60,6 +60,7 @@ public class AbilityManager {
         if (success) {
             cost.pay(player);
         }
+        return success;
     }
 
     public Ability getAbility(Player player, AbilitySlot slot) {

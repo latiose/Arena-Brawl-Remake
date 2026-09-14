@@ -26,6 +26,7 @@ public class AbilitySelectorGUI {
     private AbilityDependencies previewDependencies;
     private final Map<String, Ability> previewCache = new HashMap<>();
     private final RuneConfigManager runeConfigManager;
+    private final AbilityIconRegistry abilityIconRegistry;
     public Ability createPreview(AbilitySlot slot, String id) {
         return previewCache.computeIfAbsent(slot.name() + ":" + id, k -> registry.create(slot, id,previewDependencies));
     }
@@ -35,11 +36,12 @@ public class AbilitySelectorGUI {
 
 
 
-    public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager, RuneSelectionManager runeSelectionManager,RuneConfigManager runeConfig) {
+    public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager, RuneSelectionManager runeSelectionManager,RuneConfigManager runeConfig,AbilityIconRegistry abilityIconRegistry) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.runeSelectionManager = runeSelectionManager;
         this.runeConfigManager = runeConfig;
+        this.abilityIconRegistry = abilityIconRegistry;
     }
     public void openSlotMenu(Player player, AbilitySlot slot) {
         List<String> ids = new ArrayList<>(registry.getAvailableIds(slot));
@@ -54,9 +56,17 @@ public class AbilitySelectorGUI {
 
             Ability preview = createPreview(slot,id);
 
-            ItemStack item = new ItemStack(selected ? Material.LIME_DYE : Material.GRAY_DYE);
+            Material icon = abilityIconRegistry.getIcon(slot, id);
+            ItemStack item = new ItemStack(icon);
             ItemMeta meta = item.getItemMeta();
-            meta.setDisplayName((selected ? "§a✔ " : "§f") + preview.getName());
+
+            String prefix = selected ? "§a✔ " : "§f";
+            meta.setDisplayName(prefix + preview.getName());
+
+            if (selected) {
+                meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 1, true);
+                meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+            }
 
             List<String> lore = new ArrayList<>();
             lore.add("");
