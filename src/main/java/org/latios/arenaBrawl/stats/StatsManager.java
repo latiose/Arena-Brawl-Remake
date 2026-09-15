@@ -17,7 +17,7 @@ public class StatsManager {
     private final File file;
     private final YamlConfiguration config;
     private final Map<UUID, PlayerStats> cache = new HashMap<>();
-
+    private int multiplier = 1;
     private final Map<UUID, Integer> matchCoins = new HashMap<>();
 
     public StatsManager(Plugin plugin) {
@@ -61,6 +61,7 @@ public class StatsManager {
         PlayerStats stats = getStats(player);
         stats.wins++;
         int winReward = 80;
+        winReward *= multiplier;
         stats.coins += winReward;
         save(player, stats);
 
@@ -73,6 +74,7 @@ public class StatsManager {
         PlayerStats stats = getStats(player);
         stats.losses++;
         int lossReward = 40;
+        lossReward *= multiplier;
         stats.coins += lossReward;
         save(player, stats);
 
@@ -85,6 +87,7 @@ public class StatsManager {
         PlayerStats stats = getStats(player);
         stats.kills++;
         int killReward = 8;
+        killReward *= multiplier;
         stats.coins += killReward;
 
         matchCoins.put(player.getUniqueId(), matchCoins.getOrDefault(player.getUniqueId(), 0) + killReward);
@@ -116,5 +119,9 @@ public class StatsManager {
     public void addCoins(Player target, int amount) {
         PlayerStats stats = getStats(target);
         stats.coins += amount;
+    }
+
+    public void setMultiplier(int multiplier) {
+        this.multiplier = multiplier;
     }
 }

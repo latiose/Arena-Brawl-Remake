@@ -36,3 +36,10 @@ commands:
   setrating:
     description: Modifies a player's rating
     usage: /setrating <player> <amount>
+  setcoingain:
+    description: Modifies the coin gain for games
+    usage: /setcoingain <amount>
+  toggleblockbreak:
+    description: Toggles block breaking protection on or off
+    usage: /toggleblockbreak [on|off]
+    permission: arenabrawl.admin.togglebreak

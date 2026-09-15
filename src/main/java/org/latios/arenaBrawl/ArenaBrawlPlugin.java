@@ -42,6 +42,7 @@ import org.latios.arenaBrawl.runes.RuneConfigManager;
 import org.latios.arenaBrawl.runes.RuneManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.stats.AddCoinsCommand;
+import org.latios.arenaBrawl.stats.SetCoinGainCommand;
 import org.latios.arenaBrawl.stats.StatsManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeGUI;
@@ -342,6 +343,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
 
         // Commands
         getCommand("party").setExecutor(new PartyCommand(partyManager, queueManager));
+        getCommand("setcoingain").setExecutor(new SetCoinGainCommand(statsManager));
         getCommand("queue").setExecutor(new QueueCommand(queueManager, matchManager));
         getCommand("abilities").setExecutor(new AbilityMenuCommand(abilitySelectorGUI, matchManager));
         getCommand("draw").setExecutor(new DrawCommand(matchManager, drawVoteManager));
@@ -353,7 +355,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getCommand("capturestructure").setExecutor(new org.latios.arenaBrawl.abilities.structures.CaptureStructureCommand(this));
         getCommand("addcoins").setExecutor(new AddCoinsCommand(statsManager,lobbyScoreboardManager));
         getCommand("setrating").setExecutor(new SetRatingCommand(ratingManager,lobbyScoreboardManager));
-
+        getCommand("toggleblockbreak").setExecutor(new ToggleBlockBreakCommand());
         for (World world : getServer().getWorlds()) {
             world.setGameRule(GameRules.ADVANCE_TIME, false);
             world.setGameRule(GameRules.ADVANCE_WEATHER, false);
