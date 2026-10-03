@@ -23,11 +23,12 @@ java {
 
 tasks {
     runServer {
-        // Configure the Minecraft version for our task.
-        // This is the only required configuration besides applying the plugin.
-        // Your plugin's jar (or shadowJar if present) will be used automatically.
         minecraftVersion("26.2")
         jvmArgs("-Xms2G", "-Xmx2G")
+    }
+
+    withType<JavaCompile> {
+        options.encoding = "UTF-8"
     }
 
     processResources {

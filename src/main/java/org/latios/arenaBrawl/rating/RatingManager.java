@@ -139,5 +139,7 @@ public class RatingManager {
     public void setRating(Player target, double amount) {
         UUID id = target.getUniqueId();
         cache.put(id, amount);
+        config.set(id.toString(), amount);
+        saveToDisk();
     }
 }

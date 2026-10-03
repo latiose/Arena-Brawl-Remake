@@ -118,7 +118,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         instance = this;
 
         Location lobbySpawn = new Location(Bukkit.getWorld("world"), 0, -60, 0);
-
+        ClickModeManager clickModeManager = new ClickModeManager();
         this.arenaLocation = new ArenaLocation(this);
         this.speedBuffManager = new SpeedBuffManager(this);
         this.hatRegistry = new HatRegistry();
@@ -172,7 +172,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.hatSelectorGUI = new HatSelectorGUI(hatRegistry, hatSelectionManager);
         this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager, runeSelectionManager,runeConfigManager,abilityIconRegistry);
         this.magicChestManager = new MagicChestManager(statsManager, hatRegistry, hatSelectionManager);
-        this.magicChestGUI = new MagicChestGUI(keyManager, statsManager);
+        this.magicChestGUI = new MagicChestGUI(keyManager, statsManager,clickModeManager);
         this.zombieEntityManager = new ZombieEntityManager(teamManager, combatService, abilityConfigManager.get("zombieapocalypse"));
         this.skeletonEntityManager = new SkeletonEntityManager(teamManager, combatService, abilityConfigManager.get("necromancy"));
         this.broodMotherEntityManager = new BroodMotherEntityManager(debuffManager, teamManager, combatService, abilityConfigManager.get("broodmother"));
@@ -276,6 +276,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(
                 new MatchDisconnectListener(matchManager, playerHealthManager), this
         );
+
         getServer().getPluginManager().registerEvents(
                 new BlockInteractionListener(), this
         );
@@ -308,7 +309,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new AbilitySelectorListener(abilityRegistry, abilitySelectionManager, abilitySelectorGUI, runeSelectionManager,hatSelectorGUI,combatUpgradeGUI), this
         );
         getServer().getPluginManager().registerEvents(
-                new MagicChestListener(magicChestGUI, keyManager, magicChestManager,statsManager), this
+                new MagicChestListener(magicChestGUI, keyManager, magicChestManager, statsManager, lobbyScoreboardManager,clickModeManager), this
         );
         com.github.retrooper.packetevents.PacketEvents.getAPI().getEventManager()
                 .registerListener(new AttackSoundBlockListener());

@@ -153,19 +153,68 @@ public class AbilitySelectorGUI {
             RuneType rune = runes[i];
             boolean selected = rune == current;
 
-            RuneConfig runeConfig = runeConfigManager.get(rune.getConfigId());
-            double procChance = runeConfig.getDouble("proc-chance", 0.10);
+            RuneConfig cfg = runeConfigManager.get(rune.getConfigId());
 
             ItemStack item = new ItemStack(selected ? Material.LIME_DYE : Material.GRAY_DYE);
             ItemMeta meta = item.getItemMeta();
             meta.setDisplayName((selected ? "§a✔ " : "§f") + rune.getDisplayName());
-            meta.setLore(List.of("§7Proc chance: §f" + (int) (procChance * 100) + "%"));
-            item.setItemMeta(meta);
 
+            List<String> lore = new ArrayList<>();
+            lore.add("");
+            lore.add("§bProc chance: §f" + pct(cfg.getDouble("proc-chance", defaultProcChance(rune))));
+
+            switch (rune) {
+                case SPEED -> {
+                    lore.add("§bDuration: §f" + seconds(cfg.getLong("duration-ticks", 60)));
+                    lore.add("§bSpeed level: §f" + (cfg.getInt("amplifier", 2) + 1));
+                }
+                case SLOW -> {
+                    lore.add("§bDuration: §f" + secondsSlow(cfg.getLong("duration-ticks", 3000)));
+                }
+                case DAMAGE -> {
+                    lore.add("§bDamage multiplier: §fx" + num(cfg.getDouble("damage-multiplier", 2.0)));
+                }
+                case ENERGY -> {
+                    lore.add("§bEnergy gained: §f+" + num(cfg.getDouble("energy-amount", 10.0)));
+                }
+                default -> { }
+            }
+
+            lore.add("");
+            lore.add(selected ? "§aCurrently selected" : "§eClick to select");
+            meta.setLore(lore);
+
+            item.setItemMeta(meta);
             inv.setItem(i, item);
         }
 
         player.openInventory(inv);
+    }
+
+    private double defaultProcChance(RuneType rune) {
+        return switch (rune) {
+            case SPEED -> 0.2;
+            case SLOW, ENERGY -> 0.15;
+            case DAMAGE -> 0.48;
+        };
+    }
+
+    private String pct(double value) {
+        return num(value * 100) + "%";
+    }
+
+    private String seconds(long ticks) {
+        return num(ticks / 20.0) + "s";
+    }
+
+    private String secondsSlow(long ticks) {
+        return num(ticks / 1000.0) + "s";
+    }
+
+    private String num(double value) {
+        return value == Math.rint(value)
+                ? String.valueOf((long) value)
+                : String.format(java.util.Locale.US, "%.1f", value);
     }
 
 
