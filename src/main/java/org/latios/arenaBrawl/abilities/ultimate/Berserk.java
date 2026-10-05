@@ -12,6 +12,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
 
@@ -27,7 +28,7 @@ public class Berserk implements Ability {
     private final long durationMillis;
     private final long chargeTimeMillis;
     private final int speedAmplifier;
-
+    private final AbilityConfig config;
     private final Plugin plugin;
     private final AbilityCost cost;
     private final CooldownManager cooldownManager;
@@ -44,6 +45,7 @@ public class Berserk implements Ability {
         this.speedAmplifier = config.getInt("speed-amplifier", 1);
 
         this.cost = new UltimateCost(cooldownManager, usageManager, "berserk");
+        this.config = config;
     }
 
     @Override
@@ -69,7 +71,7 @@ public class Berserk implements Ability {
 
         BERSERK_ACTIVE_PLAYERS.add(uuid);
 
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 0.8f);
+        MatchSoundUtils.play(config, player,Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 0.8f);
         spawnFlameRings(player);
         spawnLavaRing(player);
 
@@ -99,7 +101,7 @@ public class Berserk implements Ability {
 
     private void spawnLavaRing(Player player) {
         Location loc = player.getLocation();
-        int points = 12;
+        int points = 20;
         double radius = 1.0;
 
         for (int i = 0; i < points; i++) {

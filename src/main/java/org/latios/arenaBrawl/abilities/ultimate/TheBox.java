@@ -13,6 +13,7 @@ import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class TheBox implements Ability {
     private final long slowDurationMs;
     private final long durationTicks;
     private final long chargeTimeMillis;
-
+    private final AbilityConfig config;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
@@ -49,6 +50,7 @@ public class TheBox implements Ability {
         this.chargeTimeMillis = config.getLong("charge-time-ms", 60000L);
 
         this.cost = new UltimateCost(cooldownManager, usageManager, "thebox");
+        this.config = config;
     }
 
     @Override
@@ -65,7 +67,7 @@ public class TheBox implements Ability {
     @Override
     public boolean activate(Player player) {
         Location center = player.getLocation();
-        player.getWorld().playSound(center, Sound.ENTITY_WITHER_SPAWN, 0.7f, 0.5f);
+        MatchSoundUtils.play(config, player, Sound.ENTITY_WITHER_SPAWN, 0.7f, 0.5f);
 
         List<Location> vertices = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -109,7 +111,7 @@ public class TheBox implements Ability {
                             combatService.applyAbilityDamage(player, enemy, damage, getName());
                             debuffManager.tryApply(enemy, DebuffType.SLOW, slowDurationMs);
 
-                            enemy.getWorld().playSound(enemy.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.2f, 0.6f);
+                            MatchSoundUtils.play(config, player, Sound.BLOCK_GLASS_BREAK, 1.2f, 0.6f);
                             enemy.getWorld().spawnParticle(Particle.SOUL, enemy.getLocation().add(0, 1, 0), 40, 0.4, 0.6, 0.4, 0.1);
 
                             cancel();

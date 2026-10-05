@@ -14,6 +14,7 @@ import org.latios.arenaBrawl.abilities.AbilityTargeting;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -33,7 +34,7 @@ public class LifeBond implements Ability {
     private final int durationSeconds;
     private final long cooldownMs;
     private final double redirectPercent;
-
+    private final AbilityConfig config;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
@@ -52,6 +53,7 @@ public class LifeBond implements Ability {
         this.cost = new CooldownCost(cooldownManager, "lifebond", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
         this.healthManager = healthManager;
+        this.config = config;
     }
 
     @Override
@@ -72,8 +74,7 @@ public class LifeBond implements Ability {
         final Player ally = targetAlly;
         ACTIVE_BONDS.put(ally.getUniqueId(), player.getUniqueId());
 
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 1.0f, 1.2f);
-        ally.getWorld().playSound(ally.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 1.0f, 1.2f);
+        MatchSoundUtils.play(config, player,  Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 1.0f, 1.2f);
 
         new BukkitRunnable() {
             int ticksElapsed = 0;

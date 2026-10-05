@@ -27,15 +27,16 @@ public class DragonsBreath extends Breath {
     private final double energyCost;
     private final long slowDurationTicks;
     private final double range;
-
+    private final AbilityConfig config;
     public DragonsBreath(Plugin plugin, EnergyManager energyManager, TeamManager teamManager,
                          CombatService combatService, DebuffManager debuffManager, AbilityConfig config) {
-        super(plugin, energyManager, config.getDouble("energy-cost", 60.0), teamManager, combatService, debuffManager);
+        super(plugin, energyManager, config.getDouble("energy-cost", 60.0), teamManager, combatService, debuffManager,config.getMatchManager());
         this.damage = config.getDouble("damage", 140.0);
         this.tickDamage = config.getDouble("tick-damage", 25.0);
         this.energyCost = config.getDouble("energy-cost", 60.0);
         this.slowDurationTicks = config.getLong("slow-duration-ticks", 1000L);
         this.range = config.getDouble("range", 8.0);
+        this.config = config;
     }
 
     @Override

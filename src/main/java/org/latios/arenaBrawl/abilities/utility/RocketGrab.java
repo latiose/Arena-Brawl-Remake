@@ -13,6 +13,7 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -24,7 +25,7 @@ public class RocketGrab implements Ability {
     private final double maxRange;
     private final double step;
     private final int pullTicks;
-
+    private final AbilityConfig config;
     private final Plugin plugin;
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -39,6 +40,7 @@ public class RocketGrab implements Ability {
 
         this.cost = new CooldownCost(cooldownManager, "rocketgrab", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
+        this.config = config;
     }
 
     @Override
@@ -55,8 +57,7 @@ public class RocketGrab implements Ability {
     public boolean activate(Player player) {
         Location startLoc = player.getEyeLocation().subtract(0, 0.2, 0);
         Vector direction = startLoc.getDirection().normalize();
-
-        player.getWorld().playSound(startLoc, Sound.ITEM_CROSSBOW_SHOOT, 1.0f, 0.6f);
+        MatchSoundUtils.play(config, player,Sound.ITEM_CROSSBOW_SHOOT, 1.0f, 0.6f);
 
         new BukkitRunnable() {
             private Location currentLoc = startLoc.clone();
@@ -71,7 +72,7 @@ public class RocketGrab implements Ability {
                 currentLoc.getWorld().spawnParticle(Particle.SCRAPE, currentLoc, 1, 0, 0, 0, 0);
 
                 if (currentLoc.getBlock().getType().isSolid()) {
-                    currentLoc.getWorld().playSound(currentLoc, Sound.BLOCK_ANVIL_PLACE, 0.6f, 1.8f);
+                    MatchSoundUtils.play(config, player,Sound.BLOCK_ANVIL_PLACE, 0.6f, 1.8f);
                     cancel();
                     return;
                 }
@@ -96,7 +97,8 @@ public class RocketGrab implements Ability {
     }
 
     private void pullEnemyOverTime(Player caster, Player target) {
-        target.getWorld().playSound(target.getLocation(), Sound.BLOCK_CHAIN_BREAK, 1.0f, 0.8f);
+        MatchSoundUtils.play(config, caster,Sound.BLOCK_CHAIN_BREAK, 1.0f, 0.8f);
+
 
         new BukkitRunnable() {
             private int elapsedTicks = 0;

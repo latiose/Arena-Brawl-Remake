@@ -13,6 +13,7 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -23,7 +24,7 @@ public class DarkPassage implements Ability {
     private final double maxRange;
     private final long durationTicks;
     private final long cooldownMs;
-
+    private final AbilityConfig config;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final Plugin plugin;
@@ -37,6 +38,7 @@ public class DarkPassage implements Ability {
 
         this.cost = new CooldownCost(cooldownManager, "darkpassage", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
+        this.config = config;
     }
 
     @Override
@@ -54,7 +56,8 @@ public class DarkPassage implements Ability {
         }
 
         Location lanternLoc = targetBlock.getLocation().add(0.5, 1.0, 0.5);
-        player.getWorld().playSound(lanternLoc, Sound.BLOCK_SOUL_SAND_BREAK, 1.0f, 0.8f);
+        MatchSoundUtils.play(config, player,Sound.BLOCK_SOUL_SAND_BREAK, 1.0f, 0.8f);
+
 
         new BukkitRunnable() {
             int ticksElapsed = 0;

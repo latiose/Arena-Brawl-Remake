@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -26,7 +27,7 @@ public class SugarRush implements Ability {
     private final SpeedBuffManager speedBuffManager;
     private final AbilityCost cost;
     private final DebuffManager debuffManager;
-
+    private final AbilityConfig config;
     public SugarRush(CooldownManager cooldownManager, CombatUpgradeManager combatUpgradeManager,
                      DebuffManager debuffManager, AbilityConfig config, SpeedBuffManager speedBuffManager) {
         this.cooldownMillis = config.getLong("cooldown-ms", 30_000L);
@@ -37,6 +38,7 @@ public class SugarRush implements Ability {
         this.cost = new CooldownCost(cooldownManager, "sugarrush", cooldownMillis, combatUpgradeManager);
         this.speedBuffManager = speedBuffManager;
         this.debuffManager = debuffManager;
+        this.config = config;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class SugarRush implements Ability {
     public boolean activate(Player player) {
         speedBuffManager.applyBuff(player, speedAmplifier, speedDurationTicks * 50L);
         player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 1f, 1f);
+        MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_BURP, 1f, 1f);
 
         new BukkitRunnable() {
             @Override
@@ -57,7 +59,7 @@ public class SugarRush implements Ability {
                 if (player.isOnline()) {
                     debuffManager.tryApply(player, DebuffType.SLOW, slowDurationMs);
                     player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
-                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BREATH, 1f, 0.8f);
+                    MatchSoundUtils.play(config, player,  Sound.ENTITY_PLAYER_BREATH, 1f, 0.8f);
                 }
             }
         }.runTaskLater(ArenaBrawlPlugin.getInstance(), speedDurationTicks);

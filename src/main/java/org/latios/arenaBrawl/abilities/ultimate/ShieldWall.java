@@ -9,6 +9,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class ShieldWall implements Ability {
     private final double damageReduction;
     private final long durationMillis;
     private final long chargeTimeMillis;
-
+    private final AbilityConfig config;
     private final Plugin plugin;
     private final AbilityCost cost;
     private final CooldownManager cooldownManager;
@@ -35,6 +36,7 @@ public class ShieldWall implements Ability {
         this.chargeTimeMillis = config.getLong("charge-time-ms", 60000L);
 
         this.cost = new UltimateCost(cooldownManager, usageManager, "shieldwall");
+        this.config = config;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class ShieldWall implements Ability {
     @Override
     public boolean activate(Player player) {
         shieldManager.applyShield(player, damageReduction, durationMillis,"Shield Wall");
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 1.0f);
+        MatchSoundUtils.play(config, player, Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 1.0f);
 
         spawnWaterRings(player);
 
@@ -83,8 +85,8 @@ public class ShieldWall implements Ability {
 
     private void spawnWaterRings(Player player) {
         Location loc = player.getLocation();
-        int circleCount = 8;
-        int pointsPerCircle = 15;
+        int circleCount = 15;
+        int pointsPerCircle = 20;
         double radius = 1.3;
 
         double minHeight = 0.2;

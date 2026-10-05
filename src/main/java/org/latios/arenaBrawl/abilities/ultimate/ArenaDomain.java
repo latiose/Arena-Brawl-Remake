@@ -15,6 +15,7 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -28,7 +29,7 @@ public class ArenaDomain implements Ability {
     private final double radius;
     private final int durationSeconds;
     private final double height;
-
+    private final AbilityConfig config;
     private final Plugin plugin;
     private final CooldownManager cooldownManager;
     private final AbilityCost cost;
@@ -45,6 +46,7 @@ public class ArenaDomain implements Ability {
         this.cooldownManager = cooldownManager;
         this.cost = new UltimateCost(cooldownManager, usageManager, "arenadomain");
         this.teamManager = teamManager;
+        this.config = config;
     }
 
     @Override
@@ -65,7 +67,7 @@ public class ArenaDomain implements Ability {
     @Override
     public boolean activate(Player player) {
         Location center = player.getLocation().clone();
-        center.getWorld().playSound(center, Sound.BLOCK_BEACON_ACTIVATE, 1.5f, 0.8f);
+        MatchSoundUtils.play(config, player,Sound.BLOCK_BEACON_ACTIVATE, 1.5f, 0.8f);
 
         new BukkitRunnable() {
             int ticks = 0;
@@ -77,7 +79,7 @@ public class ArenaDomain implements Ability {
                 ticks++;
 
                 if (ticks >= durationSeconds * 20 || !player.isOnline() || player.isDead()) {
-                    center.getWorld().playSound(center, Sound.BLOCK_BEACON_DEACTIVATE, 1.5f, 1.2f);
+                    MatchSoundUtils.play(config, player,Sound.BLOCK_BEACON_DEACTIVATE, 1.5f, 1.2f);
                     cancel();
                     return;
                 }
@@ -85,7 +87,7 @@ public class ArenaDomain implements Ability {
                 Location playerLoc = player.getLocation();
                 Vector fromCenterToPlayer = playerLoc.toVector().subtract(center.toVector()).setY(0);
                 if (fromCenterToPlayer.lengthSquared() > radiusSquared) {
-                    center.getWorld().playSound(center, Sound.BLOCK_GLASS_BREAK, 1.5f, 0.5f);
+                    MatchSoundUtils.play(config, player,Sound.BLOCK_GLASS_BREAK, 1.5f, 0.5f);
                     cancel();
                     return;
                 }
@@ -115,7 +117,7 @@ public class ArenaDomain implements Ability {
                         newLoc.setPitch(targetLoc.getPitch());
 
                         target.teleport(newLoc);
-                        target.playSound(targetLoc, Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 0.5f);
+                        MatchSoundUtils.play(config, player,Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 0.5f);
                         target.getWorld().spawnParticle(Particle.CRIT, targetLoc.add(0, 1, 0), 10, 0.2, 0.5, 0.2, 0.05);
                     }
                 }

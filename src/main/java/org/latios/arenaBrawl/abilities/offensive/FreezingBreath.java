@@ -19,13 +19,14 @@ public class FreezingBreath extends Breath {
     private final double damage;
     private final double energyCost;
     private final long slowDurationTicks;
-
+    private final AbilityConfig config;
     public FreezingBreath(EnergyManager energyManager, TeamManager teamManager,
                           CombatService combatService, DebuffManager debuffManager, AbilityConfig config) {
-        super(energyManager, config.getDouble("energy-cost", 80.0), teamManager, combatService, debuffManager);
+        super(energyManager, config.getDouble("energy-cost", 80.0), teamManager, combatService, debuffManager,config.getMatchManager());
         this.damage = config.getDouble("damage", 220.0);
         this.energyCost = config.getDouble("energy-cost", 80.0);
         this.slowDurationTicks = config.getLong("slow-duration-ticks", 2000L);
+        this.config = config;
     }
 
     @Override

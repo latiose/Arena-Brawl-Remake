@@ -14,6 +14,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class MysticShot implements Ability {
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
-
+    private final AbilityConfig config;
     public MysticShot(EnergyManager energyManager, TeamManager teamManager,
                       CombatService combatService, AbilityConfig config) {
         this.damage = config.getDouble("damage", 185.0);
@@ -41,6 +42,7 @@ public class MysticShot implements Ability {
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
+        this.config = config;
     }
 
     @Override
@@ -71,8 +73,7 @@ public class MysticShot implements Ability {
     public boolean activate(Player player) {
         Location startLoc = player.getEyeLocation().subtract(0, 0.2, 0);
         Vector direction = startLoc.getDirection().normalize();
-
-        player.getWorld().playSound(startLoc, Sound.ENTITY_FIREWORK_ROCKET_SHOOT, 1.0f, 1.6f);
+        MatchSoundUtils.play(config, player,Sound.ENTITY_FIREWORK_ROCKET_SHOOT, 1.0f, 1.6f);
 
         new BukkitRunnable() {
             private Location currentLoc = startLoc.clone();
@@ -88,7 +89,7 @@ public class MysticShot implements Ability {
 
                 if (currentLoc.getBlock().getType().isSolid()) {
                     currentLoc.getWorld().spawnParticle(Particle.CRIT, currentLoc, 10, 0.2, 0.2, 0.2, 0.1);
-                    currentLoc.getWorld().playSound(currentLoc, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.5f);
+                    MatchSoundUtils.play(config, player,Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.5f);
                     cancel();
                     return;
                 }

@@ -8,6 +8,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -19,7 +20,7 @@ public class Corruption implements Ability {
     private final double maxRange;
     private final long durationMillis;
     private final long cooldownMillis;
-
+    private final AbilityConfig config;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final DebuffManager debuffManager;
@@ -34,6 +35,7 @@ public class Corruption implements Ability {
         this.cost = new CooldownCost(cooldownManager, "corruption", cooldownMillis, combatUpgradeManager);
         this.teamManager = teamManager;
         this.debuffManager = debuffManager;
+        this.config = config;
     }
 
     @Override
@@ -54,7 +56,7 @@ public class Corruption implements Ability {
         debuffManager.tryApply(player, target, DebuffType.ANTIHEAL, durationMillis);
 
         target.getWorld().spawnParticle(Particle.SMOKE, target.getLocation().add(0, 1, 0), 15);
-        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_WITHER_HURT, 0.5f, 2.0f);
+        MatchSoundUtils.play(config, player,Sound.ENTITY_WITHER_HURT, 0.5f, 2.0f);
 
         player.sendMessage(MessageUtils.positive() + "§3You corrupted §3" + target.getName() + "§3!");
         target.sendMessage(MessageUtils.negative() + "§3You were hit by §a" + player.getName() + "§3's Corruption! Cannot heal for " + (durationMillis / 1000L) + "s.");

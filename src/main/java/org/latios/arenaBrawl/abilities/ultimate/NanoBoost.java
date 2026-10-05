@@ -4,12 +4,11 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
@@ -33,7 +32,7 @@ public class NanoBoost implements Ability {
     private final ShieldManager shieldManager;
     private final DamageBuffManager damageBuffManager;
     private final CooldownManager cooldownManager;
-
+    private final AbilityConfig config;
     public NanoBoost(Plugin plugin, CooldownManager cooldownManager, UsageManager usageManager,
                      TeamManager teamManager, ShieldManager shieldManager,
                      DamageBuffManager damageBuffManager, AbilityConfig config, SpeedBuffManager speedBuffManager) {
@@ -51,6 +50,7 @@ public class NanoBoost implements Ability {
         this.damageIncrease = config.getDouble("damage-increase", 1.50);
         this.speedBuffManager = speedBuffManager;
         this.cost = new UltimateCost(cooldownManager, usageManager, "nanoboost");
+        this.config = config;
     }
 
     @Override
@@ -94,7 +94,7 @@ public class NanoBoost implements Ability {
         damageBuffManager.applyBuff(target, damageIncrease, durationMillis, "Nano boost");
 
         target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 40, 0.4, 0.8, 0.4);
-        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.3f);
+        MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.3f);
 
         target.sendMessage("§eYou're powered up! Get in there!");
         player.sendMessage("§eYou nano boosted §e" + target.getName() + "§e!");

@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -30,7 +31,7 @@ public class HealingRain implements Ability {
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
-
+    private final AbilityConfig config;
     public HealingRain(Plugin plugin, CooldownManager cooldownManager, TeamManager teamManager,
                        PlayerHealthManager healthManager, CombatUpgradeManager combatUpgradeManager,
                        AbilityConfig config) {
@@ -44,6 +45,7 @@ public class HealingRain implements Ability {
         this.cost = new CooldownCost(cooldownManager, "healingrain", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
         this.healthManager = healthManager;
+        this.config = config;
     }
 
     @Override
@@ -61,8 +63,9 @@ public class HealingRain implements Ability {
         Location groundCenter = player.getLocation().getBlock().getLocation().add(0.5, 0.1, 0.5);
         Location cloudCenter = groundCenter.clone().add(0, cloudHeight, 0);
 
-        groundCenter.getWorld().playSound(groundCenter, Sound.WEATHER_RAIN, 1.0f, 1.2f);
-        groundCenter.getWorld().playSound(groundCenter, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.5f);
+        MatchSoundUtils.play(config, player,  Sound.WEATHER_RAIN, 1.0f, 1.2f);
+        MatchSoundUtils.play(config, player,  Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.5f);
+
 
         new BukkitRunnable() {
             private int ticksRun = 0;

@@ -9,8 +9,10 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -20,27 +22,28 @@ public abstract class Breath implements Ability {
 
     protected static final double HIT_RADIUS = 2.5;
     protected static final double MAX_DISTANCE = 8.0;
-    protected static final double STEP_SIZE = 0.2;
-    protected static final double RADIUS_GROWTH = 0.22;
+    protected static final double STEP_SIZE = 0.25;
+    protected static final double RADIUS_GROWTH = 0.3;
 
     protected final AbilityCost cost;
     protected final TeamManager teamManager;
     protected final CombatService combatService;
     protected final DebuffManager debuffManager;
     protected final Plugin plugin;
-
+    protected final MatchManager matchManager;
     public Breath(EnergyManager energyManager, double energyCost, TeamManager teamManager,
-                  CombatService combatService, DebuffManager debuffManager) {
-        this(null, energyManager, energyCost, teamManager, combatService, debuffManager);
+                  CombatService combatService, DebuffManager debuffManager,MatchManager matchManager) {
+        this(null, energyManager, energyCost, teamManager, combatService, debuffManager,matchManager);
     }
 
     public Breath(Plugin plugin, EnergyManager energyManager, double energyCost, TeamManager teamManager,
-                  CombatService combatService, DebuffManager debuffManager) {
+                  CombatService combatService, DebuffManager debuffManager,MatchManager matchManager) {
         this.plugin = plugin;
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
         this.debuffManager = debuffManager;
+        this.matchManager = matchManager;
     }
 
     @Override
@@ -50,7 +53,8 @@ public abstract class Breath implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        player.getWorld().playSound(player.getLocation(), getCastSound(), 1.0f, 1.0f);
+
+        MatchSoundUtils.play(matchManager, player, getCastSound(), 1.0f, 1.0f);
         Location origin = player.getLocation().add(0, 1.4, 0);
 
         Vector axis = player.getLocation().getDirection().setY(0);

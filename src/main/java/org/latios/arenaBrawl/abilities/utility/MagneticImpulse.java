@@ -17,6 +17,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.HashSet;
@@ -28,7 +29,7 @@ public class MagneticImpulse implements Ability {
     private final double radius;
     private final long stunDurationMillis;
     private final long cooldownMs;
-
+    private final AbilityConfig config;
     private final Plugin plugin;
     private final AbilityCost cost;
     private final DebuffManager debuffManager;
@@ -42,6 +43,7 @@ public class MagneticImpulse implements Ability {
 
         this.cost = new CooldownCost(cooldownManager, "magnetic_impulse", cooldownMs, combatUpgradeManager);
         this.debuffManager = debuffManager;
+        this.config = config;
     }
 
     @Override
@@ -68,8 +70,8 @@ public class MagneticImpulse implements Ability {
     public boolean activate(Player player) {
         Location casterLoc = player.getLocation();
 
-        casterLoc.getWorld().playSound(casterLoc, Sound.BLOCK_BEACON_POWER_SELECT, 1.2f, 0.5f);
-        casterLoc.getWorld().playSound(casterLoc, Sound.ENTITY_IRON_GOLEM_ATTACK, 1.0f, 1.8f);
+        MatchSoundUtils.play(config, player,Sound.BLOCK_BEACON_POWER_SELECT, 1.2f, 0.5f);
+        MatchSoundUtils.play(config, player,Sound.ENTITY_IRON_GOLEM_ATTACK, 1.0f, 1.8f);
 
         Set<Player> targets = new HashSet<>();
         for (Entity entity : casterLoc.getWorld().getNearbyEntities(casterLoc, radius, radius, radius)) {

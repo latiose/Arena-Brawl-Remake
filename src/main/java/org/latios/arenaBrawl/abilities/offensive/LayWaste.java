@@ -17,6 +17,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -30,7 +31,7 @@ public class LayWaste implements Ability {
     private final double maxTargetDistance;
     private final double radius;
     private final long delayTicks;
-
+    private final AbilityConfig config;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
@@ -40,11 +41,12 @@ public class LayWaste implements Ability {
         this.damage = config.getDouble("damage", 110.0);
         this.energyCost = config.getDouble("energy-cost", 30.0);
         this.maxTargetDistance = config.getDouble("max-target-distance", 15.0);
-        this.radius = config.getDouble("radius", 1.0);
-        this.delayTicks = config.getLong("delay-ticks", 15L);
+        this.radius = config.getDouble("radius", 1.5);
+        this.delayTicks = config.getLong("delay-ticks", 10L);
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
+        this.config = config;
     }
 
     @Override
@@ -92,7 +94,7 @@ public class LayWaste implements Ability {
 
         Location targetLocation = result.getHitPosition().toLocation(player.getWorld());
 
-        player.getWorld().playSound(targetLocation, Sound.BLOCK_CONDUIT_ATTACK_TARGET, 1.0f, 1.8f);
+        MatchSoundUtils.play(config, player,Sound.BLOCK_CONDUIT_ATTACK_TARGET, 1.0f, 1.8f);
 
         new BukkitRunnable() {
             int ticksElapsed = 0;
@@ -113,8 +115,8 @@ public class LayWaste implements Ability {
 
                 targetLocation.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, targetLocation, 35, 0.6, 0.4, 0.6, 0.08);
                 targetLocation.getWorld().spawnParticle(Particle.EXPLOSION, targetLocation, 2, 0.2, 0.2, 0.2, 0.0);
-                targetLocation.getWorld().playSound(targetLocation, Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 1.8f);
-                targetLocation.getWorld().playSound(targetLocation, Sound.ENTITY_EVOKER_CAST_SPELL, 1.0f, 1.2f);
+                MatchSoundUtils.play(config, player,Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 1.8f);
+                MatchSoundUtils.play(config, player, Sound.ENTITY_EVOKER_CAST_SPELL, 1.0f, 1.2f);
 
                 Set<Player> targetsToHit = new HashSet<>();
                 for (Entity entity : targetLocation.getWorld().getNearbyEntities(targetLocation, radius, radius + 1.5, radius)) {

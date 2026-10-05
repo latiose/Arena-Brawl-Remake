@@ -14,6 +14,7 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -35,7 +36,7 @@ public class Suzu implements Ability {
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
     private final ShieldManager shieldManager;
-
+    private final AbilityConfig config;
     public Suzu(Plugin plugin, CooldownManager cooldownManager, TeamManager teamManager,
                 PlayerHealthManager healthManager, ShieldManager shieldManager,
                 CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
@@ -51,6 +52,7 @@ public class Suzu implements Ability {
         this.teamManager = teamManager;
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
+        this.config = config;
     }
 
     @Override
@@ -67,8 +69,7 @@ public class Suzu implements Ability {
     public boolean activate(Player player) {
         Location startLoc = player.getEyeLocation().subtract(0, 0.2, 0);
         Vector direction = startLoc.getDirection().normalize();
-
-        player.getWorld().playSound(startLoc, Sound.ENTITY_EGG_THROW, 1.0f, 1.5f);
+        MatchSoundUtils.play(config, player, Sound.ENTITY_EGG_THROW, 1.0f, 1.5f);
 
         new BukkitRunnable() {
             private Location currentLoc = startLoc.clone();
@@ -109,8 +110,8 @@ public class Suzu implements Ability {
     }
 
     private void triggerProtection(Player caster, Location center) {
-        center.getWorld().playSound(center, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.5f, 1.8f);
-        center.getWorld().playSound(center, Sound.ITEM_SHIELD_BLOCK, 1.2f, 1.2f);
+        MatchSoundUtils.play(config, caster, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.5f, 1.8f);
+        MatchSoundUtils.play(config, caster, Sound.ITEM_SHIELD_BLOCK, 1.2f, 1.2f);
 
         center.getWorld().spawnParticle(Particle.FIREWORK, center, 30, 0.5, 0.5, 0.5, 0.1);
         center.getWorld().spawnParticle(Particle.END_ROD, center, 20, 0.8, 0.8, 0.8, 0.05);

@@ -19,6 +19,7 @@ import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public class AbsoluteZero implements Ability {
     private final TeamManager teamManager;
     private final CombatService combatService;
     private final DebuffManager debuffManager;
-
+    private final AbilityConfig config;
     private final Map<UUID, ChannelTask> activeChannels = new HashMap<>();
 
     public AbsoluteZero(CooldownManager cooldownManager, UsageManager usageManager,
@@ -56,6 +57,7 @@ public class AbsoluteZero implements Ability {
         this.teamManager = teamManager;
         this.combatService = combatService;
         this.debuffManager = debuffManager;
+        this.config = config;
     }
 
     @Override
@@ -137,7 +139,7 @@ public class AbsoluteZero implements Ability {
 
             center.getWorld().spawnParticle(Particle.SNOWFLAKE, center, 30, radius / 2, 0.5, radius / 2, 0.02);
             if (ticksCharged % 10 == 0) {
-                center.getWorld().playSound(center, Sound.BLOCK_GLASS_BREAK, 0.5f, 0.5f);
+                MatchSoundUtils.play(config, player,Sound.BLOCK_GLASS_BREAK, 0.5f, 0.5f);
             }
 
             ticksCharged++;
@@ -167,7 +169,7 @@ public class AbsoluteZero implements Ability {
             }
 
             center.getWorld().spawnParticle(Particle.EXPLOSION, center, 5);
-            center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.6f);
+            MatchSoundUtils.play(config, player,Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.6f);
         }
     }
 }

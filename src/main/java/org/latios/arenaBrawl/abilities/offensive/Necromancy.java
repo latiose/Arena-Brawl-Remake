@@ -19,11 +19,10 @@ public class Necromancy implements Ability {
     private final int skeletonHitsToKill;
     private final AbilityCost cost;
     private final SkeletonEntityManager skeletonManager;
-
     public Necromancy(EnergyManager energyManager, SkeletonEntityManager skeletonManager, AbilityConfig config) {
         this.energyCost = config.getDouble("energy-cost", 100.0);
         this.arrowDamage = config.getDouble("arrow-damage", 50.0);
-        this.skeletonHitsToKill = config.getInt("skeleton-hits-to-kill", 6);
+        this.skeletonHitsToKill = config.getInt("skeleton-hits-to-kill", 5);
         this.cost = new EnergyCost(energyManager, energyCost);
         this.skeletonManager = skeletonManager;
     }
@@ -37,7 +36,7 @@ public class Necromancy implements Ability {
     @Override
     public String getDescription() {
         return "Summons a Skeleton archer that shoots arrows at nearby enemies dealing "
-                + (int) arrowDamage + " damage per arrow.";
+                + (int) arrowDamage + " damage per arrow. Limited to 4 skeletons per player";
     }
 
     @Override
@@ -51,7 +50,10 @@ public class Necromancy implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        skeletonManager.summonSkeleton(player, null);
+       if (!skeletonManager.summonSkeleton(player, null)){
+           player.sendMessage("§eYou cannot summon any more skeletons");
+           return false;
+       }
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1.0f, 0.8f);
         player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, player.getLocation().add(0, 1.0, 0), 20, 0.4, 0.4, 0.4, 0.05);
         return true;

@@ -12,7 +12,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Transformation;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
+import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 
 import java.util.*;
 
@@ -21,9 +23,13 @@ public class OrbitShieldManager {
     private static final double ORBIT_RADIUS = 1.3;
     private static final double ORBIT_HEIGHT_OFFSET = 1.4;
     private static final double ROTATION_SPEED_PER_TICK = 0.05;
-
+    private MatchManager matchManager;
     private final Map<UUID, UUID> entityToOwner = new HashMap<>();
 
+
+    public void setMatchManager(MatchManager matchManager) {
+        this.matchManager = matchManager;
+    }
     public int getCharges(Player player) {
         ShieldState state = activeShields.get(player.getUniqueId());
         return state != null ? state.charges.size() : 0;
@@ -211,8 +217,7 @@ public class OrbitShieldManager {
     }
 
     private void playShieldBreakSound(Player player, OrbitShieldType type) {
-        if (player == null || !player.isOnline() || type == null) return;
-
-        player.getWorld().playSound(player.getLocation(), type.getBreakSound(), 1.0f, 1.0f);
+        if (player == null || !player.isOnline() || type == null || matchManager == null) return;
+        MatchSoundUtils.play(matchManager, player, type.getBreakSound(), 1.0f, 1.0f);
     }
 }

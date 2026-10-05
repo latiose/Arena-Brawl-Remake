@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class EtherealBody implements Ability {
 
     private final AbilityCost cost;
     private final EtherealBodyManager etherealBodyManager;
-
+    private final AbilityConfig config;
     public EtherealBody(CooldownManager cooldownManager, EtherealBodyManager etherealBodyManager,
                         CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
         this.durationMillis = config.getLong("duration-millis", 4000L);
@@ -29,6 +30,7 @@ public class EtherealBody implements Ability {
 
         this.cost = new CooldownCost(cooldownManager, "ethereal_body", cooldownMs, combatUpgradeManager);
         this.etherealBodyManager = etherealBodyManager;
+        this.config = config;
     }
 
     @Override
@@ -54,9 +56,8 @@ public class EtherealBody implements Ability {
     @Override
     public boolean activate(Player player) {
         etherealBodyManager.activate(player, durationMillis);
-
-        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.6f);
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ILLUSIONER_PREPARE_MIRROR, 1.0f, 1.2f);
+        MatchSoundUtils.play(config, player,  Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.6f);
+        MatchSoundUtils.play(config, player,  Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 1.5f);
 
         player.getWorld().spawnParticle(
                 Particle.DUST,

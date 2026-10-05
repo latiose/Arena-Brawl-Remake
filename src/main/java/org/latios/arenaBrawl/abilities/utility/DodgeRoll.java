@@ -24,7 +24,7 @@ public class DodgeRoll implements Ability {
     private final AbilityCost cost;
     private final ShieldManager shieldManager;
     private final Plugin plugin;
-
+    private final AbilityConfig config;
     public DodgeRoll(Plugin plugin, CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
                      ShieldManager shieldManager, AbilityConfig config) {
         this.plugin = plugin;
@@ -33,6 +33,7 @@ public class DodgeRoll implements Ability {
         this.iframeDurationMs = config.getLong("iframe-duration-ms", 600L);
         this.cost = new CooldownCost(cooldownManager, "dodgeroll", cooldownMs, upgradeManager);
         this.shieldManager = shieldManager;
+        this.config = config;
     }
 
     @Override

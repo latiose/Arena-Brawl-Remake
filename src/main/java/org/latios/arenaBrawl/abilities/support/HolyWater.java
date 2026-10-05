@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -29,7 +30,7 @@ public class HolyWater implements Ability {
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
     private final DebuffManager debuffManager;
-
+    private final AbilityConfig config;
     public HolyWater(CooldownManager cooldownManager, TeamManager teamManager, PlayerHealthManager healthManager,
                      DebuffManager debuffManager, CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
         this.cooldownMs = config.getLong("cooldown-ms", 30000L);
@@ -41,6 +42,7 @@ public class HolyWater implements Ability {
         this.teamManager = teamManager;
         this.healthManager = healthManager;
         this.debuffManager = debuffManager;
+        this.config = config;
     }
 
     @Override
@@ -73,7 +75,8 @@ public class HolyWater implements Ability {
         }
 
         player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 50);
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1.0f, 1.0f);
+        MatchSoundUtils.play(config, player,  Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1.0f, 1.0f);
+
         return true;
     }
 

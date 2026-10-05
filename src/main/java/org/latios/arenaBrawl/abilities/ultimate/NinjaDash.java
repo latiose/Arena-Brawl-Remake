@@ -16,6 +16,7 @@ import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.general.CombatService;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -28,7 +29,7 @@ public class NinjaDash implements Ability {
     private final double damage;
     private final double dashDistance;
     private final double hitRadius;
-
+    private final AbilityConfig config;
     private final AbilityCost cost;
     private final CooldownManager cooldownManager;
     private final TeamManager teamManager;
@@ -47,6 +48,7 @@ public class NinjaDash implements Ability {
         this.cost = new UltimateCost(cooldownManager, usageManager, "ninjadash");
         this.teamManager = teamManager;
         this.combatService = combatService;
+        this.config = config;
     }
 
     @Override
@@ -82,8 +84,8 @@ public class NinjaDash implements Ability {
     public boolean activate(Player player) {
         Vector direction = player.getLocation().getDirection().normalize();
 
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.5f, 1.8f);
-        player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_THROW, 1.2f, 0.6f);
+        MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.5f, 1.8f);
+        MatchSoundUtils.play(config, player, Sound.ITEM_TRIDENT_THROW, 1.2f, 0.6f);
 
         Set<Player> hitEnemies = new HashSet<>();
 

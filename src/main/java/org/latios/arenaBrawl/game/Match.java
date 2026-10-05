@@ -1,6 +1,7 @@
 
 package org.latios.arenaBrawl.game;
 
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.latios.arenaBrawl.powerups.PowerupManager;
@@ -68,7 +69,13 @@ public class Match {
     }
 
 
-
+    public void playSound(Sound sound, float volume, float pitch) {
+        for (Player p : getAllPlayers()) {
+            if (p.isOnline()) {
+                p.playSound(p.getLocation(), sound, volume, pitch);
+            }
+        }
+    }
     public Map<Player, Scoreboard> getIndividualScoreboards() {
         return individualScoreboards;
     }

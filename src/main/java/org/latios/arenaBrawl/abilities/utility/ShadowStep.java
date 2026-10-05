@@ -2,12 +2,14 @@ package org.latios.arenaBrawl.abilities.utility;
 
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -24,7 +26,7 @@ public class ShadowStep implements Ability {
     private final SpeedBuffManager speedBuffManager;
     private final AbilityCost cost;
     private final TeamManager teamManager;
-
+    private final AbilityConfig config;
     public ShadowStep(CooldownManager cooldownManager, TeamManager teamManager,
                       CombatUpgradeManager combatUpgradeManager, AbilityConfig config, SpeedBuffManager speedBuffManager) {
         this.maxRange = config.getInt("max-range", 20);
@@ -35,6 +37,7 @@ public class ShadowStep implements Ability {
         this.cost = new CooldownCost(cooldownManager, "shadowstep", cooldownMillis, combatUpgradeManager);
         this.teamManager = teamManager;
         this.speedBuffManager = speedBuffManager;
+        this.config = config;
     }
 
     @Override
@@ -56,6 +59,7 @@ public class ShadowStep implements Ability {
 
         player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation(), 20, 0.3, 0.5, 0.3);
         player.teleport(teleportLocation);
+        MatchSoundUtils.play(config, player, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.5f);
         player.getWorld().spawnParticle(Particle.SMOKE, teleportLocation, 20, 0.3, 0.5, 0.3);
 
         speedBuffManager.applyBuff(player, speedAmplifier, speedDurationTicks * 50L);

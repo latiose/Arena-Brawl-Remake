@@ -16,6 +16,7 @@ import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.general.CombatService;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -30,7 +31,7 @@ public class DivineJudgment implements Ability {
     private final double explosionDamage;
     private final double explosionRadius;
     private final long chargeTimeMillis;
-
+    private final AbilityConfig config;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final ShieldManager shieldManager;
@@ -51,6 +52,7 @@ public class DivineJudgment implements Ability {
         this.teamManager = teamManager;
         this.shieldManager = shieldManager;
         this.combatService = combatService;
+        this.config = config;
     }
 
     @Override
@@ -92,8 +94,7 @@ public class DivineJudgment implements Ability {
         shieldManager.applyShield(target, 1.0, durationMillis,"Divine judgment");
         target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 30, 0.3, 1, 0.3);
         target.sendMessage("§eYou are protected by Divine Judgment! Go!");
-
-        player.getWorld().playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 1f, 1f);
+        MatchSoundUtils.play(config, player,Sound.ITEM_TOTEM_USE, 1f, 1f);
 
         new BukkitRunnable() {
             int ticksElapsed = 0;
@@ -118,7 +119,8 @@ public class DivineJudgment implements Ability {
     private void triggerExplosion(Player caster) {
         Location center = caster.getLocation();
         center.getWorld().spawnParticle(Particle.EXPLOSION, center, 5);
-        center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.8f);
+        MatchSoundUtils.play(config, caster,Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.8f);
+
 
         for (Entity nearby : center.getWorld().getNearbyEntities(center, explosionRadius, explosionRadius, explosionRadius)) {
             if (nearby instanceof Player target && teamManager.isEnemy(caster, target)) {

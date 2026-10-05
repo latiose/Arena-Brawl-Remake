@@ -197,7 +197,14 @@ public class CombatService {
         if (type.getDamagePerCharge() > 0) {
             double damageAmount = type.getDamagePerCharge();
             int roundedDamage = (int) Math.round(damageAmount);
-
+            if (orbitShieldManager.hasActiveShield(victim)) {
+                OrbitShieldType type2 = orbitShieldManager.getActiveType(victim);
+                if (type2 != null) {
+                    orbitShieldManager.consumeCharge(victim);
+                    resolveShieldEffect(type, attacker, victim);
+                    return;
+                }
+            }
             healthManager.damage(attacker, damageAmount, victim);
            // playDamageFeedback(attacker);
 
@@ -241,7 +248,7 @@ public class CombatService {
     }
 
     private void playDamageFeedback(Player victim) {
-        victim.playHurtAnimation(0);
+        victim.playHurtAnimation(90f);
         victim.getWorld().playSound(victim.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_HURT, 1f, 1f);
     }
 

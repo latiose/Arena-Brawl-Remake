@@ -10,10 +10,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfigManager;
 import org.latios.arenaBrawl.abilities.config.ReloadAbilitiesCommand;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.abilities.cost.EnergyRegenTask;
-import org.latios.arenaBrawl.abilities.offensive.SkeletonAI;
-import org.latios.arenaBrawl.abilities.offensive.SkeletonArrowListener;
-import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
-import org.latios.arenaBrawl.abilities.offensive.SkeletonHitListener;
+import org.latios.arenaBrawl.abilities.offensive.*;
 import org.latios.arenaBrawl.abilities.structures.*;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.*;
@@ -125,7 +122,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.hatConfigManager = new HatConfigManager(this,hatRegistry);
         this.abilityIconRegistry = new AbilityIconRegistry();
         hatConfigManager.loadHats();
-        this.abilityConfigManager = new AbilityConfigManager(this);
+        this.abilityConfigManager = new AbilityConfigManager(this,matchManager);
         this.abilityRegistry = new AbilityRegistry(this,abilityConfigManager);
         this.arenaMapManager = new ArenaMapManager(this);
         this.shieldManager = new ShieldManager();
@@ -180,6 +177,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 playerHealthManager, teamManager, abilityManager, lobbySpawn, ratingManager, debuffManager, orbitShieldManager, cooldownManager, usageManager, statsManager, lobbyScoreboardManager, damageBuffManager,
                 armorTierManager, hatSelectionManager, broodMotherEntityManager,this, arenaMapManager,structureManager,songOfPowerManager, drawVoteManager,zombieEntityManager, skeletonEntityManager
         );
+        this.abilityConfigManager.setMatchManager(matchManager);
+        this.orbitShieldManager.setMatchManager(matchManager);
         this.combatService = new CombatService(
                 playerHealthManager, shieldManager, debuffManager, orbitShieldManager, damageBuffManager, matchManager,etherealBodyManager,
                 damageVulnerabilityManager
@@ -233,6 +232,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new BroodMotherHitListener(broodMotherEntityManager,cooldownManager), this);
         getServer().getPluginManager().registerEvents(new ZombieHitListener(zombieEntityManager,cooldownManager), this);
         getServer().getPluginManager().registerEvents(new SkeletonHitListener(skeletonEntityManager,cooldownManager), this);
+        Bukkit.getPluginManager().registerEvents(new SkeletonTargetListener(skeletonEntityManager), this);
         getServer().getPluginManager().registerEvents(new SkeletonArrowListener(skeletonEntityManager), this);
         debuffManager.registerListener(new PoisonListener(playerHealthManager));
         AntiHealListener antiHealListener = new AntiHealListener(playerHealthManager);
@@ -325,7 +325,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new DebuffTickTask(debuffManager).runTaskTimer(this, 0L, 2L);
         new PolymorphHealTask(debuffManager, playerHealthManager).runTaskTimer(this, 20L, 20L);
         new OrbitShieldOrbitTask(orbitShieldManager).runTaskTimer(this, 0L, 1L);
-        new OrbitShieldSoundTask(orbitShieldManager).runTaskTimer(this, 0L, 20L);
+        new OrbitShieldSoundTask(orbitShieldManager,matchManager).runTaskTimer(this, 0L, 20L);
         Bukkit.getScheduler().runTaskTimer(this, () -> {shieldManager.tick();;}, 0L, 1L);
         new PowerupTask(matchManager, playerHealthManager, damageBuffManager).runTaskTimer(this, 20L, 0L);
         new PowerupRotationTask(matchManager).runTaskTimer(this, 0L, 2L);

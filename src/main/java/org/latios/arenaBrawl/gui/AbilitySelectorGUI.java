@@ -199,6 +199,10 @@ public class AbilitySelectorGUI {
         };
     }
 
+    public void clearPreviewCache() {
+        previewCache.clear();
+    }
+
     private String pct(double value) {
         return num(value * 100) + "%";
     }

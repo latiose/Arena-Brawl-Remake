@@ -21,6 +21,7 @@ import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.PlacedStructure;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -33,7 +34,7 @@ public class GolemFall implements Ability {
     private final double impactRadius;
     private final double knockbackStrength;
     private final long cooldownMs;
-
+    private final AbilityConfig config;
     private final Plugin plugin;
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -52,6 +53,7 @@ public class GolemFall implements Ability {
         this.cost = new CooldownCost(cooldownManager, "golemfall", cooldownMs, upgradeManager);
         this.teamManager = teamManager;
         this.demolitionService = demolitionService;
+        this.config = config;
     }
 
     @Override
@@ -135,8 +137,9 @@ public class GolemFall implements Ability {
 
     private void triggerImpact(Player caster, Location impactLocation) {
         impactLocation.getWorld().spawnParticle(Particle.EXPLOSION, impactLocation, 3);
-        impactLocation.getWorld().playSound(impactLocation, Sound.BLOCK_ANVIL_LAND, 1.5f, 0.8f);
-        impactLocation.getWorld().playSound(impactLocation, Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
+        MatchSoundUtils.play(config, caster,Sound.BLOCK_ANVIL_LAND, 1.5f, 0.8f);
+        MatchSoundUtils.play(config, caster,Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
+
 
         List<PlacedStructure> nearbyStructures = demolitionService.findStructuresInRadius(impactLocation, impactRadius);
         for (PlacedStructure structure : nearbyStructures) {

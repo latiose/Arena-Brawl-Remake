@@ -7,7 +7,7 @@ import org.bukkit.potion.PotionEffectType;
 
 public class SlowListener implements DebuffListener {
 
-    private static final int AMPLIFIER = 1; // Slowness II
+    private static final int AMPLIFIER = 2; // Slowness II
 
     @Override
     public void onApplied(Player player, DebuffType type) {

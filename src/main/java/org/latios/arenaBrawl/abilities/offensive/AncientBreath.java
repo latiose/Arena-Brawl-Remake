@@ -21,15 +21,16 @@ public class AncientBreath extends Breath {
     private final long immoDurationTicks;
     private final double immoChance;
     private final double range;
-
+    private final AbilityConfig config;
     public AncientBreath(EnergyManager energyManager, TeamManager teamManager,
                          CombatService combatService, DebuffManager debuffManager, AbilityConfig config) {
-        super(energyManager, config.getDouble("energy-cost", 75.0), teamManager, combatService, debuffManager);
+        super(energyManager, config.getDouble("energy-cost", 75.0), teamManager, combatService, debuffManager,config.getMatchManager());
         this.damage = config.getDouble("damage", 185.0);
         this.energyCost = config.getDouble("energy-cost", 75.0);
         this.immoDurationTicks = config.getLong("immo-duration-ticks", 2000L);
         this.immoChance = config.getDouble("immo-chance", 0.50);
         this.range = config.getDouble("range", 8.0);
+        this.config = config;
     }
 
     @Override

@@ -14,6 +14,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class SpikeGrenade implements Ability {
     private final double step;
     private final int needleCount;
     private final double needleRange;
-
+    private final AbilityConfig config;
     private final Plugin plugin;
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -47,6 +48,7 @@ public class SpikeGrenade implements Ability {
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
+        this.config = config;
     }
 
     @Override
@@ -63,8 +65,8 @@ public class SpikeGrenade implements Ability {
     public boolean activate(Player player) {
         Location startLoc = player.getEyeLocation();
         Vector direction = startLoc.getDirection().normalize();
+        MatchSoundUtils.play(config, player, Sound.ENTITY_EGG_THROW, 1.2f, 0.7f);
 
-        player.getWorld().playSound(startLoc, Sound.ENTITY_EGG_THROW, 1.2f, 0.7f);
 
         new BukkitRunnable() {
             private Location currentLoc = startLoc.clone();
@@ -106,9 +108,10 @@ public class SpikeGrenade implements Ability {
         return true;
     }
 
-    private void explode(Player caster, Location center) {
-        center.getWorld().playSound(center, Sound.ENTITY_ITEM_BREAK, 1.4f, 0.5f);
-        center.getWorld().playSound(center, Sound.BLOCK_BONE_BLOCK_BREAK, 1.2f, 1.4f);
+    private void explode(Player caster, Location center)
+    {
+        MatchSoundUtils.play(config, caster, Sound.ENTITY_ITEM_BREAK, 1.4f, 0.5f);
+        MatchSoundUtils.play(config, caster, Sound.BLOCK_BONE_BLOCK_BREAK, 1.2f, 1.4f);
 
         center.getWorld().spawnParticle(Particle.ITEM_SLIME, center, 35, 0.4, 0.4, 0.4, 0.15);
         center.getWorld().spawnParticle(Particle.SCRAPE, center, 20, 0.3, 0.3, 0.3, 0.1);

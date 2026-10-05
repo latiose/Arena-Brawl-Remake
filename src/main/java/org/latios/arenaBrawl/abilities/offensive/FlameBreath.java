@@ -23,13 +23,14 @@ public class FlameBreath extends Breath {
     private final double damage;
     private final double tickDamage;
     private final double energyCost;
-
+    private final AbilityConfig config;
     public FlameBreath(Plugin plugin, EnergyManager energyManager, TeamManager teamManager,
                        CombatService combatService, AbilityConfig config) {
-        super(plugin, energyManager, config.getDouble("energy-cost", 60.0), teamManager, combatService, null);
+        super(plugin, energyManager, config.getDouble("energy-cost", 60.0), teamManager, combatService, null,config.getMatchManager());
         this.damage = config.getDouble("damage", 150.0);
         this.tickDamage = config.getDouble("tick-damage", 25.0);
         this.energyCost = config.getDouble("energy-cost", 60.0);
+        this.config = config;
     }
 
     @Override

@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -28,7 +29,7 @@ public class LightningStrike implements Ability {
     private final long immoDurationTicks;
     private final DebuffManager debuffManager;
     private final CombatService combatService;
-
+    private final AbilityConfig config;
     public LightningStrike(TeamManager teamManager, EnergyManager energyManager,
                            CombatService combatService, DebuffManager debuffManager, AbilityConfig config) {
         this.energyCost = config.getDouble("energy-cost", 70.0);
@@ -40,6 +41,7 @@ public class LightningStrike implements Ability {
         this.teamManager = teamManager;
         this.combatService = combatService;
         this.debuffManager = debuffManager;
+        this.config = config;
     }
 
     @Override
@@ -64,8 +66,7 @@ public class LightningStrike implements Ability {
         }
 
         target.getWorld().strikeLightningEffect(target.getLocation());
-        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.1f, 1.0f);
-
+        MatchSoundUtils.play(config, player,Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.1f, 1.0f);
         return true;
     }
 

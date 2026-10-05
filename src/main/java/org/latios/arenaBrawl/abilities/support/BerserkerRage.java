@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
@@ -26,7 +27,7 @@ public class BerserkerRage implements Ability {
     private final AbilityCost cost;
     private final PlayerHealthManager healthManager;
     private final DamageBuffManager damageBuffManager;
-
+    private final AbilityConfig config;
     public BerserkerRage(PlayerHealthManager healthManager,
                          DamageBuffManager damageBuffManager, CooldownManager cooldownManager, CombatUpgradeManager combatUpgradeManager,
                          AbilityConfig config) {
@@ -37,7 +38,9 @@ public class BerserkerRage implements Ability {
         this.cost = new CooldownCost(cooldownManager, "berserkerrage", cooldownMs, combatUpgradeManager);
         this.healthManager = healthManager;
         this.damageBuffManager = damageBuffManager;
+        this.config = config;
     }
+
 
     @Override
     public String getName() {
@@ -51,7 +54,7 @@ public class BerserkerRage implements Ability {
 
     @Override
     public String getDescription() {
-        return "Inflicts 50 self-damage to grant 20% bonus damage for 5 seconds. Does not stack.";
+        return "Inflicts self-damage to grant 20% bonus damage for 5 seconds. Does not stack.";
     }
 
     @Override
@@ -71,12 +74,12 @@ public class BerserkerRage implements Ability {
                 "§3Your Berserker Rage hit you §3for §c%d §3damage.",
                 (int) selfDamage
         ));
+
         damageBuffManager.applyBuff(player, damageIncrease, durationMs,"Berserker Rage");
 
         player.getWorld().spawnParticle(Particle.ANGRY_VILLAGER, player.getLocation().add(0, 1.5, 0), 10, 0.3, 0.4, 0.3, 0.0);
         player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 1, 0), 20, 0.2, 0.5, 0.2, 0.05);
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 0.6f, 1.5f);
-
+        MatchSoundUtils.play(config, player, Sound.ENTITY_ENDER_DRAGON_GROWL, 0.6f, 1.5f);
         return true;
     }
 }

@@ -15,6 +15,7 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -30,7 +31,7 @@ public class HealingWind implements Ability {
     private final double healPerSecond;
     private final long healDurationMillis;
     private final long chargeTimeMillis;
-
+    private final AbilityConfig config;
     private final CooldownManager cooldownManager;
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -50,6 +51,7 @@ public class HealingWind implements Ability {
         this.cost = new UltimateCost(cooldownManager, usageManager, "healingwind");
         this.teamManager = teamManager;
         this.healthManager = healthManager;
+        this.config = config;
     }
 
     @Override
@@ -96,7 +98,7 @@ public class HealingWind implements Ability {
         }
 
         center.getWorld().spawnParticle(Particle.CLOUD, center, 60, 3, 1, 3, 0.1);
-        center.getWorld().playSound(center, Sound.ENTITY_PHANTOM_FLAP, 1.5f, 0.6f);
+        MatchSoundUtils.play(config, player,Sound.ENTITY_PHANTOM_FLAP, 1.5f, 0.6f);
 
         new BukkitRunnable() {
             long elapsedMillis = 0;

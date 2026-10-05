@@ -12,10 +12,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
-import org.latios.arenaBrawl.general.CombatService;
-import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.EntityCleanupUtils;
-import org.latios.arenaBrawl.general.TrackedLivingProjectileTask;
+import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -31,7 +28,7 @@ public class RocketChicken implements Ability {
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
-
+    private final AbilityConfig config;
     public RocketChicken(EnergyManager energyManager, TeamManager teamManager,
                          CombatService combatService, AbilityConfig config) {
         this.damage = config.getDouble("damage", 80.0);
@@ -43,6 +40,7 @@ public class RocketChicken implements Ability {
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
+        this.config = config;
     }
 
     @Override
@@ -79,7 +77,7 @@ public class RocketChicken implements Ability {
         });
 
         EntityCleanupUtils.markAsArenaEntity(chicken);
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_CHICKEN_HURT, 1f, 1.4f);
+        MatchSoundUtils.play(config, player,Sound.ENTITY_CHICKEN_HURT, 1f, 1.4f);
 
         new TrackedLivingProjectileTask(
                 chicken, player, direction, launchSpeed, damage, directHitRadius, aoeRadius,

@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.general;
 
 import org.bukkit.entity.Player;
@@ -7,8 +6,11 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SpeedBuffManager {
 
@@ -29,18 +31,12 @@ public class SpeedBuffManager {
             return amplifier;
         }
 
-
-        public int getLevels() {
-            return amplifier + 1;
-        }
-
         public long getExpireTimeMillis() {
             return expireTimeMillis;
         }
 
-        public long getRemainingTicks() {
-            long remainingMs = expireTimeMillis - System.currentTimeMillis();
-            return Math.max(1L, (remainingMs + 49L) / 50L);
+        public boolean dominates(SpeedBuff other) {
+            return amplifier >= other.amplifier && expireTimeMillis >= other.expireTimeMillis;
         }
     }
 
@@ -52,18 +48,24 @@ public class SpeedBuffManager {
         startCleanupTask();
     }
 
-
     public void applyBuff(Player player, int amplifier, long durationMillis) {
         if (player == null || !player.isOnline()) return;
 
         UUID uuid = player.getUniqueId();
+        SpeedBuff incoming = new SpeedBuff(amplifier, durationMillis);
 
-        List<SpeedBuff> buffs = activeBuffs.computeIfAbsent(
-                uuid,
-                k -> Collections.synchronizedList(new ArrayList<>())
-        );
+        List<SpeedBuff> buffs = activeBuffs.computeIfAbsent(uuid, k -> new CopyOnWriteArrayList<>());
+        buffs.removeIf(SpeedBuff::isExpired);
 
-        buffs.add(new SpeedBuff(amplifier, durationMillis));
+        for (SpeedBuff existing : buffs) {
+            if (existing.dominates(incoming)) {
+                updatePlayerSpeed(player);
+                return;
+            }
+        }
+
+        buffs.removeIf(incoming::dominates);
+        buffs.add(incoming);
 
         updatePlayerSpeed(player);
     }
@@ -74,66 +76,38 @@ public class SpeedBuffManager {
         UUID uuid = player.getUniqueId();
         List<SpeedBuff> buffs = activeBuffs.get(uuid);
 
-        if (buffs == null || buffs.isEmpty()) {
+        if (buffs == null) {
             applyBaseSpeed(player);
-            activeBuffs.remove(uuid);
             return;
         }
 
-        synchronized (buffs) {
-            buffs.removeIf(SpeedBuff::isExpired);
-        }
+        buffs.removeIf(SpeedBuff::isExpired);
 
         if (buffs.isEmpty()) {
+            activeBuffs.remove(uuid, buffs);
             applyBaseSpeed(player);
-            activeBuffs.remove(uuid);
             return;
         }
 
-        List<SpeedBuff> sortedBuffs;
-
-        synchronized (buffs) {
-            sortedBuffs = new ArrayList<>(buffs);
+        int maxAmplifier = Integer.MIN_VALUE;
+        for (SpeedBuff buff : buffs) {
+            maxAmplifier = Math.max(maxAmplifier, buff.getAmplifier());
         }
 
-        sortedBuffs.sort(
-                Comparator.comparingLong(SpeedBuff::getExpireTimeMillis)
-        );
-
-        long now = System.currentTimeMillis();
-
-
-        int totalLevels = 0;
-        long earliestExpiration = Long.MAX_VALUE;
-
-        for (SpeedBuff buff : sortedBuffs) {
-            if (!buff.isExpired()) {
-                totalLevels += buff.getLevels();
-                earliestExpiration = Math.min(
-                        earliestExpiration,
-                        buff.getExpireTimeMillis()
-                );
+        long latestExpiration = 0L;
+        for (SpeedBuff buff : buffs) {
+            if (buff.getAmplifier() == maxAmplifier) {
+                latestExpiration = Math.max(latestExpiration, buff.getExpireTimeMillis());
             }
         }
 
-        if (totalLevels <= 0) {
-            applyBaseSpeed(player);
-            return;
-        }
-
-
-        int resultAmplifier = totalLevels - 1;
-
-        long remainingMs = Math.max(1L, earliestExpiration - now);
-        int durationTicks = (int) Math.max(
-                1L,
-                (remainingMs + 49L) / 50L
-        );
+        long remainingMs = Math.max(1L, latestExpiration - System.currentTimeMillis());
+        int durationTicks = (int) Math.max(1L, (remainingMs + 49L) / 50L);
 
         PotionEffect existing = player.getPotionEffect(PotionEffectType.SPEED);
 
         if (existing != null
-                && existing.getAmplifier() == resultAmplifier
+                && existing.getAmplifier() == maxAmplifier
                 && existing.getDuration() >= durationTicks - 1) {
             return;
         }
@@ -143,7 +117,7 @@ public class SpeedBuffManager {
         player.addPotionEffect(new PotionEffect(
                 PotionEffectType.SPEED,
                 durationTicks,
-                resultAmplifier,
+                maxAmplifier,
                 true,
                 false
         ));
@@ -185,7 +159,6 @@ public class SpeedBuffManager {
             }
         }.runTaskTimer(plugin, 10L, 2L);
     }
-
 
     public void clearBuffs(Player player) {
         if (player == null) return;

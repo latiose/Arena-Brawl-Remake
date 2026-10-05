@@ -19,13 +19,14 @@ public class EvilBreath extends Breath {
     private final double damage;
     private final double energyCost;
     private final long stunDurationTicks;
-
+    private final AbilityConfig config;
     public EvilBreath(EnergyManager energyManager, TeamManager teamManager,
                       CombatService combatService, DebuffManager debuffManager, AbilityConfig config) {
-        super(energyManager, config.getDouble("energy-cost", 100.0), teamManager, combatService, debuffManager);
+        super(energyManager, config.getDouble("energy-cost", 100.0), teamManager, combatService, debuffManager,config.getMatchManager());
         this.damage = config.getDouble("damage", 210.0);
         this.energyCost = config.getDouble("energy-cost", 100.0);
         this.stunDurationTicks = config.getLong("stun-duration-ticks", 1000L);
+        this.config = config;
     }
 
     @Override

@@ -19,14 +19,15 @@ public class HeavensBreath extends Breath {
     private final double energyCost;
     private final double healAmount;
     private final PlayerHealthManager healthManager;
-
+    private final AbilityConfig config;
     public HeavensBreath(EnergyManager energyManager, TeamManager teamManager,
                          CombatService combatService, PlayerHealthManager healthManager, AbilityConfig config) {
-        super(energyManager, config.getDouble("energy-cost", 100.0), teamManager, combatService, null);
+        super(energyManager, config.getDouble("energy-cost", 100.0), teamManager, combatService, null,config.getMatchManager());
         this.damage = config.getDouble("damage", 190.0);
         this.energyCost = config.getDouble("energy-cost", 100.0);
         this.healAmount = config.getDouble("heal-amount", 50.0);
         this.healthManager = healthManager;
+        this.config = config;
     }
 
     @Override

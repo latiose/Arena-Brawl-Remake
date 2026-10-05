@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class LifeLeech implements Ability {
     private final long durationMillis;
     private final long cooldownMs;
     private final double healPerHit;
-
+    private final AbilityConfig config;
     private final AbilityCost cost;
     private final LifeLeechManager lifeLeechManager;
 
@@ -36,6 +37,7 @@ public class LifeLeech implements Ability {
 
         this.cost = new CooldownCost(cooldownManager, "lifeleech", cooldownMs, upgradeManager);
         this.lifeLeechManager = lifeLeechManager;
+        this.config = config;
     }
 
     @Override
@@ -62,7 +64,7 @@ public class LifeLeech implements Ability {
     @Override
     public boolean activate(Player player) {
         lifeLeechManager.activate(player, hitCount, durationMillis);
-        player.getLocation().getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_HURT, 1.0f, 1.0f);
+        MatchSoundUtils.play(config, player,  Sound.ENTITY_ENDERMAN_HURT, 1.0f, 1.0f);
         startAmbientParticles(player);
         return true;
     }

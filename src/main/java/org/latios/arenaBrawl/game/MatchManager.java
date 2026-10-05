@@ -163,6 +163,8 @@ public class MatchManager {
         }
     }
 
+
+
     private void applyRatingChanges(List<Player> winners, List<Player> losers) {
         double losersAvg = losers.stream().mapToDouble(ratingManager::getRating).average().orElse(1000.0);
         double winnersAvg = winners.stream().mapToDouble(ratingManager::getRating).average().orElse(1000.0);

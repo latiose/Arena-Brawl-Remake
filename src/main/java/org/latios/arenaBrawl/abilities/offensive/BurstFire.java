@@ -14,6 +14,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -28,16 +29,17 @@ public class BurstFire implements Ability {
     private final TeamManager teamManager;
     private final CombatService combatService;
     private final Plugin plugin;
-
+    private final AbilityConfig config;
     public BurstFire(Plugin plugin, EnergyManager energyManager, TeamManager teamManager,
                      CombatService combatService, AbilityConfig config) {
         this.plugin = plugin;
         this.damage = config.getDouble("damage", 55.0);
-        this.maxRange = config.getDouble("max-range", 5.0);
+        this.maxRange = config.getDouble("max-range", 10.0);
         this.energyCost = config.getDouble("energy-cost", 20.0);
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
+        this.config = config;
     }
 
     @Override
@@ -51,8 +53,8 @@ public class BurstFire implements Ability {
         Location startLoc = player.getEyeLocation().subtract(0, 0.2, 0);
         Vector direction = startLoc.getDirection().normalize();
 
-        player.getWorld().playSound(startLoc, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 0.8f, 1.8f);
-        player.getWorld().playSound(startLoc, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 2.0f);
+        MatchSoundUtils.play(config, player, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 0.8f, 1.8f);
+        MatchSoundUtils.play(config, player, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 2.0f);
 
         new BukkitRunnable() {
             int shotsFired = 0;

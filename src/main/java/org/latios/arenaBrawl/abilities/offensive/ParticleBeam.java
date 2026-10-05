@@ -14,6 +14,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -31,7 +32,7 @@ public class ParticleBeam implements Ability {
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
-
+    private final AbilityConfig config;
     public ParticleBeam(EnergyManager energyManager, TeamManager teamManager,
                         CombatService combatService, AbilityConfig config) {
         this.damage = config.getDouble("damage", 130.0);
@@ -43,6 +44,7 @@ public class ParticleBeam implements Ability {
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
+        this.config = config;
     }
 
     @Override
@@ -96,8 +98,7 @@ public class ParticleBeam implements Ability {
                 }
             }
         }
-
-        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 2f);
+        MatchSoundUtils.play(config, player,Sound.BLOCK_BEACON_POWER_SELECT, 2f, 2f);
 
         for (Player victim : hitEnemies) {
             combatService.applyAbilityDamage(player, victim, damage, getName());

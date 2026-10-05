@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.debuffs;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
@@ -34,6 +35,9 @@ public class DebuffManager {
 
     public boolean tryApply(Player attacker, Player victim, DebuffType type, long durationMillis) {
         if (songOfPowerManager != null && songOfPowerManager.isActive(victim)) {
+            return false;
+        }
+        if(victim.getGameMode() == GameMode.SPECTATOR) {
             return false;
         }
         if (hasActiveDebuff(victim)) {

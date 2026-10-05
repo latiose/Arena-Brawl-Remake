@@ -1,15 +1,20 @@
 package org.latios.arenaBrawl.abilities.config;
 
 import org.bukkit.configuration.ConfigurationSection;
+import org.latios.arenaBrawl.game.MatchManager;
 
 public class AbilityConfig {
-
+    private MatchManager matchManager;
     private final ConfigurationSection section; // may be null if this ability has no config entries
 
-    public AbilityConfig(ConfigurationSection section) {
+    public AbilityConfig(ConfigurationSection section, MatchManager matchManager) {
         this.section = section;
+        this.matchManager = matchManager;
     }
 
+    public MatchManager getMatchManager() {
+        return matchManager;
+    }
     public double getDouble(String key, double defaultValue) {
         return section != null ? section.getDouble(key, defaultValue) : defaultValue;
     }

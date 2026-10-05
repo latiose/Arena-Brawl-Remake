@@ -39,6 +39,7 @@ public class ReloadAbilitiesCommand implements CommandExecutor {
         }
 
         configManager.reload();
+        abilitySelectorGUI.clearPreviewCache();
         abilityRegistry.clearPreviewCache();
         runeConfigManager.reload();
         hatConfigManager.reload();
