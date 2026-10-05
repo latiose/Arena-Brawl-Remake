@@ -29,7 +29,6 @@ public class Polymorph implements Ability {
         this.durationMillis = config.getLong("duration-ms", 6500L);
         this.range = config.getDouble("range", 20.0);
         this.cooldownMs = config.getLong("cooldown-ms", 40000L);
-        org.bukkit.Bukkit.getLogger().info("[ArenaBrawl] Polymorph duration-ms=" + config.getLong("duration-ms", -1L));
         this.cost = new CooldownCost(cooldownManager, "polymorph", cooldownMs, combatUpgradeManager);
         this.teamManager = teamManager;
         this.debuffManager = debuffManager;

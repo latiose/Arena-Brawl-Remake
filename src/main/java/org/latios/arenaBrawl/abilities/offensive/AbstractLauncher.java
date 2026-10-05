@@ -54,8 +54,8 @@ public abstract class AbstractLauncher implements Ability {
             s.getEquipment().setHelmet(new ItemStack(getHeadMaterial()));
         });
 
-        Vector velocity = player.getLocation().getDirection().multiply(1.2);
-        velocity.setY(velocity.getY() + 0.2);
+        Vector velocity = player.getLocation().getDirection().multiply(1.45);
+        velocity.setY(velocity.getY());
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 1, 1.2f);
 

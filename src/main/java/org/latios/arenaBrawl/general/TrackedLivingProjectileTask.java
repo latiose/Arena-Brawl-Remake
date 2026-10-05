@@ -35,7 +35,7 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
     private final Sound impactSound;
     private final float soundVolume;
     private final float soundPitch;
-
+    private final boolean explosion;
     private int ticksElapsed = 0;
 
     public TrackedLivingProjectileTask(LivingEntity entity, Player shooter, Vector direction, double speed,
@@ -43,6 +43,15 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
                                        String abilityName, TeamManager teamManager, CombatService combatService,
                                        Particle impactParticle, int particleCount,
                                        Sound impactSound, float soundVolume, float soundPitch) {
+        this(entity, shooter, direction, speed, damage, hitRadius, aoeRadius, abilityName,
+                teamManager, combatService, impactParticle, particleCount, impactSound, soundVolume, soundPitch, false);
+    }
+
+    public TrackedLivingProjectileTask(LivingEntity entity, Player shooter, Vector direction, double speed,
+                                       double damage, double hitRadius, double aoeRadius,
+                                       String abilityName, TeamManager teamManager, CombatService combatService,
+                                       Particle impactParticle, int particleCount,
+                                       Sound impactSound, float soundVolume, float soundPitch, boolean explosion) {
         this.entity = entity;
         this.shooter = shooter;
         this.speed = speed;
@@ -58,6 +67,7 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
         this.impactSound = impactSound;
         this.soundVolume = soundVolume;
         this.soundPitch = soundPitch;
+        this.explosion = explosion;
     }
 
     @Override
@@ -98,7 +108,7 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
     private void explode(Player directHitVictim) {
         cancel();
 
-        Set<Player> alreadyHit = new HashSet<>();
+        Set alreadyHit = new HashSet<>();
         combatService.applyAbilityDamage(shooter, directHitVictim, damage, abilityName, entity.getLocation());
         alreadyHit.add(directHitVictim);
 
@@ -115,7 +125,7 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
         entity.remove();
     }
 
-    private void applyAoeDamage(Set<Player> alreadyHit) {
+    private void applyAoeDamage(Set alreadyHit) {
         if (aoeRadius <= 0) return;
 
         for (Entity nearby : entity.getNearbyEntities(aoeRadius, aoeRadius, aoeRadius)) {
@@ -129,6 +139,9 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
     }
 
     private void spawnImpactEffects() {
+        if (explosion) {
+            entity.getWorld().createExplosion(entity.getLocation(), 0.0f, false, false);
+        }
         if (impactParticle != null && particleCount > 0) {
             entity.getWorld().spawnParticle(impactParticle, entity.getLocation(), particleCount);
         }

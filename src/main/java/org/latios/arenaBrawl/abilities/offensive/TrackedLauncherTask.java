@@ -27,7 +27,6 @@ public class TrackedLauncherTask extends BukkitRunnable {
     private final TeamManager teamManager;
     private final CombatService combatService;
     private Vector velocity;
-    private int ticksLived = 0;
 
     public TrackedLauncherTask(ArmorStand armorStand, Vector velocity, Player shooter, double mainDamage, double sliceDamage,
                                double aoeRadius, String abilityName, Material headMaterial, Material sliceMaterial,
@@ -46,15 +45,14 @@ public class TrackedLauncherTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        ticksLived++;
 
-        if (!armorStand.isValid() || ticksLived > 100) {
+        if (!armorStand.isValid()) {
             cancel();
             armorStand.remove();
             return;
         }
 
-        velocity.setY(velocity.getY() - 0.04);
+        velocity.setY(velocity.getY() - 0.03);
         Location nextLoc = armorStand.getLocation().add(velocity);
         armorStand.teleport(nextLoc);
 

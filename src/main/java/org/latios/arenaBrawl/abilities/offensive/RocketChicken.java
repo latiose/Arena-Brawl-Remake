@@ -83,7 +83,7 @@ public class RocketChicken implements Ability {
                 chicken, player, direction, launchSpeed, damage, directHitRadius, aoeRadius,
                 getName(), teamManager, combatService,
                 Particle.POOF, 15,
-                Sound.ENTITY_CHICKEN_HURT, 1.0f, 0.6f
+                Sound.ENTITY_CHICKEN_HURT, 1.0f, 0.6f,true
         ).runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
 
         return true;
