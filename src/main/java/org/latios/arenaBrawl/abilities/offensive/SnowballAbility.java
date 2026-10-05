@@ -24,6 +24,7 @@ public class SnowballAbility implements Ability {
     private final double energyCost;
     private final long slowDurationTicks;
     private final double slowChance;
+    private final double speedMultiplier;
 
     private final AbilityCost cost;
     private final DebuffManager debuffManager;
@@ -36,6 +37,7 @@ public class SnowballAbility implements Ability {
         this.energyCost = config.getDouble("energy-cost", 20.0);
         this.slowDurationTicks = config.getLong("slow-duration-ticks", 2000L);
         this.slowChance = config.getDouble("slow-chance", 0.20);
+        this.speedMultiplier = config.getDouble("speed-multiplier", 1.2);
 
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
@@ -52,7 +54,7 @@ public class SnowballAbility implements Ability {
     @Override
     public boolean activate(Player player) {
         Snowball snowball = AbilityProjectileFactory.launchAoe(
-                player, Snowball.class, damage, getName(), 0
+                player, Snowball.class, damage, getName(), 0, speedMultiplier
         );
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1.0f, 1.0f);
         new TrackedProjectileTask(snowball, player, damage, 1, getName(), teamManager, combatService, debuffManager, DebuffType.SLOW, slowDurationTicks, slowChance, ProjectileImpactEffect.SNOWBALL)
@@ -66,7 +68,7 @@ public class SnowballAbility implements Ability {
     }
 
     @Override
-    public List<AbilityStat> getStats() {
+    public List getStats() {
         return List.of(
                 new AbilityStat("Damage", String.valueOf((int) damage)),
                 new AbilityStat("Energy Cost", (int) energyCost + ""),

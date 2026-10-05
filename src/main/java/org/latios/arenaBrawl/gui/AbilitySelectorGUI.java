@@ -1,11 +1,12 @@
-
 package org.latios.arenaBrawl.gui;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jspecify.annotations.NonNull;
@@ -14,12 +15,26 @@ import org.latios.arenaBrawl.runes.RuneConfig;
 import org.latios.arenaBrawl.runes.RuneConfigManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class AbilitySelectorGUI {
+
+    public static final int INVENTORY_SIZE = 54;
+    public static final int ITEMS_PER_PAGE = 45;
+    public static final int PREVIOUS_PAGE_SLOT = 48;
+    public static final int NEXT_PAGE_SLOT = 50;
+
+    public static final int HATS_SLOT = 29;
+    public static final int RUNE_SLOT = 31;
+    public static final int UPGRADES_SLOT = 33;
+
+    private static final int ABILITY_ROW = 1;
+    private static final int RUNE_ROW = 2;
+
     private final RuneSelectionManager runeSelectionManager;
     private final AbilityRegistry registry;
     private final AbilitySelectionManager selectionManager;
@@ -27,51 +42,109 @@ public class AbilitySelectorGUI {
     private final Map<String, Ability> previewCache = new HashMap<>();
     private final RuneConfigManager runeConfigManager;
     private final AbilityIconRegistry abilityIconRegistry;
-    public Ability createPreview(AbilitySlot slot, String id) {
-        return previewCache.computeIfAbsent(slot.name() + ":" + id, k -> registry.create(slot, id,previewDependencies));
-    }
-    public void setPreviewDependencies(AbilityDependencies deps) {
-        this.previewDependencies = deps;
-    }
 
-
-
-    public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager, RuneSelectionManager runeSelectionManager,RuneConfigManager runeConfig,AbilityIconRegistry abilityIconRegistry) {
+    public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager,
+                              RuneSelectionManager runeSelectionManager, RuneConfigManager runeConfig,
+                              AbilityIconRegistry abilityIconRegistry) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.runeSelectionManager = runeSelectionManager;
         this.runeConfigManager = runeConfig;
         this.abilityIconRegistry = abilityIconRegistry;
     }
-    public void openSlotMenu(Player player, AbilitySlot slot) {
-        List<String> ids = new ArrayList<>(registry.getAvailableIds(slot));
 
-        Inventory inv = Bukkit.createInventory(new AbilitySelectorHolder(slot), 27, "Choose: " + slot.name());
+    public Ability createPreview(AbilitySlot slot, String id) {
+        return previewCache.computeIfAbsent(slot.name() + ":" + id, k -> registry.create(slot, id, previewDependencies));
+    }
+
+    public void setPreviewDependencies(AbilityDependencies deps) {
+        this.previewDependencies = deps;
+    }
+
+    public void clearPreviewCache() {
+        previewCache.clear();
+    }
+
+    public static int getTotalPages(int itemCount) {
+        return Math.max(1, (int) Math.ceil(itemCount / (double) ITEMS_PER_PAGE));
+    }
+
+    public static int getContentSlot(int index) {
+        return index % ITEMS_PER_PAGE;
+    }
+
+    public static int getContentIndex(int rawSlot, int page) {
+        if (rawSlot < 0 || rawSlot >= ITEMS_PER_PAGE) {
+            return -1;
+        }
+        return page * ITEMS_PER_PAGE + rawSlot;
+    }
+
+    public static int getMainMenuSlot(AbilitySlot slot) {
+        return centeredRow(ABILITY_ROW, AbilitySlot.values().length)[slot.ordinal()];
+    }
+
+    public static AbilitySlot getMainMenuAbilitySlot(int rawSlot) {
+        for (AbilitySlot slot : AbilitySlot.values()) {
+            if (getMainMenuSlot(slot) == rawSlot) {
+                return slot;
+            }
+        }
+        return null;
+    }
+
+    public static int getRuneMenuSlot(int runeOrdinal) {
+        return centeredRow(RUNE_ROW, RuneType.values().length)[runeOrdinal];
+    }
+
+    public static RuneType getRuneAtMenuSlot(int rawSlot) {
+        RuneType[] runes = RuneType.values();
+        for (int i = 0; i < runes.length; i++) {
+            if (getRuneMenuSlot(i) == rawSlot) {
+                return runes[i];
+            }
+        }
+        return null;
+    }
+
+    public void openSlotMenu(Player player, AbilitySlot slot) {
+        openSlotMenu(player, slot, 0);
+    }
+
+    public void openSlotMenu(Player player, AbilitySlot slot, int page) {
+        List<String> ids = new ArrayList<>(registry.getAvailableIds(slot));
+        int totalPages = PaginationUtil.totalPages(ids.size());
+        int currentPage = PaginationUtil.clampPage(page, ids.size());
+
+        Inventory inv = Bukkit.createInventory(
+                new AbilitySelectorHolder(slot, false, currentPage),
+                PaginationUtil.INVENTORY_SIZE,
+                PaginationUtil.title("Choose: " + slot.name(), currentPage, totalPages));
 
         String current = selectionManager.getSelection(player, slot);
 
-        for (int i = 0; i < ids.size() && i < 27; i++) {
+        int start = PaginationUtil.firstIndex(currentPage);
+        int end = PaginationUtil.lastIndexExclusive(currentPage, ids.size());
+
+        for (int i = start; i < end; i++) {
             String id = ids.get(i);
             boolean selected = id.equals(current);
 
-            Ability preview = createPreview(slot,id);
+            Ability preview = createPreview(slot, id);
 
-            Material icon = abilityIconRegistry.getIcon(slot, id);
-            ItemStack item = new ItemStack(icon);
+            ItemStack item = new ItemStack(abilityIconRegistry.getIcon(slot, id));
             ItemMeta meta = item.getItemMeta();
 
-            String prefix = selected ? "§a✔ " : "§f";
-            meta.setDisplayName(prefix + preview.getName());
+            meta.setDisplayName((selected ? "§a✔ " : "§f") + preview.getName());
 
             if (selected) {
-                meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 1, true);
-                meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+                meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
 
             List<String> lore = new ArrayList<>();
             lore.add("");
 
-            // Stats block
             List<AbilityStat> stats = preview.getStats();
             if (!stats.isEmpty()) {
                 for (AbilityStat stat : stats) {
@@ -80,14 +153,12 @@ public class AbilitySelectorGUI {
                 lore.add("");
             }
 
-            // Base cost, if the AbilityCost provides one and it isn't already covered by a manual stat
             String baseCost = preview.getCost().getBaseCostDescription();
             if (!baseCost.isEmpty()) {
                 lore.add("§b" + baseCost);
                 lore.add("");
             }
 
-            // Description block
             for (String line : wrapText(preview.getDescription(), 40)) {
                 lore.add("§7" + line);
             }
@@ -97,59 +168,71 @@ public class AbilitySelectorGUI {
             meta.setLore(lore);
 
             item.setItemMeta(meta);
-            inv.setItem(i, item);
+            inv.setItem(PaginationUtil.slotOf(i), item);
         }
 
+        PaginationUtil.addNavigation(inv, currentPage, totalPages);
         player.openInventory(inv);
     }
 
     public void openMainMenu(Player player) {
-        Inventory inv = Bukkit.createInventory(new AbilitySelectorHolder(null), 18, "Selection Menu");
+        Inventory inv = Bukkit.createInventory(new AbilitySelectorHolder(null), INVENTORY_SIZE, "Selection Menu");
 
         for (AbilitySlot slot : AbilitySlot.values()) {
             String current = selectionManager.getSelection(player, slot);
             ItemStack item = new ItemStack(Material.BOOK);
             ItemMeta meta = item.getItemMeta();
             meta.setDisplayName("§e" + slot.name());
-            meta.setLore(List.of("§7Current: §f" + prettify(current)));
+            meta.setLore(List.of("", "§7Current: §f" + prettify(current), "", "§eClick to change"));
             item.setItemMeta(meta);
-            inv.setItem(slot.ordinal() * 2, item); // slots 0, 2, 4, 6
+            inv.setItem(getMainMenuSlot(slot), item);
         }
-
-        // Rune section, placed in the last slot
-        RuneType currentRune = runeSelectionManager.getSelection(player);
-        ItemStack runeItem = new ItemStack(Material.NETHER_STAR);
-        ItemMeta runeMeta = runeItem.getItemMeta();
-        runeMeta.setDisplayName("§dRune");
-        runeMeta.setLore(List.of("§7Current: §f" + currentRune.getDisplayName()));
-        runeItem.setItemMeta(runeMeta);
-        inv.setItem(8, runeItem);
 
         ItemStack hatItem = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta hatMeta = hatItem.getItemMeta();
         hatMeta.setDisplayName("§dHats");
-        hatMeta.setLore(List.of("§7Click to choose your hat"));
+        hatMeta.setLore(List.of("", "§7Click to choose your hat"));
         hatItem.setItemMeta(hatMeta);
-        inv.setItem(7, hatItem);
+        inv.setItem(HATS_SLOT, hatItem);
+
+        RuneType currentRune = runeSelectionManager.getSelection(player);
+        ItemStack runeItem = new ItemStack(Material.NETHER_STAR);
+        ItemMeta runeMeta = runeItem.getItemMeta();
+        runeMeta.setDisplayName("§dRune");
+        runeMeta.setLore(List.of("", "§7Current: §f" + currentRune.getDisplayName(), "", "§eClick to change"));
+        runeItem.setItemMeta(runeMeta);
+        inv.setItem(RUNE_SLOT, runeItem);
 
         ItemStack upgradesItem = new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
         ItemMeta upgradesMeta = upgradesItem.getItemMeta();
         upgradesMeta.setDisplayName("§6Combat Upgrades");
-        upgradesMeta.setLore(List.of("§7Click to improve your combat stats"));
+        upgradesMeta.setLore(List.of("", "§7Click to improve your combat stats"));
         upgradesItem.setItemMeta(upgradesMeta);
-        inv.setItem(13, upgradesItem);
+        inv.setItem(UPGRADES_SLOT, upgradesItem);
 
         player.openInventory(inv);
     }
 
-    /** Opens the rune selection submenu, mirroring openSlotMenu's structure for ability slots. */
     public void openRuneMenu(Player player) {
+        openRuneMenu(player, 0);
+    }
+
+    public void openRuneMenu(Player player, int page) {
         RuneType[] runes = RuneType.values();
-        Inventory inv = Bukkit.createInventory(new AbilitySelectorHolder(null, true), 27, "Choose a Rune");
+        int totalPages = PaginationUtil.totalPages(runes.length);
+        int currentPage = PaginationUtil.clampPage(page, runes.length);
+
+        Inventory inv = Bukkit.createInventory(
+                new AbilitySelectorHolder(null, true, currentPage),
+                PaginationUtil.INVENTORY_SIZE,
+                PaginationUtil.title("Choose a Rune", currentPage, totalPages));
 
         RuneType current = runeSelectionManager.getSelection(player);
 
-        for (int i = 0; i < runes.length; i++) {
+        int start = PaginationUtil.firstIndex(currentPage);
+        int end = PaginationUtil.lastIndexExclusive(currentPage, runes.length);
+
+        for (int i = start; i < end; i++) {
             RuneType rune = runes[i];
             boolean selected = rune == current;
 
@@ -168,15 +251,9 @@ public class AbilitySelectorGUI {
                     lore.add("§bDuration: §f" + seconds(cfg.getLong("duration-ticks", 60)));
                     lore.add("§bSpeed level: §f" + (cfg.getInt("amplifier", 2) + 1));
                 }
-                case SLOW -> {
-                    lore.add("§bDuration: §f" + secondsSlow(cfg.getLong("duration-ticks", 3000)));
-                }
-                case DAMAGE -> {
-                    lore.add("§bDamage multiplier: §fx" + num(cfg.getDouble("damage-multiplier", 2.0)));
-                }
-                case ENERGY -> {
-                    lore.add("§bEnergy gained: §f+" + num(cfg.getDouble("energy-amount", 10.0)));
-                }
+                case SLOW -> lore.add("§bDuration: §f" + secondsSlow(cfg.getLong("duration-ticks", 3000)));
+                case DAMAGE -> lore.add("§bDamage multiplier: §fx" + num(cfg.getDouble("damage-multiplier", 2.0)));
+                case ENERGY -> lore.add("§bEnergy gained: §f+" + num(cfg.getDouble("energy-amount", 10.0)));
                 default -> { }
             }
 
@@ -185,10 +262,31 @@ public class AbilitySelectorGUI {
             meta.setLore(lore);
 
             item.setItemMeta(meta);
-            inv.setItem(i, item);
+            inv.setItem(PaginationUtil.slotOf(i), item);
         }
 
+        PaginationUtil.addNavigation(inv, currentPage, totalPages);
         player.openInventory(inv);
+    }
+
+    private ItemStack createArrow(String name, int targetPage, int totalPages) {
+        ItemStack arrow = new ItemStack(Material.ARROW);
+        ItemMeta meta = arrow.getItemMeta();
+        meta.setDisplayName(name);
+        meta.setLore(List.of("", "§7Page §f" + targetPage + "§7/§f" + totalPages));
+        arrow.setItemMeta(meta);
+        return arrow;
+    }
+
+    private static int[] centeredRow(int row, int count) {
+        int spacing = count <= 4 ? 2 : 1;
+        int width = (count - 1) * spacing + 1;
+        int start = Math.max(0, (9 - width) / 2);
+        int[] positions = new int[count];
+        for (int i = 0; i < count; i++) {
+            positions[i] = row * 9 + start + i * spacing;
+        }
+        return positions;
     }
 
     private double defaultProcChance(RuneType rune) {
@@ -197,10 +295,6 @@ public class AbilitySelectorGUI {
             case SLOW, ENERGY -> 0.15;
             case DAMAGE -> 0.48;
         };
-    }
-
-    public void clearPreviewCache() {
-        previewCache.clear();
     }
 
     private String pct(double value) {
@@ -221,15 +315,17 @@ public class AbilitySelectorGUI {
                 : String.format(java.util.Locale.US, "%.1f", value);
     }
 
-
-
     private String prettify(String id) {
         return id.substring(0, 1).toUpperCase() + id.substring(1);
     }
 
-    public record AbilitySelectorHolder(AbilitySlot slot, boolean isRuneMenu) implements InventoryHolder {
+    public record AbilitySelectorHolder(AbilitySlot slot, boolean isRuneMenu, int page) implements InventoryHolder {
         public AbilitySelectorHolder(AbilitySlot slot) {
-            this(slot, false);
+            this(slot, false, 0);
+        }
+
+        public AbilitySelectorHolder(AbilitySlot slot, boolean isRuneMenu) {
+            this(slot, isRuneMenu, 0);
         }
 
         @Override

@@ -29,13 +29,23 @@ public class AbilityProjectileFactory {
     public static <T extends Projectile> T launchAoe(
             Player shooter, Class<T> projectileType, double damage, String abilityName, double radius) {
 
+        return launchAoe(shooter, projectileType, damage, abilityName, radius, 1.0);
+    }
+
+    public static <T extends Projectile> T launchAoe(
+            Player shooter, Class<T> projectileType, double damage, String abilityName, double radius,double speedMultiplier) {
+
         T projectile = shooter.launchProjectile(projectileType);
+        if (speedMultiplier != 1.0) {
+            projectile.setVelocity(projectile.getVelocity().multiply(speedMultiplier));
+        }
         tagDamage(projectile, damage, abilityName);
         projectile.getPersistentDataContainer().set(
                 AbilityItemKeys.PROJECTILE_AOE_RADIUS, PersistentDataType.DOUBLE, radius
         );
         return projectile;
     }
+
 
     private static void tagDamage(Projectile projectile, double damage, String abilityName) {
         projectile.getPersistentDataContainer().set(

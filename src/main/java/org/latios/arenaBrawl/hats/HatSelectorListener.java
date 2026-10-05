@@ -1,10 +1,10 @@
-
 package org.latios.arenaBrawl.hats;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.latios.arenaBrawl.gui.PaginationUtil;
 
 import java.util.List;
 
@@ -20,14 +20,30 @@ public class HatSelectorListener implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (!(event.getInventory().getHolder() instanceof HatSelectorGUI.HatSelectorHolder)) return;
+        if (!(event.getInventory().getHolder() instanceof HatSelectorGUI.HatSelectorHolder holder)) return;
 
         event.setCancelled(true);
+
+        if (event.getClickedInventory() == null || !event.getClickedInventory().equals(event.getView().getTopInventory())) {
+            return;
+        }
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (event.getCurrentItem() == null) return;
 
         List<HatDefinition> hats = gui.getOrderedHats();
-        int index = event.getSlot();
+        int totalPages = PaginationUtil.totalPages(hats.size());
+        int rawSlot = event.getRawSlot();
+
+        if (PaginationUtil.isPrevious(rawSlot, holder.page())) {
+            gui.open(player, holder.page() - 1);
+            return;
+        }
+        if (PaginationUtil.isNext(rawSlot, holder.page(), totalPages)) {
+            gui.open(player, holder.page() + 1);
+            return;
+        }
+
+        int index = PaginationUtil.indexOf(rawSlot, holder.page());
         if (index < 0 || index >= hats.size()) return;
 
         HatDefinition clicked = hats.get(index);
@@ -47,7 +63,7 @@ public class HatSelectorListener implements Listener {
             player.sendMessage("§aYou equipped " + clicked.rarity().getColor() + clicked.displayName() + "§a!");
         }
 
-        HatEquipUtils.applyEquippedHat(player, hatSelectionManager); // <-- actually puts it on the player's head
-        gui.open(player);
+        HatEquipUtils.applyEquippedHat(player, hatSelectionManager);
+        gui.open(player, holder.page());
     }
 }

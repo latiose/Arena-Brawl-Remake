@@ -103,7 +103,7 @@ public class AbilityRegistry {
                 deps -> new Corruption(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), deps.debuffManager(), configManager.get("corruption")));
         register(AbilitySlot.UTILITY, "magneticImpulse",
                 deps -> new MagneticImpulse(plugin, deps.cooldownManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("magneticImpulse")));
-        register(AbilitySlot.UTILITY, "RocketGrab",
+        register(AbilitySlot.UTILITY, "rocketgrab",
                 deps -> new RocketGrab(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("rocketgrab")));
         register(AbilitySlot.UTILITY, "darkpassage",
                 deps -> new DarkPassage(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("darkpassage")));
@@ -115,6 +115,8 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "skittles",
                 deps -> new Skittles(deps.cooldownManager(), deps.combatUpgradeManager(),
                         deps.playerHealthManager(), deps.damageBuffManager(), deps.energyManager(), deps.debuffManager(), deps.speedBuffManager(), configManager.get("skittles")));
+        register(AbilitySlot.UTILITY, "primalroar",
+                deps -> new PrimalRoar(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.shieldManager(), deps.debuffManager(), deps.teamManager(), configManager.get("primalroar")));
 
         // --- SUPPORT ---
         register(AbilitySlot.SUPPORT, "holywater",

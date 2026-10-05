@@ -47,7 +47,7 @@ public abstract class AbstractLauncher implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        ArmorStand stand = player.getWorld().spawn(player.getEyeLocation().subtract(0, 1.2, 0), ArmorStand.class, s -> {
+        ArmorStand stand = player.getWorld().spawn(player.getEyeLocation().subtract(0, 0.9, 0), ArmorStand.class, s -> {
             s.setVisible(false);
             s.setGravity(false);
             s.setMarker(true);

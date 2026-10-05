@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.upgrades;
 
 import org.bukkit.entity.Player;
@@ -21,16 +20,16 @@ public class CombatUpgradeListener implements Listener {
         if (!(event.getInventory().getHolder() instanceof CombatUpgradeGUI.CombatUpgradeHolder)) return;
 
         event.setCancelled(true);
+
+        if (event.getClickedInventory() == null || !event.getClickedInventory().equals(event.getView().getTopInventory())) {
+            return;
+        }
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (event.getCurrentItem() == null) return;
 
-        int slot = event.getSlot();
-        CombatUpgradeType[] types = CombatUpgradeType.values();
+        CombatUpgradeType type = CombatUpgradeGUI.getTypeAt(event.getRawSlot());
+        if (type == null) return;
 
-        int index = slot / 2;
-        if (slot % 2 != 0 || index >= types.length) return; // ignore filler/coins slot
-
-        CombatUpgradeType type = types[index];
         CombatUpgradeManager.PurchaseResult result = upgradeManager.purchase(player, type);
 
         switch (result) {
@@ -40,6 +39,6 @@ public class CombatUpgradeListener implements Listener {
             case MAXED_OUT -> player.sendMessage("§7This upgrade is already at max level.");
         }
 
-        gui.open(player); // refresh to show updated level/cost
+        gui.open(player);
     }
 }

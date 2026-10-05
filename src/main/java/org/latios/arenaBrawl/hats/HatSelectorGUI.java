@@ -1,4 +1,3 @@
-
 package org.latios.arenaBrawl.hats;
 
 import org.bukkit.Bukkit;
@@ -11,15 +10,18 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jspecify.annotations.NonNull;
+import org.latios.arenaBrawl.gui.PaginationUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class HatSelectorGUI {
 
-    public record HatSelectorHolder() implements InventoryHolder {
+    public record HatSelectorHolder(int page) implements InventoryHolder {
         @Override
-        public @NonNull Inventory getInventory() { throw new UnsupportedOperationException(); }
+        public @NonNull Inventory getInventory() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     private final HatRegistry hatRegistry;
@@ -30,7 +32,6 @@ public class HatSelectorGUI {
         this.hatSelectionManager = hatSelectionManager;
     }
 
-    /** Ordered list of hats matching the slot layout used by the menu, so the listener can map clicks back to hats. */
     public List<HatDefinition> getOrderedHats() {
         List<HatDefinition> ordered = new ArrayList<>();
         ordered.addAll(hatRegistry.getByRarity(HatRarity.COMMON));
@@ -40,21 +41,33 @@ public class HatSelectorGUI {
     }
 
     public void open(Player player) {
-        List<HatDefinition> hats = getOrderedHats();
-        int size = Math.min(54, ((hats.size() / 9) + 1) * 9); // round up to a full row, capped at 54
+        open(player, 0);
+    }
 
-        Inventory inv = Bukkit.createInventory(new HatSelectorHolder(), size, "§dHat Selector");
+    public void open(Player player, int page) {
+        List<HatDefinition> hats = getOrderedHats();
+        int totalPages = PaginationUtil.totalPages(hats.size());
+        int currentPage = PaginationUtil.clampPage(page, hats.size());
+
+        Inventory inv = Bukkit.createInventory(
+                new HatSelectorHolder(currentPage),
+                PaginationUtil.INVENTORY_SIZE,
+                PaginationUtil.title("§dHat Selector", currentPage, totalPages));
 
         HatDefinition equipped = hatSelectionManager.getEquipped(player);
 
-        for (int i = 0; i < hats.size() && i < size; i++) {
+        int start = PaginationUtil.firstIndex(currentPage);
+        int end = PaginationUtil.lastIndexExclusive(currentPage, hats.size());
+
+        for (int i = start; i < end; i++) {
             HatDefinition hat = hats.get(i);
             boolean unlocked = hatSelectionManager.isUnlocked(player, hat.id());
             boolean isEquipped = equipped != null && equipped.id().equals(hat.id());
 
-            inv.setItem(i, buildDisplayItem(hat, unlocked, isEquipped));
+            inv.setItem(PaginationUtil.slotOf(i), buildDisplayItem(hat, unlocked, isEquipped));
         }
 
+        PaginationUtil.addNavigation(inv, currentPage, totalPages);
         player.openInventory(inv);
     }
 
@@ -82,6 +95,7 @@ public class HatSelectorGUI {
         } else {
             meta.setDisplayName("§7??? " + hat.rarity().getColor() + hat.rarity().getDisplayName() + " §7Hat");
             meta.setLore(List.of(
+                    "",
                     "§7Not unlocked yet.",
                     "§7Find it in the §dMagic Chest§7!"
             ));

@@ -7,6 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -93,12 +94,13 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
         entity.setVelocity(velocity);
         ticksElapsed++;
 
+        BoundingBox projectileBox = entity.getBoundingBox().expand(hitRadius);
+
         for (Player candidate : entity.getWorld().getPlayers()) {
-            if (candidate.equals(shooter)) continue;
+            if (candidate.equals(shooter) || candidate.isDead()) continue;
             if (!teamManager.isEnemy(shooter, candidate)) continue;
 
-            double distance = candidate.getLocation().distance(entity.getLocation());
-            if (distance <= hitRadius) {
+            if (projectileBox.overlaps(candidate.getBoundingBox())) {
                 explode(candidate);
                 return;
             }

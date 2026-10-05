@@ -50,9 +50,22 @@ public class AbilitySelectorListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (event.getCurrentItem() == null || !event.getCurrentItem().hasItemMeta()) return;
 
+        int rawSlot = event.getRawSlot();
+
         if (holder.isRuneMenu()) {
-            int index = event.getRawSlot();
             RuneType[] runes = RuneType.values();
+            int totalPages = PaginationUtil.totalPages(runes.length);
+
+            if (PaginationUtil.isPrevious(rawSlot, holder.page())) {
+                gui.openRuneMenu(player, holder.page() - 1);
+                return;
+            }
+            if (PaginationUtil.isNext(rawSlot, holder.page(), totalPages)) {
+                gui.openRuneMenu(player, holder.page() + 1);
+                return;
+            }
+
+            int index = PaginationUtil.indexOf(rawSlot, holder.page());
             if (index < 0 || index >= runes.length) return;
 
             RuneType chosen = runes[index];
@@ -63,31 +76,22 @@ public class AbilitySelectorListener implements Listener {
         }
 
         if (holder.slot() == null) {
-            int rawSlot = event.getRawSlot();
-
-            if (rawSlot == 7) { // hat item
+            if (rawSlot == AbilitySelectorGUI.HATS_SLOT) {
                 hatManager.open(player);
                 return;
             }
 
-            if (rawSlot == 8) { // rune item
+            if (rawSlot == AbilitySelectorGUI.RUNE_SLOT) {
                 gui.openRuneMenu(player);
                 return;
             }
 
-            if (rawSlot == 13) {
+            if (rawSlot == AbilitySelectorGUI.UPGRADES_SLOT) {
                 combatUpgradeGUI.open(player);
                 return;
             }
 
-            AbilitySlot slot = switch (rawSlot) {
-                case 0 -> AbilitySlot.OFFENSIVE;
-                case 2 -> AbilitySlot.UTILITY;
-                case 4 -> AbilitySlot.SUPPORT;
-                case 6 -> AbilitySlot.ULTIMATE;
-                default -> null;
-            };
-
+            AbilitySlot slot = AbilitySelectorGUI.getMainMenuAbilitySlot(rawSlot);
             if (slot != null) {
                 gui.openSlotMenu(player, slot);
             }
@@ -95,7 +99,18 @@ public class AbilitySelectorListener implements Listener {
         }
 
         List<String> ids = new ArrayList<>(registry.getAvailableIds(holder.slot()));
-        int index = event.getRawSlot();
+        int totalPages = PaginationUtil.totalPages(ids.size());
+
+        if (PaginationUtil.isPrevious(rawSlot, holder.page())) {
+            gui.openSlotMenu(player, holder.slot(), holder.page() - 1);
+            return;
+        }
+        if (PaginationUtil.isNext(rawSlot, holder.page(), totalPages)) {
+            gui.openSlotMenu(player, holder.slot(), holder.page() + 1);
+            return;
+        }
+
+        int index = PaginationUtil.indexOf(rawSlot, holder.page());
         if (index < 0 || index >= ids.size()) return;
 
         String chosenId = ids.get(index);

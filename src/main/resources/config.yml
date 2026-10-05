@@ -86,6 +86,7 @@ ability-values:
     energy-cost: 20.0
     slow-duration-ticks: 2000
     slow-chance: 0.20
+    speed-multiplier: 1.2
 
   melonlauncher:
     main-damage: 140.0
@@ -266,6 +267,13 @@ ability-values:
     duration-ms: 8000
     range: 20.0
     cooldown-ms: 40000
+
+  primalroar:
+    cooldown-ms: 30000
+    shield-percent: 0.30
+    shield-duration-ms: 3000
+    radius: 3.0
+    silence-duration-ms: 2000
 
   barricade:
     cooldown-ms: 30000

@@ -60,7 +60,8 @@ public class AbilityIconRegistry {
         icons.put("bullcharge", Material.LEATHER_HORSE_ARMOR);
         icons.put("corruption", Material.CRYING_OBSIDIAN);
         icons.put("magneticImpulse", Material.LODESTONE);
-        icons.put("RocketGrab", Material.FISHING_ROD);
+        icons.put("rocketgrab", Material.FISHING_ROD);
+        icons.put("primalroar", Material.WOLF_ARMOR);
         icons.put("darkpassage", Material.OBSIDIAN);
         icons.put("dodgeroll", Material.RABBIT_FOOT);
         icons.put("scavenger", Material.HOPPER);

@@ -52,7 +52,7 @@ public class TrackedLauncherTask extends BukkitRunnable {
             return;
         }
 
-        velocity.setY(velocity.getY() - 0.03);
+        velocity.setY(velocity.getY() - 0.025);
         Location nextLoc = armorStand.getLocation().add(velocity);
         armorStand.teleport(nextLoc);
 

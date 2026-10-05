@@ -178,6 +178,11 @@ public class CombatService {
     }
 
     public void resolveShieldEffect(OrbitShieldType type, Player attacker, Player victim) {
+        resolveShieldEffect(type, attacker, victim, false);
+    }
+
+
+    private void resolveShieldEffect(OrbitShieldType type, Player attacker, Player victim, boolean reflected) {
         if (type == null) return;
         int remainingCharges = orbitShieldManager.hasActiveShield(victim) ? orbitShieldManager.getCharges(victim) : 0;
         int maxCharges = type.getChargeCount();
@@ -190,42 +195,42 @@ public class CombatService {
         }
 
         if (type.getHealPerCharge() > 0) {
-            double healAmount = type.getHealPerCharge();
-            healthManager.heal(victim, healAmount, type.getDisplayName());
+            healthManager.heal(victim, type.getHealPerCharge(), type.getDisplayName());
         }
 
         if (type.getDamagePerCharge() > 0) {
             double damageAmount = type.getDamagePerCharge();
             int roundedDamage = (int) Math.round(damageAmount);
-            if (orbitShieldManager.hasActiveShield(victim)) {
-                OrbitShieldType type2 = orbitShieldManager.getActiveType(victim);
-                if (type2 != null) {
-                    orbitShieldManager.consumeCharge(victim);
-                    resolveShieldEffect(type, attacker, victim);
-                    return;
-                }
+
+            OrbitShieldType attackerShield = (!reflected && orbitShieldManager.hasActiveShield(attacker))
+                    ? orbitShieldManager.getActiveType(attacker)
+                    : null;
+
+            if (attackerShield != null) {
+                orbitShieldManager.consumeCharge(attacker);
+                resolveShieldEffect(attackerShield, victim, attacker, true);
+            } else {
+                healthManager.damage(attacker, damageAmount, victim);
+
+                Location impactLoc = attacker.getLocation().add(0, attacker.getHeight() * 0.5, 0);
+                spawnHologram(attacker, String.valueOf(roundedDamage), impactLoc);
+
+                victim.sendMessage(MessageUtils.positive() + String.format(
+                        "§3Your %s hit §3%s §3for §c%d §3damage.",
+                        type.getDisplayName(), attacker.getName(), roundedDamage
+                ));
+
+                attacker.sendMessage(MessageUtils.negative() + String.format(
+                        "§3%s's %s hit §3you §3for §c%d §3damage.",
+                        victim.getName(), type.getDisplayName(), roundedDamage
+                ));
             }
-            healthManager.damage(attacker, damageAmount, victim);
-           // playDamageFeedback(attacker);
-
-            Location impactLoc = attacker.getLocation().add(0, attacker.getHeight() * 0.5, 0);
-            spawnHologram(attacker, String.valueOf(roundedDamage), impactLoc);
-
-            victim.sendMessage(MessageUtils.positive() + String.format(
-                    "§3Your %s hit §3%s §3for §c%d §3damage.",
-                    type.getDisplayName(), attacker.getName(), roundedDamage
-            ));
-
-            attacker.sendMessage(MessageUtils.negative() + String.format(
-                    "§3%s's %s hit §3you §3for §c%d §3damage.",
-                    victim.getName(), type.getDisplayName(), roundedDamage
-            ));
         }
 
         if (type.rollsDebuffOnBlock()) {
             applyGuaranteedRandomDebuff(attacker, type);
         }
-        if(type.doesKnockback()){
+        if (type.doesKnockback()) {
             Vector push = attacker.getLocation().toVector().subtract(victim.getLocation().toVector());
             push.setY(0);
             if (push.lengthSquared() < 0.0001) push = new Vector(1, 0, 0);
