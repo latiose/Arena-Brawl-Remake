@@ -91,10 +91,10 @@ public class DivineJudgment implements Ability {
             player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
-        shieldManager.applyShield(target, 1.0, durationMillis,"Divine judgment");
+        shieldManager.applyShield(target, 1.0, durationMillis, "Divine judgment");
         target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 30, 0.3, 1, 0.3);
         target.sendMessage("§eYou are protected by Divine Judgment! Go!");
-        MatchSoundUtils.play(config, player,Sound.ITEM_TOTEM_USE, 1f, 1f);
+        MatchSoundUtils.play(config, player, Sound.ITEM_TOTEM_USE, 1f, 1f);
 
         new BukkitRunnable() {
             int ticksElapsed = 0;
@@ -119,8 +119,7 @@ public class DivineJudgment implements Ability {
     private void triggerExplosion(Player caster) {
         Location center = caster.getLocation();
         center.getWorld().spawnParticle(Particle.EXPLOSION, center, 5);
-        MatchSoundUtils.play(config, caster,Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.8f);
-
+        MatchSoundUtils.play(config, caster, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.8f);
 
         for (Entity nearby : center.getWorld().getNearbyEntities(center, explosionRadius, explosionRadius, explosionRadius)) {
             if (nearby instanceof Player target && teamManager.isEnemy(caster, target)) {

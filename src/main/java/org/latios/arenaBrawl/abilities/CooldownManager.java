@@ -31,6 +31,24 @@ public class CooldownManager {
                 .put(abilityKey, System.currentTimeMillis() + cooldownMillis);
     }
 
+    public void reduceCooldown(Player player, String key, long reductionMs) {
+        Map<String, Long> playerCooldowns = cooldowns.get(player.getUniqueId());
+        if (playerCooldowns == null) return;
+
+        Long expiry = playerCooldowns.get(key);
+        if (expiry == null) return;
+
+        long now = System.currentTimeMillis();
+        if (expiry <= now) return;
+
+        long newExpiry = expiry - reductionMs;
+        if (newExpiry <= now) {
+            playerCooldowns.remove(key);
+        } else {
+            playerCooldowns.put(key, newExpiry);
+        }
+    }
+
     public void clearPlayer(Player player) {
         cooldowns.remove(player.getUniqueId());
     }

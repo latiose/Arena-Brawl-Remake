@@ -80,7 +80,7 @@ public class BurstFire implements Ability {
         double spreadZ = ThreadLocalRandom.current().nextDouble(-0.04, 0.04);
 
         Vector finalDir = direction.add(new Vector(spreadX, spreadY, spreadZ)).normalize();
-        double step = 0.3;
+        double step = 0.5;
 
         for (double traveled = 0; traveled <= maxRange; traveled += step) {
             Location point = origin.add(finalDir.clone().multiply(step));

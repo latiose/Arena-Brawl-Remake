@@ -15,6 +15,7 @@ import org.latios.arenaBrawl.abilities.structures.*;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.*;
 
+import org.latios.arenaBrawl.abilities.utility.Grit;
 import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
 import org.latios.arenaBrawl.abilities.utility.ScavengerMeleeEffect;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
@@ -189,6 +190,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.skeletonEntityManager.setCombatService(combatService);
         combatService.registerMeleeHitEffect(new LifeLeechMeleeEffect(lifeLeechManager, playerHealthManager,abilityConfigManager.get("lifeleech")));
         combatService.registerMeleeHitEffect(new BerserkMeleeEffect());
+        combatService.registerMeleeHitEffect(new Grit(cooldownManager,combatUpgradeManager,shieldManager,abilityConfigManager.get("grit")));
         combatService.registerMeleeHitEffect(new ScavengerMeleeEffect(scavengerManager,energyManager,abilityConfigManager.get("scavenger")));
         debuffManager.registerListener(new PolymorphEffectListener(playerHealthManager));
         debuffManager.registerListener(new StunListener());

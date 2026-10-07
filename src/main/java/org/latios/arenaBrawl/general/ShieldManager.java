@@ -31,7 +31,6 @@ public class ShieldManager {
         activeShields.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>())
                 .add(new ActiveShield(reductionPercent, System.currentTimeMillis(), durationMillis, title));
     }
-
     public void tick() {
         if (activeShields.isEmpty()) return;
 
@@ -63,6 +62,21 @@ public class ShieldManager {
 
             if (shields.isEmpty()) {
                 mapIterator.remove();
+                continue;
+            }
+
+            if (player != null && player.isOnline()) {
+                ActiveShield highestShield = null;
+                for (ActiveShield shield : shields) {
+                    if (highestShield == null || shield.reductionPercent() > highestShield.reductionPercent()) {
+                        highestShield = shield;
+                    }
+                }
+
+                if (highestShield != null) {
+                    double progress = (double) highestShield.getRemainingMillis() / highestShield.durationMillis();
+                    StatusBarUtil.sendStatusBar(player, highestShield.title(), progress, "#00FFFF");
+                }
             }
         }
     }
@@ -92,6 +106,38 @@ public class ShieldManager {
         }
 
         return 0.0;
+    }
+
+    public double getReductionByTitle(Player player, String title) {
+        List<ActiveShield> shields = activeShields.get(player.getUniqueId());
+        if (shields == null || shields.isEmpty()) return 0.0;
+
+        ActiveShield highestShield = null;
+        for (ActiveShield shield : shields) {
+            if (!shield.isExpired() && shield.title().equalsIgnoreCase(title)) {
+                if (highestShield == null || shield.reductionPercent() > highestShield.reductionPercent()) {
+                    highestShield = shield;
+                }
+            }
+        }
+
+        if (highestShield != null) {
+            double progress = (double) highestShield.getRemainingMillis() / highestShield.durationMillis();
+            StatusBarUtil.sendStatusBar(player, highestShield.title(), progress, "#00FFFF");
+            return highestShield.reductionPercent();
+        }
+
+        return 0.0;
+    }
+
+    public void removeByTitle(Player player, String title) {
+        List<ActiveShield> shields = activeShields.get(player.getUniqueId());
+        if (shields == null) return;
+
+        shields.removeIf(shield -> shield.title().equals(title));
+        if (shields.isEmpty()) {
+            activeShields.remove(player.getUniqueId());
+        }
     }
 
     public void clear(Player player) {

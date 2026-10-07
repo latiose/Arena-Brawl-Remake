@@ -63,8 +63,9 @@ public class AbilityIconRegistry {
         icons.put("rocketgrab", Material.FISHING_ROD);
         icons.put("primalroar", Material.WOLF_ARMOR);
         icons.put("darkpassage", Material.OBSIDIAN);
-        icons.put("dodgeroll", Material.RABBIT_FOOT);
+        icons.put("dodgeroll", Material.LEATHER_BOOTS);
         icons.put("scavenger", Material.HOPPER);
+        icons.put("grit", Material.BOW);
 
         // --- SUPPORT ---
         icons.put("holywater", Material.POTION);

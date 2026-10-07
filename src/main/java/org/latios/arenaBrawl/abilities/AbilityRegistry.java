@@ -112,11 +112,11 @@ public class AbilityRegistry {
         register(AbilitySlot.UTILITY, "scavenger",
                 deps -> new Scavenger(deps.cooldownManager(), deps.combatUpgradeManager(), deps.scavengerManager(),
                       configManager.get("scavenger")));
-        register(AbilitySlot.SUPPORT, "skittles",
-                deps -> new Skittles(deps.cooldownManager(), deps.combatUpgradeManager(),
-                        deps.playerHealthManager(), deps.damageBuffManager(), deps.energyManager(), deps.debuffManager(), deps.speedBuffManager(), configManager.get("skittles")));
         register(AbilitySlot.UTILITY, "primalroar",
                 deps -> new PrimalRoar(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.shieldManager(), deps.debuffManager(), deps.teamManager(), configManager.get("primalroar")));
+        register(AbilitySlot.UTILITY, "grit",
+                deps -> new Grit(deps.cooldownManager(),deps.combatUpgradeManager(),deps.shieldManager(), configManager.get("grit")));
+
 
         // --- SUPPORT ---
         register(AbilitySlot.SUPPORT, "holywater",
@@ -153,6 +153,9 @@ public class AbilityRegistry {
                 deps -> new BerserkerRage(deps.playerHealthManager(), deps.damageBuffManager(), deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("berserkerrage")));
         register(AbilitySlot.SUPPORT, "magictable",
                 deps -> new MagicTable(deps.cooldownManager(), deps.combatUpgradeManager(), deps.structureManager(), deps.teamManager(), deps.playerHealthManager(), configManager.get("magictable")));
+        register(AbilitySlot.SUPPORT, "skittles",
+                deps -> new Skittles(deps.cooldownManager(), deps.combatUpgradeManager(),
+                        deps.playerHealthManager(), deps.damageBuffManager(), deps.energyManager(), deps.debuffManager(), deps.speedBuffManager(), configManager.get("skittles")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",

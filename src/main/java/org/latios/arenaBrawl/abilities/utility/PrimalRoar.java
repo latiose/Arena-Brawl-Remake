@@ -72,7 +72,7 @@ public class PrimalRoar implements Ability {
     }
 
     @Override
-    public List getStats() {
+    public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Shield", (int) (shieldPercent * 100) + "%"),
                 new AbilityStat("Silence", (silenceDurationMs / 1000.0) + "s"),
@@ -111,7 +111,7 @@ public class PrimalRoar implements Ability {
 
             int points = 32;
             for (int i = 0; i < points; i++) {
-                double angle = 2 * Math.PI * i / points;
+                double angle = (2 * Math.PI / points) * i;
 
                 double x = Math.cos(angle) * radius;
                 double z = Math.sin(angle) * radius;

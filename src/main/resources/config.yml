@@ -230,6 +230,14 @@ ability-values:
     speed-amplifier: 2
     speed-duration-ticks: 40
 
+  grit:
+    cooldown-ms: 18000
+    dash-speed: 0.8
+    reduction-per-use: 0.10
+    max-reduction: 0.70
+    duration-ms: 10000
+    reduction-per-hit-ms: 2000
+
   dodgeroll:
     cooldown-ms: 22000
     dash-speed: 1.3

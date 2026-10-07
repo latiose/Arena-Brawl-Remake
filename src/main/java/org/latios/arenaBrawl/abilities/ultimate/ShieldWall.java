@@ -52,7 +52,7 @@ public class ShieldWall implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        shieldManager.applyShield(player, damageReduction, durationMillis,"Shield Wall");
+        shieldManager.applyShield(player, damageReduction, durationMillis, "Shield Wall");
         MatchSoundUtils.play(config, player, Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 1.0f);
 
         spawnWaterRings(player);
@@ -69,9 +69,9 @@ public class ShieldWall implements Ability {
                 }
 
                 player.getWorld().spawnParticle(
-                        Particle.DRAGON_BREATH,
+                        Particle.DRIPPING_WATER,
                         player.getLocation().add(0, 1.0, 0),
-                        15,
+                        20,
                         0.5, 0.5, 0.5, 0.1,
                         1.0f
                 );
@@ -85,7 +85,7 @@ public class ShieldWall implements Ability {
 
     private void spawnWaterRings(Player player) {
         Location loc = player.getLocation();
-        int circleCount = 15;
+        int circleCount = 25;
         int pointsPerCircle = 20;
         double radius = 1.3;
 

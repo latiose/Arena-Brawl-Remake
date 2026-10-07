@@ -120,7 +120,8 @@ public class FlameBreath extends Breath {
                     lastSpawnedSliceIndex = targetIndex;
                 } else {
                     for (Location pt : allConePoints) {
-                        pt.getWorld().spawnParticle(Particle.FLAME, pt, 1, 0.05, 0.05, 0.05, 0);
+                      //  pt.getWorld().spawnParticle(Particle.FLAME, pt, 1, 0.05, 0.05, 0.05, 0);
+                        spawnTrailParticles(pt);
                     }
                 }
 

@@ -128,7 +128,7 @@ public class MatchManager {
         }
 
         Location loc = player.getLocation();
-        player.getWorld().playSound(loc, Sound.BLOCK_GLASS_BREAK, 1.0f, 1.0f);
+        player.getWorld().playSound(loc, Sound.BLOCK_GLASS_BREAK, 10.0f, 1.0f);
         org.bukkit.entity.Firework fw = loc.getWorld().spawn(loc, org.bukkit.entity.Firework.class);
         org.bukkit.inventory.meta.FireworkMeta meta = fw.getFireworkMeta();
         meta.addEffect(org.bukkit.FireworkEffect.builder()

@@ -25,42 +25,38 @@ public class AbilityManager {
         playerAbilities.remove(player.getUniqueId());
     }
 
+    private final Map<UUID, Integer> lastTick = new HashMap<>();
+
     public boolean tryActivate(Player player, AbilitySlot slot) {
+        if (player.getGameMode() == GameMode.SPECTATOR) return false;
+
         Map<AbilitySlot, Ability> abilities = playerAbilities.get(player.getUniqueId());
         if (abilities == null || !abilities.containsKey(slot)) {
             player.sendMessage("§cYou have no ability assigned to that slot.");
             return false;
         }
-        if(player.getGameMode() ==  GameMode.SPECTATOR) {
-            return false;
-        }
+
+        int now = org.bukkit.Bukkit.getCurrentTick();
+        Integer last = lastTick.put(player.getUniqueId(), now);
+        if (last != null && last == now) return false;
+
         Ability ability = abilities.get(slot);
         AbilityCost cost = ability.getCost();
 
-        if (!cost.canPay(player) && (cost instanceof CooldownCost)) {
-            player.sendMessage("§eWait another " + cost.describeRemaining(player));
-            return false;
-        }
-        else if(!cost.canPay(player) && cost instanceof EnergyCost){
-            player.sendMessage("§e" + cost.describeRemaining(player));
-            return false;
-        }
-        else if(!cost.canPay(player) && cost instanceof UltimateCost){
-            if(cost.isPermanentlyUnavailable(player)){
+        if (!cost.canPay(player)) {
+            if (cost instanceof EnergyCost) {
                 player.sendMessage("§e" + cost.describeRemaining(player));
-            }
-          else{
+            } else if (cost instanceof UltimateCost && cost.isPermanentlyUnavailable(player)) {
+                player.sendMessage("§e" + cost.describeRemaining(player));
+            } else {
                 player.sendMessage("§eWait another " + cost.describeRemaining(player));
             }
             return false;
         }
 
-        boolean success = ability.activate(player);
-
-        if (success) {
-            cost.pay(player);
-        }
-        return success;
+        if (!ability.activate(player)) return false;
+        cost.pay(player);
+        return true;
     }
 
     public Ability getAbility(Player player, AbilitySlot slot) {

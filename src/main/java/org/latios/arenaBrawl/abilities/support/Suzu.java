@@ -37,6 +37,7 @@ public class Suzu implements Ability {
     private final PlayerHealthManager healthManager;
     private final ShieldManager shieldManager;
     private final AbilityConfig config;
+
     public Suzu(Plugin plugin, CooldownManager cooldownManager, TeamManager teamManager,
                 PlayerHealthManager healthManager, ShieldManager shieldManager,
                 CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
@@ -128,7 +129,7 @@ public class Suzu implements Ability {
                 }
                 ally.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, ally.getLocation().add(0, 1.0, 0), 10, 0.3, 0.5, 0.3, 0);
 
-                shieldManager.applyShield(ally, 1.0, invulnerabilityDurationMs,"Suzu");
+                shieldManager.applyShield(ally, 1.0, invulnerabilityDurationMs, "Suzu");
             }
         }
     }
