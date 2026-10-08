@@ -144,7 +144,7 @@ public class TreeOfLifeStructure extends PlacedStructure {
 
         if (isBurst) {
             center.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, center, 60, 1, 1.5, 1, 0.1);
-            center.getWorld().playSound(center, Sound.ITEM_TOTEM_USE, 1f, 1f);
+            center.getWorld().playSound(center, Sound.ITEM_TOTEM_USE, 5f, 1f);
         } else {
             center.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, center, 10, 1, 1, 1);
         }

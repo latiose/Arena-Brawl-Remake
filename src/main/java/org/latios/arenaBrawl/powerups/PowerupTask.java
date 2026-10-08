@@ -36,11 +36,11 @@ public class PowerupTask extends BukkitRunnable {
                 PowerupType type = entry.getKey();
 
                 switch (type) {
-                    case HEALTH -> healthManager.heal(picker, 200);
-                    case DOUBLE_DAMAGE -> damageBuffManager.applyBuff(picker, 2.0, 12_000, "DOUBLE DAMAGE", true);
+                    case HEALTH -> healthManager.heal(picker, 130);
+                    case DAMAGE -> damageBuffManager.applyBuff(picker, 1.5, 11_000, "DAMAGE", true);
                 }
 
-                String powerupName = type == PowerupType.HEALTH ? "HEALING" : "DOUBLE DAMAGE";
+                String powerupName = type == PowerupType.HEALTH ? "HEALING" : "DAMAGE";
 
                 boolean isPickerRed = match.getRed().contains(picker);
 
@@ -51,8 +51,8 @@ public class PowerupTask extends BukkitRunnable {
 
                         if (type == PowerupType.HEALTH) {
                             p.sendMessage("§eYou activated the §a§l"+powerupName+" §epowerup!");
-                            p.sendMessage("§a+200 health!");
-                        } else if (type == PowerupType.DOUBLE_DAMAGE) {
+                            p.sendMessage("§a+130 health!");
+                        } else if (type == PowerupType.DAMAGE) {
                             p.sendMessage("§eYou activated the §c§l"+powerupName+" §epowerup!");
                         }
                     } else {

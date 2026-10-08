@@ -23,7 +23,7 @@ public enum OrbitShieldType {
     SPONGE_SHIELD(
             "Sponge Shield", OrbitShieldVisualType.ITEM_DISPLAY, Material.SPONGE,
             3, 0.0, false,
-            30_000, Sound.BLOCK_WET_SPONGE_PLACE, Sound.BLOCK_WET_SPONGE_BREAK, Particle.DRIPPING_WATER,
+            18_000, Sound.BLOCK_WET_SPONGE_PLACE, Sound.BLOCK_WET_SPONGE_BREAK, Particle.DRIPPING_WATER,
             2, 0, true
     ),
 

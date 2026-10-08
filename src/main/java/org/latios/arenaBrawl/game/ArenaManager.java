@@ -156,7 +156,7 @@ public class ArenaManager {
 
         match.getPowerupManager().configureLocations(PowerupType.HEALTH,
                 map.getHealthPowerupLocation() != null ? List.of(map.getHealthPowerupLocation()) : List.of());
-        match.getPowerupManager().configureLocations(PowerupType.DOUBLE_DAMAGE, map.getDamagePowerupLocations());
+        match.getPowerupManager().configureLocations(PowerupType.DAMAGE, map.getDamagePowerupLocations());
         match.getPowerupManager().reset();
 
         match.setIndividualScoreboards(scoreboardManager.createIndividualScoreboards(match));

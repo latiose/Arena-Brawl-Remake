@@ -201,7 +201,8 @@ public class CombatService {
         if (type.getDamagePerCharge() > 0) {
             double damageAmount = type.getDamagePerCharge();
             int roundedDamage = (int) Math.round(damageAmount);
-
+            roundedDamage *= (int) damageBuffManager.getMultiplier(victim);
+            damageAmount *= (int) damageBuffManager.getMultiplier(victim);
             OrbitShieldType attackerShield = (!reflected && orbitShieldManager.hasActiveShield(attacker))
                     ? orbitShieldManager.getActiveType(attacker)
                     : null;

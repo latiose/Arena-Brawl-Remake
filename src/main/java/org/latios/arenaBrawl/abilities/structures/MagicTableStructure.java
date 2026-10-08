@@ -98,8 +98,8 @@ public class MagicTableStructure extends PlacedStructure {
         if (!healed.isEmpty()) {
             center.getWorld().spawnParticle(Particle.HEART, center, 20, 0.8, 0.8, 0.8, 0.1);
             center.getWorld().spawnParticle(Particle.END_ROD, center, 30, 0.5, 0.5, 0.5, 0.05);
-            center.getWorld().playSound(center, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.2f);
-            center.getWorld().playSound(center, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.5f, 0.8f);
+            center.getWorld().playSound(center, Sound.ENTITY_PLAYER_LEVELUP, 5f, 1.2f);
+            center.getWorld().playSound(center, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 5, 0.8f);
         }
 
         return true;

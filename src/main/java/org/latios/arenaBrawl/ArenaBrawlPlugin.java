@@ -327,7 +327,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new DebuffTickTask(debuffManager).runTaskTimer(this, 0L, 2L);
         new PolymorphHealTask(debuffManager, playerHealthManager).runTaskTimer(this, 20L, 20L);
         new OrbitShieldOrbitTask(orbitShieldManager).runTaskTimer(this, 0L, 1L);
-        new OrbitShieldSoundTask(orbitShieldManager,matchManager).runTaskTimer(this, 0L, 20L);
+        new OrbitShieldSoundTask(orbitShieldManager).runTaskTimer(this, 0L, 20L);
         Bukkit.getScheduler().runTaskTimer(this, () -> {shieldManager.tick();;}, 0L, 1L);
         new PowerupTask(matchManager, playerHealthManager, damageBuffManager).runTaskTimer(this, 20L, 0L);
         new PowerupRotationTask(matchManager).runTaskTimer(this, 0L, 2L);

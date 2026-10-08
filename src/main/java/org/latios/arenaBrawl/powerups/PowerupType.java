@@ -4,7 +4,7 @@ import org.bukkit.Material;
 
 public enum PowerupType {
     HEALTH(Material.EMERALD_BLOCK, "HEALING POWERUP", new PowerupSchedule(95_000, 30_000, 45_000)),
-    DOUBLE_DAMAGE(Material.REDSTONE_BLOCK, "DOUBLE DAMAGE POWERUP", new PowerupSchedule(95_000, 65_000, 90_000));
+    DAMAGE(Material.REDSTONE_BLOCK, "DAMAGE POWERUP", new PowerupSchedule(95_000, 65_000, 90_000));
 
     private final Material material;
     private final String displayName;

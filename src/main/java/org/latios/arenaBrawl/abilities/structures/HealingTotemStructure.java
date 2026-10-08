@@ -99,7 +99,7 @@ public class HealingTotemStructure extends PlacedStructure {
 
         if (!healed.isEmpty()) {
             center.getWorld().spawnParticle(Particle.FIREWORK, center, 40, 0.5, 1, 0.5, 0.05);
-            center.getWorld().playSound(center, Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 1f, 1f);
+            center.getWorld().playSound(center, Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 5f, 1f);
         }
 
         return healPulsesUsed >= MAX_HEAL_PULSES;

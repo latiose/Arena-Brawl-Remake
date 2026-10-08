@@ -139,7 +139,7 @@ public class PowerupManager {
         });
 
         NamedTextColor color = type == PowerupType.HEALTH ? NamedTextColor.GREEN : NamedTextColor.RED;
-        String label = type == PowerupType.HEALTH ? "HEALING" : "DOUBLE DAMAGE";
+        String label = type == PowerupType.HEALTH ? "HEALING" : "DAMAGE";
 
         Location hologramLoc = location.clone().add(0, HOLOGRAM_HEIGHT_OFFSET, 0);
         TextDisplay hologram = world.spawn(hologramLoc, TextDisplay.class, d -> {

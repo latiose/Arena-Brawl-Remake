@@ -11,10 +11,8 @@ import org.latios.arenaBrawl.general.MatchSoundUtils;
 public class OrbitShieldSoundTask extends BukkitRunnable {
 
     private final OrbitShieldManager orbitShieldManager;
-    private final MatchManager matchManager;
-    public OrbitShieldSoundTask(OrbitShieldManager orbitShieldManager, MatchManager matchManager) {
+    public OrbitShieldSoundTask(OrbitShieldManager orbitShieldManager) {
         this.orbitShieldManager = orbitShieldManager;
-        this.matchManager = matchManager;
     }
 
     @Override
@@ -25,7 +23,7 @@ public class OrbitShieldSoundTask extends BukkitRunnable {
 
             OrbitShieldType type = orbitShieldManager.getActiveType(player);
             if (type == null) continue;
-            MatchSoundUtils.play(matchManager, player, type.getAmbientSound(), 0.8f, 1f);
+            player.getWorld().playSound(player.getLocation(), type.getAmbientSound(), 8.0f, 1.0f );
         }
     }
 }
