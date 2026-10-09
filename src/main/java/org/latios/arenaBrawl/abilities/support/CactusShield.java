@@ -43,16 +43,16 @@ public class CactusShield implements Ability {
 
     @Override
     public String getDescription() {
-        return "Blocks the 4 next attacks and deals damage to the attacker";
+        return "Blocks the " + OrbitShieldType.CACTUS_SHIELD.getChargeCount() + " next attacks and deals damage to the attacker";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Heal", "0"),
+                new AbilityStat("Heal", (int) OrbitShieldType.CACTUS_SHIELD.getHealPerCharge() + " HP"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s"),
-                new AbilityStat("Bonus", "Blocks the 4 next enemy attacks"),
-                new AbilityStat("Damage", "50")
+                new AbilityStat("Bonus", "Blocks the " + OrbitShieldType.CACTUS_SHIELD.getChargeCount() + " next enemy attacks"),
+                new AbilityStat("Damage", String.valueOf((int) OrbitShieldType.CACTUS_SHIELD.getDamagePerCharge()))
         );
     }
 }

@@ -283,7 +283,6 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new BlockInteractionListener(), this
         );
         getServer().getPluginManager().registerEvents(new ImmobilizeListener(debuffManager,movementLockManager), this);
-        getServer().getPluginManager().registerEvents(new ImmobilizeJumpListener(debuffManager), this);
         getServer().getPluginManager().registerEvents(
                 new HatSelectorListener(hatSelectorGUI, hatSelectionManager), this
         );
@@ -343,7 +342,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new StructureTickTask(structureManager).runTaskTimer(this, 0L, 20L);
 
         Bukkit.getPluginManager().registerEvents(new ItemCleanupListener(this), this);
-
+        OrbitShieldType.loadFromConfig(getConfig());
         // Commands
         getCommand("party").setExecutor(new PartyCommand(partyManager, queueManager));
         getCommand("setcoingain").setExecutor(new SetCoinGainCommand(statsManager));

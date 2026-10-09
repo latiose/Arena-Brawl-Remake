@@ -332,15 +332,22 @@ ability-values:
 
   boneshield:
     cooldown-ms: 30000
+    charges: 5
+    heal-per-charge: 30.0
 
   cactusshield:
-    cooldown-ms: 30000
+      cooldown-ms: 30000
+      charges: 4
+      damage-per-charge: 50.0
 
   starshield:
-    cooldown-ms: 45000
+      cooldown-ms: 45000
+      charges: 3
+      heal-per-charge: 50.0
 
   spongeshield:
-    cooldown-ms: 45000
+      cooldown-ms: 45000
+      charges: 3
 
   lifebond:
     range: 25.0

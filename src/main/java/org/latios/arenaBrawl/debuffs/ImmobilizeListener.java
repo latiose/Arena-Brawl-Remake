@@ -1,30 +1,57 @@
 package org.latios.arenaBrawl.debuffs;
 
-import org.bukkit.FluidCollisionMode;
+import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.util.RayTraceResult;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.general.MovementLockManager;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class ImmobilizeListener implements Listener {
 
-    private static final double MAX_GROUND_CHECK = 128.0;
-    private static final double[][] FOOT_OFFSETS = {
-            {0, 0}, {0.3, 0.3}, {0.3, -0.3}, {-0.3, 0.3}, {-0.3, -0.3}
-    };
+    private static final double NUDGE_SPEED = 0.32;
+    private static final double NUDGE_MAX_DISTANCE = 0.6;
+    private static final long NUDGE_WINDOW_MS = 300;
+    private static final long NUDGE_COOLDOWN_MS = 350;
+    private static final double FALL_SPEED = -1.5;
+    private record Nudge(long startMs, double x, double z) {}
 
     private final DebuffManager debuffManager;
     private final MovementLockManager movementLockManager;
+    private final Map<UUID, Nudge> nudges = new HashMap<>();
 
     public ImmobilizeListener(DebuffManager debuffManager, MovementLockManager movementLockManager) {
         this.debuffManager = debuffManager;
         this.movementLockManager = movementLockManager;
+    }
+
+    @EventHandler
+    public void onJump(PlayerJumpEvent event) {
+        Player player = event.getPlayer();
+        if (!isCurrentlyImmobilizing(player)) return;
+        event.setCancelled(true);
+
+        if (movementLockManager.isLocked(player)) return;
+
+        long now = System.currentTimeMillis();
+        Nudge last = nudges.get(player.getUniqueId());
+        if (last != null && now - last.startMs() < NUDGE_COOLDOWN_MS) return;
+
+        Vector dir = player.getLocation().getDirection().setY(0);
+        if (dir.lengthSquared() < 1.0E-6) return;
+        dir.normalize().multiply(NUDGE_SPEED);
+
+        Location origin = event.getFrom();
+        nudges.put(player.getUniqueId(), new Nudge(now, origin.getX(), origin.getZ()));
+        player.setVelocity(dir);
     }
 
     @EventHandler
@@ -36,30 +63,71 @@ public class ImmobilizeListener implements Listener {
         Location from = event.getFrom();
         Location to = event.getTo();
 
-        if (isAirborne(player)) {
-            event.setTo(from.clone().set(from.getX(), to.getY(), from.getZ()));
-            player.setVelocity(new Vector(0, -3, 0));
+        double dx = to.getX() - from.getX();
+        double dy = to.getY() - from.getY();
+        double dz = to.getZ() - from.getZ();
+        boolean movedHorizontally = dx != 0 || dz != 0;
+        boolean rising = dy > 0;
+
+        Nudge nudge = activeNudge(player);
+
+        if (nudge == null && isAirborne(player)) {
+            player.setVelocity(new Vector(0, FALL_SPEED, 0));
+
+            if (rising) {
+                Location adjusted = to.clone();
+                adjusted.setX(from.getX());
+                adjusted.setY(from.getY());
+                adjusted.setZ(from.getZ());
+                event.setTo(adjusted);
+            }
+            return;
         }
 
-        boolean lockedX = from.getX() != to.getX();
-        boolean lockedZ = from.getZ() != to.getZ();
-        boolean jumping = to.getY() > from.getY();
-
-        if (!lockedX && !lockedZ && !jumping) return;
-
         Location adjusted = to.clone();
-        if (lockedX) adjusted.setX(from.getX());
-        if (lockedZ) adjusted.setZ(from.getZ());
-        if (jumping) adjusted.setY(from.getY());
+        boolean changed = false;
 
-        event.setTo(adjusted);
+        if (nudge != null) {
+            double ox = to.getX() - nudge.x();
+            double oz = to.getZ() - nudge.z();
+            double dist = Math.hypot(ox, oz);
+            if (dist > NUDGE_MAX_DISTANCE) {
+                double scale = NUDGE_MAX_DISTANCE / dist;
+                adjusted.setX(nudge.x() + ox * scale);
+                adjusted.setZ(nudge.z() + oz * scale);
+                changed = true;
+            }
+        } else if (movedHorizontally) {
+            adjusted.setX(from.getX());
+            adjusted.setZ(from.getZ());
+            changed = true;
+        }
 
-        if (jumping) {
+        if (rising) {
+            adjusted.setY(from.getY());
             Vector velocity = player.getVelocity();
             if (velocity.getY() > 0) {
                 player.setVelocity(velocity.setY(0));
             }
+            changed = true;
         }
+
+        if (changed) event.setTo(adjusted);
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        nudges.remove(event.getPlayer().getUniqueId());
+    }
+
+    private Nudge activeNudge(Player player) {
+        Nudge nudge = nudges.get(player.getUniqueId());
+        if (nudge == null) return null;
+        if (System.currentTimeMillis() - nudge.startMs() > NUDGE_WINDOW_MS) {
+            nudges.remove(player.getUniqueId());
+            return null;
+        }
+        return nudge;
     }
 
     private boolean isAirborne(Player player) {
@@ -68,25 +136,6 @@ public class ImmobilizeListener implements Listener {
         if (player.isFlying() || player.isGliding()) return false;
         if (player.isInWater() || player.isSwimming() || player.isClimbing()) return false;
         return true;
-    }
-
-    private Double findGroundY(Location loc) {
-        World world = loc.getWorld();
-        if (world == null) return null;
-
-        Double best = null;
-        for (double[] offset : FOOT_OFFSETS) {
-            Location start = loc.clone().add(offset[0], 0.1, offset[1]);
-            RayTraceResult result = world.rayTraceBlocks(
-                    start, new Vector(0, -1, 0), MAX_GROUND_CHECK,
-                    FluidCollisionMode.NEVER, true
-            );
-            if (result != null) {
-                double y = result.getHitPosition().getY();
-                if (best == null || y > best) best = y;
-            }
-        }
-        return best;
     }
 
     private boolean isCurrentlyImmobilizing(Player player) {

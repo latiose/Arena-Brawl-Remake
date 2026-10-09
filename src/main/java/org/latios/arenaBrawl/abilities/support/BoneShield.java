@@ -43,15 +43,16 @@ public class BoneShield implements Ability {
 
     @Override
     public String getDescription() {
-        return "Blocks the 5 next attacks, on hit heals the user.";
+        return "Blocks the " + OrbitShieldType.BONE_SHIELD.getChargeCount() + " next attacks, on hit heals the user.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
+        int totalHeal = (int) (OrbitShieldType.BONE_SHIELD.getHealPerCharge() * OrbitShieldType.BONE_SHIELD.getChargeCount());
         return List.of(
-                new AbilityStat("Heal", (int) OrbitShieldType.BONE_SHIELD.getHealPerCharge() * 5 + " HP"),
+                new AbilityStat("Heal", totalHeal + " HP"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s"),
-                new AbilityStat("Bonus", "Blocks the 5 next enemy attacks")
+                new AbilityStat("Bonus", "Blocks the " + OrbitShieldType.BONE_SHIELD.getChargeCount() + " next enemy attacks")
         );
     }
 }

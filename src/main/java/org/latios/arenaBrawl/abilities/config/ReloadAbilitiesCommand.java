@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.latios.arenaBrawl.abilities.AbilityRegistry;
+import org.latios.arenaBrawl.abilities.OrbitShieldType;
 import org.latios.arenaBrawl.gui.AbilitySelectorGUI;
 import org.latios.arenaBrawl.hats.HatConfigManager;
 import org.latios.arenaBrawl.hats.HatSelectorGUI;
@@ -20,6 +21,7 @@ public class ReloadAbilitiesCommand implements CommandExecutor {
     private final HatConfigManager hatConfigManager;
     private final HatSelectorGUI hatSelectorGUI;
     private final RuneConfigManager runeConfigManager;
+
     public ReloadAbilitiesCommand(AbilityConfigManager configManager, AbilityRegistry abilityRegistry,
                                   AbilitySelectorGUI abilitySelectorGUI, HatConfigManager hatConfigManager,
                                   HatSelectorGUI hatSelectorGUI, RuneConfigManager runeConfigManager) {
@@ -39,18 +41,19 @@ public class ReloadAbilitiesCommand implements CommandExecutor {
         }
 
         configManager.reload();
+
+        OrbitShieldType.loadFromConfig(configManager.getConfig());
+
         abilitySelectorGUI.clearPreviewCache();
         abilityRegistry.clearPreviewCache();
         runeConfigManager.reload();
         hatConfigManager.reload();
-
         refreshOpenSelectorMenus();
 
         sender.sendMessage("§aAbilities, hats and runes reloaded! Open menus updated live.");
         return true;
     }
 
-    /** Re-renders open menus for online players live. */
     private void refreshOpenSelectorMenus() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             Inventory openInventory = player.getOpenInventory().getTopInventory();

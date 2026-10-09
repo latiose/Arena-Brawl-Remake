@@ -16,7 +16,6 @@ import java.util.List;
 public class StarShield implements Ability {
 
     private final long cooldownMs;
-
     private final AbilityCost cost;
     private final OrbitShieldManager orbitShieldManager;
 
@@ -44,7 +43,7 @@ public class StarShield implements Ability {
 
     @Override
     public String getDescription() {
-        return "Blocks the 3 next attacks, on hit heals the user and applies a random debuff to the attacker.";
+        return "Blocks the " + OrbitShieldType.STAR_SHIELD.getChargeCount() + " next attacks, on hit heals the user and applies a random debuff to the attacker.";
     }
 
     @Override

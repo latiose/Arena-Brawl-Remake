@@ -16,7 +16,6 @@ import java.util.List;
 public class SpongeShield implements Ability {
 
     private final long cooldownMs;
-
     private final AbilityCost cost;
     private final OrbitShieldManager orbitShieldManager;
 
@@ -44,15 +43,15 @@ public class SpongeShield implements Ability {
 
     @Override
     public String getDescription() {
-        return "Blocks the 3 next attacks, on hit knocksback attacker.";
+        return "Blocks the " + OrbitShieldType.SPONGE_SHIELD.getChargeCount() + " next attacks, on hit knocksback attacker.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Heal", "0 HP"),
+                new AbilityStat("Heal", (int) OrbitShieldType.SPONGE_SHIELD.getHealPerCharge() + " HP"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s"),
-                new AbilityStat("Bonus", "Blocks the 3 next enemy attacks")
+                new AbilityStat("Bonus", "Blocks the " + OrbitShieldType.SPONGE_SHIELD.getChargeCount() + " next enemy attacks")
         );
     }
 }
