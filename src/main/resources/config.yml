@@ -183,7 +183,7 @@ ability-values:
     energy-cost: 50.0
     max-range: 256.0
     step-size: 0.4
-    hit-expansion: 0.4
+    hit-expansion: 0.8
 
   burstfire:
     damage: 55.0
@@ -222,6 +222,15 @@ ability-values:
     energy-cost: 100.0
     arrow-damage: 100.0
     skeleton-hits-to-kill: 6
+
+  seismicwave:
+    energy-cost: 100.0
+    damage: 275.0
+    range: 18.0
+    width: 3.0
+    speed: 0.9
+    knockback-horizontal: 0.3
+    knockback-vertical: 0.4
 
   # --- UTILITY ---
   shadowstep:

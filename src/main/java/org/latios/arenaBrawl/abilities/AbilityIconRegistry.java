@@ -45,6 +45,7 @@ public class AbilityIconRegistry {
         icons.put("void", Material.ENDER_EYE);
         icons.put("cowthrow", Material.LEATHER);
         icons.put("necromancy", Material.WITHER_SKELETON_SKULL);
+        icons.put("seismicwave", Material.STONE_STAIRS);
 
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);

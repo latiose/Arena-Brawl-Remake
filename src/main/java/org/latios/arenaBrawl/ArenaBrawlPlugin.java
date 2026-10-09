@@ -274,7 +274,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
 
         MagicalChestHologramListener hologramListener = new MagicalChestHologramListener(this);
         getServer().getPluginManager().registerEvents(hologramListener, this);
-
+        getServer().getPluginManager().registerEvents(new FireworkListener(), this);
         getServer().getPluginManager().registerEvents(
                 new MatchDisconnectListener(matchManager, playerHealthManager), this
         );

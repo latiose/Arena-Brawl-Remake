@@ -76,6 +76,8 @@ public class AbilityRegistry {
                 deps -> new CowThrow(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("cowthrow")));
         register(AbilitySlot.OFFENSIVE, "necromancy",
                 deps -> new Necromancy(deps.energyManager(),deps.skeletonEntityManager(), configManager.get("necromancy")));
+        register(AbilitySlot.OFFENSIVE, "seismicwave",
+                deps -> new SeismicWave(plugin,deps.energyManager(),deps.teamManager(), deps.combatService(),deps.demolitionService(),configManager.get("seismicwave")));
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
                 deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("shadowstep"),deps.speedBuffManager()));
