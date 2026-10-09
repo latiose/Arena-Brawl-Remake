@@ -1,11 +1,16 @@
 package org.latios.arenaBrawl.abilities.offensive;
 
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
@@ -21,13 +26,20 @@ import java.util.List;
 
 public class SpikeGrenade implements Ability {
 
+    private static final double TRAIL_SPACING = 0.5;
+    private static final double SURFACE_OFFSET = 0.3;
+    private static final double FLOOR_LIFT = 1.0;
+
     private final double energyCost;
     private final double grenadeDamage;
     private final double needleDamage;
     private final double maxRange;
-    private final double step;
+    private final double grenadeSpeed;
+    private final double grenadeHitRadius;
     private final int needleCount;
     private final double needleRange;
+    private final double needleSpeed;
+    private final double needleHitRadius;
     private final AbilityConfig config;
     private final Plugin plugin;
     private final AbilityCost cost;
@@ -41,9 +53,12 @@ public class SpikeGrenade implements Ability {
         this.grenadeDamage = config.getDouble("grenade-damage", 60.0);
         this.needleDamage = config.getDouble("needle-damage", 5.0);
         this.maxRange = config.getDouble("max-range", 15.0);
-        this.step = config.getDouble("step", 0.5);
+        this.grenadeSpeed = config.getDouble("grenade-speed", 1.5);
+        this.grenadeHitRadius = config.getDouble("grenade-hit-radius", 0.4);
         this.needleCount = config.getInt("needle-count", 6);
         this.needleRange = config.getDouble("needle-range", 6.0);
+        this.needleSpeed = config.getDouble("needle-speed", 1.0);
+        this.needleHitRadius = config.getDouble("needle-hit-radius", 0.3);
 
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
@@ -63,43 +78,47 @@ public class SpikeGrenade implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        Location startLoc = player.getEyeLocation();
-        Vector direction = startLoc.getDirection().normalize();
+        Location start = player.getEyeLocation();
+        Vector direction = start.getDirection().normalize();
         MatchSoundUtils.play(config, player, Sound.ENTITY_EGG_THROW, 1.2f, 0.7f);
 
-
         new BukkitRunnable() {
-            private Location currentLoc = startLoc.clone();
-            private double distanceTraveled = 0;
+            private final Location pos = start.clone();
+            private double traveled = 0;
 
             @Override
             public void run() {
-                currentLoc.add(direction.clone().multiply(step));
-                distanceTraveled += step;
+                double segment = Math.min(grenadeSpeed, maxRange - traveled);
+                RayTraceResult hit = trace(player, pos, direction, segment, grenadeHitRadius, null);
 
-                currentLoc.getWorld().spawnParticle(Particle.ITEM_SLIME, currentLoc, 8, 0.2, 0.2, 0.2, 0.05);
-                currentLoc.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, currentLoc, 3, 0.15, 0.15, 0.15, 0);
-                currentLoc.getWorld().spawnParticle(Particle.SCRAPE, currentLoc, 2, 0.1, 0.1, 0.1, 0.01);
+                double length = hit != null
+                        ? Math.min(segment, hit.getHitPosition().distance(pos.toVector()))
+                        : segment;
+                spawnGrenadeTrail(pos, direction, length);
 
-                if (currentLoc.getBlock().getType().isSolid()) {
-                    explode(player, currentLoc);
+                if (hit != null) {
+                    World world = pos.getWorld();
+                    if (hit.getHitEntity() instanceof Player target) {
+                        Location impact = target.getBoundingBox().getCenter().toLocation(world);
+                        combatService.applyAbilityDamage(player, target, grenadeDamage, getName(), impact);
+                        explode(player, impact, target, null);
+                    } else {
+                        BlockFace face = hit.getHitBlockFace();
+                        Location impact = hit.getHitPosition().toLocation(world);
+                        if (face != null) {
+                            impact.add(face.getDirection().multiply(SURFACE_OFFSET));
+                        }
+                        explode(player, impact, null, face);
+                    }
                     cancel();
                     return;
                 }
 
-                for (Player enemy : currentLoc.getWorld().getPlayers()) {
-                    if (!teamManager.isEnemy(player, enemy) || enemy.isDead()) continue;
+                pos.add(direction.clone().multiply(segment));
+                traveled += segment;
 
-                    if (enemy.getBoundingBox().expand(0.3, 0.3, 0.3).contains(currentLoc.getX(), currentLoc.getY(), currentLoc.getZ())) {
-                        combatService.applyAbilityDamage(player, enemy, grenadeDamage, getName(), currentLoc);
-                        explode(player, currentLoc);
-                        cancel();
-                        return;
-                    }
-                }
-
-                if (distanceTraveled >= maxRange) {
-                    explode(player, currentLoc);
+                if (traveled >= maxRange - 1.0E-6) {
+                    explode(player, pos.clone(), null, null);
                     cancel();
                 }
             }
@@ -108,63 +127,114 @@ public class SpikeGrenade implements Ability {
         return true;
     }
 
-    private void explode(Player caster, Location center)
-    {
-        MatchSoundUtils.play(config, caster, Sound.ENTITY_ITEM_BREAK, 1.4f, 0.5f);
-        MatchSoundUtils.play(config, caster, Sound.BLOCK_BONE_BLOCK_BREAK, 1.2f, 1.4f);
+    private void explode(Player caster, Location center, Player directTarget, BlockFace face) {
+        World world = center.getWorld();
+        MatchSoundUtils.play(config, caster, Sound.ENTITY_ITEM_BREAK, 7f, 0.5f);
+        MatchSoundUtils.play(config, caster, Sound.BLOCK_BONE_BLOCK_BREAK, 7f, 1.4f);
 
-        center.getWorld().spawnParticle(Particle.ITEM_SLIME, center, 35, 0.4, 0.4, 0.4, 0.15);
-        center.getWorld().spawnParticle(Particle.SCRAPE, center, 20, 0.3, 0.3, 0.3, 0.1);
+        world.spawnParticle(Particle.ITEM_SLIME, center, 35, 0.4, 0.4, 0.4, 0.15);
+        world.spawnParticle(Particle.SCRAPE, center, 20, 0.3, 0.3, 0.3, 0.1);
 
-        double angleStep = 360.0 / needleCount;
+        if (directTarget != null) {
+            for (int i = 0; i < needleCount; i++) {
+                if (directTarget.isDead()) break;
+                combatService.applyAbilityDamage(caster, directTarget, needleDamage, getName(), center);
+            }
+        }
+        Location origin = center.clone();
+        if (face == BlockFace.UP) {
+            Location lifted = center.clone().add(0, FLOOR_LIFT, 0);
+            if (lifted.getBlock().isPassable()) {
+                origin = lifted;
+            }
+        }
+
+        double angleStep = 2 * Math.PI / needleCount;
         for (int i = 0; i < needleCount; i++) {
-            double radians = Math.toRadians(i * angleStep);
-            Vector needleDir = new Vector(Math.cos(radians), 0, Math.sin(radians)).normalize();
-            launchNeedle(caster, center.clone(), needleDir);
+            double angle = i * angleStep;
+            Vector needleDir = new Vector(Math.cos(angle), 0, Math.sin(angle));
+            launchNeedle(caster, origin.clone(), needleDir, directTarget);
         }
     }
 
-    private void launchNeedle(Player caster, Location start, Vector dir) {
+    private void launchNeedle(Player caster, Location start, Vector dir, Player ignored) {
         new BukkitRunnable() {
-            private Location needleLoc = start.clone();
-            private double dist = 0;
+            private final Location pos = start.clone();
+            private double traveled = 0;
 
             @Override
             public void run() {
-                needleLoc.add(dir.clone().multiply(step));
-                dist += step;
+                double segment = Math.min(needleSpeed, needleRange - traveled);
+                RayTraceResult hit = trace(caster, pos, dir, segment, needleHitRadius, ignored);
 
-                needleLoc.getWorld().spawnParticle(Particle.CRIT, needleLoc, 2, 0.05, 0.05, 0.05, 0.02);
-                needleLoc.getWorld().spawnParticle(Particle.SCRAPE, needleLoc, 2, 0.05, 0.05, 0.05, 0.01);
+                double length = hit != null
+                        ? Math.min(segment, hit.getHitPosition().distance(pos.toVector()))
+                        : segment;
+                spawnNeedleTrail(pos, dir, length);
 
-                if (needleLoc.getBlock().getType().isSolid()) {
-                    needleLoc.getWorld().spawnParticle(Particle.CRIT, needleLoc, 5, 0.1, 0.1, 0.1, 0.05);
+                if (hit != null) {
+                    Location impact = hit.getHitPosition().toLocation(pos.getWorld());
+                    if (hit.getHitEntity() instanceof Player enemy) {
+                        combatService.applyAbilityDamage(caster, enemy, needleDamage, getName(), impact);
+                        pos.getWorld().playSound(impact, Sound.ENTITY_PLAYER_HURT, 0.8f, 1.8f);
+                        pos.getWorld().spawnParticle(Particle.CRIT, impact, 8, 0.2, 0.2, 0.2, 0.1);
+                    } else {
+                        pos.getWorld().spawnParticle(Particle.CRIT, impact, 5, 0.1, 0.1, 0.1, 0.05);
+                    }
                     cancel();
                     return;
                 }
 
-                for (Player enemy : needleLoc.getWorld().getPlayers()) {
-                    if (!teamManager.isEnemy(caster, enemy) || enemy.isDead()) continue;
+                pos.add(dir.clone().multiply(segment));
+                traveled += segment;
 
-                    if (enemy.getBoundingBox().expand(0.3, 0.3, 0.3).contains(needleLoc.getX(), needleLoc.getY(), needleLoc.getZ())) {
-                        combatService.applyAbilityDamage(caster, enemy, needleDamage, getName(), needleLoc);
-                        enemy.getWorld().playSound(needleLoc, Sound.ENTITY_PLAYER_HURT, 0.8f, 1.8f);
-                        enemy.getWorld().spawnParticle(Particle.CRIT, needleLoc, 8, 0.2, 0.2, 0.2, 0.1);
-                        cancel();
-                        return;
-                    }
-                }
-
-                if (dist >= needleRange) {
+                if (traveled >= needleRange - 1.0E-6) {
                     cancel();
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
     }
 
+
+    private RayTraceResult trace(Player caster, Location from, Vector dir, double length,
+                                 double raySize, Player ignored) {
+        if (length <= 0) return null;
+        return from.getWorld().rayTrace(
+                from, dir, length,
+                FluidCollisionMode.NEVER,
+                true,
+                raySize,
+                entity -> entity instanceof Player p
+                        && p != ignored
+                        && !p.isDead()
+                        && p.getGameMode() != GameMode.SPECTATOR
+                        && teamManager.isEnemy(caster, p)
+        );
+    }
+
+    private void spawnGrenadeTrail(Location from, Vector dir, double length) {
+        World world = from.getWorld();
+        for (double d = 0; d <= length; d += TRAIL_SPACING) {
+            Location p = from.clone().add(dir.clone().multiply(d));
+            world.spawnParticle(Particle.ITEM_SLIME, p, 6, 0.2, 0.2, 0.2, 0.05);
+            world.spawnParticle(Particle.HAPPY_VILLAGER, p, 2, 0.15, 0.15, 0.15, 0);
+            world.spawnParticle(Particle.SCRAPE, p, 1, 0.1, 0.1, 0.1, 0.01);
+        }
+    }
+
+    private void spawnNeedleTrail(Location from, Vector dir, double length) {
+        World world = from.getWorld();
+        for (double d = 0; d <= length; d += TRAIL_SPACING) {
+            Location p = from.clone().add(dir.clone().multiply(d));
+            world.spawnParticle(Particle.CRIT, p, 2, 0.05, 0.05, 0.05, 0.02);
+            world.spawnParticle(Particle.SCRAPE, p, 1, 0.05, 0.05, 0.05, 0.01);
+        }
+    }
+
     @Override
     public String getDescription() {
-        return "Fires a cactus grenade that explodes on contact or max range, splitting into 6 needles in all directions.";
+        return "Fires a cactus grenade that explodes on contact or max range, splitting into "
+                + needleCount + " needles in all directions.";
     }
 
     @Override

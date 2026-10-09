@@ -80,7 +80,7 @@ public class RocketGrab implements Ability {
                 for (Player enemy : currentLoc.getWorld().getPlayers()) {
                     if (!teamManager.isEnemy(player, enemy) || enemy.isDead()) continue;
 
-                    if (enemy.getBoundingBox().expand(0.3, 0.3, 0.3).contains(currentLoc.getX(), currentLoc.getY(), currentLoc.getZ())) {
+                    if (enemy.getBoundingBox().expand(1.5, 1.5, 1.5).contains(currentLoc.getX(), currentLoc.getY(), currentLoc.getZ())) {
                         pullEnemyOverTime(player, enemy);
                         cancel();
                         return;

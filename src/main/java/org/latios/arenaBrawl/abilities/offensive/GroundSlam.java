@@ -44,7 +44,7 @@ public class GroundSlam implements Ability {
         for (Entity nearby : player.getNearbyEntities(4, 3, 4)) {
             if (nearby instanceof Player target && teamManager.isEnemy(player, target) && target.getGameMode() != GameMode.SPECTATOR) {
                 combatService.applyAbilityDamage(player, target, damage, getName());
-                target.setVelocity(target.getVelocity().setY(1.5));
+                target.setVelocity(target.getVelocity().setY(0.7));
                 hitSomeone = true;
             }
         }

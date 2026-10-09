@@ -169,7 +169,7 @@ ability-values:
     energy-cost: 70.0
     max-distance: 25.0
     step: 1.3
-    hit-box-radius: 1.0
+    hit-box-radius: 1.2
 
   laywaste:
     damage: 110.0
@@ -332,22 +332,22 @@ ability-values:
 
   boneshield:
     cooldown-ms: 30000
-    charges: 5
-    heal-per-charge: 30.0
+    charges: 7
+    heal-per-charge: 40.0
 
   cactusshield:
-      cooldown-ms: 30000
-      charges: 4
-      damage-per-charge: 50.0
+    cooldown-ms: 30000
+    charges: 4
+    damage-per-charge: 50.0
 
   starshield:
-      cooldown-ms: 45000
-      charges: 3
-      heal-per-charge: 50.0
+    cooldown-ms: 45000
+    charges: 3
+    heal-per-charge: 50.0
 
   spongeshield:
-      cooldown-ms: 45000
-      charges: 3
+    cooldown-ms: 45000
+    charges: 3
 
   lifebond:
     range: 25.0

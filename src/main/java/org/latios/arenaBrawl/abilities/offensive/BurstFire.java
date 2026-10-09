@@ -97,7 +97,7 @@ public class BurstFire implements Ability {
                     continue;
                 }
 
-                if (target.getBoundingBox().expand(0.2, 0.2, 0.2).contains(point.getX(), point.getY(), point.getZ())) {
+                if (target.getBoundingBox().expand(0.8, 0, 0.2).contains(point.getX(), point.getY(), point.getZ())) {
                     combatService.applyAbilityDamage(caster, target, damage / 3.0, getName(), point);
 
                     point.getWorld().playSound(point, Sound.ENTITY_PLAYER_HURT, 0.8f, 1.5f);
