@@ -87,6 +87,7 @@ public class AbilityIconRegistry {
         icons.put("berserkerrage", Material.REDSTONE_BLOCK);
         icons.put("magictable", Material.ENCHANTING_TABLE);
         icons.put("skittles", Material.RABBIT_STEW);
+        icons.put("gamblersheal",Material.CLOCK);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);

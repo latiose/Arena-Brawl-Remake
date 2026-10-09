@@ -158,6 +158,8 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "skittles",
                 deps -> new Skittles(deps.cooldownManager(), deps.combatUpgradeManager(),
                         deps.playerHealthManager(), deps.damageBuffManager(), deps.energyManager(), deps.debuffManager(), deps.speedBuffManager(), configManager.get("skittles")));
+        register(AbilitySlot.SUPPORT, "gamblersheal",
+                deps -> new GamblersHeal(deps.cooldownManager(),deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("gamblersheal")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",

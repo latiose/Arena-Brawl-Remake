@@ -450,6 +450,11 @@ ability-values:
     orange-damage-bonus: 0.25
     orange-damage-duration-millis: 5000
 
+  gamblersheal:
+    cooldown-ms: 30000
+    heal-lower: 100.0
+    heal-higher: 500.0
+
   # --- ULTIMATE ---
   shieldwall:
     damage-reduction: 0.70
