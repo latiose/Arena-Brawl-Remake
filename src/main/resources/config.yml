@@ -455,6 +455,16 @@ ability-values:
     heal-lower: 100.0
     heal-higher: 500.0
 
+  bloodthirst:
+    cooldown-ms: 35000
+    duration-ms: 8000
+    lifesteal-percent: 50.0
+
+  meditation:
+    cooldown-ms: 25000
+    max-duration-ms: 6000
+    heal-per-second: 60.0
+
   # --- ULTIMATE ---
   shieldwall:
     damage-reduction: 0.70

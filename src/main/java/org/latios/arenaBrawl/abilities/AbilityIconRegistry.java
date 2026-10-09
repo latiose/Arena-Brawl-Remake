@@ -88,6 +88,8 @@ public class AbilityIconRegistry {
         icons.put("magictable", Material.ENCHANTING_TABLE);
         icons.put("skittles", Material.RABBIT_STEW);
         icons.put("gamblersheal",Material.CLOCK);
+        icons.put("meditation",Material.RED_BED);
+        icons.put("bloodthirst",Material.SKELETON_SKULL);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);

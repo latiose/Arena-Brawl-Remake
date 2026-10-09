@@ -160,6 +160,10 @@ public class AbilityRegistry {
                         deps.playerHealthManager(), deps.damageBuffManager(), deps.energyManager(), deps.debuffManager(), deps.speedBuffManager(), configManager.get("skittles")));
         register(AbilitySlot.SUPPORT, "gamblersheal",
                 deps -> new GamblersHeal(deps.cooldownManager(),deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("gamblersheal")));
+        register(AbilitySlot.SUPPORT, "bloodthirst",
+                deps -> new Bloodthirst(deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("bloodthirst")));
+        register(AbilitySlot.SUPPORT, "meditation",
+                deps -> new Meditation(deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("meditation")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
