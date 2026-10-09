@@ -128,7 +128,7 @@ public class MatchManager {
         }
 
         Location loc = player.getLocation();
-        player.getWorld().playSound(loc, Sound.BLOCK_GLASS_BREAK, 10.0f, 1.0f);
+        player.getWorld().playSound(loc, Sound.BLOCK_STONE_BREAK, 15.0f, 2.0f);
         org.bukkit.entity.Firework fw = loc.getWorld().spawn(loc, org.bukkit.entity.Firework.class);
         org.bukkit.inventory.meta.FireworkMeta meta = fw.getFireworkMeta();
         meta.addEffect(org.bukkit.FireworkEffect.builder()
@@ -268,6 +268,7 @@ public class MatchManager {
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             for (Player player : match.getAllPlayers()) {
+                if (activeMatches.get(player.getUniqueId()) != match) continue;
                 cleanupPlayer(player);
             }
             finishMatch(match);
@@ -291,6 +292,7 @@ public class MatchManager {
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             for (Player player : match.getAllPlayers()) {
+                if (activeMatches.get(player.getUniqueId()) != match) continue;
                 cleanupPlayer(player);
             }
             finishMatch(match);
@@ -316,6 +318,16 @@ public class MatchManager {
 
     }
 
+    public void leaveMatch(Player player) {
+        Match match = activeMatches.get(player.getUniqueId());
+        if (match == null) return;
+
+        if (!match.isEnded() && player.getGameMode() != GameMode.SPECTATOR) {
+            onPlayerEliminated(player);
+        }
+
+        cleanupPlayer(player);
+    }
     public boolean isInMatch(Player player) {
         return activeMatches.containsKey(player.getUniqueId());
     }

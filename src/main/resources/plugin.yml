@@ -43,3 +43,6 @@ commands:
     description: Toggles block breaking protection on or off
     usage: /toggleblockbreak [on|off]
     permission: arenabrawl.admin.togglebreak
+  hub:
+    description: Leaves the game
+    usage: /hub
