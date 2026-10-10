@@ -79,7 +79,7 @@ public class VenomBloom implements Ability {
     @Override
     public String getDescription() {
         return "Throws a seed that bursts into a poison cloud. Enemies who stay inside "
-                + "take progressive damage and have their healing reduced.";
+                + "take progressive damage and have their healing negated.";
     }
 
     @Override

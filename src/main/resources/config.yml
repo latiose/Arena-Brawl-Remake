@@ -301,6 +301,13 @@ ability-values:
     damage-interval-ticks: 10
     antiheal-duration-ticks: 60
 
+  icespear:
+    damage: 75.0
+    energy-cost: 30.0
+    max-target-distance: 40.0
+    projectile-speed: 4
+    radius: 2.0
+    slow-duration-ticks: 20
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000

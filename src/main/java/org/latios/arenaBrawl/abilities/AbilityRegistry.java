@@ -81,6 +81,9 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "venombloom",
                 deps -> new VenomBloom(deps.energyManager(), deps.teamManager(), deps.combatService(),
                         deps.debuffManager(), configManager.get("venombloom")));
+        register(AbilitySlot.OFFENSIVE, "icespear",
+                deps -> new IceSpear(deps.energyManager(), deps.teamManager(), deps.combatService(),
+                        deps.debuffManager(), configManager.get("icespear")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",

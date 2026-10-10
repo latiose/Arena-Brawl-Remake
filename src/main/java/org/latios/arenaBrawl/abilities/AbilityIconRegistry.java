@@ -46,7 +46,8 @@ public class AbilityIconRegistry {
         icons.put("cowthrow", Material.LEATHER);
         icons.put("necromancy", Material.WITHER_SKELETON_SKULL);
         icons.put("seismicwave", Material.STONE_STAIRS);
-
+        icons.put("venombloom", Material.POISONOUS_POTATO);
+        icons.put("icespear", Material.ICE);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
