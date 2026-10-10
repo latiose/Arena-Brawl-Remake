@@ -16,10 +16,10 @@ public class AntiHealListener implements DebuffListener, Listener {
     }
 
     @Override
-    public void onApplied(Player victim, DebuffType type) {
+    public void onApplied(Player victim, DebuffType type, long durationMillis) {
         if (type != DebuffType.ANTIHEAL) return;
 
-        healthManager.disableRegen(victim, 5_000L);
+        healthManager.disableRegen(victim, durationMillis);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class AntiHealListener implements DebuffListener, Listener {
         healthManager.clearRegenDisable(victim);
 
         if (victim.isOnline() && !victim.isDead()) {
-            victim.sendMessage(MessageUtils.positive() + "§3Corruption has worn off!");
+            victim.sendMessage(MessageUtils.positive() + "§3Anti healing has worn off!");
         }
     }
 

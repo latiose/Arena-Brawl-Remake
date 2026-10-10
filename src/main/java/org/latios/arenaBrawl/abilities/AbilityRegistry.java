@@ -78,6 +78,9 @@ public class AbilityRegistry {
                 deps -> new Necromancy(deps.energyManager(),deps.skeletonEntityManager(), configManager.get("necromancy")));
         register(AbilitySlot.OFFENSIVE, "seismicwave",
                 deps -> new SeismicWave(plugin,deps.energyManager(),deps.teamManager(), deps.combatService(),deps.demolitionService(),configManager.get("seismicwave")));
+        register(AbilitySlot.OFFENSIVE, "venombloom",
+                deps -> new VenomBloom(deps.energyManager(), deps.teamManager(), deps.combatService(),
+                        deps.debuffManager(), configManager.get("venombloom")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",

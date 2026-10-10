@@ -288,6 +288,18 @@ ability-values:
     knockback-horizontal: 0.3
     knockback-vertical: 0.4
 
+  venombloom:
+    base-damage: 8.0
+    damage-per-stack: 4.0
+    max-stacks: 6
+    energy-cost: 35.0
+    max-target-distance: 18.0
+    projectile-speed: 1.2
+    projectile-gravity: 0.03
+    radius: 3.5
+    duration-ticks: 100
+    damage-interval-ticks: 10
+    antiheal-duration-ticks: 60
 
   # --- UTILITY ---
   shadowstep:

@@ -20,7 +20,7 @@ import java.util.UUID;
 public class PoisonListener implements DebuffListener, Listener {
 
     private static final double DAMAGE_PER_SECOND = 33.0;
-    private static final long DURATION_TICKS = 120; // 6
+    private static final long DEFAULT_DURATION_MILLIS = 6_000L;
 
     private final PlayerHealthManager healthManager;
     private final Map<UUID, BukkitTask> activeTasks = new HashMap<>();
@@ -31,6 +31,15 @@ public class PoisonListener implements DebuffListener, Listener {
     }
 
     public void onAppliedWithAttacker(Player victim, Player attacker, DebuffType type) {
+        onAppliedWithAttacker(victim, attacker, type, DEFAULT_DURATION_MILLIS);
+    }
+
+    public void onAppliedWithAttacker(
+            Player victim,
+            Player attacker,
+            DebuffType type,
+            long durationMillis
+    ) {
         if (type != DebuffType.POISON) return;
 
         onExpired(victim, DebuffType.POISON);
@@ -40,7 +49,11 @@ public class PoisonListener implements DebuffListener, Listener {
         }
 
         victim.addPotionEffect(new PotionEffect(
-                PotionEffectType.POISON, (int) DURATION_TICKS, 0, true, true
+                PotionEffectType.POISON,
+                (int) Math.min(Integer.MAX_VALUE, Math.max(1L, (durationMillis + 49L) / 50L)),
+                0,
+                true,
+                true
         ));
 
         BukkitTask task = new BukkitRunnable() {
@@ -79,6 +92,11 @@ public class PoisonListener implements DebuffListener, Listener {
     @Override
     public void onApplied(Player player, DebuffType type) {
         onAppliedWithAttacker(player, null, type);
+    }
+
+    @Override
+    public void onApplied(Player player, DebuffType type, long durationMillis) {
+        onAppliedWithAttacker(player, null, type, durationMillis);
     }
 
     @Override

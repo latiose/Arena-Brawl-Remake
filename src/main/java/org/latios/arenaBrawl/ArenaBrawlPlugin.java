@@ -211,7 +211,6 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         debuffManager.registerListener(new StunListener());
         debuffManager.registerListener(new SilenceListener());
         debuffManager.registerListener(new SlowListener());
-        debuffManager.registerListener(new AntiHealListener(playerHealthManager));
         debuffManager.setSongOfPowerManager(songOfPowerManager);
         saveDefaultConfig();
 

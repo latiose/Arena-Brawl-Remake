@@ -54,9 +54,9 @@ public class DebuffManager {
 
         for (DebuffListener listener : listeners) {
             if (listener instanceof PoisonListener poisonListener) {
-                poisonListener.onAppliedWithAttacker(victim, attacker, type);
+                poisonListener.onAppliedWithAttacker(victim, attacker, type, durationMillis);
             } else {
-                listener.onApplied(victim, type);
+                listener.onApplied(victim, type, durationMillis);
             }
         }
 

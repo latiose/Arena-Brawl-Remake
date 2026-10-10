@@ -53,7 +53,18 @@ public class Corruption implements Ability {
             return false;
         }
 
-        debuffManager.tryApply(player, target, DebuffType.ANTIHEAL, durationMillis);
+        boolean applied = debuffManager.tryApply(
+                player,
+                target,
+                DebuffType.ANTIHEAL,
+                durationMillis
+        );
+
+        if (!applied) {
+            player.sendMessage(MessageUtils.negative()
+                    + "§3" + target.getName() + " is already affected by a debuff.");
+            return false;
+        }
 
         target.getWorld().spawnParticle(Particle.SMOKE, target.getLocation().add(0, 1, 0), 15);
         MatchSoundUtils.play(config, player,Sound.ENTITY_WITHER_HURT, 0.5f, 2.0f);
