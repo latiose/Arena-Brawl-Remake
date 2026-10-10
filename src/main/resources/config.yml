@@ -35,6 +35,21 @@ leaderboard-signs:
 maps:
   Bridge:
     world: "Bridge"
+    # Override spawn points per mode. Each list is ordered by player slot.
+    spawns:
+      1v1:
+        - {x: -2443, y: 17, z: 709, yaw: 90, pitch: 0}
+        - {x: -2499.3, y: 17, z: 686, yaw: -90, pitch: 0}
+      2v2:
+        - {x: -2443, y: 17, z: 709, yaw: 90, pitch: 0}
+        - {x: -2443, y: 17, z: 708, yaw: 90, pitch: 0}
+        - {x: -2499.3, y: 17, z: 686, yaw: -90, pitch: 0}
+        - {x: -2499.3, y: 17, z: 685, yaw: -90, pitch: 0}
+      1v1v1v1:
+        - {x: -2443, y: 17, z: 709, yaw: 90, pitch: 0}
+        - {x: -2443, y: 17, z: 708, yaw: 90, pitch: 0}
+        - {x: -2499.3, y: 17, z: 686, yaw: -90, pitch: 0}
+        - {x: -2499.3, y: 17, z: 685, yaw: -90, pitch: 0}
     red-spawn-1: {x: -2443, y: 17, z: 709, yaw: 90, pitch: 0}
     red-spawn-2: {x: -2443, y: 17, z: 708, yaw: 90, pitch: 0}
     blue-spawn-1: {x: -2499.3, y: 17, z: 686, yaw: -90, pitch: 0}
@@ -45,6 +60,20 @@ maps:
       - { x: -2462.592, y: 24.5, z: 697.423 }
   Jungle:
     world: "Jungle"
+    spawns:
+      1v1:
+        - {x: -2421.7, y: 35, z: 753.579, yaw: -90, pitch: 0}
+        - {x: -2385.3, y: 35, z: 723, yaw: 90, pitch: 0}
+      2v2:
+        - {x: -2421.7, y: 35, z: 753.579, yaw: -90, pitch: 0}
+        - {x: -2421.7, y: 35, z: 754.579, yaw: -90, pitch: 0}
+        - {x: -2385.3, y: 35, z: 723, yaw: 90, pitch: 0}
+        - {x: -2385.3, y: 35, z: 722.185, yaw: 90, pitch: 0}
+      1v1v1v1:
+        - {x: -2421.7, y: 35, z: 753.579, yaw: -90, pitch: 0}
+        - {x: -2421.7, y: 35, z: 754.579, yaw: -90, pitch: 0}
+        - {x: -2385.3, y: 35, z: 723, yaw: 90, pitch: 0}
+        - {x: -2385.3, y: 35, z: 722.185, yaw: 90, pitch: 0}
     red-spawn-1: {x: -2421.7, y: 35, z: 753.579, yaw: -90, pitch: 0}
     red-spawn-2: {x: -2421.7, y: 35, z: 754.579, yaw: -90, pitch: 0}
     blue-spawn-1: {x: -2385.3, y: 35, z: 723, yaw: 90, pitch: 0}
@@ -55,6 +84,20 @@ maps:
       - {x: -2403.4, y: 43.5, z: 738.43}
   Highlink:
     world: "Highlink"
+    spawns:
+      1v1:
+        - {x: 1, y: 76, z: 51.5}
+        - {x: 0, y: 76, z: 110.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: 1, y: 76, z: 51.5}
+        - {x: 0, y: 76, z: 51.5}
+        - {x: 0, y: 76, z: 110.5, yaw: 180, pitch: 0}
+        - {x: 1, y: 76, z: 110.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: 1, y: 76, z: 51.5}
+        - {x: 0, y: 76, z: 51.5}
+        - {x: 0, y: 76, z: 110.5, yaw: 180, pitch: 0}
+        - {x: 1, y: 76, z: 110.5, yaw: 180, pitch: 0}
     red-spawn-1: {x: 1, y: 76, z: 51.5}
     red-spawn-2: {x: 0, y: 76, z: 51.5}
     blue-spawn-1: {x: 0, y: 76, z: 110.5, yaw: 180, pitch: 0}
@@ -65,6 +108,20 @@ maps:
       - {x: 14, y: 75.5, z: 81.5}
   Zeus:
     world: "Zeus"
+    spawns:
+      1v1:
+        - {x: 16.421, y: 45, z: 91.961}
+        - {x: -15, y: 45, z: 148.8, yaw: 180, pitch: 0}
+      2v2:
+        - {x: 16.421, y: 45, z: 91.961}
+        - {x: 15.421, y: 45, z: 91.961}
+        - {x: -15, y: 45, z: 148.8, yaw: 180, pitch: 0}
+        - {x: -14, y: 45, z: 148.8, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: 16.421, y: 45, z: 91.961}
+        - {x: 15.421, y: 45, z: 91.961}
+        - {x: -15, y: 45, z: 148.8, yaw: 180, pitch: 0}
+        - {x: -14, y: 45, z: 148.8, yaw: 180, pitch: 0}
     red-spawn-1: {x: 16.421, y: 45, z: 91.961}
     red-spawn-2: {x: 15.421, y: 45, z: 91.961}
     blue-spawn-1: {x: -15, y: 45, z: 148.8, yaw: 180, pitch: 0}

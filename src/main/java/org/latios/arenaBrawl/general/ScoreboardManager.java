@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
 import org.latios.arenaBrawl.game.Match;
+import org.latios.arenaBrawl.team.Team;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,22 +50,28 @@ public class ScoreboardManager {
                 board.resetScores(scoreEntry);
             }
 
-            boolean isViewerRed = match.getRed().contains(viewer);
-            List<Player> myTeam = isViewerRed ? match.getRed() : match.getBlue();
-            List<Player> enemyTeam = isViewerRed ? match.getBlue() : match.getRed();
+            Team viewerTeam = match.getTeams().entrySet().stream()
+                    .filter(teamEntry -> teamEntry.getValue().contains(viewer))
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElse(null);
+            List<Player> myTeam = viewerTeam == null ? List.of() : match.getTeamPlayers(viewerTeam);
 
             int line = 8;
 
             obj.getScore(" ").setScore(line--);
 
-            obj.getScore("§c[ENEMY TEAM]").setScore(line--);
-            for (Player enemy : enemyTeam) {
+            obj.getScore("§c[ENEMY TEAMS]").setScore(line--);
+            for (Map.Entry<Team, List<Player>> teamEntry : match.getTeams().entrySet()) {
+                if (teamEntry.getKey() == viewerTeam) continue;
+                for (Player enemy : teamEntry.getValue()) {
                 int health = (int) healthManager.getHealth(enemy);
                 if(health != 0) {
                     obj.getScore("§7" + enemy.getName() + " §e" + health).setScore(line--);
                 }
                 else{
                     obj.getScore("§7" + enemy.getName() + " §e" + "DEAD").setScore(line--);
+                }
                 }
             }
 

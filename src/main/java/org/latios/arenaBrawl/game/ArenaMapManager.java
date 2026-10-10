@@ -58,7 +58,8 @@ public class ArenaMapManager {
                     readLocation(section, "blue-spawn-1", world),
                     readLocation(section, "blue-spawn-2", world),
                     readLocation(section, "health-powerup", world),
-                    readLocationList(section, "damage-powerups", world)
+                    readLocationList(section, "damage-powerups", world),
+                    readSpawns(section, world)
             );
 
             maps.put(mapName, map);
@@ -91,10 +92,44 @@ public class ArenaMapManager {
                 double x = ((Number) map.get("x")).doubleValue();
                 double y = ((Number) map.get("y")).doubleValue();
                 double z = ((Number) map.get("z")).doubleValue();
-                locations.add(new Location(world, x, y, z));
+                float yaw = map.get("yaw") instanceof Number value ? value.floatValue() : 0.0f;
+                float pitch = map.get("pitch") instanceof Number value ? value.floatValue() : 0.0f;
+                locations.add(new Location(world, x, y, z, yaw, pitch));
             }
+
         }
         return locations;
+    }
+
+    private Map<MatchType, List<Location>> readSpawns(ConfigurationSection section, World world) {
+        Map<MatchType, List<Location>> spawns = new EnumMap<>(MatchType.class);
+        ConfigurationSection modes = section.getConfigurationSection("spawns");
+
+        if (modes != null) {
+            for (MatchType type : MatchType.values()) {
+                List<Location> locations = readLocationList(modes, type.getDisplayName(), world);
+                if (!locations.isEmpty()) spawns.put(type, locations);
+            }
+        }
+
+        List<Location> legacy = Arrays.asList(
+                readLocation(section, "red-spawn-1", world),
+                readLocation(section, "red-spawn-2", world),
+                readLocation(section, "blue-spawn-1", world),
+                readLocation(section, "blue-spawn-2", world)
+        );
+        if (spawns.get(MatchType.TEAMS) == null && legacy.stream().allMatch(Objects::nonNull)) {
+            spawns.put(MatchType.TEAMS, legacy);
+        }
+        if (spawns.get(MatchType.DUEL) == null
+                && legacy.get(0) != null && legacy.get(2) != null) {
+            spawns.put(MatchType.DUEL, List.of(legacy.get(0), legacy.get(2)));
+        }
+        if (spawns.get(MatchType.FFA) == null
+                && legacy.stream().allMatch(Objects::nonNull)) {
+            spawns.put(MatchType.FFA, legacy);
+        }
+        return spawns;
     }
 
     /** Returns an available (not currently in use) map, or null if all are occupied. */

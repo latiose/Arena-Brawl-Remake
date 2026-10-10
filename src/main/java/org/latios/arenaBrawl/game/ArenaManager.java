@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.game;
 
 
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
@@ -27,7 +28,7 @@ import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeType;
 
-import java.util.List;
+import java.util.*;
 
 public class ArenaManager {
 
@@ -111,23 +112,34 @@ public class ArenaManager {
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
+        startMatch(MatchType.TEAMS, List.of(p1, p2, p3, p4));
+    }
+
+    public void startMatch(MatchType type, List<Player> players) {
         ArenaMap map = arenaMapManager.claimAvailableMap();
 
-        if (map == null || !map.isValid()) {
+        if (map == null || !map.isValid(type)) {
             if (map != null) {
                 arenaMapManager.releaseMap(map);
             }
-            for (Player p : List.of(p1, p2, p3, p4)) {
+            for (Player p : players) {
                 p.sendMessage("§cAll arenas are currently occupied or invalid. Please wait.");
             }
             return;
         }
-        teamManager.setTeam(p1, Team.RED);
-        teamManager.setTeam(p2, Team.RED);
-        teamManager.setTeam(p3, Team.BLUE);
-        teamManager.setTeam(p4, Team.BLUE);
+        Team[] availableTeams = Team.values();
+        Map<Team, List<Player>> teams = new LinkedHashMap<>();
+        for (int i = 0; i < type.getTeamCount(); i++) {
+            List<Player> teamPlayers = new ArrayList<>();
+            for (int j = 0; j < type.getTeamSize(); j++) {
+                Player player = players.get(i * type.getTeamSize() + j);
+                teamPlayers.add(player);
+                teamManager.setTeam(player, availableTeams[i]);
+            }
+            teams.put(availableTeams[i], teamPlayers);
+        }
 
-        List<Player> allPlayers = List.of(p1, p2, p3, p4);
+        List<Player> allPlayers = List.copyOf(players);
         AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,
                 energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager,scavengerManager,skeletonEntityManager);
 
@@ -152,7 +164,7 @@ public class ArenaManager {
             player.updateInventory();
         }
 
-        var match = new Match(List.of(p1, p2), List.of(p3, p4), map);
+        var match = new Match(type, teams, map);
 
         match.getPowerupManager().configureLocations(PowerupType.HEALTH,
                 map.getHealthPowerupLocation() != null ? List.of(map.getHealthPowerupLocation()) : List.of());
@@ -167,10 +179,10 @@ public class ArenaManager {
         var task = new MatchScoreboardTask(match, scoreboardManager).runTaskTimer(plugin, 0L, 10L);
         matchManager.registerMatch(match, task);
 
-        p1.teleport(map.getRedSpawn1());
-        p2.teleport(map.getRedSpawn2());
-        p3.teleport(map.getBlueSpawn1());
-        p4.teleport(map.getBlueSpawn2());
+        List<Location> spawns = map.getSpawns(type);
+        for (int i = 0; i < allPlayers.size(); i++) {
+            allPlayers.get(i).teleport(spawns.get(i));
+        }
 
     }
 

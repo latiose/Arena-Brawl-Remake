@@ -30,6 +30,7 @@ import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import org.latios.arenaBrawl.rating.RatingManager;
 import org.latios.arenaBrawl.stats.StatsManager;
 import org.latios.arenaBrawl.team.TeamManager;
+import org.latios.arenaBrawl.team.Team;
 
 import java.util.*;
 
@@ -157,7 +158,7 @@ public class MatchManager {
 
         player.setGameMode(GameMode.SPECTATOR);
         debuffManager.clear(player);
-        String winner = match.eliminate(player);
+        Team winner = match.eliminate(player);
         if (winner != null) {
             endMatch(match, winner);
         }
@@ -236,11 +237,13 @@ public class MatchManager {
         return new ArrayList<>(activeMatchesList);
     }
 
-    private void endMatch(Match match, String winnerTeam) {
+    private void endMatch(Match match, Team winnerTeam) {
         if (match.isEnded()) return;
         match.setEnded(true);
-        List<Player> winners = winnerTeam.equals("RED") ? match.getRed() : match.getBlue();
-        List<Player> losers = winnerTeam.equals("RED") ? match.getBlue() : match.getRed();
+        List<Player> winners = match.getTeamPlayers(winnerTeam);
+        List<Player> losers = match.getAllPlayers().stream()
+                .filter(player -> !winners.contains(player))
+                .toList();
 
         for (Player viewer : match.getAllPlayers()) {
             if (!viewer.isOnline()) continue;
@@ -251,7 +254,9 @@ public class MatchManager {
             viewer.sendMessage("§6#§7--------------------------§6#");
         }
 
-        applyRatingChanges(winners, losers);
+        if (match.getType() == MatchType.TEAMS) {
+            applyRatingChanges(winners, losers);
+        }
 
         for (Player winner : winners) {
             if (winner.isOnline()) {

@@ -32,6 +32,9 @@ import org.latios.arenaBrawl.party.PartyManager;
 import org.latios.arenaBrawl.powerups.*;
 import org.latios.arenaBrawl.queue.QueueCommand;
 import org.latios.arenaBrawl.queue.QueueManager;
+import org.latios.arenaBrawl.queue.QueueSignListener;
+import org.latios.arenaBrawl.gui.QueueGUI;
+import org.latios.arenaBrawl.gui.QueueGUIListener;
 import org.latios.arenaBrawl.rating.LeaderboardCommand;
 import org.latios.arenaBrawl.rating.RatingCommand;
 import org.latios.arenaBrawl.rating.RatingManager;
@@ -236,6 +239,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         );
 
         this.queueManager = new QueueManager(this,partyManager, arenaManager,arenaMapManager);
+        QueueGUI queueGUI = new QueueGUI();
         // Listeners
         getServer().getPluginManager().registerEvents(
                 new AbilityTriggerListener(abilityManager,debuffManager,matchManager), this
@@ -316,8 +320,10 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new LobbyJoinListener(matchManager,  teamManager,
                  abilityManager,  debuffManager,lobbyScoreboardManager,armorTierManager,hatSelectionManager,hologramListener,this), this);
         getServer().getPluginManager().registerEvents(
-                new LobbyItemListener(queueManager, abilitySelectorGUI,matchManager), this
+                new LobbyItemListener(queueManager, abilitySelectorGUI,matchManager, queueGUI), this
         );
+        getServer().getPluginManager().registerEvents(new QueueGUIListener(queueManager, queueGUI), this);
+        getServer().getPluginManager().registerEvents(new QueueSignListener(queueManager, matchManager), this);
         getServer().getPluginManager().registerEvents(
                 new AbilitySelectorListener(abilityRegistry, abilitySelectionManager, abilitySelectorGUI, runeSelectionManager,hatSelectorGUI,combatUpgradeGUI), this
         );

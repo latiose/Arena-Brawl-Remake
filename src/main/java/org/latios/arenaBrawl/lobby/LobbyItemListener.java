@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.gui.AbilitySelectorGUI;
+import org.latios.arenaBrawl.gui.QueueGUI;
 import org.latios.arenaBrawl.queue.QueueManager;
 
 public class LobbyItemListener implements Listener {
@@ -16,11 +17,13 @@ public class LobbyItemListener implements Listener {
     private final QueueManager queueManager;
     private final AbilitySelectorGUI abilitySelectorGUI;
     private final MatchManager matchManager;
+    private final QueueGUI queueGUI;
 
-    public LobbyItemListener(QueueManager queueManager, AbilitySelectorGUI abilitySelectorGUI, MatchManager matchManager) {
+    public LobbyItemListener(QueueManager queueManager, AbilitySelectorGUI abilitySelectorGUI, MatchManager matchManager, QueueGUI queueGUI) {
         this.queueManager = queueManager;
         this.abilitySelectorGUI = abilitySelectorGUI;
         this.matchManager = matchManager;
+        this.queueGUI = queueGUI;
     }
 
     @EventHandler
@@ -37,7 +40,11 @@ public class LobbyItemListener implements Listener {
 
         if (item.getType() == Material.COMPASS) {
             event.setCancelled(true);
-            toggleQueue(player);
+            if (matchManager.isInMatch(player)) {
+                player.sendMessage("§cYou can't use the queue while in a match.");
+            } else {
+                queueGUI.open(player, queueManager);
+            }
         } else if (item.getType() == Material.EMERALD) {
             event.setCancelled(true);
 
@@ -50,22 +57,4 @@ public class LobbyItemListener implements Listener {
         }
     }
 
-    private void toggleQueue(Player player) {
-        if (matchManager.isInMatch(player)) {
-            player.sendMessage("§cYou can't use the queue while in a match.");
-            return;
-        }
-
-        if (queueManager.isQueued(player)) {
-            queueManager.leaveQueue(player);
-            player.sendMessage("§eYou left the queue.");
-        } else {
-            int queueSize = queueManager.joinQueue(player);
-            if (queueSize != -1) {
-                player.sendMessage("§aYou joined the queue (" + queueSize + "/4).");
-            } else {
-                player.sendMessage("§cA member of your party is already in queue.");
-            }
-        }
-    }
 }
