@@ -35,7 +35,6 @@ leaderboard-signs:
 maps:
   Bridge:
     world: "Bridge"
-    # Override spawn points per mode. Each list is ordered by player slot.
     spawns:
       1v1:
         - {x: -2443, y: 17, z: 709, yaw: 90, pitch: 0}

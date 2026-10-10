@@ -4,9 +4,11 @@ import org.bukkit.block.Container;
 import org.bukkit.block.EnchantingTable;
 import org.bukkit.block.EnderChest;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class BlockInteractionListener implements Listener {
@@ -30,11 +32,18 @@ public class BlockInteractionListener implements Listener {
 
         var state = event.getClickedBlock().getState();
 
-        if (state instanceof Sign || state instanceof Container || state  instanceof EnchantingTable) {
+        if (state instanceof Container || state  instanceof EnchantingTable || state instanceof ItemFrame) {
             event.setCancelled(true);
         }
         if(state instanceof EnderChest) {
             event.setCancelled(false);
+        }
+    }
+
+    @EventHandler
+    public void onEntityInteract(PlayerInteractEntityEvent event) {
+        if (event.getRightClicked() instanceof ItemFrame) {
+            event.setCancelled(true);
         }
     }
 }
