@@ -78,6 +78,7 @@ public class AbilityRegistry {
                 deps -> new Necromancy(deps.energyManager(),deps.skeletonEntityManager(), configManager.get("necromancy")));
         register(AbilitySlot.OFFENSIVE, "seismicwave",
                 deps -> new SeismicWave(plugin,deps.energyManager(),deps.teamManager(), deps.combatService(),deps.demolitionService(),configManager.get("seismicwave")));
+
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
                 deps -> new ShadowStep(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("shadowstep"),deps.speedBuffManager()));
@@ -118,6 +119,7 @@ public class AbilityRegistry {
                 deps -> new PrimalRoar(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.shieldManager(), deps.debuffManager(), deps.teamManager(), configManager.get("primalroar")));
         register(AbilitySlot.UTILITY, "grit",
                 deps -> new Grit(deps.cooldownManager(),deps.combatUpgradeManager(),deps.shieldManager(), configManager.get("grit")));
+
 
 
         // --- SUPPORT ---
@@ -164,6 +166,10 @@ public class AbilityRegistry {
                 deps -> new Bloodthirst(deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("bloodthirst")));
         register(AbilitySlot.SUPPORT, "meditation",
                 deps -> new Meditation(deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("meditation")));
+        register(AbilitySlot.SUPPORT, "rallybanner",
+                deps -> new RallyBanner(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.teamManager(),
+                        deps.damageBuffManager(), deps.speedBuffManager(), deps.playerHealthManager(),
+                        configManager.get("rallybanner")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
@@ -194,6 +200,7 @@ public class AbilityRegistry {
                 deps -> new Berserk(plugin, deps.cooldownManager(), deps.usageManager(), deps.speedBuffManager(), configManager.get("berserk")));
         register(AbilitySlot.ULTIMATE, "zombieapocalypse",
                 deps -> new ZombieApocalypse(deps.cooldownManager(), deps.usageManager(), deps.zombieEntityManager(), deps.teamManager(), configManager.get("zombieapocalypse")));
+
 
         // --- DEFAULTS ---
         defaults.put(AbilitySlot.OFFENSIVE, "fireball");

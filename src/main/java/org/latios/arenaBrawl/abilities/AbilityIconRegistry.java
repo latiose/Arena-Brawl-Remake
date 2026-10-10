@@ -68,6 +68,7 @@ public class AbilityIconRegistry {
         icons.put("scavenger", Material.HOPPER);
         icons.put("grit", Material.BOW);
 
+
         // --- SUPPORT ---
         icons.put("holywater", Material.POTION);
         icons.put("boneshield", Material.BONE);
@@ -90,6 +91,7 @@ public class AbilityIconRegistry {
         icons.put("gamblersheal",Material.CLOCK);
         icons.put("meditation",Material.RED_BED);
         icons.put("bloodthirst",Material.SKELETON_SKULL);
+        icons.put("rallybanner", Material.WHITE_BANNER);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);

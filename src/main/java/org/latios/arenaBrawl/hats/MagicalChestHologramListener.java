@@ -19,6 +19,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.Plugin;
 import org.joml.Vector3f;
 
@@ -103,6 +104,11 @@ public class MagicalChestHologramListener implements Listener {
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
         Bukkit.getScheduler().runTaskLater(plugin, () -> scanChunk(event.getChunk()), 1L);
+    }
+
+    @EventHandler
+    public void onWorldLoad(WorldLoadEvent event) {
+        Bukkit.getScheduler().runTaskLater(plugin, this::scanAllWorlds, 1L);
     }
 
     @EventHandler

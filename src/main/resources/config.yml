@@ -288,6 +288,7 @@ ability-values:
     knockback-horizontal: 0.3
     knockback-vertical: 0.4
 
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -520,6 +521,14 @@ ability-values:
     cooldown-ms: 25000
     max-duration-ms: 6000
     heal-per-second: 60.0
+
+  rallybanner:
+    radius: 8.0
+    damage-multiplier: 1.20
+    heal-per-second: 20.0
+    duration-ms: 8000
+    speed-amplifier: 1
+    cooldown-ms: 35000
 
   # --- ULTIMATE ---
   shieldwall:
