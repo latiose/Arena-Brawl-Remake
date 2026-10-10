@@ -33,7 +33,7 @@ public class CombatService {
     private final OrbitShieldManager orbitShieldManager;
     private final DamageBuffManager damageBuffManager;
     private final MatchManager matchManager;
-    private static final long HOLOGRAM_LIFETIME_TICKS = 35;
+    private static final long HOLOGRAM_LIFETIME_TICKS = 30;
     private static final long STAR_SHIELD_EFFECT_DURATION_MILLIS = 4_000;
     private static final List<DebuffType> STAR_SHIELD_POSSIBLE_DEBUFFS =
             List.of(DebuffType.STUN, DebuffType.IMMOBILIZE, DebuffType.SLOW);
@@ -202,9 +202,10 @@ public class CombatService {
 
         if (type.getDamagePerCharge() > 0) {
             double damageAmount = type.getDamagePerCharge();
-            int roundedDamage = (int) Math.round(damageAmount);
-            roundedDamage *= (int) damageBuffManager.getMultiplier(victim);
             damageAmount *= (int) damageBuffManager.getMultiplier(victim);
+            damageAmount *= (int) damageVulnerabilityManager.getBonusMultiplier(attacker);
+            int roundedDamage = (int) Math.round(damageAmount);
+
             OrbitShieldType attackerShield = (!reflected && orbitShieldManager.hasActiveShield(attacker))
                     ? orbitShieldManager.getActiveType(attacker)
                     : null;

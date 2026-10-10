@@ -115,7 +115,19 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
 
-        Location lobbySpawn = new Location(Bukkit.getWorld("world"), 0, -60, 0);
+        String lobbyWorldName = getConfig().getString("worlds.lobby", "world");
+        World lobbyWorld = Bukkit.getWorld(lobbyWorldName);
+        if (lobbyWorld == null) {
+            getLogger().severe("Lobby world '" + lobbyWorldName + "' not found, using the default world.");
+            lobbyWorld = Bukkit.getWorlds().getFirst();
+        }
+
+        Location lobbySpawn = new Location(
+                lobbyWorld,
+                getConfig().getDouble("lobby-spawn.x", -2462),
+                getConfig().getDouble("lobby-spawn.y", 13),
+                getConfig().getDouble("lobby-spawn.z", 750.0)
+        );
         ClickModeManager clickModeManager = new ClickModeManager();
         this.arenaLocation = new ArenaLocation(this);
         this.speedBuffManager = new SpeedBuffManager(this);
