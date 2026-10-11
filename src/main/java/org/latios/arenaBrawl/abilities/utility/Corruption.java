@@ -2,6 +2,7 @@ package org.latios.arenaBrawl.abilities.utility;
 
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
@@ -17,7 +18,7 @@ import java.util.List;
 
 public class Corruption implements Ability {
 
-    private final double maxRange;
+    private final double areaRadius;
     private final long durationMillis;
     private final long cooldownMillis;
     private final AbilityConfig config;
@@ -28,8 +29,8 @@ public class Corruption implements Ability {
     public Corruption(CooldownManager cooldownManager, TeamManager teamManager,
                       CombatUpgradeManager combatUpgradeManager, DebuffManager debuffManager,
                       AbilityConfig config) {
-        this.maxRange = config.getDouble("max-range", 20.0);
         this.durationMillis = config.getLong("duration-ms", 5000L);
+        this.areaRadius = config.getDouble("area-radius", 6.0);
         this.cooldownMillis = config.getLong("cooldown-ms", 35000L);
 
         this.cost = new CooldownCost(cooldownManager, "corruption", cooldownMillis, combatUpgradeManager);
@@ -46,32 +47,45 @@ public class Corruption implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, maxRange);
+        List<Player> targets = player.getNearbyEntities(areaRadius, areaRadius, areaRadius).stream()
+                .filter(entity -> entity instanceof Player)
+                .map(entity -> (Player) entity)
+                .filter(target -> !target.equals(player))
+                .filter(target -> target.getGameMode() != GameMode.SPECTATOR)
+                .filter(target -> !target.isDead())
+                .filter(target -> teamManager.isEnemy(player, target))
+                .toList();
 
-        if (target == null) {
+        if (targets.isEmpty()) {
             player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
 
-        boolean applied = debuffManager.tryApply(
-                player,
-                target,
-                DebuffType.ANTIHEAL,
-                durationMillis,
-                100.0
-        );
+        boolean appliedToAny = false;
+        for (Player target : targets) {
+            boolean applied = debuffManager.tryApply(
+                    player,
+                    target,
+                    DebuffType.ANTIHEAL,
+                    durationMillis,
+                    100.0
+            );
+            if (!applied) {
+                player.sendMessage(MessageUtils.negative()
+                        + "§3" + target.getName() + " is already affected by a debuff.");
+                continue;
+            }
 
-        if (!applied) {
-            player.sendMessage(MessageUtils.negative()
-                    + "§3" + target.getName() + " is already affected by a debuff.");
-            return false;
+            appliedToAny = true;
+            target.getWorld().spawnParticle(Particle.SMOKE, target.getLocation().add(0, 1, 0), 15);
+            player.sendMessage(MessageUtils.positive() + "§3You corrupted §3" + target.getName() + "§3!");
+            target.sendMessage(MessageUtils.negative() + "§3You were hit by §a" + player.getName()
+                    + "§3's Corruption! Cannot heal for " + (durationMillis / 1000L) + "s.");
         }
 
-        target.getWorld().spawnParticle(Particle.SMOKE, target.getLocation().add(0, 1, 0), 15);
-        MatchSoundUtils.play(config, player,Sound.ENTITY_WITHER_HURT, 0.5f, 2.0f);
+        if (!appliedToAny) return false;
 
-        player.sendMessage(MessageUtils.positive() + "§3You corrupted §3" + target.getName() + "§3!");
-        target.sendMessage(MessageUtils.negative() + "§3You were hit by §a" + player.getName() + "§3's Corruption! Cannot heal for " + (durationMillis / 1000L) + "s.");
+        MatchSoundUtils.play(config, player,Sound.ENTITY_WITHER_HURT, 0.5f, 2.0f);
 
         return true;
     }
@@ -85,7 +99,7 @@ public class Corruption implements Ability {
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Cooldown", (cooldownMillis / 1000L) + "s"),
-                new AbilityStat("Range", (int) maxRange + " blocks"),
+                new AbilityStat("Area Radius", areaRadius + " blocks"),
                 new AbilityStat("Duration", (durationMillis / 1000L) + "s")
         );
     }

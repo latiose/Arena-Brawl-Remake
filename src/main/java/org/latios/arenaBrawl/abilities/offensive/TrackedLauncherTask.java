@@ -10,6 +10,8 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.general.CombatService;
@@ -27,6 +29,7 @@ public class TrackedLauncherTask extends BukkitRunnable {
     private final TeamManager teamManager;
     private final CombatService combatService;
     private Vector velocity;
+    private Location previousCenter;
 
     public TrackedLauncherTask(ArmorStand armorStand, Vector velocity, Player shooter, double mainDamage, double sliceDamage,
                                double aoeRadius, String abilityName, Material headMaterial, Material sliceMaterial,
@@ -41,6 +44,7 @@ public class TrackedLauncherTask extends BukkitRunnable {
         this.sliceMaterial = sliceMaterial;
         this.teamManager = teamManager;
         this.combatService = combatService;
+        this.previousCenter = armorStand.getLocation().add(0, 1.4, 0);
     }
 
     @Override
@@ -53,18 +57,39 @@ public class TrackedLauncherTask extends BukkitRunnable {
         }
 
         velocity.setY(velocity.getY() - 0.025);
+        Location previous = previousCenter.clone();
         Location nextLoc = armorStand.getLocation().add(velocity);
         armorStand.teleport(nextLoc);
 
         Location projectileCenter = nextLoc.clone().add(0, 1.4, 0);
 
+        Player directHit = null;
+        Location directImpact = projectileCenter;
         for (Player candidate : armorStand.getWorld().getPlayers()) {
             if (candidate.equals(shooter) || !teamManager.isEnemy(shooter, candidate)) continue;
 
-            if (candidate.getBoundingBox().expand(0.5).contains(projectileCenter.toVector())) {
-                explode(candidate, projectileCenter);
-                return;
+            BoundingBox targetBox = candidate.getBoundingBox().expand(0.5);
+            if (targetBox.contains(projectileCenter.toVector())) {
+                directHit = candidate;
+                break;
             }
+
+            Vector movement = projectileCenter.toVector().subtract(previous.toVector());
+            if (movement.lengthSquared() > 1.0E-6) {
+                RayTraceResult hit = targetBox.rayTrace(
+                        previous.toVector(), movement.clone().normalize(), movement.length());
+                if (hit != null) {
+                    directHit = candidate;
+                    directImpact = hit.getHitPosition().toLocation(armorStand.getWorld());
+                    break;
+                }
+            }
+        }
+
+        previousCenter = projectileCenter.clone();
+        if (directHit != null) {
+            explode(directHit, directImpact);
+            return;
         }
 
         if (projectileCenter.getBlock().getType().isSolid() && !projectileCenter.getBlock().isPassable()) {

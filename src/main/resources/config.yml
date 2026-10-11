@@ -338,8 +338,8 @@ ability-values:
 
   sparkbolt:
     cooldown-ms: 30000
-    max-range: 20
     duration-ms: 5000
+    area-radius: 6.0
 
   sugarrush:
     cooldown-ms: 30000
@@ -384,9 +384,9 @@ ability-values:
     cooldown-ms: 30000
 
   corruption:
-    max-range: 20.0
     duration-ms: 5000
     cooldown-ms: 35000
+    area-radius: 6.0
 
   magneticImpulse:
     radius: 5.0

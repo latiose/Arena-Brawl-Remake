@@ -1,10 +1,14 @@
 package org.latios.arenaBrawl.abilities.support;
 
 import org.bukkit.GameMode;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
@@ -75,6 +79,19 @@ public class HolyWater implements Ability {
         }
 
         player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 50);
+        player.getWorld().spawn(player.getLocation().add(0, 3.0, 0), Firework.class, firework -> {
+            FireworkMeta meta = firework.getFireworkMeta();
+            meta.addEffect(FireworkEffect.builder()
+                    .with(FireworkEffect.Type.BALL)
+                    .withColor(Color.AQUA)
+                    .withFade(Color.AQUA)
+                    .trail(true)
+                    .flicker(true)
+                    .build());
+            meta.setPower(1);
+            firework.setFireworkMeta(meta);
+            firework.detonate();
+        });
         MatchSoundUtils.play(config, player,  Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1.0f, 1.0f);
 
         return true;
