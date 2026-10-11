@@ -15,7 +15,9 @@ public class ArenaCleanupListener implements Listener {
     public void onChunkLoad(ChunkLoadEvent event) {
         for (Entity entity : event.getChunk().getEntities()) {
             boolean hasMarker = entity.getPersistentDataContainer().has(AbilityItemKeys.ARENA_ENTITY_MARKER, PersistentDataType.BYTE);
-            boolean isDisplay = entity instanceof ItemDisplay || entity instanceof TextDisplay;
+            boolean isDisplay = (entity instanceof ItemDisplay || entity instanceof TextDisplay)
+                    && entity.getPersistentDataContainer().has(
+                    AbilityItemKeys.ARENA_ENTITY_MARKER, PersistentDataType.BYTE);
 
             if (hasMarker || isDisplay) {
                 entity.remove();

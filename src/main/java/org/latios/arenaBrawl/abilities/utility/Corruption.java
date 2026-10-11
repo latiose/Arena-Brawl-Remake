@@ -56,9 +56,10 @@ public class Corruption implements Ability {
                 .filter(target -> teamManager.isEnemy(player, target))
                 .toList();
 
+        spawnAreaEffect(player);
+
         if (targets.isEmpty()) {
-            player.sendMessage(MessageUtils.noValidPlayer());
-            return false;
+            return true;
         }
 
         boolean appliedToAny = false;
@@ -88,6 +89,24 @@ public class Corruption implements Ability {
         MatchSoundUtils.play(config, player,Sound.ENTITY_WITHER_HURT, 0.5f, 2.0f);
 
         return true;
+    }
+
+    private void spawnAreaEffect(Player player) {
+        var center = player.getLocation().add(0, 0.15, 0);
+        int points = Math.max(24, (int) Math.ceil(areaRadius * 8));
+        for (int i = 0; i < points; i++) {
+            double angle = 2 * Math.PI * i / points;
+            var point = center.clone().add(
+                    Math.cos(angle) * areaRadius,
+                    0,
+                    Math.sin(angle) * areaRadius
+            );
+            player.getWorld().spawnParticle(Particle.SMOKE, point, 2, 0.08, 0.03, 0.08, 0.01);
+            player.getWorld().spawnParticle(Particle.WITCH, point.clone().add(0, 0.25, 0),
+                    1, 0.04, 0.04, 0.04, 0.01);
+        }
+        player.getWorld().spawnParticle(Particle.SOUL, player.getLocation().add(0, 1, 0),
+                16, 0.4, 0.7, 0.4, 0.03);
     }
 
     @Override

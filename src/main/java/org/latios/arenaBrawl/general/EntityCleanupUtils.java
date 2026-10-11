@@ -20,9 +20,10 @@ public class EntityCleanupUtils {
 
         for (Entity entity : world.getEntities()) {
             boolean hasMarker = entity.getPersistentDataContainer().has(AbilityItemKeys.ARENA_ENTITY_MARKER, PersistentDataType.BYTE);
-            boolean isDisplay = entity instanceof ItemDisplay || entity instanceof TextDisplay;
+            boolean isDisplay = (entity instanceof ItemDisplay || entity instanceof TextDisplay)
+                    && hasMarker;
 
-            if (hasMarker || isDisplay) {
+            if (isDisplay) {
                 entity.remove();
             }
         }

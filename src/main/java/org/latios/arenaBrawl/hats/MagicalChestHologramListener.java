@@ -21,6 +21,8 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.persistence.PersistentDataType;
+import org.latios.arenaBrawl.general.AbilityItemKeys;
 import org.joml.Vector3f;
 
 import java.util.HashMap;
@@ -65,8 +67,11 @@ public class MagicalChestHologramListener implements Listener {
         if (world == null) return;
 
         for (Entity nearby : world.getNearbyEntities(holoLoc, 0.5, 0.5, 0.5)) {
-            if (nearby instanceof TextDisplay) {
-                nearby.remove();
+            if (nearby instanceof TextDisplay
+                    && nearby.getPersistentDataContainer().has(
+                    AbilityItemKeys.MAGICAL_CHEST_HOLOGRAM, PersistentDataType.BYTE)) {
+                holograms.put(chestLoc, (TextDisplay) nearby);
+                return;
             }
         }
 
@@ -88,7 +93,10 @@ public class MagicalChestHologramListener implements Listener {
                     new org.joml.AxisAngle4f()
             ));
             d.setViewRange(64.0f);
-            d.setPersistent(false);
+            d.getPersistentDataContainer().set(
+                    AbilityItemKeys.MAGICAL_CHEST_HOLOGRAM, PersistentDataType.BYTE, (byte) 1
+            );
+            d.setPersistent(true);
         });
 
         holograms.put(chestLoc, display);

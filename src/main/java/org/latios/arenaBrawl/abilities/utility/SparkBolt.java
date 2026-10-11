@@ -55,9 +55,10 @@ public class SparkBolt implements Ability {
                 .filter(target -> teamManager.isEnemy(player, target))
                 .toList();
 
+        spawnAreaEffect(player);
+
         if (targets.isEmpty()) {
-            player.sendMessage(MessageUtils.noValidPlayer());
-            return false;
+            return true;
         }
 
         for (Player target : targets) {
@@ -72,6 +73,22 @@ public class SparkBolt implements Ability {
         MatchSoundUtils.play(config, player, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.5f, 2.0f);
 
         return true;
+    }
+
+    private void spawnAreaEffect(Player player) {
+        var center = player.getLocation().add(0, 0.15, 0);
+        int points = Math.max(24, (int) Math.ceil(areaRadius * 8));
+        for (int i = 0; i < points; i++) {
+            double angle = 2 * Math.PI * i / points;
+            var point = center.clone().add(
+                    Math.cos(angle) * areaRadius,
+                    0,
+                    Math.sin(angle) * areaRadius
+            );
+            player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, point, 2, 0.04, 0.02, 0.04, 0.01);
+        }
+        player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1, 0),
+                12, 0.35, 0.6, 0.35, 0.04);
     }
 
     @Override
