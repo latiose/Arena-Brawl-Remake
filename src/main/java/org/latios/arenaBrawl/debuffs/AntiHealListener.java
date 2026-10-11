@@ -16,18 +16,22 @@ public class AntiHealListener implements DebuffListener, Listener {
     }
 
     @Override
-    public void onApplied(Player victim, DebuffType type, long durationMillis) {
+    public void onApplied(Player victim, DebuffType type, long durationMillis, double strength) {
         if (type != DebuffType.ANTIHEAL) return;
 
-        healthManager.disableRegen(victim, durationMillis);
+        healthManager.addHealReduction(victim, strength, durationMillis);
     }
 
     @Override
     public void onExpired(Player victim, DebuffType type) {
         if (type != DebuffType.ANTIHEAL) return;
+    }
 
-        healthManager.clearRegenDisable(victim);
+    @Override
+    public void onExpired(Player victim, DebuffType type, long durationMillis, double strength) {
+        if (type != DebuffType.ANTIHEAL) return;
 
+        healthManager.removeHealReduction(victim, strength, durationMillis);
         if (victim.isOnline() && !victim.isDead()) {
             victim.sendMessage(MessageUtils.positive() + "§3Anti healing has worn off!");
         }
@@ -35,6 +39,6 @@ public class AntiHealListener implements DebuffListener, Listener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        onExpired(event.getEntity(), DebuffType.ANTIHEAL);
+        healthManager.clearRegenDisable(event.getEntity());
     }
 }

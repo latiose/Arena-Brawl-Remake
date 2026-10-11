@@ -57,7 +57,8 @@ public class Corruption implements Ability {
                 player,
                 target,
                 DebuffType.ANTIHEAL,
-                durationMillis
+                durationMillis,
+                100.0
         );
 
         if (!applied) {

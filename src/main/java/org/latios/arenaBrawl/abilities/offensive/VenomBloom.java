@@ -43,6 +43,7 @@ public class VenomBloom implements Ability {
     private final long durationTicks;
     private final long damageIntervalTicks;
     private final long antiHealTicks;
+    private final double antiHealPercent;
     private final AbilityConfig config;
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -63,6 +64,7 @@ public class VenomBloom implements Ability {
         this.durationTicks = config.getLong("duration-ticks", 100L);
         this.damageIntervalTicks = config.getLong("damage-interval-ticks", 10L);
         this.antiHealTicks = config.getLong("antiheal-duration-ticks", 60L);
+        this.antiHealPercent = config.getDouble("antiheal-percent", 40.0);
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
@@ -192,7 +194,8 @@ public class VenomBloom implements Ability {
                                 caster,
                                 victim,
                                 DebuffType.ANTIHEAL,
-                                antiHealTicks * 50L
+                                antiHealTicks * 50L,
+                                antiHealPercent
                         );
                     }
                 }

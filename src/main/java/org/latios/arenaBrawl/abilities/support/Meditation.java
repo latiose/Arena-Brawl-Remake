@@ -28,6 +28,7 @@ public class Meditation implements Ability {
     private static final int HEAL_INTERVAL_TICKS = 10;
     private static final double MOVE_THRESHOLD_SQ = 0.09;
     private static final double MAX_VERTICAL_DRIFT = 0.5;
+    private static final long MOVEMENT_GRACE_TICKS = 20L;
     private static final Map<UUID, BukkitRunnable> ACTIVE = new HashMap<>();
 
     private final long cooldownMs;
@@ -80,8 +81,9 @@ public class Meditation implements Ability {
                 Location now = player.getLocation();
                 double dx = now.getX() - anchor.getX();
                 double dz = now.getZ() - anchor.getZ();
-                if (dx * dx + dz * dz > MOVE_THRESHOLD_SQ
-                        || Math.abs(now.getY() - anchor.getY()) > MAX_VERTICAL_DRIFT) {
+                if (elapsed > MOVEMENT_GRACE_TICKS
+                        && (dx * dx + dz * dz > MOVE_THRESHOLD_SQ
+                        || Math.abs(now.getY() - anchor.getY()) > MAX_VERTICAL_DRIFT)) {
                     stop(player, MessageUtils.negative() + "§3Your meditation was broken because you moved.");
                     return;
                 }
@@ -96,7 +98,7 @@ public class Meditation implements Ability {
                 }
 
                 if (elapsed >= maxTicks) {
-                    stop(player, MessageUtils.positive() + null);
+                    stop(player, null);
                 }
             }
         };
@@ -107,7 +109,7 @@ public class Meditation implements Ability {
     }
 
     public static void interrupt(Player victim) {
-        stop(victim, MessageUtils.negative() + "§3Your meditation was interrupted by damage.");
+        // Damage no longer interrupts meditation.
     }
 
     private static void stop(Player player, String message) {
@@ -127,7 +129,7 @@ public class Meditation implements Ability {
     @Override
     public String getDescription() {
         return "Stand still to heal " + (int) healPerSecond + " HP per second for up to "
-                + (maxDurationMs / 1000L) + "s. Moving or taking damage cancels it.";
+                + (maxDurationMs / 1000L) + "s. Movement is allowed for the first second.";
     }
 
     @Override

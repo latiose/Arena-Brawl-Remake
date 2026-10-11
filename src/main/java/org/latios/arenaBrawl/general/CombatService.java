@@ -114,7 +114,6 @@ public class CombatService {
                 finalDamage = finalDamage * 0.70;
 
                 healthManager.damage(caster, redirectedDamage, attacker);
-                Meditation.interrupt(caster);
                 caster.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, caster.getLocation().add(0, 1, 0), 3);
 
                 caster.sendMessage(MessageUtils.negative() + String.format(
@@ -130,7 +129,6 @@ public class CombatService {
         }
 
         healthManager.damage(victim, finalDamage, attacker);
-        Meditation.interrupt(victim);
         Bloodthirst.onDamageDealt(attacker, victim, finalDamage, healthManager);
         if (abilityName.equals("Melee")) {
             playDamageFeedback(victim);
@@ -202,8 +200,8 @@ public class CombatService {
 
         if (type.getDamagePerCharge() > 0) {
             double damageAmount = type.getDamagePerCharge();
-            damageAmount *= (int) damageBuffManager.getMultiplier(victim);
-            damageAmount *= (int) damageVulnerabilityManager.getBonusMultiplier(attacker);
+            damageAmount *= damageBuffManager.getMultiplier(victim);
+            damageAmount *= 1.0 + damageVulnerabilityManager.getBonusMultiplier(attacker);
             int roundedDamage = (int) Math.round(damageAmount);
 
             OrbitShieldType attackerShield = (!reflected && orbitShieldManager.hasActiveShield(attacker))
@@ -285,8 +283,7 @@ public class CombatService {
             }
         }
 
-        healthManager.damageSilent(victim, finalDamage);
-        Meditation.interrupt(victim);
+        healthManager.damageSilent(victim, finalDamage, owner);
         Bloodthirst.onDamageDealt(owner, victim, finalDamage, healthManager);
         if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
             boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, finalDamage, 30.0);

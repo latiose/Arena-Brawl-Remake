@@ -193,6 +193,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 playerHealthManager, teamManager, abilityManager, lobbySpawn, ratingManager, debuffManager, orbitShieldManager, cooldownManager, usageManager, statsManager, lobbyScoreboardManager, damageBuffManager,
                 armorTierManager, hatSelectionManager, broodMotherEntityManager,this, arenaMapManager,structureManager,songOfPowerManager, drawVoteManager,zombieEntityManager, skeletonEntityManager
         );
+        playerHealthManager.setDamageCallback(matchManager::recordDamage);
+        playerHealthManager.setHealingCallback(matchManager::recordHealing);
         this.abilityConfigManager.setMatchManager(matchManager);
         this.orbitShieldManager.setMatchManager(matchManager);
         this.combatService = new CombatService(

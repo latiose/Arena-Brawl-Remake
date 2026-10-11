@@ -7,6 +7,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,6 +37,7 @@ public class SpikeGrenade implements Ability {
     private final double maxRange;
     private final double grenadeSpeed;
     private final double grenadeHitRadius;
+    private final double groundImpactRadius;
     private final int needleCount;
     private final double needleRange;
     private final double needleSpeed;
@@ -55,6 +57,7 @@ public class SpikeGrenade implements Ability {
         this.maxRange = config.getDouble("max-range", 15.0);
         this.grenadeSpeed = config.getDouble("grenade-speed", 1.5);
         this.grenadeHitRadius = config.getDouble("grenade-hit-radius", 0.4);
+        this.groundImpactRadius = config.getDouble("ground-impact-radius", 1.8);
         this.needleCount = config.getInt("needle-count", 6);
         this.needleRange = config.getDouble("needle-range", 6.0);
         this.needleSpeed = config.getDouble("needle-speed", 1.0);
@@ -134,6 +137,19 @@ public class SpikeGrenade implements Ability {
 
         world.spawnParticle(Particle.ITEM_SLIME, center, 35, 0.4, 0.4, 0.4, 0.15);
         world.spawnParticle(Particle.SCRAPE, center, 20, 0.3, 0.3, 0.3, 0.1);
+
+        if (face == BlockFace.UP) {
+            for (Entity entity : world.getNearbyEntities(
+                    center, groundImpactRadius, groundImpactRadius, groundImpactRadius)) {
+                if (entity instanceof Player target
+                        && !target.equals(caster)
+                        && !target.isDead()
+                        && target.getGameMode() != GameMode.SPECTATOR
+                        && teamManager.isEnemy(caster, target)) {
+                    combatService.applyAbilityDamage(caster, target, grenadeDamage, getName(), center);
+                }
+            }
+        }
 
         if (directTarget != null) {
             for (int i = 0; i < needleCount; i++) {
@@ -241,6 +257,7 @@ public class SpikeGrenade implements Ability {
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Direct Damage", String.valueOf((int) grenadeDamage)),
+                new AbilityStat("Ground Impact Radius", String.valueOf((int) groundImpactRadius)),
                 new AbilityStat("Needle Damage", String.valueOf((int) needleDamage)),
                 new AbilityStat("Energy", String.valueOf((int) energyCost))
         );

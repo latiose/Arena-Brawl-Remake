@@ -83,20 +83,25 @@ public class CookieShotgun implements Ability {
 
             Item cookie = player.getWorld().dropItem(eyeLoc, new ItemStack(Material.COOKIE));
             cookie.setPickupDelay(Integer.MAX_VALUE);
-            cookie.setVelocity(spreadDir.multiply(speed));
+            cookie.setGravity(false);
+            cookie.setVelocity(new Vector());
 
             new BukkitRunnable() {
                 int ticks = 0;
+                Location current = eyeLoc.clone();
 
                 @Override
                 public void run() {
                     ticks++;
 
-                    if (!cookie.isValid() || cookie.isOnGround() || ticks > 40) {
+                    if (!cookie.isValid() || ticks > 40) {
                         cancel();
                         explodeCookie(player, cookie);
                         return;
                     }
+
+                    current.add(spreadDir.clone().multiply(speed));
+                    cookie.teleport(current);
 
                     cookie.getWorld().spawnParticle(
                             Particle.DUST,

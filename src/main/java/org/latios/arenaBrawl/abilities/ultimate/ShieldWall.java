@@ -69,7 +69,7 @@ public class ShieldWall implements Ability {
                 }
 
                 player.getWorld().spawnParticle(
-                        Particle.DRIPPING_WATER,
+                        Particle.DRAGON_BREATH,
                         player.getLocation().add(0, 1.0, 0),
                         20,
                         0.5, 0.5, 0.5, 0.1,

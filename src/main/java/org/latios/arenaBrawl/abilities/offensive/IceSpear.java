@@ -25,6 +25,7 @@ import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class IceSpear implements Ability {
 
@@ -34,6 +35,7 @@ public class IceSpear implements Ability {
     private final double projectileSpeed;
     private final double radius;
     private final long slowTicks;
+    private final double slowChance;
     private final AbilityConfig config;
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -49,6 +51,7 @@ public class IceSpear implements Ability {
         this.projectileSpeed = config.getDouble("projectile-speed", 3.5);
         this.radius = config.getDouble("radius", 2.0);
         this.slowTicks = config.getLong("slow-duration-ticks", 60L);
+        this.slowChance = config.getDouble("slow-chance", 0.50);
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
@@ -73,7 +76,8 @@ public class IceSpear implements Ability {
                 new AbilityStat("Damage", String.valueOf((int) damage)),
                 new AbilityStat("Energy Cost", String.valueOf((int) energyCost)),
                 new AbilityStat("Radius", radius + " blocks"),
-                new AbilityStat("Slow", (slowTicks * 0.05) + "s")
+                new AbilityStat("Slow", (slowTicks * 0.05) + "s"),
+                new AbilityStat("Slow Chance", (int) (slowChance * 100) + "%")
         );
     }
 
@@ -165,7 +169,9 @@ public class IceSpear implements Ability {
             if (body.distanceSquared(impact) > radius * radius) continue;
 
             combatService.applyAbilityDamage(caster, victim, damage, getName(), impact);
-            debuffManager.tryApply(caster, victim, DebuffType.SLOW, slowTicks * 50L);
+            if (ThreadLocalRandom.current().nextDouble() < slowChance) {
+                debuffManager.tryApply(caster, victim, DebuffType.SLOW, slowTicks * 50L);
+            }
 
             victim.getWorld().spawnParticle(Particle.SNOWFLAKE, body, 20, 0.3, 0.5, 0.3, 0.05);
         }

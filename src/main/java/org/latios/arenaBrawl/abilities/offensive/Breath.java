@@ -21,6 +21,7 @@ import java.util.Set;
 public abstract class Breath implements Ability {
 
     protected static final double HIT_RADIUS = 2.5;
+    protected static final double VERTICAL_HIT_RADIUS = 2.8;
     protected static final double MAX_DISTANCE = 8.0;
     protected static final double STEP_SIZE = 0.25;
     protected static final double RADIUS_GROWTH = 0.3;
@@ -116,7 +117,18 @@ public abstract class Breath implements Ability {
             if (!isTargetValid(caster, candidate)) continue;
             if (hitPlayers.contains(candidate)) continue;
 
-            if (candidate.getLocation().distance(point) < HIT_RADIUS) {
+            Location candidateLocation = candidate.getLocation();
+            double horizontalDistanceSquared = Math.pow(
+                    candidateLocation.getX() - point.getX(),
+                    2
+            ) + Math.pow(
+                    candidateLocation.getZ() - point.getZ(),
+                    2
+            );
+            double verticalDistance = Math.abs(candidateLocation.getY() - point.getY());
+
+            if (horizontalDistanceSquared < HIT_RADIUS * HIT_RADIUS
+                    && verticalDistance < VERTICAL_HIT_RADIUS) {
                 hitPlayers.add(candidate);
             }
         }
@@ -132,14 +144,6 @@ public abstract class Breath implements Ability {
         applySpike(target);
     }
 
-    /*
-    protected void applySpike(Player target) {
-        Vector velocity = target.getVelocity();
-        if (velocity.getY() < 0) {
-            target.setVelocity(velocity.setY(velocity.getY() * 2.0));
-        }
-    }
-    */
 
     protected void applySpike(Player target) {
         if (!target.isOnGround()) {

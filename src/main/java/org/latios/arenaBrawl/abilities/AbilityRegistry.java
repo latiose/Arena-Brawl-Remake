@@ -95,7 +95,7 @@ public class AbilityRegistry {
         register(AbilitySlot.UTILITY, "sugarrush",
                 deps -> new SugarRush(deps.cooldownManager(), deps.combatUpgradeManager(), deps.debuffManager(), configManager.get("sugarrush"),deps.speedBuffManager()));
         register(AbilitySlot.UTILITY, "swap",
-                deps -> new Swap(deps.cooldownManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("swap")));
+                deps -> new Swap(deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("swap")));
         register(AbilitySlot.UTILITY, "violentleap",
                 deps -> new ViolentLeap(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("violentleap")));
         register(AbilitySlot.UTILITY, "wallofvines",

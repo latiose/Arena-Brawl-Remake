@@ -18,6 +18,12 @@ public class AbilityItemKeys {
     public static final NamespacedKey PROJECTILE_AOE_RADIUS = new NamespacedKey(
             ArenaBrawlPlugin.getInstance(), "projectile_aoe_radius"
     );
+    public static final NamespacedKey PROJECTILE_DIRECT_HIT = new NamespacedKey(
+            ArenaBrawlPlugin.getInstance(), "projectile_direct_hit"
+    );
+    public static final NamespacedKey PROJECTILE_DIRECT_HIT_TARGET = new NamespacedKey(
+            ArenaBrawlPlugin.getInstance(), "projectile_direct_hit_target"
+    );
     public static final NamespacedKey ARENA_ENTITY_MARKER = new NamespacedKey(
             ArenaBrawlPlugin.getInstance(), "arena_entity_marker"
     );

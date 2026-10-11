@@ -193,7 +193,7 @@ public class AbilityTargeting {
     }
 
     private static boolean isInsideHitbox(Player target, Location point) {
-        BoundingBox box = target.getBoundingBox().expand(0.3, 0.3, 0.3);
+        BoundingBox box = target.getBoundingBox().expand(0.4, 0.4, 0.4);
         return box.contains(point.getX(), point.getY(), point.getZ());
     }
 

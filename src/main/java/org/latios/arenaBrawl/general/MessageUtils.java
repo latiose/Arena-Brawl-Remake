@@ -14,6 +14,6 @@ public class MessageUtils {
     }
 
     public static String noValidPlayer() {
-        return "§eThere is not valid player within range!";
+        return "§eThere is no valid player within range!";
     }
 }

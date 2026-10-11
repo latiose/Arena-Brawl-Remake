@@ -43,6 +43,9 @@ public class AbilityProjectileFactory {
         projectile.getPersistentDataContainer().set(
                 AbilityItemKeys.PROJECTILE_AOE_RADIUS, PersistentDataType.DOUBLE, radius
         );
+        projectile.getPersistentDataContainer().set(
+                AbilityItemKeys.PROJECTILE_DIRECT_HIT, PersistentDataType.BYTE, (byte) 1
+        );
         return projectile;
     }
 
@@ -65,6 +68,9 @@ public class AbilityProjectileFactory {
         tagDamage(projectile, damage, abilityName);
         projectile.getPersistentDataContainer().set(
                 AbilityItemKeys.PROJECTILE_AOE_RADIUS, org.bukkit.persistence.PersistentDataType.DOUBLE, radius
+        );
+        projectile.getPersistentDataContainer().set(
+                AbilityItemKeys.PROJECTILE_DIRECT_HIT, org.bukkit.persistence.PersistentDataType.BYTE, (byte) 1
         );
         return projectile;
     }

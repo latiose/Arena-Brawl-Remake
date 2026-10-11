@@ -72,16 +72,16 @@ public class DashAbility implements Ability {
         while (traveled < distance) {
             Location next = lastSafe.clone().add(direction.clone().multiply(STEP_SIZE));
 
-            if (isBlocked(next)) {
-                break;
-            }
-
             for (Entity nearby : next.getWorld().getNearbyEntities(next, hitRadius, hitRadius, hitRadius)) {
                 if (nearby instanceof Player target && !target.equals(player)
                         && teamManager.isEnemy(player, target) && !hit.contains(target)) {
                     combatService.applyAbilityDamage(player, target, damage, getName());
                     hit.add(target);
                 }
+            }
+
+            if (isBlocked(next)) {
+                break;
             }
 
             lastSafe = next;

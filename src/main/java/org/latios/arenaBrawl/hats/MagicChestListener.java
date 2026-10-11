@@ -105,7 +105,7 @@ public class MagicChestListener implements Listener {
                     player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 150);
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1.0f, 1.0f);
 
-                    String broadcastMessage = "§e" + player.getName() + " §7has unlocked the " + hatName + " §7hat!";
+                    String broadcastMessage = "§e" + player.getName() + " §7has unlocked the " + hatName + " §7!";
                     for (Player worldPlayer : player.getWorld().getPlayers()) {
                         if (!worldPlayer.equals(player)) {
                             worldPlayer.sendMessage(broadcastMessage);

@@ -22,6 +22,8 @@ import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
 
+import static org.latios.arenaBrawl.general.EntityCleanupUtils.markAsArenaEntity;
+
 public class RallyBanner implements Ability {
 
     private final AbilityCost cost;
@@ -89,7 +91,7 @@ public class RallyBanner implements Ability {
         );
 
         applyBuffs(player);
-
+        markAsArenaEntity(banner);
         player.getWorld().spawnParticle(
                 Particle.HAPPY_VILLAGER,
                 bannerLocation.clone().add(0.5, 1.0, 0.5),

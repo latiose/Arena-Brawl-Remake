@@ -19,6 +19,7 @@ import org.latios.arenaBrawl.abilities.ultimate.Rewind;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -27,17 +28,31 @@ import java.util.function.Consumer;
 
 public class PlayerHealthManager {
 
+    public record DamageEvent(Player attacker, Player victim, double amount) {}
+    public record HealingEvent(Player healer, Player target, double amount) {}
+
     private static final double VANILLA_MAX = 20.0;
     private final Map<UUID, UUID> lastAttacker = new HashMap<>();
     private final Map<UUID, Double> currentHealth = new HashMap<>();
     private final Map<UUID, Double> maxHealth = new HashMap<>();
-    private final Map<UUID, Long> regenDisabledUntil = new HashMap<>();
+    private record HealReduction(double percent, long durationMillis) {}
+    private final Map<UUID, List<HealReduction>> healReductions = new HashMap<>();
     private final Set<UUID> eliminated = new HashSet<>();
     private static final long HOLOGRAM_LIFETIME_TICKS = 35;
     private Consumer<Player> eliminationCallback = p -> {};
+    private Consumer<DamageEvent> damageCallback = event -> {};
+    private Consumer<HealingEvent> healingCallback = event -> {};
     private AbilityConfig config;
     public void setEliminationCallback(Consumer<Player> callback) {
         this.eliminationCallback = callback;
+    }
+
+    public void setDamageCallback(Consumer<DamageEvent> callback) {
+        this.damageCallback = callback;
+    }
+
+    public void setHealingCallback(Consumer<HealingEvent> callback) {
+        this.healingCallback = callback;
     }
 
     public PlayerHealthManager(AbilityConfig config) {
@@ -59,51 +74,93 @@ public class PlayerHealthManager {
     }
 
     public boolean canRegen(Player player) {
-        return !isRegenDisabled(player);
+        return getHealingMultiplier(player) > 0.0;
     }
 
     public boolean isRegenDisabled(Player player) {
-        Long disabledUntil = regenDisabledUntil.get(player.getUniqueId());
-        if (disabledUntil == null) return false;
-        return System.currentTimeMillis() < disabledUntil;
+        return getHealingMultiplier(player) <= 0.0;
     }
 
     public void disableRegen(Player player, long durationMillis) {
-        regenDisabledUntil.put(player.getUniqueId(), System.currentTimeMillis() + durationMillis);
+        addHealReduction(player, 100.0, durationMillis);
     }
 
-    public void heal(Player player, double amount) {
-        if (eliminated.contains(player.getUniqueId())) return;
-        if (!canRegen(player)) return;
+    public void addHealReduction(Player player, double percent, long durationMillis) {
+        healReductions.computeIfAbsent(player.getUniqueId(), ignored -> new java.util.ArrayList<>())
+                .add(new HealReduction(Math.max(0.0, percent), durationMillis));
+    }
+
+    public void removeHealReduction(Player player, double percent, long durationMillis) {
+        List<HealReduction> reductions = healReductions.get(player.getUniqueId());
+        if (reductions == null) return;
+
+        for (int i = 0; i < reductions.size(); i++) {
+            HealReduction reduction = reductions.get(i);
+            if (Double.compare(reduction.percent(), Math.max(0.0, percent)) == 0
+                    && reduction.durationMillis() == durationMillis) {
+                reductions.remove(i);
+                break;
+            }
+        }
+
+        if (reductions.isEmpty()) {
+            healReductions.remove(player.getUniqueId());
+        }
+    }
+
+    public double getHealingMultiplier(Player player) {
+        List<HealReduction> reductions = healReductions.get(player.getUniqueId());
+        if (reductions == null) return 1.0;
+
+        double reduction = reductions.stream()
+                .mapToDouble(HealReduction::percent)
+                .sum();
+        return Math.max(0.0, 1.0 - Math.min(100.0, reduction) / 100.0);
+    }
+
+    public double heal(Player player, double amount) {
+        return heal(player, amount, true);
+    }
+
+    private double heal(Player player, double amount, boolean recordHealing) {
+        if (eliminated.contains(player.getUniqueId())) return 0.0;
+
+        double effectiveAmount = amount * getHealingMultiplier(player);
+        if (effectiveAmount <= 0.0) return 0.0;
 
         double max = getMaxHealth(player);
-        double updated = Math.min(getHealth(player) + amount, max);
-        currentHealth.put(player.getUniqueId(), updated);
+        double healedAmount = Math.min(effectiveAmount, max - getHealth(player));
+        if (healedAmount <= 0.0) return 0.0;
 
-        int roundedHeal = (int) Math.round(amount);
+        double updated = getHealth(player) + healedAmount;
+        currentHealth.put(player.getUniqueId(), updated);
+        if (recordHealing) {
+            healingCallback.accept(new HealingEvent(player, player, healedAmount));
+        }
+
+        int roundedHeal = (int) Math.round(healedAmount);
         spawnHologram(player, String.valueOf(roundedHeal), player.getLocation());
         syncVanilla(player);
+        return healedAmount;
     }
 
-    public void heal(Player player, double amount, String sourceName) {
-        if (eliminated.contains(player.getUniqueId())) return;
-        if (!canRegen(player)) return;
-
-        heal(player, amount);
-        int roundedHeal = (int) Math.round(amount);
+    public double heal(Player player, double amount, String sourceName) {
+        double healedAmount = heal(player, amount);
+        int roundedHeal = (int) Math.round(healedAmount);
 
         player.sendMessage(MessageUtils.positive() + String.format(
                 "§3Your %s healed you for §a%d §3health!",
                 sourceName, roundedHeal
         ));
+        return healedAmount;
     }
 
     public void healAlly(Player healer, Player target, double amount, String sourceName) {
         if (eliminated.contains(target.getUniqueId())) return;
-        if (!canRegen(target)) return;
 
-        heal(target, amount);
-        int roundedHeal = (int) Math.round(amount);
+        double healedAmount = heal(target, amount, false);
+        healingCallback.accept(new HealingEvent(healer, target, healedAmount));
+        int roundedHeal = (int) Math.round(healedAmount);
 
         healer.sendMessage(MessageUtils.positive() + String.format(
                 "§3Your %s healed %s §3for §a%d §3health!",
@@ -124,7 +181,11 @@ public class PlayerHealthManager {
         }
 
         double updated = Math.max(getHealth(player) - amount, 0);
+        double damageDealt = Math.min(amount, getHealth(player));
         currentHealth.put(player.getUniqueId(), updated);
+        if (attacker != null && damageDealt > 0) {
+            damageCallback.accept(new DamageEvent(attacker, player, damageDealt));
+        }
         syncVanilla(player);
 
         if (updated <= 0) {
@@ -198,7 +259,11 @@ public class PlayerHealthManager {
         }
 
         double updated = Math.max(getHealth(player) - amount, 0);
+        double damageDealt = Math.min(amount, getHealth(player));
         currentHealth.put(player.getUniqueId(), updated);
+        if (attacker != null && damageDealt > 0) {
+            damageCallback.accept(new DamageEvent(attacker, player, damageDealt));
+        }
         syncVanillaSilent(player);
         if (updated <= 0) {
             UUID casterUUID = Rewind.ACTIVE_REWUNDS.remove(player.getUniqueId());
@@ -234,7 +299,7 @@ public class PlayerHealthManager {
     }
 
     public void clearRegenDisable(Player player) {
-        regenDisabledUntil.remove(player.getUniqueId());
+        healReductions.remove(player.getUniqueId());
     }
 
     private void spawnHologram(Player victim, String phrase, Location impactLocation) {

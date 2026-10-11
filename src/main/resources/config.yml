@@ -229,6 +229,7 @@ ability-values:
 
   laywaste:
     damage: 110.0
+    multi-target-damage-multiplier: 0.75
     energy-cost: 30.0
     max-target-distance: 15.0
     radius: 1.0
@@ -255,6 +256,7 @@ ability-values:
   spikegrenade:
     energy-cost: 30.0
     grenade-damage: 60.0
+    ground-impact-radius: 2
     needle-damage: 5.0
     max-range: 15.0
     step: 0.5
@@ -300,6 +302,7 @@ ability-values:
     duration-ticks: 100
     damage-interval-ticks: 10
     antiheal-duration-ticks: 60
+    antiheal-percent: 40.0
 
   icespear:
     damage: 75.0
@@ -308,6 +311,7 @@ ability-values:
     projectile-speed: 4
     radius: 2.0
     slow-duration-ticks: 20
+    slow-chance: 0.50
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -346,8 +350,6 @@ ability-values:
   swap:
     cooldown-ms: 30000
     max-range: 30
-    stun-duration-ms: 2000
-    teleport-delay-ticks: 40
 
   violentleap:
     cooldown-seconds: 40

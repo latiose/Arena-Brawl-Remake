@@ -18,6 +18,8 @@ public class Match {
     private final PowerupManager powerupManager = new PowerupManager();
     private boolean doubleDamageActive = false;
     private final Map<Player, org.bukkit.scoreboard.Scoreboard> individualScoreboards = new HashMap<>();
+    private final Map<UUID, Double> damageDealt = new HashMap<>();
+    private final Map<UUID, Double> healingDone = new HashMap<>();
 
     private final ArenaMap arenaMap;
     private boolean ended = false;
@@ -47,6 +49,18 @@ public class Match {
     public void setDoubleDamageActive(boolean active) { this.doubleDamageActive = active; }
     public Map<Player, Scoreboard> getIndividualScoreboards() { return individualScoreboards; }
     public void setIndividualScoreboards(Map<Player, Scoreboard> boards) { individualScoreboards.putAll(boards); }
+    public void addDamage(Player player, double amount) {
+        damageDealt.merge(player.getUniqueId(), amount, Double::sum);
+    }
+    public void addHealing(Player player, double amount) {
+        healingDone.merge(player.getUniqueId(), amount, Double::sum);
+    }
+    public double getDamageDealt(Player player) {
+        return damageDealt.getOrDefault(player.getUniqueId(), 0.0);
+    }
+    public double getHealingDone(Player player) {
+        return healingDone.getOrDefault(player.getUniqueId(), 0.0);
+    }
     public List<Player> getRed() { return getTeamPlayers(Team.RED); }
     public List<Player> getBlue() { return getTeamPlayers(Team.BLUE); }
     public boolean contains(Player player) { return getAllPlayers().contains(player); }

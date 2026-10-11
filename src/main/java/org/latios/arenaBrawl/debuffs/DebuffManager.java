@@ -18,9 +18,16 @@ import java.util.UUID;
 
 public class DebuffManager {
 
-    private record ActiveDebuff(DebuffType type, UUID attackerId, long startedAt, long durationMillis) {}
+    private record ActiveDebuff(
+            DebuffType type,
+            UUID attackerId,
+            long startedAt,
+            long durationMillis,
+            double strength
+    ) {}
 
     private final Map<UUID, ActiveDebuff> activeDebuffs = new HashMap<>();
+    private final Map<UUID, List<ActiveDebuff>> activeAntiHeals = new HashMap<>();
     private final Map<UUID, Double> accumulatedDamage = new HashMap<>();
     private final List<DebuffListener> listeners = new ArrayList<>();
     private SongOfPowerManager songOfPowerManager;
@@ -34,29 +41,50 @@ public class DebuffManager {
     }
 
     public boolean tryApply(Player attacker, Player victim, DebuffType type, long durationMillis) {
+        return tryApply(attacker, victim, type, durationMillis, 0.0);
+    }
+
+    public boolean tryApply(
+            Player attacker,
+            Player victim,
+            DebuffType type,
+            long durationMillis,
+            double strength
+    ) {
         if (songOfPowerManager != null && songOfPowerManager.isActive(victim)) {
             return false;
         }
         if(victim.getGameMode() == GameMode.SPECTATOR) {
             return false;
         }
-        if (hasActiveDebuff(victim)) {
+        if (type != DebuffType.ANTIHEAL && hasPrimaryDebuff(victim)) {
             return false;
         }
 
-        if (activeDebuffs.containsKey(victim.getUniqueId())) {
-            clear(victim);
-        }
+        UUID victimId = victim.getUniqueId();
+        ActiveDebuff debuff = new ActiveDebuff(
+                type,
+                attacker != null ? attacker.getUniqueId() : null,
+                System.currentTimeMillis(),
+                durationMillis,
+                strength
+        );
 
-        UUID attackerId = attacker != null ? attacker.getUniqueId() : null;
-        activeDebuffs.put(victim.getUniqueId(), new ActiveDebuff(type, attackerId, System.currentTimeMillis(), durationMillis));
-        accumulatedDamage.put(victim.getUniqueId(), 0.0);
+        if (type == DebuffType.ANTIHEAL) {
+            activeAntiHeals.computeIfAbsent(victimId, ignored -> new ArrayList<>()).add(debuff);
+        } else {
+            if (activeDebuffs.containsKey(victimId)) {
+                clearPrimary(victim);
+            }
+            activeDebuffs.put(victimId, debuff);
+            accumulatedDamage.put(victimId, 0.0);
+        }
 
         for (DebuffListener listener : listeners) {
             if (listener instanceof PoisonListener poisonListener) {
                 poisonListener.onAppliedWithAttacker(victim, attacker, type, durationMillis);
             } else {
-                listener.onApplied(victim, type, durationMillis);
+                listener.onApplied(victim, type, durationMillis, strength);
             }
         }
 
@@ -68,14 +96,28 @@ public class DebuffManager {
     }
 
     public boolean hasActiveDebuff(Player player) {
+        if (hasPrimaryDebuff(player)) {
+            return true;
+        }
+
+        return hasDebuff(player, DebuffType.ANTIHEAL);
+    }
+
+    private boolean hasPrimaryDebuff(Player player) {
         ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
-        if (debuff == null) return false;
-        return System.currentTimeMillis() - debuff.startedAt() < debuff.durationMillis();
+        return debuff != null
+                && System.currentTimeMillis() - debuff.startedAt() < debuff.durationMillis();
     }
 
     public boolean hasDebuff(Player player, DebuffType type) {
+        if (type == DebuffType.ANTIHEAL) {
+            return activeAntiHeals.getOrDefault(player.getUniqueId(), List.of()).stream()
+                    .anyMatch(active -> System.currentTimeMillis() - active.startedAt() < active.durationMillis());
+        }
         ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
-        return debuff != null && debuff.type() == type && hasActiveDebuff(player);
+        return debuff != null
+                && debuff.type() == type
+                && hasPrimaryDebuff(player);
     }
 
     public boolean addAccumulatedDamage(Player player, double amount, double breakThreshold) {
@@ -88,6 +130,7 @@ public class DebuffManager {
     }
 
     public void tick(Player player) {
+        tickAntiHeals(player);
         ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
         if (debuff == null) return;
 
@@ -95,7 +138,7 @@ public class DebuffManager {
         long remaining = debuff.durationMillis() - elapsed;
 
         if (remaining <= 0) {
-            clear(player);
+            clearPrimary(player);
             return;
         }
 
@@ -122,20 +165,63 @@ public class DebuffManager {
         StatusBarUtil.sendStatusBar(player, debuff.type().getDisplayName(), progress, debuff.type.getColor()); //color
     }
 
+    private void tickAntiHeals(Player player) {
+        UUID playerId = player.getUniqueId();
+        List<ActiveDebuff> debuffs = activeAntiHeals.get(playerId);
+        if (debuffs == null) return;
+
+        long now = System.currentTimeMillis();
+        debuffs.removeIf(debuff -> {
+            if (now - debuff.startedAt() < debuff.durationMillis()) return false;
+            notifyExpired(player, debuff);
+            return true;
+        });
+
+        if (debuffs.isEmpty()) {
+            activeAntiHeals.remove(playerId);
+        }
+    }
+
+    private void clearPrimary(Player player) {
+        ActiveDebuff debuff = activeDebuffs.remove(player.getUniqueId());
+        accumulatedDamage.remove(player.getUniqueId());
+        if (debuff == null) return;
+
+        notifyExpired(player, debuff);
+        List<PotionEffect> effectsSnapshot = new ArrayList<>(player.getActivePotionEffects());
+        for (PotionEffect effect : effectsSnapshot) {
+            if (effect.getType() != PotionEffectType.SPEED
+                    && effect.getType() != PotionEffectType.INVISIBILITY) {
+                player.removePotionEffect(effect.getType());
+            }
+        }
+    }
+
     public void clear(Player player) {
+        List<ActiveDebuff> antiHeals = activeAntiHeals.remove(player.getUniqueId());
+        if (antiHeals != null) {
+            for (ActiveDebuff debuff : antiHeals) {
+                notifyExpired(player, debuff);
+            }
+        }
+
         ActiveDebuff debuff = activeDebuffs.remove(player.getUniqueId());
         accumulatedDamage.remove(player.getUniqueId());
 
         if (debuff != null) {
-            for (DebuffListener listener : listeners) {
-                listener.onExpired(player, debuff.type());
-            }
+            notifyExpired(player, debuff);
             List<PotionEffect> effectsSnapshot = new ArrayList<>(player.getActivePotionEffects());
             for (PotionEffect effect : effectsSnapshot) {
                 if (effect.getType() != PotionEffectType.SPEED && effect.getType() != PotionEffectType.INVISIBILITY) {
                     player.removePotionEffect(effect.getType());
                 }
             }
+        }
+    }
+
+    private void notifyExpired(Player player, ActiveDebuff debuff) {
+        for (DebuffListener listener : listeners) {
+            listener.onExpired(player, debuff.type(), debuff.durationMillis(), debuff.strength());
         }
     }
 

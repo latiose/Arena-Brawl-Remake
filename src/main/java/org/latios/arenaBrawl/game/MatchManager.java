@@ -166,30 +166,94 @@ public class MatchManager {
 
 
 
-    private void applyRatingChanges(List<Player> winners, List<Player> losers) {
+    private Map<UUID, RatingChange> applyRatingChanges(List<Player> winners, List<Player> losers) {
+        Map<UUID, RatingChange> changes = new HashMap<>();
         double losersAvg = losers.stream().mapToDouble(ratingManager::getRating).average().orElse(1000.0);
         double winnersAvg = winners.stream().mapToDouble(ratingManager::getRating).average().orElse(1000.0);
 
         for (Player winner : winners) {
             if (!winner.isOnline()) continue;
-            // Uses the winner's own rating against the opponent team's average
             double gain = ratingManager.calculateGain(ratingManager.getRating(winner), losersAvg);
             ratingManager.applyDelta(winner, gain);
-            long currentRating = (long) Math.floor(ratingManager.getRating(winner));
-            winner.sendMessage(String.format("§6Your new rating is %d (+%.2f)", currentRating, gain));
+            changes.put(winner.getUniqueId(), new RatingChange(gain, floorRating(winner)));
         }
 
         for (Player loser : losers) {
             if (!loser.isOnline()) continue;
-            // Uses the loser's own rating against the opponent team's average
             double loss = ratingManager.calculateLoss(ratingManager.getRating(loser), winnersAvg);
             ratingManager.applyDelta(loser, loss);
-            long currentRating = (long) Math.floor(ratingManager.getRating(loser));
-            loser.sendMessage(String.format("§6Your new rating is %d (%.2f)", currentRating, loss));
+            changes.put(loser.getUniqueId(), new RatingChange(loss, floorRating(loser)));
+        }
+        return changes;
+    }
+
+    private long floorRating(Player player) {
+        return (long) Math.floor(ratingManager.getRating(player));
+    }
+
+    public void announceMatchStart(Match match) {
+        for (Player viewer : match.getAllPlayers()) {
+            if (!viewer.isOnline()) continue;
+            viewer.sendMessage("§6#§7--------------------------§6#");
+            List<Team> teams = new ArrayList<>(match.getTeams().keySet());
+            for (int i = 0; i < teams.size(); i++) {
+                Team team = teams.get(i);
+                for (Player player : match.getTeamPlayers(team)) {
+                    viewer.sendMessage(String.format("%s%s §f%d", teamColor(team), player.getName(), floorRating(player)));
+                }
+                if (i < teams.size() - 1) {
+                    viewer.sendMessage("§6§lVS");
+                }
+            }
+            viewer.sendMessage("§6#§7--------------------------§6#");
         }
     }
 
+    private void announceMatchResult(Match match, List<Player> winners, List<Player> losers,
+                                      Map<UUID, RatingChange> changes) {
+        for (Player viewer : match.getAllPlayers()) {
+            if (!viewer.isOnline()) continue;
+            viewer.sendMessage("§6#§7--------------------------§6#");
+            viewer.sendMessage(winners.contains(viewer) ? "§a§lVICTORY" : "§c§lDEFEAT");
+            for (Player player : winners) {
+                sendResultLine(viewer, player, changes.get(player.getUniqueId()), true);
+            }
+            for (Player player : losers) {
+                sendResultLine(viewer, player, changes.get(player.getUniqueId()), false);
+            }
+            viewer.sendMessage("§6#§7--------------------------§6#");
+        }
+    }
+
+    private void sendResultLine(Player viewer, Player player, RatingChange change, boolean winner) {
+        String delta = change == null ? "" : String.format("§b(%+.2f) ", change.delta());
+        long rating = change == null ? floorRating(player) : change.rating();
+        String nameColor = winner ? "§a" : "§c";
+        Match match = activeMatches.get(player.getUniqueId());
+        int damage = match == null ? 0 : (int) Math.round(match.getDamageDealt(player));
+        int healing = match == null ? 0 : (int) Math.round(match.getHealingDone(player));
+        viewer.sendMessage(String.format("%s%s%s§f %d §c§l%d§7/§a§l%d",
+                delta, nameColor, player.getName(), rating, damage, healing));
+    }
+
+    private String teamColor(Team team) {
+        return switch (team) {
+            case RED -> "§c";
+            case BLUE -> "§b";
+            case GREEN -> "§a";
+            case YELLOW -> "§e";
+        };
+    }
+
+    private record RatingChange(double delta, long rating) {
+    }
+
     public void cleanupPlayer(Player player) {
+        cleanupPlayerHub(player);
+        EntityCleanupUtils.sweepArenaEntities(player.getWorld());
+    }
+
+    public void cleanupPlayerHub(Player player) {
         activeMatches.remove(player.getUniqueId());
         teamManager.clear(player);
         debuffManager.clear(player);
@@ -202,7 +266,6 @@ public class MatchManager {
         zombieEntityManager.clearAll();
         skeletonEntityManager.clearAll();
         songOfPowerManager.clear(player);
-        EntityCleanupUtils.sweepArenaEntities(player.getWorld());
         if (!player.isOnline()) return;
 
         player.setGameMode(org.bukkit.GameMode.SURVIVAL);
@@ -232,6 +295,20 @@ public class MatchManager {
         return activeMatches.get(player.getUniqueId());
     }
 
+    public void recordDamage(PlayerHealthManager.DamageEvent event) {
+        Match match = activeMatches.get(event.attacker().getUniqueId());
+        if (match != null && match.contains(event.victim())) {
+            match.addDamage(event.attacker(), event.amount());
+        }
+    }
+
+    public void recordHealing(PlayerHealthManager.HealingEvent event) {
+        Match match = activeMatches.get(event.healer().getUniqueId());
+        if (match != null && match.contains(event.target())) {
+            match.addHealing(event.healer(), event.amount());
+        }
+    }
+
     /** Returns all matches currently running (needed for tasks that iterate every active game). */
     public List<Match> getActiveMatches() {
         return new ArrayList<>(activeMatchesList);
@@ -245,18 +322,11 @@ public class MatchManager {
                 .filter(player -> !winners.contains(player))
                 .toList();
 
-        for (Player viewer : match.getAllPlayers()) {
-            if (!viewer.isOnline()) continue;
-            viewer.sendMessage("§6#§7--------------------------§6#");
-            for (Player winner : winners) {
-                viewer.sendMessage(String.format("§6%s has won the game!", winner.getName()));
-            }
-            viewer.sendMessage("§6#§7--------------------------§6#");
-        }
-
+        Map<UUID, RatingChange> ratingChanges = Map.of();
         if (match.getType() == MatchType.TEAMS) {
-            applyRatingChanges(winners, losers);
+            ratingChanges = applyRatingChanges(winners, losers);
         }
+        announceMatchResult(match, winners, losers, ratingChanges);
 
         for (Player winner : winners) {
             if (winner.isOnline()) {
@@ -331,7 +401,7 @@ public class MatchManager {
             onPlayerEliminated(player);
         }
 
-        cleanupPlayer(player);
+        cleanupPlayerHub(player);
     }
     public boolean isInMatch(Player player) {
         return activeMatches.containsKey(player.getUniqueId());

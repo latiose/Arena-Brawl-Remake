@@ -30,6 +30,7 @@ public class LayWaste implements Ability {
     private final double energyCost;
     private final double maxTargetDistance;
     private final double radius;
+    private final double multiTargetDamageMultiplier;
     private final long delayTicks;
     private final AbilityConfig config;
     private final AbilityCost cost;
@@ -42,6 +43,10 @@ public class LayWaste implements Ability {
         this.energyCost = config.getDouble("energy-cost", 30.0);
         this.maxTargetDistance = config.getDouble("max-target-distance", 15.0);
         this.radius = config.getDouble("radius", 1.5);
+        this.multiTargetDamageMultiplier = Math.max(
+                0.0,
+                Math.min(1.0, config.getDouble("multi-target-damage-multiplier", 0.75))
+        );
         this.delayTicks = config.getLong("delay-ticks", 10L);
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
@@ -66,7 +71,9 @@ public class LayWaste implements Ability {
                 new AbilityStat("Damage", String.valueOf((int) damage)),
                 new AbilityStat("Energy Cost", String.valueOf((int) energyCost)),
                 new AbilityStat("Delay", (delayTicks * 0.05) + "s"),
-                new AbilityStat("Radius", radius + " blocks")
+                new AbilityStat("Radius", radius + " blocks"),
+                new AbilityStat("Multi-target Damage",
+                        (int) (multiTargetDamageMultiplier * 100) + "% per additional target")
         );
     }
 
@@ -127,8 +134,19 @@ public class LayWaste implements Ability {
                     }
                 }
 
+                double targetDamage = damage;
+                for (int i = 1; i < targetsToHit.size(); i++) {
+                    targetDamage *= multiTargetDamageMultiplier;
+                }
+
                 for (Player victim : targetsToHit) {
-                    combatService.applyAbilityDamage(player, victim, damage, getName(), targetLocation);
+                    combatService.applyAbilityDamage(
+                            player,
+                            victim,
+                            targetDamage,
+                            getName(),
+                            targetLocation
+                    );
                 }
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);

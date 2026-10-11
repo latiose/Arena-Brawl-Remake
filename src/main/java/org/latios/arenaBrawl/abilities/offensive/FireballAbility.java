@@ -3,7 +3,6 @@ package org.latios.arenaBrawl.abilities.offensive;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 
-import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
@@ -13,7 +12,6 @@ import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.TrackedProjectileTask;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -49,8 +47,8 @@ public class FireballAbility implements Ability {
         );
         fireball.setYield(0f);
         fireball.setIsIncendiary(false);
-        new TrackedProjectileTask(fireball, player, damage, aoeRadius, getName(), teamManager, combatService,ProjectileImpactEffect.FIREBALL)
-                .runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
+        new org.latios.arenaBrawl.general.ProjectileAoeListener(teamManager, combatService)
+                .trackDirectHit(fireball, player);
         return true;
     }
 

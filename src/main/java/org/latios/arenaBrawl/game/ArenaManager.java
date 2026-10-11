@@ -162,6 +162,8 @@ public class ArenaManager {
             armorTierManager.equipCosmeticArmor(player);
             HatEquipUtils.applyEquippedHat(player, hatSelectionManager);
             player.updateInventory();
+            player.getInventory().setHeldItemSlot(0);
+            player.setGameMode(org.bukkit.GameMode.SURVIVAL);
         }
 
         var match = new Match(type, teams, map);
@@ -183,6 +185,7 @@ public class ArenaManager {
         for (int i = 0; i < allPlayers.size(); i++) {
             allPlayers.get(i).teleport(spawns.get(i));
         }
+        matchManager.announceMatchStart(match);
 
     }
 
