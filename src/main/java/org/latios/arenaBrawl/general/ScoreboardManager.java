@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-
 public class ScoreboardManager {
 
     private final PlayerHealthManager healthManager;
@@ -61,17 +59,11 @@ public class ScoreboardManager {
 
             obj.getScore(" ").setScore(line--);
 
-            obj.getScore("§c[ENEMY TEAMS]").setScore(line--);
+            obj.getScore("§c[ENEMY TEAM]").setScore(line--);
             for (Map.Entry<Team, List<Player>> teamEntry : match.getTeams().entrySet()) {
                 if (teamEntry.getKey() == viewerTeam) continue;
                 for (Player enemy : teamEntry.getValue()) {
-                int health = (int) healthManager.getHealth(enemy);
-                if(health != 0) {
-                    obj.getScore("§7" + enemy.getName() + " §e" + health).setScore(line--);
-                }
-                else{
-                    obj.getScore("§7" + enemy.getName() + " §e" + "DEAD").setScore(line--);
-                }
+                    obj.getScore(healthLine(match, enemy)).setScore(line--);
                 }
             }
 
@@ -79,14 +71,13 @@ public class ScoreboardManager {
 
             obj.getScore("§a[YOUR TEAM]").setScore(line--);
             for (Player teammate : myTeam) {
-                int health = (int) healthManager.getHealth(teammate);
-                if(health != 0) {
-                    obj.getScore("§7" + teammate.getName() + " §e" + health).setScore(line--);
-                }
-                else{
-                    obj.getScore("§7" + teammate.getName() + " §e" + "DEAD").setScore(line--);
-                }
+                obj.getScore(healthLine(match, teammate)).setScore(line--);
             }
         }
+    }
+
+    private String healthLine(Match match, Player p) {
+        boolean dead = match.isEliminated(p) || (int) healthManager.getHealth(p) == 0 || !p.isOnline();
+        return "§7" + p.getName() + " §e" + (dead ? "DEAD" : (int) healthManager.getHealth(p));
     }
 }

@@ -2,6 +2,7 @@
 package org.latios.arenaBrawl.party;
 
 import org.bukkit.entity.Player;
+import org.latios.arenaBrawl.queue.QueueManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +14,14 @@ public class PartyManager {
 
     private final Map<UUID, Party> parties = new HashMap<>();
     private final Map<UUID, UUID> pendingInvites = new HashMap<>();
-
+    private QueueManager queueManager;
 
     public Party getParty(Player player) {
         return parties.get(player.getUniqueId());
+    }
+
+    public void setQueueManager(QueueManager queueManager) {
+        this.queueManager = queueManager;
     }
 
     public boolean isInParty(Player player) {
@@ -42,13 +47,17 @@ public class PartyManager {
     public void acceptInvite(Player target, Player leader) {
         pendingInvites.remove(target.getUniqueId());
 
+        if (isInParty(target)) return;
+
         Party party = parties.get(leader.getUniqueId());
         if (party == null) {
             party = createParty(leader);
         }
 
+        if (isFull(party)) return;
         party.addMember(target);
         parties.put(target.getUniqueId(), party);
+        queueManager.handlePartyChange(party);
     }
 
     public void leaveParty(Player player) {

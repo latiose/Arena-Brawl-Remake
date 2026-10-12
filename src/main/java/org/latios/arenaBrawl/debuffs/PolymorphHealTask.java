@@ -25,10 +25,10 @@ public class PolymorphHealTask extends BukkitRunnable {
                 healthManager.heal(victim, HEAL_PER_SECOND);
                 int roundedHeal = (int) Math.round(HEAL_PER_SECOND);
                 Player attacker = debuffManager.getAttacker(victim);
-                victim.sendMessage(MessageUtils.positive() + "§c"+attacker.getName()+ "§3's Polymorph healed you for §a" + roundedHeal + "§3 health!");
+                victim.sendMessage(MessageUtils.negative() + "§3"+attacker.getName()+ "§3's Polymorph healed you for §a" + roundedHeal + "§3 health!");
 
                 if (attacker.isOnline()) {
-                    attacker.sendMessage(MessageUtils.positive() + "§3Your Polymorph healed §c" + victim.getName() + "§3 for §a" + roundedHeal + "§3 health!");
+                    attacker.sendMessage(MessageUtils.positive() + "§3Your Polymorph healed" + victim.getName() + "§3 for §a" + roundedHeal + "§3 health!");
                 }
             }
         }

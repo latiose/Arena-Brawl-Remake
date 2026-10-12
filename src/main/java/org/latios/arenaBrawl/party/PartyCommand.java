@@ -63,6 +63,11 @@ public class PartyCommand implements CommandExecutor {
             return;
         }
 
+        if (partyManager.isInParty(target)) {
+            player.sendMessage("§c" + target.getName() + " is already in a party.");
+            return;
+        }
+
         if (target.equals(player)) {
             player.sendMessage("§cYou can't invite yourself.");
             return;
@@ -108,6 +113,11 @@ public class PartyCommand implements CommandExecutor {
         Party leaderParty = partyManager.getParty(leader);
         if (leaderParty != null && partyManager.isFull(leaderParty)) {
             player.sendMessage("§cThe party is already full.");
+            return;
+        }
+
+        if (partyManager.isInParty(player)) {
+            player.sendMessage("§cYou are already in a party.");
             return;
         }
 

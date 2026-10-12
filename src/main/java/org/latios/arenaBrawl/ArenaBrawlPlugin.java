@@ -239,7 +239,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 scavengerManager, skeletonEntityManager
         );
 
-        this.queueManager = new QueueManager(this,partyManager, arenaManager,arenaMapManager);
+        this.queueManager = new QueueManager(this, partyManager, ratingManager, arenaManager, arenaMapManager);
+        partyManager.setQueueManager(queueManager);
         QueueGUI queueGUI = new QueueGUI();
         // Listeners
         getServer().getPluginManager().registerEvents(

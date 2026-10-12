@@ -61,7 +61,7 @@ public class ShadowStep implements Ability {
         player.getWorld().playSound(
                 player.getLocation(),
                 Sound.ENTITY_ENDERMAN_TELEPORT,
-                1.0f,
+                0.4f,
                 1.5f
         );
         player.getWorld().spawnParticle(Particle.SMOKE, teleportLocation, 20, 0.3, 0.5, 0.3);

@@ -20,7 +20,7 @@ public class Match {
     private final Map<Player, org.bukkit.scoreboard.Scoreboard> individualScoreboards = new HashMap<>();
     private final Map<UUID, Double> damageDealt = new HashMap<>();
     private final Map<UUID, Double> healingDone = new HashMap<>();
-
+    private final Set<UUID> eliminated = new HashSet<>();
     private final ArenaMap arenaMap;
     private boolean ended = false;
 
@@ -75,6 +75,10 @@ public class Match {
         List<Team> remaining = alive.entrySet().stream()
                 .filter(e -> !e.getValue().isEmpty())
                 .map(Map.Entry::getKey).toList();
+        eliminated.add(player.getUniqueId());
         return remaining.size() == 1 ? remaining.getFirst() : null;
+    }
+    public boolean isEliminated(Player player) {
+        return eliminated.contains(player.getUniqueId());
     }
 }

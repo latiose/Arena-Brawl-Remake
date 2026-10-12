@@ -19,6 +19,22 @@ public class QueueCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("mode")) {
+            if (!sender.hasPermission("arenabrawl.admin.queue")) {
+                sender.sendMessage("§cYou do not have permission to change the queue mode.");
+                return true;
+            }
+            if (args.length != 2
+                    || (!args[1].equalsIgnoreCase("old") && !args[1].equalsIgnoreCase("rated"))) {
+                sender.sendMessage("§cUsage: /queue mode <old|rated>");
+                return true;
+            }
+            boolean rated = args[1].equalsIgnoreCase("rated");
+            queueManager.setRatedTeamsEnabled(rated);
+            sender.sendMessage("§a2v2 queue mode: " + (rated ? "rated search" : "old search") + ".");
+            return true;
+        }
+
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Players only.");
             return true;
@@ -43,9 +59,7 @@ public class QueueCommand implements CommandExecutor {
             int queueSize = queueManager.joinQueue(player);
 
             if (queueSize != -1) {
-                player.sendMessage("§aYou joined the queue (" + queueSize + "/4).");
-            } else {
-                player.sendMessage("§cA member of your party is already in queue.");
+                player.sendMessage("§aYou joined the queue");
             }
         } else if (args[0].equalsIgnoreCase("leave")) {
             queueManager.leaveQueue(player);

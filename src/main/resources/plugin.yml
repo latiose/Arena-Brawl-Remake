@@ -10,8 +10,8 @@ commands:
     description: Manage your party
     usage: /party <invite|accept|leave> [player]
   queue:
-    description: Leave or join the queue
-    usage: /queue <join|leave>
+    description: Leave, join, or configure the queue
+    usage: /queue <join|leave|mode <old|rated>>
   abilities:
     description: Select your abilities
     usage: /abilities
@@ -46,3 +46,7 @@ commands:
   hub:
     description: Leaves the game
     usage: /hub
+permissions:
+  arenabrawl.admin.queue:
+    description: Switches the 2v2 matchmaking system
+    default: op

@@ -61,6 +61,7 @@ public class MatchManager {
     private final DrawVoteManager drawVoteManager;
     private final ZombieEntityManager zombieEntityManager;
     private final SkeletonEntityManager skeletonEntityManager;
+    private static final String SEPARATOR_LINE = "§a§l---------------------------------------------";
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
@@ -94,20 +95,19 @@ public class MatchManager {
     public void onPlayerEliminated(Player player) {
         Match match = activeMatches.get(player.getUniqueId());
         if (match == null) return;
-
         Player killer = null;
         UUID attackerId = healthManager.getLastAttacker(player);
         if (attackerId != null) {
             killer = Bukkit.getPlayer(attackerId);
             if (killer != null && killer.isOnline() && !killer.equals(player)) {
                 statsManager.addKill(killer);
-                killer.sendMessage(String.format("§3You killed §c%s§3!", player.getName()));
+                killer.sendMessage(String.format("§3You killed %s§3!", player.getName()));
             }
         }
         statsManager.addDeath(player);
 
         if (killer != null && killer.isOnline() && !killer.equals(player)) {
-            player.sendMessage(String.format("§3You were killed by §c%s§3!", killer.getName()));
+            player.sendMessage(String.format("§3You were killed by %s§3!", killer.getName()));
         } else {
             player.sendMessage("§3You were killed!");
         }
@@ -116,12 +116,10 @@ public class MatchManager {
             if (viewer.equals(player)) continue;
             if (viewer.equals(killer)) continue;
 
-            String victimColor = teamManager.isAlly(viewer, player) ? "§a" : "§c";
-            String victimName = victimColor + player.getName();
+            String victimName = "§3" + player.getName();
 
             if (killer != null && killer.isOnline()) {
-                String killerColor = teamManager.isAlly(viewer, killer) ? "§a" : "§c";
-                String killerName = killerColor + killer.getName();
+                String killerName = "§3" + killer.getName();
                 viewer.sendMessage(String.format("%s §3was killed by %s§3!", victimName, killerName));
             } else {
                 viewer.sendMessage(String.format("%s §3was killed!", victimName));
@@ -191,59 +189,94 @@ public class MatchManager {
         return (long) Math.floor(ratingManager.getRating(player));
     }
 
+
+
     public void announceMatchStart(Match match) {
+        List<Team> teams = new ArrayList<>(match.getTeams().keySet());
         for (Player viewer : match.getAllPlayers()) {
             if (!viewer.isOnline()) continue;
-            viewer.sendMessage("§6#§7--------------------------§6#");
-            List<Team> teams = new ArrayList<>(match.getTeams().keySet());
+            viewer.sendMessage(SEPARATOR_LINE);
             for (int i = 0; i < teams.size(); i++) {
-                Team team = teams.get(i);
-                for (Player player : match.getTeamPlayers(team)) {
-                    viewer.sendMessage(String.format("%s%s §f%d", teamColor(team), player.getName(), floorRating(player)));
+                StringBuilder line = new StringBuilder();
+                List<Player> players = match.getTeamPlayers(teams.get(i));
+                for (int j = 0; j < players.size(); j++) {
+                    Player p = players.get(j);
+                    if (j > 0) line.append("  ");
+                    line.append(String.format("§e%s §b%d", p.getName(), floorRating(p)));
                 }
+                viewer.sendMessage(center(line.toString()));
                 if (i < teams.size() - 1) {
-                    viewer.sendMessage("§6§lVS");
+                    viewer.sendMessage(center("§a§lVS"));
                 }
             }
-            viewer.sendMessage("§6#§7--------------------------§6#");
+            viewer.sendMessage(SEPARATOR_LINE);
         }
     }
 
     private void announceMatchResult(Match match, List<Player> winners, List<Player> losers,
-                                      Map<UUID, RatingChange> changes) {
+                                     Map<UUID, RatingChange> changes) {
         for (Player viewer : match.getAllPlayers()) {
             if (!viewer.isOnline()) continue;
-            viewer.sendMessage("§6#§7--------------------------§6#");
-            viewer.sendMessage(winners.contains(viewer) ? "§a§lVICTORY" : "§c§lDEFEAT");
+            viewer.sendMessage(SEPARATOR_LINE);
+            viewer.sendMessage(center("§a§lVICTORY"));
             for (Player player : winners) {
-                sendResultLine(viewer, player, changes.get(player.getUniqueId()), true);
+                viewer.sendMessage(center(resultLine(match, player, changes.get(player.getUniqueId()))));
             }
+            viewer.sendMessage(center("§c§lDEFEAT"));
             for (Player player : losers) {
-                sendResultLine(viewer, player, changes.get(player.getUniqueId()), false);
+                viewer.sendMessage(center(resultLine(match, player, changes.get(player.getUniqueId()))));
             }
-            viewer.sendMessage("§6#§7--------------------------§6#");
+            viewer.sendMessage(SEPARATOR_LINE);
         }
     }
 
-    private void sendResultLine(Player viewer, Player player, RatingChange change, boolean winner) {
-        String delta = change == null ? "" : String.format("§b(%+.2f) ", change.delta());
+    private String resultLine(Match match, Player player, RatingChange change) {
         long rating = change == null ? floorRating(player) : change.rating();
-        String nameColor = winner ? "§a" : "§c";
-        Match match = activeMatches.get(player.getUniqueId());
-        int damage = match == null ? 0 : (int) Math.round(match.getDamageDealt(player));
-        int healing = match == null ? 0 : (int) Math.round(match.getHealingDone(player));
-        viewer.sendMessage(String.format("%s%s%s§f %d §c§l%d§7/§a§l%d",
-                delta, nameColor, player.getName(), rating, damage, healing));
+        String delta = change == null ? "" : String.format(Locale.US, " §b(%+.2f)", change.delta());
+        return String.format("§c%s§7/§a%s §e%s §b%d%s",
+                formatK(match.getDamageDealt(player)),
+                formatK(match.getHealingDone(player)),
+                player.getName(), rating, delta);
     }
 
-    private String teamColor(Team team) {
-        return switch (team) {
-            case RED -> "§c";
-            case BLUE -> "§b";
-            case GREEN -> "§a";
-            case YELLOW -> "§e";
+    /** 950 -> "950", 2700 -> "2.7k", 4000 -> "4k" */
+    private String formatK(double value) {
+        long v = Math.round(value);
+        if (v < 1000) return String.valueOf(v);
+        double k = Math.round(v / 100.0) / 10.0;
+        return (k == Math.floor(k) ? String.valueOf((long) k) : String.valueOf(k)) + "k";
+    }
+
+    private static final int CHAT_CENTER_PX = 160;
+
+    private String center(String message) {
+        int width = 0;
+        boolean bold = false;
+        for (int i = 0; i < message.length(); i++) {
+            char c = message.charAt(i);
+            if (c == '§' && i + 1 < message.length()) {
+                char code = Character.toLowerCase(message.charAt(++i));
+                if (code == 'l') bold = true;
+                else if (code == 'r' || "0123456789abcdef".indexOf(code) >= 0) bold = false;
+                continue;
+            }
+            width += charWidth(c) + (bold && c != ' ' ? 1 : 0);
+        }
+        int spaces = (CHAT_CENTER_PX - width / 2) / 4; // un espacio = 4 px
+        if (spaces <= 0) return message;
+        return " ".repeat(spaces) + message;
+    }
+
+    private int charWidth(char c) {
+        return switch (c) {
+            case 'i', '!', '.', ',', ':', ';', '|', '\'' -> 2;
+            case 'l' -> 3;
+            case 'I', 't', ' ', '[', ']' -> 4;
+            case 'f', 'k', '(', ')', '*', '"', '<', '>' -> 5;
+            default -> 6;
         };
     }
+
 
     private record RatingChange(double delta, long rating) {
     }
