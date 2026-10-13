@@ -8,6 +8,8 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -23,8 +25,6 @@ public class BlockInteractionListener implements Listener {
         }
     }
 
-
-
     @EventHandler
     public void onBlockInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
@@ -32,10 +32,10 @@ public class BlockInteractionListener implements Listener {
 
         var state = event.getClickedBlock().getState();
 
-        if (state instanceof Container || state  instanceof EnchantingTable || state instanceof ItemFrame) {
+        if (state instanceof Container || state instanceof EnchantingTable) {
             event.setCancelled(true);
         }
-        if(state instanceof EnderChest) {
+        if (state instanceof EnderChest) {
             event.setCancelled(false);
         }
     }
@@ -43,6 +43,20 @@ public class BlockInteractionListener implements Listener {
     @EventHandler
     public void onEntityInteract(PlayerInteractEntityEvent event) {
         if (event.getRightClicked() instanceof ItemFrame) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onEntityDamage(EntityDamageByEntityEvent event) {
+        if (event.getEntity() instanceof ItemFrame) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onHangingBreak(HangingBreakByEntityEvent event) {
+        if (event.getEntity() instanceof ItemFrame) {
             event.setCancelled(true);
         }
     }

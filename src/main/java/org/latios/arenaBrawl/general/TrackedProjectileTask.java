@@ -187,9 +187,12 @@ public class TrackedProjectileTask extends BukkitRunnable {
     }
 
     private void playImpactEffects(Location at) {
-        at.getWorld().spawnParticle(
-                impactEffect.particle(), at, impactEffect.particleCount(),
-                0.2, 0.2, 0.2, 0.05);
-        at.getWorld().playSound(at, impactEffect.sound(), impactEffect.volume(), impactEffect.pitch());
+        if(abilityName.equals("Fireball")) {
+            at.getWorld().spawnParticle(
+                    impactEffect.particle(), at, impactEffect.particleCount(),
+                    0.2, 0.2, 0.2, 0.05);
+
+            at.getWorld().playSound(at, impactEffect.sound(), impactEffect.volume(), impactEffect.pitch());
+        }
     }
 }

@@ -252,6 +252,7 @@ ability-values:
     energy-cost: 60.0
     cookie-count: 7
     explosion-radius: 1.8
+    ground-impact-radius: 2.0
 
   spikegrenade:
     energy-cost: 30.0

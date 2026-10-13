@@ -1,15 +1,12 @@
 package org.latios.arenaBrawl.abilities.offensive;
 
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
@@ -37,11 +34,13 @@ public class CookieShotgun implements Ability {
     private final TeamManager teamManager;
     private final CombatService combatService;
     private final AbilityConfig config;
+    private final double groundImpactRadius;
     public CookieShotgun(EnergyManager energyManager, TeamManager teamManager, CombatService combatService, AbilityConfig config) {
         this.damagePerCookie = config.getDouble("damage-per-cookie", 25.0);
         this.energyCost = config.getDouble("energy-cost", 60.0);
         this.cookieCount = config.getInt("cookie-count", 7);
         this.explosionRadius = config.getDouble("explosion-radius", 1.8);
+        this.groundImpactRadius = config.getDouble("ground-impact-radius", 2.0);
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
@@ -96,7 +95,22 @@ public class CookieShotgun implements Ability {
 
                     if (!cookie.isValid() || ticks > 40) {
                         cancel();
-                        explodeCookie(player, cookie);
+                        explodeCookie(player, cookie, cookie.getLocation(), explosionRadius);
+                        return;
+                    }
+
+                    RayTraceResult blockHit = current.getWorld().rayTraceBlocks(
+                            current,
+                            spreadDir,
+                            speed,
+                            FluidCollisionMode.NEVER,
+                            true
+                    );
+                    if (blockHit != null) {
+                        Location impact = blockHit.getHitPosition().toLocation(current.getWorld());
+                        impact.subtract(spreadDir.clone().multiply(0.1));
+                        cancel();
+                        explodeCookie(player, cookie, impact, groundImpactRadius);
                         return;
                     }
 
@@ -114,7 +128,7 @@ public class CookieShotgun implements Ability {
                     for (Entity nearby : cookie.getNearbyEntities(0.6, 0.6, 0.6)) {
                         if (nearby instanceof Player victim && !victim.equals(player) && teamManager.isEnemy(player, victim)) {
                             cancel();
-                            explodeCookie(player, cookie);
+                            explodeCookie(player, cookie, cookie.getLocation(), explosionRadius);
                             return;
                         }
                     }
@@ -125,8 +139,7 @@ public class CookieShotgun implements Ability {
         return true;
     }
 
-    private void explodeCookie(Player owner, Item cookie) {
-        Location impactLoc = cookie.getLocation();
+    private void explodeCookie(Player owner, Item cookie, Location impactLoc, double radius) {
         cookie.remove();
 
         impactLoc.getWorld().spawnParticle(
@@ -141,7 +154,7 @@ public class CookieShotgun implements Ability {
         impactLoc.getWorld().playSound(impactLoc, Sound.ENTITY_GENERIC_EXPLODE, 0.3f, 2.0f);
 
         Set<Player> targets = new HashSet<>();
-        for (Entity entity : impactLoc.getWorld().getNearbyEntities(impactLoc, explosionRadius, explosionRadius, explosionRadius)) {
+        for (Entity entity : impactLoc.getWorld().getNearbyEntities(impactLoc, radius, radius, radius)) {
             if (entity instanceof Player victim && !victim.equals(owner)) {
                 if (teamManager.isEnemy(owner, victim)) {
                     targets.add(victim);
