@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities.offensive;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -146,9 +147,9 @@ public abstract class Breath implements Ability {
 
 
     protected void applySpike(Player target) {
-        if (!target.isOnGround()) {
+        if (!target.isOnGround() && target.getGameMode() != GameMode.SPECTATOR) {
             Vector velocity = target.getVelocity();
-            velocity.setY(-1.5);
+            velocity.setY(-1.0);
 
             target.setVelocity(velocity);
         }

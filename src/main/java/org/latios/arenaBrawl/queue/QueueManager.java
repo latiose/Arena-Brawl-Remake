@@ -22,13 +22,16 @@ public class QueueManager implements Listener {
     private static final int WIDE_SEARCH_STEP = 6;
     private static final long RANGE_INCREMENT_MILLIS = 10_000L;
 
+    private static final long NON_RATED_UPDATE_INTERVAL = 10 * 60 * 1000L;
+    private long lastNonRatedUpdateSent = System.currentTimeMillis();
+
     private final Map<MatchType, Set<UUID>> queuedPlayers = new EnumMap<>(MatchType.class);
     private final Map<UUID, RatedEntry> ratedEntries = new LinkedHashMap<>();
     private final PartyManager partyManager;
     private final RatingManager ratingManager;
     private final ArenaManager arenaManager;
     private final ArenaMapManager arenaMapManager;
-    private boolean ratedTeamsEnabled = true;
+    private boolean ratedTeamsEnabled = false;
 
     public QueueManager(Plugin plugin, PartyManager partyManager, RatingManager ratingManager,
                         ArenaManager arenaManager, ArenaMapManager arenaMapManager) {
@@ -38,15 +41,15 @@ public class QueueManager implements Listener {
         this.arenaMapManager = arenaMapManager;
         for (MatchType type : MatchType.values()) queuedPlayers.put(type, new LinkedHashSet<>());
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+
         new BukkitRunnable() {
             @Override
             public void run() {
                 updateRatedSearch();
-                sendQueueUpdates();
+                checkAndSendPeriodicQueueUpdates();
             }
-        }.runTaskTimer(plugin, 20L * 10L, 20L * 10L);
+        }.runTaskTimer(plugin, 20L, 20L);
     }
-
 
     public void handlePartyChange(Party party) {
         for (UUID memberId : party.getMembers()) {
@@ -57,6 +60,7 @@ public class QueueManager implements Listener {
             }
         }
     }
+
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) { leaveQueue(event.getPlayer()); }
 
@@ -97,13 +101,21 @@ public class QueueManager implements Listener {
             RatedEntry entry = new RatedEntry(player.getUniqueId(), members, averageRating(members), maxStep);
             ratedEntries.put(entry.leaderId, entry);
             sendRatedSearchMessage(entry);
-            sendQueueUpdates();
             tryStartMatches();
             return getQueueSize(type);
         }
 
         Set<UUID> queue = queuedPlayers.get(type);
         queue.addAll(members);
+
+        int queueSize = queue.size();
+        for (UUID memberId : members) {
+            Player p = Bukkit.getPlayer(memberId);
+            if (p != null && p.isOnline()) {
+                p.sendMessage("§eThere are currently " + queueSize + " players in the queue.");
+            }
+        }
+
         tryStartMatches();
         return queue.size();
     }
@@ -139,6 +151,7 @@ public class QueueManager implements Listener {
         return queuedPlayers.values().stream().mapToInt(Set::size).sum()
                 + ratedEntries.values().stream().mapToInt(entry -> entry.members.size()).sum();
     }
+
     public int getQueueSize(MatchType type) {
         if (type == MatchType.TEAMS) {
             return queuedPlayers.get(type).size()
@@ -180,6 +193,14 @@ public class QueueManager implements Listener {
         tryStartMatches();
     }
 
+    private void checkAndSendPeriodicQueueUpdates() {
+        long now = System.currentTimeMillis();
+        if (now - lastNonRatedUpdateSent >= NON_RATED_UPDATE_INTERVAL) {
+            lastNonRatedUpdateSent = now;
+            sendQueueUpdates();
+        }
+    }
+
     private void sendQueueUpdates() {
         for (Map.Entry<MatchType, Set<UUID>> entry : queuedPlayers.entrySet()) {
             if (entry.getKey() == MatchType.TEAMS && ratedTeamsEnabled) continue;
@@ -194,7 +215,7 @@ public class QueueManager implements Listener {
     }
 
     private void tryStartMatches() {
-        for (MatchType type : MatchType.values()) {
+          for (MatchType type : MatchType.values()) {
             if (type == MatchType.TEAMS && ratedTeamsEnabled) {
                 tryStartRatedMatches();
                 continue;
@@ -202,11 +223,16 @@ public class QueueManager implements Listener {
             Set<UUID> queue = queuedPlayers.get(type);
             if (queue.size() < type.playersNeeded() || arenaMapManager.getAvailableMapCount() == 0) continue;
 
+            boolean fifo = type == MatchType.TEAMS;
+
             List<List<Player>> groups = new ArrayList<>();
             int total = 0;
             Set<UUID> considered = new HashSet<>();
             List<UUID> queueOrder = new ArrayList<>(queue);
-            queueOrder.sort((first, second) -> Boolean.compare(isSoloPlayer(second), isSoloPlayer(first)));
+            if (!fifo) {
+                queueOrder.sort((first, second) -> Boolean.compare(isSoloPlayer(second), isSoloPlayer(first)));
+            }
+
 
             for (UUID id : queueOrder) {
                 if (!considered.add(id)) continue;
@@ -224,13 +250,33 @@ public class QueueManager implements Listener {
                 total += group.size();
                 if (total == type.playersNeeded()) break;
             }
-            if (total < type.playersNeeded()) continue;
+              if (total < type.playersNeeded()) continue;
 
-            List<Player> players = arrangeForType(type, groups);
-            if (players == null) continue;
-            players.forEach(p -> queue.remove(p.getUniqueId()));
-            arenaManager.startMatch(type, players);
+              List<Player> players = fifo
+                      ? arrangeByEntryOrder(groups, type.getTeamSize())
+                      : arrangeForType(type, groups);
+              if (players == null) continue;
+              players.forEach(p -> queue.remove(p.getUniqueId()));
+              arenaManager.startMatch(type, players);
         }
+    }
+
+    private List<Player> arrangeByEntryOrder(List<List<Player>> groups, int teamSize) {
+        int n = groups.size();
+
+        for (int mask = 1; mask < (1 << n); mask += 2) {
+            int sizeA = 0;
+            for (int i = 0; i < n; i++) {
+                if ((mask & (1 << i)) != 0) sizeA += groups.get(i).size();
+            }
+            if (sizeA != teamSize) continue;
+
+            List<Player> ordered = new ArrayList<>();
+            for (int i = 0; i < n; i++) if ((mask & (1 << i)) != 0) ordered.addAll(groups.get(i));
+            for (int i = 0; i < n; i++) if ((mask & (1 << i)) == 0) ordered.addAll(groups.get(i));
+            return ordered;
+        }
+        return null;
     }
 
     private void updateRatedSearch() {
@@ -241,9 +287,14 @@ public class QueueManager implements Listener {
             int previousStep = entry.searchStep;
             entry.searchStep = Math.min(WIDE_SEARCH_STEP,
                     (int) ((now - entry.joinedAt) / RANGE_INCREMENT_MILLIS));
-            if (entry.searchStep > previousStep) {
+
+            if (entry.searchStep >= WIDE_SEARCH_STEP) {
+                if (now - entry.lastWideMessageSent >= 10_000L) {
+                    entry.lastWideMessageSent = now;
+                    sendRatedSearchMessage(entry);
+                }
+            } else if (entry.searchStep > previousStep) {
                 sendRatedSearchMessage(entry);
-                sendQueueUpdates();
             }
         }
         tryStartRatedMatches();
@@ -252,7 +303,7 @@ public class QueueManager implements Listener {
     private void sendRatedSearchMessage(RatedEntry entry) {
         String message;
         if (entry.searchStep >= WIDE_SEARCH_STEP) {
-            message = "§eUsing a {wide search} to try and find you a match";
+            message = "§eUsing a {WIDE SEARCH} to try and find you a match";
         } else {
             int minimum = (int) Math.floor(entry.averageRating - entry.getRange());
             int maximum = (int) Math.ceil(entry.averageRating + entry.getRange());
@@ -292,7 +343,6 @@ public class QueueManager implements Listener {
         }
     }
 
-
     private List<RatedEntry> findRatedMatch(List<RatedEntry> entries) {
         List<RatedEntry> byWait = new ArrayList<>(entries);
         byWait.sort(Comparator.comparingLong(e -> e.joinedAt));
@@ -330,6 +380,11 @@ public class QueueManager implements Listener {
     }
 
     private boolean isCompatible(List<RatedEntry> entries) {
+        boolean hasWideSearch = entries.stream().anyMatch(entry -> entry.searchStep >= WIDE_SEARCH_STEP);
+        if (hasWideSearch) {
+            return true;
+        }
+
         double minimum = entries.stream().mapToDouble(RatedEntry::getRange).min().orElse(0);
         double lowest = entries.stream().mapToDouble(entry -> entry.averageRating).min().orElse(0);
         double highest = entries.stream().mapToDouble(entry -> entry.averageRating).max().orElse(0);
@@ -339,7 +394,7 @@ public class QueueManager implements Listener {
     private double averageRating(Collection<UUID> members) {
         return members.stream()
                 .map(Bukkit::getPlayer)
-                .filter(player -> player != null)
+                .filter(Objects::nonNull)
                 .mapToDouble(ratingManager::getRating)
                 .average()
                 .orElse(1000.0);
@@ -351,6 +406,7 @@ public class QueueManager implements Listener {
         private final double averageRating;
         private final long joinedAt;
         private int searchStep;
+        private long lastWideMessageSent;
 
         private RatedEntry(UUID leaderId, Collection<UUID> members, double averageRating, int initialStep) {
             this.leaderId = leaderId;
@@ -358,10 +414,11 @@ public class QueueManager implements Listener {
             this.averageRating = averageRating;
             this.searchStep = initialStep;
             this.joinedAt = System.currentTimeMillis() - (initialStep * RANGE_INCREMENT_MILLIS);
+            this.lastWideMessageSent = System.currentTimeMillis();
         }
 
         private int getRange() {
-            return INITIAL_RATING_RANGE + RATING_RANGE_INCREMENT * searchStep;
+            return INITIAL_RATING_RANGE + (RATING_RANGE_INCREMENT * searchStep);
         }
     }
 
@@ -370,7 +427,6 @@ public class QueueManager implements Listener {
         return player == null || partyManager.getParty(player) == null;
     }
 
-    // 0 weight = balanced teams, 1.0 weight = prioritize similar ratings
     private static final double TEAMMATE_CLOSENESS_WEIGHT = 1.0;
 
     private List<Player> arrangeTeams(List<List<Player>> groups, List<Double> ratings, int teamSize) {
@@ -399,7 +455,7 @@ public class QueueManager implements Listener {
 
             double teamDiff = Math.abs(sumA / sizeA - sumB / sizeB);
             double spread = (maxA - minA) + (maxB - minB);
-            double score = teamDiff + TEAMMATE_CLOSENESS_WEIGHT * spread;
+            double score = teamDiff + (TEAMMATE_CLOSENESS_WEIGHT * spread);
 
             if (score < bestScore) { bestScore = score; bestMask = mask; }
         }
@@ -425,7 +481,7 @@ public class QueueManager implements Listener {
 
     private List<Player> onlinePlayers(RatedEntry entry) {
         return entry.members.stream().map(Bukkit::getPlayer)
-                .filter(p -> p != null && p.isOnline()).toList();
+                .filter(Objects::nonNull).toList();
     }
 
     private boolean isEntryValid(RatedEntry entry) {

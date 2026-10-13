@@ -14,12 +14,14 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
+import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.hats.HatEquipUtils;
@@ -51,6 +53,7 @@ public class MatchManager {
     private final LobbyScoreboardManager lobbyScoreboardManager;
     private final DamageBuffManager damageBuffManager;
     private final ArmorTierManager armorTierManager;
+    private  SwordSelectionManager swordSelectionManager;
     private final HatSelectionManager hatSelectionManager;
     private final BroodMotherEntityManager broodMotherEntityManager;
     private final Plugin plugin;
@@ -61,12 +64,14 @@ public class MatchManager {
     private final DrawVoteManager drawVoteManager;
     private final ZombieEntityManager zombieEntityManager;
     private final SkeletonEntityManager skeletonEntityManager;
+    private final LifeLeechManager lifeLeechManager;
+
     private static final String SEPARATOR_LINE = "§a§l---------------------------------------------";
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
-                        ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin,ArenaMapManager arenaMapManager, StructureManager structureManager,
-                        SongOfPowerManager songOfPowerManager, DrawVoteManager drawVoteManager,ZombieEntityManager zombieEntityManager, SkeletonEntityManager skeletonEntityManager) {
+                        ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin, ArenaMapManager arenaMapManager, StructureManager structureManager,
+                        SongOfPowerManager songOfPowerManager, DrawVoteManager drawVoteManager, ZombieEntityManager zombieEntityManager, SkeletonEntityManager skeletonEntityManager, LifeLeechManager lifeLeechManage, SwordSelectionManager swordSelectionManager ) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -89,6 +94,8 @@ public class MatchManager {
         this.drawVoteManager = drawVoteManager;
         this.zombieEntityManager = zombieEntityManager;
         this.skeletonEntityManager = skeletonEntityManager;
+        this.lifeLeechManager = lifeLeechManage;
+        this.swordSelectionManager = swordSelectionManager;
     }
 
 
@@ -262,7 +269,7 @@ public class MatchManager {
             }
             width += charWidth(c) + (bold && c != ' ' ? 1 : 0);
         }
-        int spaces = (CHAT_CENTER_PX - width / 2) / 4; // un espacio = 4 px
+        int spaces = (CHAT_CENTER_PX - width / 2) / 4;
         if (spaces <= 0) return message;
         return " ".repeat(spaces) + message;
     }
@@ -284,6 +291,9 @@ public class MatchManager {
     public void cleanupPlayer(Player player) {
         cleanupPlayerHub(player);
         EntityCleanupUtils.sweepArenaEntities(player.getWorld());
+        broodMotherEntityManager.clearAll();
+        zombieEntityManager.clearAll();
+        skeletonEntityManager.clearAll();
     }
 
     public void cleanupPlayerHub(Player player) {
@@ -295,10 +305,8 @@ public class MatchManager {
         cooldownManager.clearPlayer(player);
         usageManager.resetPlayer(player);
         orbitShieldManager.clear(player);
-        broodMotherEntityManager.clearAll();
-        zombieEntityManager.clearAll();
-        skeletonEntityManager.clearAll();
         songOfPowerManager.clear(player);
+        lifeLeechManager.clear(player);
         if (!player.isOnline()) return;
 
         player.setGameMode(org.bukkit.GameMode.SURVIVAL);

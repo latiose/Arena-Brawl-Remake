@@ -71,11 +71,20 @@ public class RatingManager {
      * vs the opponent team's average rating. Clamped between -MAX_CHANGE and -MIN_CHANGE.
      */
     public double calculateLoss(double playerRating, double opponentAverageRating) {
-        double d = getWinChance(playerRating, opponentAverageRating);
-        double loss = K_FACTOR * (0 - d);
-        return -clamp(-loss, MIN_CHANGE, MAX_CHANGE);
-    }
+        if (playerRating <= 1300.0) {
+            return 0.0;
+        }
 
+        double ownWinChance = getWinChance(playerRating, opponentAverageRating);
+        double rawLoss = K_FACTOR * ownWinChance;
+        double clampedLoss = clamp(rawLoss, MIN_CHANGE, MAX_CHANGE);
+
+        if (playerRating - clampedLoss < 1300.0) {
+            clampedLoss = playerRating - 1300.0;
+        }
+
+        return -clampedLoss;
+    }
     private double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(max, value));
     }

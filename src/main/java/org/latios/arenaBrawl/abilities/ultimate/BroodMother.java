@@ -49,7 +49,7 @@ public class BroodMother implements Ability {
     }
 
     @Override
-    public String getName() { return "BroodMother"; }
+    public String getName() { return "Broodmother"; }
 
     @Override
     public AbilityCost getCost() { return cost; }
