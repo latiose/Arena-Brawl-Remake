@@ -28,9 +28,10 @@ public class AbilitySelectorGUI {
     public static final int PREVIOUS_PAGE_SLOT = 48;
     public static final int NEXT_PAGE_SLOT = 50;
 
-    public static final int HATS_SLOT = 29;
-    public static final int RUNE_SLOT = 31;
-    public static final int UPGRADES_SLOT = 33;
+    public static final int HATS_SLOT = 28;
+    public static final int RUNE_SLOT = 30;
+    public static final int UPGRADES_SLOT = 32;
+    public static final int SWORDS_SLOT = 34;
 
     private static final int ABILITY_ROW = 1;
     private static final int RUNE_ROW = 2;
@@ -209,6 +210,13 @@ public class AbilitySelectorGUI {
         upgradesMeta.setLore(List.of("", "§7Click to improve your combat stats"));
         upgradesItem.setItemMeta(upgradesMeta);
         inv.setItem(UPGRADES_SLOT, upgradesItem);
+
+        ItemStack swordItem = new ItemStack(Material.IRON_SWORD);
+        ItemMeta swordMeta = swordItem.getItemMeta();
+        swordMeta.setDisplayName("§bSwords");
+        swordMeta.setLore(List.of("", "§7Click to choose your cosmetic sword"));
+        swordItem.setItemMeta(swordMeta);
+        inv.setItem(SWORDS_SLOT, swordItem);
 
         player.openInventory(inv);
     }

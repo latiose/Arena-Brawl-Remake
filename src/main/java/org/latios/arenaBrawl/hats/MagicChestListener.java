@@ -105,7 +105,7 @@ public class MagicChestListener implements Listener {
                     player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 150);
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1.0f, 1.0f);
 
-                    String broadcastMessage = "§e" + player.getName() + " §7has unlocked the " + hatName + " §7!";
+                    String broadcastMessage = "§e" + player.getName() + " §7has unlocked the " + hatName + "§7!";
                     for (Player worldPlayer : player.getWorld().getPlayers()) {
                         if (!worldPlayer.equals(player)) {
                             worldPlayer.sendMessage(broadcastMessage);
@@ -114,6 +114,19 @@ public class MagicChestListener implements Listener {
                 } else {
                     int amount = 50 + ThreadLocalRandom.current().nextInt(151);
                     player.sendMessage(hatResult.hat().rarity().getColor() + "You got a duplicate: " + hatResult.hat().displayName()
+                            + " §7(already unlocked), got " + amount + " coins instead!");
+                    var stats = statsManager.getStats(player);
+                    stats.coins += amount;
+                    statsManager.saveDirectly(player, stats);
+                }
+            } else if (result instanceof MagicChestManager.SwordResult swordResult) {
+                if (swordResult.wasNew()) {
+                    player.sendMessage("§b§lNEW SWORD: " + swordResult.sword().getDisplayName() + "!");
+                    player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation(), 150);
+                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1.0f, 1.0f);
+                } else {
+                    int amount = 50 + ThreadLocalRandom.current().nextInt(151);
+                    player.sendMessage("§7You got a duplicate: §b§l" + swordResult.sword().getDisplayName()
                             + " §7(already unlocked), got " + amount + " coins instead!");
                     var stats = statsManager.getStats(player);
                     stats.coins += amount;

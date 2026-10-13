@@ -17,6 +17,7 @@ import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
 import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
+import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.hats.HatEquipUtils;
@@ -66,6 +67,7 @@ public class ArenaManager {
     private final ZombieEntityManager zombieEntityManager;
     private final ScavengerManager scavengerManager;
     private final SkeletonEntityManager skeletonEntityManager;
+    private final SwordSelectionManager swordSelectionManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
@@ -74,7 +76,8 @@ public class ArenaManager {
                         CombatUpgradeManager combatUpgradeManager,BroodMotherEntityManager broodMotherEntityManager, ArenaMapManager arenaMapManager, StructureManager structureManager, MovementLockManager movementLockManager, SongOfPowerManager songOfPowerManager,
                         LifeLeechManager lifeLeechManager, StructureDemolitionService demolitionService,EnergyModifierManager energyModifierManager, DamageBuffManager damageBuffManager,
                         EtherealBodyManager etherealBodyManager, DamageVulnerabilityManager damageVulnerabilityManager,SpeedBuffManager speedBuffManager,ZombieEntityManager zombieEntityManager,
-                        ScavengerManager scavengerManager,SkeletonEntityManager skeletonEntityManager) {
+                        ScavengerManager scavengerManager,SkeletonEntityManager skeletonEntityManager,
+                        SwordSelectionManager swordSelectionManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -109,6 +112,7 @@ public class ArenaManager {
         this.zombieEntityManager = zombieEntityManager;
         this.scavengerManager = scavengerManager;
         this.skeletonEntityManager = skeletonEntityManager;
+        this.swordSelectionManager = swordSelectionManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -158,7 +162,7 @@ public class ArenaManager {
                 ability.onMatchStart(player);
             }
 
-            AbilityKit.giveDefaultKit(player, abilityManager);
+            AbilityKit.giveDefaultKit(player, abilityManager, swordSelectionManager);
             armorTierManager.equipCosmeticArmor(player);
             HatEquipUtils.applyEquippedHat(player, hatSelectionManager);
             player.updateInventory();

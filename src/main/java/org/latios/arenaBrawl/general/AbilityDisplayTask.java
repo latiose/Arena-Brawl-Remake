@@ -10,13 +10,16 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 import org.latios.arenaBrawl.abilities.AbilitySlot;
+import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 
 public class AbilityDisplayTask extends BukkitRunnable {
 
     private final AbilityManager abilityManager;
+    private final SwordSelectionManager swordSelectionManager;
 
-    public AbilityDisplayTask(AbilityManager abilityManager) {
+    public AbilityDisplayTask(AbilityManager abilityManager, SwordSelectionManager swordSelectionManager) {
         this.abilityManager = abilityManager;
+        this.swordSelectionManager = swordSelectionManager;
     }
 
     @Override
@@ -36,7 +39,9 @@ public class AbilityDisplayTask extends BukkitRunnable {
 
         if (cost.isPermanentlyUnavailable(player)) {
             String readyColorCode = getReadyColorCode(slot);
-            Material unavailableMat = (slot.ordinal() == 0) ? AbilityKit.getIcon(slot) : Material.GRAY_DYE;
+            Material unavailableMat = (slot.ordinal() == 0)
+                    ? AbilityKit.getIcon(player, slot, swordSelectionManager)
+                    : Material.GRAY_DYE;
             setItem(player, slot, unavailableMat, 1, readyColorCode + ability.getName());
             return;
         }
@@ -45,7 +50,7 @@ public class AbilityDisplayTask extends BukkitRunnable {
             int remaining = Math.max(1, cost.getRemainingSeconds(player));
 
             Material cdMaterial = (slot.ordinal() == 0)
-                    ? AbilityKit.getIcon(slot)
+                    ? AbilityKit.getIcon(player, slot, swordSelectionManager)
                     : Material.GRAY_DYE;
             String readyColorCode = getReadyColorCode(slot);
             String name = (slot.ordinal() == 0)
@@ -59,7 +64,7 @@ public class AbilityDisplayTask extends BukkitRunnable {
             String readyColorCode = getReadyColorCode(slot);
             String readyName = readyColorCode + ability.getName() + " §f- §b§lRIGHT CLICK";
 
-            setItem(player, slot, AbilityKit.getIcon(slot), 1, readyName);
+            setItem(player, slot, AbilityKit.getIcon(player, slot, swordSelectionManager), 1, readyName);
         }
     }
 

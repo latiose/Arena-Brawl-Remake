@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.hats.KeyManager;
+import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -20,13 +21,15 @@ public class AbilitySelectionLoadListener implements Listener {
     private final KeyManager keyManager;
     private final CombatUpgradeManager combatUpgradeManager;
     private final MatchManager matchManager;
-    public AbilitySelectionLoadListener(AbilitySelectionManager selectionManager, RuneSelectionManager runeManager,HatSelectionManager hatSelectionManager, KeyManager keyManager, CombatUpgradeManager combatUpgradeManager, MatchManager matchManager) {
+    private final SwordSelectionManager swordSelectionManager;
+    public AbilitySelectionLoadListener(AbilitySelectionManager selectionManager, RuneSelectionManager runeManager,HatSelectionManager hatSelectionManager, KeyManager keyManager, CombatUpgradeManager combatUpgradeManager, MatchManager matchManager,SwordSelectionManager swordSelectionManager) {
         this.selectionManager = selectionManager;
         this.runeManager = runeManager;
         this.hatSelectionManager = hatSelectionManager;
         this.keyManager = keyManager;
         this.combatUpgradeManager = combatUpgradeManager;
         this.matchManager = matchManager;
+      this.swordSelectionManager = swordSelectionManager;
     }
 
 
@@ -37,6 +40,7 @@ public class AbilitySelectionLoadListener implements Listener {
         hatSelectionManager.loadForPlayer(event.getPlayer());
         keyManager.loadForPlayer(event.getPlayer());
         combatUpgradeManager.loadForPlayer(event.getPlayer());
+        swordSelectionManager.loadForPlayer(event.getPlayer());
         matchManager.cleanupPlayer(event.getPlayer());
     }
 
@@ -47,5 +51,6 @@ public class AbilitySelectionLoadListener implements Listener {
         hatSelectionManager.unloadPlayer(event.getPlayer());
         keyManager.unloadPlayer(event.getPlayer());
         combatUpgradeManager.unloadPlayer(event.getPlayer());
+       swordSelectionManager.unloadPlayer(event.getPlayer());
     }
 }

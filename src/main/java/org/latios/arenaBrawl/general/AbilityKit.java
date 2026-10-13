@@ -9,6 +9,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 import org.latios.arenaBrawl.abilities.AbilitySlot;
+import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Consumable;
 import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
@@ -29,13 +30,22 @@ public class AbilityKit {
         return SLOT_ICONS.get(slot);
     }
 
-    public static void giveDefaultKit(Player player, AbilityManager abilityManager) {
+    public static Material getIcon(Player player, AbilitySlot slot, SwordSelectionManager swordSelectionManager) {
+        if (slot == AbilitySlot.OFFENSIVE) {
+            return swordSelectionManager.getEquipped(player).getMaterial();
+        }
+        return getIcon(slot);
+    }
+
+    public static void giveDefaultKit(Player player, AbilityManager abilityManager,
+                                      SwordSelectionManager swordSelectionManager) {
         player.getInventory().clear();
 
         for (AbilitySlot slot : AbilitySlot.values()) {
             Ability ability = abilityManager.getAbility(player, slot);
             String name = ability != null ? ability.getName() : slot.name();
-            player.getInventory().setItem(slot.ordinal(), namedItem(SLOT_ICONS.get(slot), "§e" + name));
+            player.getInventory().setItem(slot.ordinal(),
+                    namedItem(getIcon(player, slot, swordSelectionManager), "§e" + name));
         }
     }
 

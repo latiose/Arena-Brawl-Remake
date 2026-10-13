@@ -2,6 +2,8 @@
 package org.latios.arenaBrawl.hats;
 
 import org.bukkit.entity.Player;
+import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
+import org.latios.arenaBrawl.cosmetics.SwordType;
 import org.latios.arenaBrawl.stats.StatsManager;
 
 import java.util.List;
@@ -9,23 +11,31 @@ import java.util.Random;
 
 public class MagicChestManager {
 
-    public sealed interface ChestResult permits CoinsResult, HatResult {}
+    public sealed interface ChestResult permits CoinsResult, HatResult, SwordResult {}
     public record CoinsResult(int amount) implements ChestResult {}
     public record HatResult(HatDefinition hat, boolean wasNew) implements ChestResult {}
-
+    public record SwordResult(SwordType sword, boolean wasNew) implements ChestResult {}
+    private final SwordSelectionManager swordSelectionManager;
     private final StatsManager statsManager;
     private final HatRegistry hatRegistry;
     private final HatSelectionManager hatSelectionManager;
     private final Random random = new Random();
 
-    public MagicChestManager(StatsManager statsManager, HatRegistry hatRegistry, HatSelectionManager hatSelectionManager) {
+    public MagicChestManager(StatsManager statsManager, HatRegistry hatRegistry, HatSelectionManager hatSelectionManager,SwordSelectionManager swordSelectionManager) {
         this.statsManager = statsManager;
         this.hatRegistry = hatRegistry;
         this.hatSelectionManager = hatSelectionManager;
+        this.swordSelectionManager = swordSelectionManager;
     }
 
     public ChestResult open(Player player) {
         double roll = random.nextDouble();
+
+        if (roll < 0.02) {
+            SwordType sword = SwordType.values()[random.nextInt(SwordType.values().length)];
+            boolean wasNew = swordSelectionManager.unlock(player, sword);
+            return new SwordResult(sword, wasNew);
+        }
 
         if (roll < 0.50) {
             int amount = 50 + random.nextInt(151); // 50 to 200 inclusive

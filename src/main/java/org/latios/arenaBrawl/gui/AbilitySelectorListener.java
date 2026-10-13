@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.abilities.AbilityRegistry;
 import org.latios.arenaBrawl.abilities.AbilitySelectionManager;
 import org.latios.arenaBrawl.abilities.AbilitySlot;
 import org.latios.arenaBrawl.hats.HatSelectorGUI;
+import org.latios.arenaBrawl.cosmetics.SwordSelectorGUI;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeGUI;
@@ -25,14 +26,16 @@ public class AbilitySelectorListener implements Listener {
     private final RuneSelectionManager runeManager;
     private final HatSelectorGUI hatManager;
     private final CombatUpgradeGUI combatUpgradeGUI;
+    private final SwordSelectorGUI swordSelectorGUI;
 
-    public AbilitySelectorListener(AbilityRegistry registry, AbilitySelectionManager selectionManager, AbilitySelectorGUI gui, RuneSelectionManager runeManager, HatSelectorGUI hatSelectorGUI, CombatUpgradeGUI combatUpgradeGUI) {
+    public AbilitySelectorListener(AbilityRegistry registry, AbilitySelectionManager selectionManager, AbilitySelectorGUI gui, RuneSelectionManager runeManager, HatSelectorGUI hatSelectorGUI, CombatUpgradeGUI combatUpgradeGUI,SwordSelectorGUI swordSelectorGUI) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.gui = gui;
         this.runeManager = runeManager;
         this.hatManager = hatSelectorGUI;
         this.combatUpgradeGUI = combatUpgradeGUI;
+        this.swordSelectorGUI = swordSelectorGUI;
     }
 
     @EventHandler
@@ -88,6 +91,10 @@ public class AbilitySelectorListener implements Listener {
 
             if (rawSlot == AbilitySelectorGUI.UPGRADES_SLOT) {
                 combatUpgradeGUI.open(player);
+                return;
+            }
+            if (rawSlot == AbilitySelectorGUI.SWORDS_SLOT) {
+                swordSelectorGUI.open(player);
                 return;
             }
 

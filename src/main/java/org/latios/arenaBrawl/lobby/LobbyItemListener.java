@@ -11,6 +11,7 @@ import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.gui.AbilitySelectorGUI;
 import org.latios.arenaBrawl.gui.QueueGUI;
 import org.latios.arenaBrawl.queue.QueueManager;
+import org.latios.arenaBrawl.cosmetics.SwordSelectorGUI;
 
 public class LobbyItemListener implements Listener {
 
@@ -18,12 +19,14 @@ public class LobbyItemListener implements Listener {
     private final AbilitySelectorGUI abilitySelectorGUI;
     private final MatchManager matchManager;
     private final QueueGUI queueGUI;
+    private final SwordSelectorGUI swordSelectorGUI;
 
-    public LobbyItemListener(QueueManager queueManager, AbilitySelectorGUI abilitySelectorGUI, MatchManager matchManager, QueueGUI queueGUI) {
+    public LobbyItemListener(QueueManager queueManager, AbilitySelectorGUI abilitySelectorGUI, MatchManager matchManager, QueueGUI queueGUI,SwordSelectorGUI swordSelectorGUI) {
         this.queueManager = queueManager;
         this.abilitySelectorGUI = abilitySelectorGUI;
         this.matchManager = matchManager;
         this.queueGUI = queueGUI;
+        this.swordSelectorGUI = swordSelectorGUI;
     }
 
     @EventHandler

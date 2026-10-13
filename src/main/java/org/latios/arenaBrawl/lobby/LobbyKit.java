@@ -9,11 +9,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
+import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
+import org.latios.arenaBrawl.cosmetics.SwordType;
 
 public class LobbyKit {
 
 
-    public static void giveLobbyKit(Player player, ArmorTierManager armorTierManager) {
+    public static void giveLobbyKit(Player player, ArmorTierManager armorTierManager
+                                    ) {
         player.getInventory().clear();
         player.getInventory().setItem(0, buildCompass());
         player.getInventory().setItem(1, buildEmerald());
@@ -38,4 +41,6 @@ public class LobbyKit {
         item.setItemMeta(meta);
         return item;
     }
+
+
 }
