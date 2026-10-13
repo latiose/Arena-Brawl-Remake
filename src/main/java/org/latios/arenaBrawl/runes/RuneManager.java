@@ -8,7 +8,6 @@ import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
 
-
 import java.util.Random;
 
 public class RuneManager {
@@ -19,7 +18,8 @@ public class RuneManager {
     private final Random random = new Random();
     private final DebuffManager debuffManager;
     private final SpeedBuffManager speedBuffManager;
-    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager,RuneConfigManager runeConfigManager, SpeedBuffManager speedBuffManager) {
+
+    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager, RuneConfigManager runeConfigManager, SpeedBuffManager speedBuffManager) {
         this.energyManager = energyManager;
         this.selectionManager = selectionManager;
         this.runeConfigManager = runeConfigManager;
@@ -72,6 +72,20 @@ public class RuneManager {
                 attacker.sendMessage("§eYour §e" + rune.getDisplayName() + " §ewas activated!");
                 return 1.0;
             }
+            case CONFUSION -> {
+                if (victim != null) {
+                    int currentSlot = victim.getInventory().getHeldItemSlot();
+                    int newSlot;
+
+                    do {
+                        newSlot = random.nextInt(9);
+                    } while (newSlot == currentSlot);
+
+                    victim.getInventory().setHeldItemSlot(newSlot);
+                    attacker.sendMessage("§eYour §d" + rune.getDisplayName() + " §ewas activated!");
+                }
+                return 1.0;
+            }
             default -> {
                 return 1.0;
             }
@@ -83,6 +97,7 @@ public class RuneManager {
             case SPEED -> 0.2;
             case SLOW, ENERGY -> 0.15;
             case DAMAGE -> 0.48;
+            case CONFUSION -> 0.20;
         };
     }
 }

@@ -4,14 +4,9 @@ public enum RuneType {
     SPEED("Rune of Speed"),
     SLOW("Rune of Slow"),
     DAMAGE("Rune of Damage"),
-    ENERGY("Rune of Energy");
+    ENERGY("Rune of Energy"),
+    CONFUSION("Rune of Confusion"),;
 
-    /*
-  SPEED("Rune of Speed", 0.25),
-  SLOW("Rune of Slow", 0.15),
-  DAMAGE("Rune of Damage", 0.50),
-  ENERGY("Rune of Energy", 0.15);
-  */
 
   private final String displayName;
 

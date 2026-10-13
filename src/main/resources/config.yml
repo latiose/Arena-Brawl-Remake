@@ -661,6 +661,8 @@ rune-values:
   energy:
     proc-chance: 0.15
     energy-amount: 10.0
+  confusion:
+    proc-chance: 0.15
 
 hats:
   # --- COMMON HATS ---

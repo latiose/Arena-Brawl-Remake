@@ -243,15 +243,37 @@ public class CombatService {
     }
 
     private void applyGuaranteedRandomDebuff(Player attacker, OrbitShieldType type) {
-        List<DebuffType> shuffled = new ArrayList<>(STAR_SHIELD_POSSIBLE_DEBUFFS);
-        Collections.shuffle(shuffled);
+        List<DebuffType> weightedOrder = getRandomDebuffPriorityOrder();
 
-        for (DebuffType debuffType : shuffled) {
+        for (DebuffType debuffType : weightedOrder) {
             boolean applied = debuffManager.tryApply(attacker, debuffType, STAR_SHIELD_EFFECT_DURATION_MILLIS);
             if (applied) {
                 return;
             }
         }
+    }
+
+    private List<DebuffType> getRandomDebuffPriorityOrder() {
+        double roll = ThreadLocalRandom.current().nextDouble();
+        DebuffType primary;
+
+        if (roll < 0.50) {
+            primary = DebuffType.SLOW;
+        } else if (roll < 0.75) {
+            primary = DebuffType.STUN;
+        } else {
+            primary = DebuffType.IMMOBILIZE;
+        }
+
+        List<DebuffType> order = new ArrayList<>();
+        order.add(primary);
+
+        List<DebuffType> remaining = new ArrayList<>(STAR_SHIELD_POSSIBLE_DEBUFFS);
+        remaining.remove(primary);
+        Collections.shuffle(remaining);
+        order.addAll(remaining);
+
+        return order;
     }
 
     private void playDamageFeedback(Player victim) {

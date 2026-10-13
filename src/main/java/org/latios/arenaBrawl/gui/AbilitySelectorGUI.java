@@ -302,6 +302,7 @@ public class AbilitySelectorGUI {
             case SPEED -> 0.2;
             case SLOW, ENERGY -> 0.15;
             case DAMAGE -> 0.48;
+            case CONFUSION -> 0.20;
         };
     }
 
