@@ -48,6 +48,7 @@ public class AbilityIconRegistry {
         icons.put("seismicwave", Material.STONE_STAIRS);
         icons.put("venombloom", Material.POISONOUS_POTATO);
         icons.put("icespear", Material.ICE);
+        icons.put("soulcannon", Material.SOUL_SAND);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
@@ -68,6 +69,8 @@ public class AbilityIconRegistry {
         icons.put("dodgeroll", Material.LEATHER_BOOTS);
         icons.put("scavenger", Material.HOPPER);
         icons.put("grit", Material.BOW);
+        icons.put("grapplinghook", Material.TRIPWIRE_HOOK);
+
 
 
         // --- SUPPORT ---

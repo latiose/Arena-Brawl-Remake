@@ -65,4 +65,11 @@ public class EnergyManager {
         energy.put(player.getUniqueId(), updated);
         syncVisual(player);
     }
+
+    public void removeEnergy(Player player, double extra) {
+        double current = getEnergy(player);
+        double updated = Math.max(0, current - extra);
+        energy.put(player.getUniqueId(), updated);
+        syncVisual(player);
+    }
 }

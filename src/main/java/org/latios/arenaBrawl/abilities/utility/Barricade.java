@@ -9,6 +9,7 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.*;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
@@ -53,7 +54,7 @@ public class Barricade implements Ability {
         StructureBlueprint blueprint = Blueprints.defaultBarricade();
 
         if (!BarricadeStructure.canBuild(placementLocation, blueprint)) {
-            player.sendMessage("§cCannot place Barricade!");
+            player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
 

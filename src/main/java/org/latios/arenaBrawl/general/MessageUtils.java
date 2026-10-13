@@ -16,4 +16,8 @@ public class MessageUtils {
     public static String noValidPlayer() {
         return "§eThere is no valid player within range!";
     }
+
+    public static String noValidBlock() {
+        return "§eSelect a valid block!";
+    }
 }

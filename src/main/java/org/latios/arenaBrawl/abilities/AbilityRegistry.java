@@ -84,6 +84,9 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "icespear",
                 deps -> new IceSpear(deps.energyManager(), deps.teamManager(), deps.combatService(),
                         deps.debuffManager(), configManager.get("icespear")));
+        register(AbilitySlot.OFFENSIVE, "soulcannon",
+                deps -> new SoulCannon(deps.energyManager(), deps.teamManager(), deps.combatService(),
+                        configManager.get("soulcannon")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -125,6 +128,9 @@ public class AbilityRegistry {
                 deps -> new PrimalRoar(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.shieldManager(), deps.debuffManager(), deps.teamManager(), configManager.get("primalroar")));
         register(AbilitySlot.UTILITY, "grit",
                 deps -> new Grit(deps.cooldownManager(),deps.combatUpgradeManager(),deps.shieldManager(), configManager.get("grit")));
+        register(AbilitySlot.UTILITY, "grapplinghook",
+                deps -> new GrapplingHook(deps.cooldownManager(), deps.combatUpgradeManager(),
+                        configManager.get("grapplinghook")));
 
 
 

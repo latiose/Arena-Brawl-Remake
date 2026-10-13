@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.*;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -62,7 +63,7 @@ public class WallOfVines implements Ability {
         Block targetBlock = player.getTargetBlockExact(5);
 
         if (targetBlock == null || !targetBlock.getType().isSolid()) {
-            player.sendMessage("§eSelect a valid block!");
+            player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
 
@@ -71,7 +72,7 @@ public class WallOfVines implements Ability {
         BlockFace facing = WallOfVinesStructure.getPlayerFacing(player);
 
         if (!StructureUtils.isSpaceClearForBlueprint(placementLocation, facing, blueprint)) {
-            player.sendMessage("§eSelect a valid block!");
+            player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
 

@@ -13,6 +13,7 @@ import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.Blueprints;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.structures.TreeOfLifeStructure;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -80,14 +81,14 @@ public class TreeOfLife implements Ability {
         Block targetBlock = player.getTargetBlockExact((int) maxPlacementRange);
 
         if (targetBlock == null || !targetBlock.getType().isSolid()) {
-            player.sendMessage("§eSelect a valid block!");
+            player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
 
         Block placementBlock = targetBlock.getRelative(BlockFace.UP);
 
         if (!isReplaceable(placementBlock.getType())) {
-            player.sendMessage("§eSelect a valid block!");
+            player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
 

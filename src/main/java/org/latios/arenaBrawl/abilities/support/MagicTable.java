@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.MagicTableStructure;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -73,7 +74,7 @@ public class MagicTable implements Ability {
         Block targetBlock = player.getTargetBlockExact(7);
 
         if (targetBlock == null || !targetBlock.getType().isSolid()) {
-            player.sendMessage("§cYou must aim at a solid block on the ground!");
+            player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
 
@@ -81,7 +82,7 @@ public class MagicTable implements Ability {
         Block topBlock = baseBlock.getRelative(0, 1, 0);
 
         if (baseBlock.getType().isSolid() || topBlock.getType().isSolid()) {
-            player.sendMessage("§cCannot place Magic Table! The space is obstructed.");
+            player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
 

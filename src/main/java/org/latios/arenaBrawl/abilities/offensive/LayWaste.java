@@ -18,6 +18,7 @@ import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.MatchSoundUtils;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -88,14 +89,14 @@ public class LayWaste implements Ability {
         );
 
         if (result == null || result.getHitBlock() == null) {
-            player.sendMessage("§cYou must target a block on the ground.");
+           player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
 
         Block hitBlock = result.getHitBlock();
 
         if (result.getHitBlockFace() != null && result.getHitBlockFace().getModY() < 0) {
-            player.sendMessage("§cYou must target a block on the ground.");
+            player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
 

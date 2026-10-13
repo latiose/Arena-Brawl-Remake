@@ -313,6 +313,17 @@ ability-values:
     radius: 2.0
     slow-duration-ticks: 20
     slow-chance: 0.50
+
+  soulcannon:
+    min-energy: 10.0
+    max-energy: 100.0
+    min-damage: 25.0
+    max-damage: 160.0
+    min-speed: 0.8
+    max-speed: 2.6
+    min-size: 0.3
+    max-size: 1.6
+    max-target-distance: 45
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -410,6 +421,14 @@ ability-values:
     duration-ms: 5000
     energy-per-hit: 10.0
 
+  grapplinghook:
+    cooldown-ms: 30000
+    max-target-distance: 25.0
+    max-wall-height: 14.0
+    extra-height: 3.0
+    pull-speed: 1.1
+    climb-speed: 0.85
+    ledge-push: 0.45
 
   # --- SUPPORT ---
   holywater:
