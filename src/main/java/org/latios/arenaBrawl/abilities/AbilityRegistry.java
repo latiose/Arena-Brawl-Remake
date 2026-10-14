@@ -122,15 +122,13 @@ public class AbilityRegistry {
         register(AbilitySlot.UTILITY, "dodgeroll",
                 deps -> new DodgeRoll(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.shieldManager(), configManager.get("dodgeroll")));
         register(AbilitySlot.UTILITY, "scavenger",
-                deps -> new Scavenger(deps.cooldownManager(), deps.combatUpgradeManager(), deps.scavengerManager(),
-                      configManager.get("scavenger")));
+                deps -> new Scavenger(deps.cooldownManager(), deps.combatUpgradeManager(), deps.scavengerManager(), configManager.get("scavenger")));
         register(AbilitySlot.UTILITY, "primalroar",
                 deps -> new PrimalRoar(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.shieldManager(), deps.debuffManager(), deps.teamManager(), configManager.get("primalroar")));
         register(AbilitySlot.UTILITY, "grit",
                 deps -> new Grit(deps.cooldownManager(),deps.combatUpgradeManager(),deps.shieldManager(), configManager.get("grit")));
         register(AbilitySlot.UTILITY, "grapplinghook",
-                deps -> new GrapplingHook(deps.cooldownManager(), deps.combatUpgradeManager(),
-                        configManager.get("grapplinghook")));
+                deps -> new GrapplingHook(deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("grapplinghook")));
 
 
 
@@ -170,8 +168,7 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "magictable",
                 deps -> new MagicTable(deps.cooldownManager(), deps.combatUpgradeManager(), deps.structureManager(), deps.teamManager(), deps.playerHealthManager(), configManager.get("magictable")));
         register(AbilitySlot.SUPPORT, "skittles",
-                deps -> new Skittles(deps.cooldownManager(), deps.combatUpgradeManager(),
-                        deps.playerHealthManager(), deps.damageBuffManager(), deps.energyManager(), deps.debuffManager(), deps.speedBuffManager(), configManager.get("skittles")));
+                deps -> new Skittles(deps.cooldownManager(), deps.combatUpgradeManager(), deps.playerHealthManager(), deps.damageBuffManager(), deps.energyManager(), deps.debuffManager(), deps.speedBuffManager(), configManager.get("skittles")));
         register(AbilitySlot.SUPPORT, "gamblersheal",
                 deps -> new GamblersHeal(deps.cooldownManager(),deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("gamblersheal")));
         register(AbilitySlot.SUPPORT, "bloodthirst",
@@ -179,9 +176,8 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "meditation",
                 deps -> new Meditation(deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("meditation")));
         register(AbilitySlot.SUPPORT, "rallybanner",
-                deps -> new RallyBanner(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.teamManager(),
-                        deps.damageBuffManager(), deps.speedBuffManager(), deps.playerHealthManager(),
-                        configManager.get("rallybanner")));
+                deps -> new RallyBanner(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.teamManager(), deps.damageBuffManager(), deps.speedBuffManager(), deps.playerHealthManager(), configManager.get("rallybanner")));
+        register(AbilitySlot.SUPPORT, "gamblersshield", deps -> new GamblersShield(deps.cooldownManager(), deps.orbitShieldManager(), deps.combatUpgradeManager(), configManager.get("gamblersshield")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",

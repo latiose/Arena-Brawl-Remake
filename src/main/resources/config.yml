@@ -442,6 +442,11 @@ ability-values:
     charges: 7
     heal-per-charge: 40.0
 
+  gamblersshield:
+    cooldown-ms: 30000
+    charges: 4
+    heal-per-charge: 30.0
+
   cactusshield:
     cooldown-ms: 30000
     charges: 4

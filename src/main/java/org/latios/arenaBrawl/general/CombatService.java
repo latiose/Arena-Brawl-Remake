@@ -184,9 +184,9 @@ public class CombatService {
 
     private void resolveShieldEffect(OrbitShieldType type, Player attacker, Player victim, boolean reflected) {
         if (type == null) return;
+
         int remainingCharges = orbitShieldManager.hasActiveShield(victim) ? orbitShieldManager.getCharges(victim) : 0;
         int maxCharges = type.getChargeCount();
-
         if (remainingCharges > 0) {
             int healthPercent = (int) Math.round(((double) remainingCharges / maxCharges) * 100.0);
             victim.sendMessage(String.format("§e%s Health: §a%d%%", type.getDisplayName(), healthPercent));
@@ -195,61 +195,24 @@ public class CombatService {
         }
 
         if (type.getHealPerCharge() > 0) {
-            healthManager.heal(victim, type.getHealPerCharge(), type.getDisplayName());
+            healVictim(victim, type.getHealPerCharge(), type.getDisplayName());
+        }
+
+
+        if (type.isRandom()) {
+            org.latios.arenaBrawl.general.GamblerEffects.Entry result = org.latios.arenaBrawl.general.GamblerEffects.roll();
+            victim.sendMessage("§6" + type.getDisplayName() + " rolled: §e" + result.name());
+            result.effect().apply(this, attacker, victim, reflected);
         }
 
         if (type.getDamagePerCharge() > 0) {
-            double damageAmount = type.getDamagePerCharge();
-            damageAmount *= damageBuffManager.getMultiplier(victim);
-            damageAmount *= 1.0 + damageVulnerabilityManager.getBonusMultiplier(attacker);
-            int roundedDamage = (int) Math.round(damageAmount);
-
-            OrbitShieldType attackerShield = (!reflected && orbitShieldManager.hasActiveShield(attacker))
-                    ? orbitShieldManager.getActiveType(attacker)
-                    : null;
-
-            if (attackerShield != null) {
-                orbitShieldManager.consumeCharge(attacker);
-                resolveShieldEffect(attackerShield, victim, attacker, true);
-            } else {
-                healthManager.damage(attacker, damageAmount, victim);
-
-                Location impactLoc = attacker.getLocation().add(0, attacker.getHeight() * 0.5, 0);
-                spawnHologram(attacker, String.valueOf(roundedDamage), impactLoc);
-
-                victim.sendMessage(MessageUtils.positive() + String.format(
-                        "§3Your %s hit §3%s §3for §c%d §3damage.",
-                        type.getDisplayName(), attacker.getName(), roundedDamage
-                ));
-
-                attacker.sendMessage(MessageUtils.negative() + String.format(
-                        "§3%s's %s hit §3you §3for §c%d §3damage.",
-                        victim.getName(), type.getDisplayName(), roundedDamage
-                ));
-            }
+            reflectDamage(attacker, victim, type.getDamagePerCharge(), type.getDisplayName(), reflected);
         }
-
         if (type.rollsDebuffOnBlock()) {
-            applyGuaranteedRandomDebuff(attacker, type);
+            applyGuaranteedRandomDebuff(attacker);
         }
         if (type.doesKnockback()) {
-            Vector push = attacker.getLocation().toVector().subtract(victim.getLocation().toVector());
-            push.setY(0);
-            if (push.lengthSquared() < 0.0001) push = new Vector(1, 0, 0);
-            push.normalize().multiply(1.3);
-            push.setY(0.4);
-            attacker.setVelocity(push);
-        }
-    }
-
-    private void applyGuaranteedRandomDebuff(Player attacker, OrbitShieldType type) {
-        List<DebuffType> weightedOrder = getRandomDebuffPriorityOrder();
-
-        for (DebuffType debuffType : weightedOrder) {
-            boolean applied = debuffManager.tryApply(attacker, debuffType, STAR_SHIELD_EFFECT_DURATION_MILLIS);
-            if (applied) {
-                return;
-            }
+            applyKnockbackEffect(attacker, victim);
         }
     }
 
@@ -375,5 +338,51 @@ public class CombatService {
                 ticksElapsed++;
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
+    }
+
+
+    void reflectDamage(Player attacker, Player victim, double baseDamage, String sourceName, boolean reflected) {
+        double damageAmount = baseDamage
+                * damageBuffManager.getMultiplier(victim)
+                * (1.0 + damageVulnerabilityManager.getBonusMultiplier(attacker));
+        int roundedDamage = (int) Math.round(damageAmount);
+
+        OrbitShieldType attackerShield = (!reflected && orbitShieldManager.hasActiveShield(attacker))
+                ? orbitShieldManager.getActiveType(attacker)
+                : null;
+
+        if (attackerShield != null) {
+            orbitShieldManager.consumeCharge(attacker);
+            resolveShieldEffect(attackerShield, victim, attacker, true);
+            return;
+        }
+
+        healthManager.damage(attacker, damageAmount, victim);
+        spawnHologram(attacker, String.valueOf(roundedDamage),
+                attacker.getLocation().add(0, attacker.getHeight() * 0.5, 0));
+
+        victim.sendMessage(MessageUtils.positive() + String.format(
+                "§3Your %s hit §3%s §3for §c%d §3damage.", sourceName, attacker.getName(), roundedDamage));
+        attacker.sendMessage(MessageUtils.negative() + String.format(
+                "§3%s's %s hit §3you §3for §c%d §3damage.", victim.getName(), sourceName, roundedDamage));
+    }
+
+    void applyKnockbackEffect(Player attacker, Player victim) {
+        Vector push = attacker.getLocation().toVector().subtract(victim.getLocation().toVector());
+        push.setY(0);
+        if (push.lengthSquared() < 0.0001) push = new Vector(1, 0, 0);
+        push.normalize().multiply(1.3);
+        push.setY(0.4);
+        attacker.setVelocity(push);
+    }
+
+    void healVictim(Player victim, double amount, String source) {
+        healthManager.heal(victim, amount, source);
+    }
+
+    void applyGuaranteedRandomDebuff(Player attacker) {
+        for (DebuffType debuffType : getRandomDebuffPriorityOrder()) {
+            if (debuffManager.tryApply(attacker, debuffType, STAR_SHIELD_EFFECT_DURATION_MILLIS)) return;
+        }
     }
 }
