@@ -10,16 +10,21 @@ import org.latios.arenaBrawl.abilities.support.SongOfPower;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.MatchManager;
+import org.latios.arenaBrawl.general.HoldToActivateTask;
 
 public class AbilityTriggerListener implements Listener {
     private final AbilityManager abilityManager;
     private final MatchManager matchManager;
     private final DebuffManager debuffManager;
 
-    public AbilityTriggerListener(AbilityManager abilityManager, DebuffManager debuffManager, MatchManager matchManager) {
+    private final HoldToActivateTask holdTask;
+
+    public AbilityTriggerListener(AbilityManager abilityManager, DebuffManager debuffManager,
+                                  MatchManager matchManager, HoldToActivateTask holdTask) {
         this.abilityManager = abilityManager;
         this.debuffManager = debuffManager;
         this.matchManager = matchManager;
+        this.holdTask = holdTask;
     }
 
     @EventHandler
@@ -70,7 +75,7 @@ public class AbilityTriggerListener implements Listener {
         }
 
         if (abilitySlot == AbilitySlot.OFFENSIVE) {
-            abilityManager.tryActivate(player, abilitySlot);
+            holdTask.markRightClick(player);
             return;
         }
 
