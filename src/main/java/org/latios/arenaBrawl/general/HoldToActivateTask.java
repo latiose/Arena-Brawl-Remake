@@ -15,13 +15,16 @@ import java.util.Map;
 import java.util.UUID;
 
 public class HoldToActivateTask extends BukkitRunnable {
+    private static final int HOLD_GRACE_TICKS = 1;
+    private static final int ACTIVATION_INTERVAL_TICKS = 2;
 
     private final AbilityManager abilityManager;
     private final MatchManager matchManager;
     private final DebuffManager debuffManager;
 
-    private final Map<UUID, Integer> holdTicks = new HashMap<>();
-    private static final int HOLD_THRESHOLD_TICKS = 5;
+    private final Map<UUID, Long> lastRightClick = new HashMap<>();
+    private final Map<UUID, Long> lastActivation = new HashMap<>();
+    private long currentTick = 0;
 
     public HoldToActivateTask(AbilityManager abilityManager, MatchManager matchManager, DebuffManager debuffManager) {
         this.abilityManager = abilityManager;
@@ -29,22 +32,35 @@ public class HoldToActivateTask extends BukkitRunnable {
         this.debuffManager = debuffManager;
     }
 
+    public void markRightClick(Player player) {
+        lastRightClick.put(player.getUniqueId(), currentTick);
+    }
+
+    public void clear(UUID uuid) {
+        lastRightClick.remove(uuid);
+        lastActivation.remove(uuid);
+    }
+
     @Override
     public void run() {
+        currentTick++;
+
         for (Player player : Bukkit.getOnlinePlayers()) {
             UUID uuid = player.getUniqueId();
 
             if (!matchManager.isInMatch(player)
-                    || player.getInventory().getHeldItemSlot() != AbilitySlot.OFFENSIVE.ordinal()
-                    || !player.isHandRaised()) {
-                holdTicks.remove(uuid);
+                    || player.getInventory().getHeldItemSlot() != AbilitySlot.OFFENSIVE.ordinal()) {
+                clear(uuid);
                 continue;
             }
 
-            int currentTicks = holdTicks.getOrDefault(uuid, 0) + 1;
-            holdTicks.put(uuid, currentTicks);
+            long lastClick = lastRightClick.getOrDefault(uuid, Long.MIN_VALUE / 2);
+            boolean holding = player.isHandRaised() || (currentTick - lastClick) <= HOLD_GRACE_TICKS;
+            if (!holding) {
+                continue;
+            }
 
-            if (currentTicks < HOLD_THRESHOLD_TICKS) {
+            if (currentTick - lastActivation.getOrDefault(uuid, Long.MIN_VALUE / 2) < ACTIVATION_INTERVAL_TICKS) {
                 continue;
             }
 
@@ -55,16 +71,12 @@ public class HoldToActivateTask extends BukkitRunnable {
             }
 
             Ability ability = abilityManager.getAbility(player, AbilitySlot.OFFENSIVE);
-            if (ability == null) continue;
+            if (ability == null) {
+                continue;
+            }
 
-            if (ability.getCost().canPay(player)) {
-                boolean success = abilityManager.tryActivate(player, AbilitySlot.OFFENSIVE);
-
-                if (success) {
-                    holdTicks.put(uuid, 0);
-                } else {
-                    holdTicks.put(uuid, 0);
-                }
+            if (abilityManager.tryActivate(player, AbilitySlot.OFFENSIVE)) {
+                lastActivation.put(uuid, currentTick);
             }
         }
     }

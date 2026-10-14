@@ -1,8 +1,11 @@
 package org.latios.arenaBrawl.abilities.offensive;
 
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
@@ -57,7 +60,9 @@ public class SnowballAbility implements Ability {
                 player, Snowball.class, damage, getName(), 2, speedMultiplier
         );
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1.0f, 1.0f);
-        new TrackedProjectileTask(snowball, player, damage, 1, getName(), teamManager, combatService, debuffManager, DebuffType.SLOW, slowDurationTicks, slowChance, ProjectileImpactEffect.SNOWBALL)
+        new TrackedProjectileTask(snowball, player, damage, 1, getName(), teamManager, combatService,
+                debuffManager, DebuffType.SLOW, slowDurationTicks, slowChance, ProjectileImpactEffect.SNOWBALL)
+                .withTrail(Particle.SNOWFLAKE)
                 .runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
         return true;
     }
@@ -75,5 +80,14 @@ public class SnowballAbility implements Ability {
                 new AbilityStat("Slow chance", (int) (slowChance * 100) + "%"),
                 new AbilityStat("Slow duration", (int) (slowDurationTicks / 1000L) + "s")
         );
+    }
+
+    @EventHandler
+    public void onHit(ProjectileHitEvent e) {
+        if (e.getEntity().getShooter() instanceof Player shooter
+                && e.getHitEntity() instanceof Player victim
+                && !teamManager.isEnemy(shooter, victim)) {
+            e.setCancelled(true);
+        }
     }
 }

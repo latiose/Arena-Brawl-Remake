@@ -1,9 +1,11 @@
 package org.latios.arenaBrawl.general;
 
 import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -19,8 +21,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class TrackedProjectileTask extends BukkitRunnable {
 
-    private static final double HITBOX_EXPAND = 0.3;   // margen extra alrededor del jugador
+    private static final double HITBOX_EXPAND = 0.3;
     private static final int MAX_LIFETIME_TICKS = 20 * 15;
+    private static final double TRAIL_STEP = 0.4;
+    private static final int TRAIL_SKIP_TICKS = 2;
 
     private final Projectile projectile;
     private final Player shooter;
@@ -35,6 +39,7 @@ public class TrackedProjectileTask extends BukkitRunnable {
     private final double debuffChance;
     private final ProjectileImpactEffect impactEffect;
 
+    private Particle trailParticle = null;
     private Location lastLocation;
     private int ticksLived = 0;
     private boolean exploded = false;
@@ -56,12 +61,19 @@ public class TrackedProjectileTask extends BukkitRunnable {
         this.debuffChance = debuffChance;
         this.impactEffect = impactEffect != null ? impactEffect : ProjectileImpactEffect.DEFAULT;
         this.lastLocation = projectile.getLocation().clone();
+
     }
 
     public TrackedProjectileTask(Projectile projectile, Player shooter, double damage, double aoeRadius,
                                  String abilityName, TeamManager teamManager, CombatService combatService,
                                  ProjectileImpactEffect impactEffect) {
         this(projectile, shooter, damage, aoeRadius, abilityName, teamManager, combatService, null, null, 0, 0, impactEffect);
+    }
+
+
+    public TrackedProjectileTask withTrail(Particle particle) {
+        this.trailParticle = particle;
+        return this;
     }
 
     @Override
@@ -71,7 +83,7 @@ public class TrackedProjectileTask extends BukkitRunnable {
             return;
         }
 
-        if (projectile.isDead() || !projectile.isValid()) {
+        if (!projectile.isValid()) {
             explodeAt(lastLocation, null);
             return;
         }
@@ -84,73 +96,46 @@ public class TrackedProjectileTask extends BukkitRunnable {
 
         World world = projectile.getWorld();
         Location now = projectile.getLocation();
-        Vector from = lastLocation.toVector();
-        Vector to = now.toVector();
-        Vector move = to.clone().subtract(from);
-        double distance = move.length();
+        Vector velocity = projectile.getVelocity();
+        double speed = velocity.length();
 
-        Vector direction = distance > 1.0E-6 ? move.clone().normalize() : projectile.getVelocity().clone();
-        if (direction.lengthSquared() < 1.0E-6) {
-            direction = new Vector(0, -1, 0);
-        } else {
-            direction.normalize();
-        }
+        if (speed > 1.0E-6) {
+            Vector direction = velocity.clone().normalize();
 
-        Player hitPlayer = null;
-        double playerDist = Double.MAX_VALUE;
-        Vector playerHitPos = null;
+            RayTraceResult hit = world.rayTrace(
+                    now, direction, speed,
+                    FluidCollisionMode.NEVER, true, HITBOX_EXPAND,
+                    this::isValidTarget);
 
-        for (Player candidate : world.getPlayers()) {
-            if (candidate.equals(shooter)) continue;
-            if (candidate.isDead() || candidate.getGameMode() == GameMode.SPECTATOR) continue;
-            if (!teamManager.isEnemy(shooter, candidate)) continue;
-
-            BoundingBox box = candidate.getBoundingBox().expand(HITBOX_EXPAND);
-
-            if (box.contains(to) || box.contains(from)) {
-                double d = box.contains(from) ? 0 : distance;
-                if (d < playerDist) {
-                    playerDist = d;
-                    hitPlayer = candidate;
-                    playerHitPos = box.contains(from) ? from.clone() : to.clone();
-                }
-                continue;
+            if (hit != null) {
+                Location hitLoc = hit.getHitPosition().toLocation(world);
+                Entity hitEntity = hit.getHitEntity();
+                explodeAt(hitLoc, hitEntity instanceof Player p ? p : null);
+                return;
             }
 
-            if (distance > 1.0E-6) {
-                RayTraceResult r = box.rayTrace(from, direction, distance);
-                if (r != null) {
-                    double d = r.getHitPosition().distance(from);
-                    if (d < playerDist) {
-                        playerDist = d;
-                        hitPlayer = candidate;
-                        playerHitPos = r.getHitPosition();
-                    }
-                }
+            if (trailParticle != null && ticksLived > TRAIL_SKIP_TICKS) {
+                spawnTrail(world, now.toVector(), velocity, speed);
             }
-        }
-
-        double blockDist = Double.MAX_VALUE;
-        Vector blockHitPos = null;
-        if (distance > 1.0E-6) {
-            RayTraceResult br = world.rayTraceBlocks(
-                    lastLocation, direction, distance, FluidCollisionMode.NEVER, true);
-            if (br != null) {
-                blockDist = br.getHitPosition().distance(from);
-                blockHitPos = br.getHitPosition();
-            }
-        }
-
-        if (hitPlayer != null && playerDist <= blockDist) {
-            explodeAt(playerHitPos.toLocation(world), hitPlayer);
-            return;
-        }
-        if (blockHitPos != null) {
-            explodeAt(blockHitPos.toLocation(world), null);
-            return;
         }
 
         lastLocation = now.clone();
+    }
+
+    private boolean isValidTarget(Entity entity) {
+        return entity instanceof Player candidate
+                && !candidate.equals(shooter)
+                && !candidate.isDead()
+                && candidate.getGameMode() != GameMode.SPECTATOR
+                && teamManager.isEnemy(shooter, candidate);
+    }
+
+    private void spawnTrail(World world, Vector from, Vector velocity, double speed) {
+        int steps = Math.max(1, (int) Math.ceil(speed / TRAIL_STEP));
+        for (int i = 0; i < steps; i++) {
+            Vector p = from.clone().add(velocity.clone().multiply((double) i / steps));
+            world.spawnParticle(trailParticle, p.getX(), p.getY(), p.getZ(), 1, 0, 0, 0, 0);
+        }
     }
 
     private void explodeAt(Location center, Player directHitVictim) {
@@ -187,12 +172,9 @@ public class TrackedProjectileTask extends BukkitRunnable {
     }
 
     private void playImpactEffects(Location at) {
-        if(abilityName.equals("Fireball")) {
-            at.getWorld().spawnParticle(
-                    impactEffect.particle(), at, impactEffect.particleCount(),
-                    0.2, 0.2, 0.2, 0.05);
-
-            at.getWorld().playSound(at, impactEffect.sound(), impactEffect.volume(), impactEffect.pitch());
-        }
+        at.getWorld().spawnParticle(
+                impactEffect.particle(), at, impactEffect.particleCount(),
+                0.2, 0.2, 0.2, 0.05);
+        at.getWorld().playSound(at, impactEffect.sound(), impactEffect.volume(), impactEffect.pitch());
     }
 }

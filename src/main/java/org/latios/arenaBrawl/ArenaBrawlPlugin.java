@@ -251,9 +251,12 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         partyManager.setQueueManager(queueManager);
         QueueGUI queueGUI = new QueueGUI();
         // Listeners
+        HoldToActivateTask holdTask = new HoldToActivateTask(abilityManager, matchManager, debuffManager);
+        holdTask.runTaskTimer(this, 0L, 1L);
         getServer().getPluginManager().registerEvents(
-                new AbilityTriggerListener(abilityManager,debuffManager,matchManager), this
+                new AbilityTriggerListener(abilityManager,debuffManager,matchManager,holdTask), this
         );
+        getServer().getPluginManager().registerEvents(debuffManager, this);
        getServer().getPluginManager().registerEvents(
                 new InventoryLockListener(), this
         );
@@ -350,7 +353,6 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new MobTargetListener(broodMotherEntityManager), this);
         // Tasks
         new BaseSpeedTask(speedBuffManager).runTaskTimer(this, 0L, 10L);
-        new HoldToActivateTask(abilityManager, matchManager, debuffManager).runTaskTimer(this, 0L, 1L);
         new StructureTickTask(structureManager).runTaskTimer(this, 0L, 20L);
         new EnergyRegenTask(energyManager,matchManager,energyModifierManager).runTaskTimer(this, 20L, 5L);
         new HungerTask(hungerManager,matchManager,songOfPowerManager).runTaskTimer(this, 20L, 20L);
@@ -423,9 +425,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
             EntityCleanupUtils.sweepArenaEntities(world); //powerups
         }
         structureManager.clearAll();
-        getLogger().info(
-
-                "ArenaBrawl off.");
+        getLogger().info("ArenaBrawl off.");
+        debuffManager.clearAll();
     }
 
 

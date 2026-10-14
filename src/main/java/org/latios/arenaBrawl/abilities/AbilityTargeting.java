@@ -16,7 +16,7 @@ public class AbilityTargeting {
         Location eye = caster.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
 
-        Vector behindDirection = direction.clone().multiply(-1);
+        Vector behindDirection = direction.clone().multiply(-0.3);
         Location behindCursor = eye.clone();
 
         for (double traveled = 0; traveled <= 1.0; traveled += STEP_SIZE) {
@@ -71,7 +71,7 @@ public class AbilityTargeting {
         Location eye = caster.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
 
-        Vector behindDirection = direction.clone().multiply(-1);
+        Vector behindDirection = direction.clone().multiply(-0.3);
         Location behindCursor = eye.clone();
 
         for (double traveled = 0; traveled <= 1.0; traveled += STEP_SIZE) {
@@ -125,7 +125,7 @@ public class AbilityTargeting {
         Location eye = caster.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
 
-        Vector behindDirection = direction.clone().multiply(-1);
+        Vector behindDirection = direction.clone().multiply(-0.3);
         Location behindCursor = eye.clone();
 
         for (double traveled = 0; traveled <= 1.0; traveled += STEP_SIZE) {

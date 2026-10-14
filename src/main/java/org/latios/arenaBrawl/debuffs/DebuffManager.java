@@ -5,6 +5,11 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
@@ -16,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class DebuffManager {
+public class DebuffManager implements Listener {
 
     private record ActiveDebuff(
             DebuffType type,
@@ -195,6 +200,7 @@ public class DebuffManager {
                 player.removePotionEffect(effect.getType());
             }
         }
+
     }
 
     public void clear(Player player) {
@@ -219,6 +225,15 @@ public class DebuffManager {
         }
     }
 
+    public void clearAll() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            clear(p);
+        }
+        activeDebuffs.clear();
+        activeAntiHeals.clear();
+        accumulatedDamage.clear();
+    }
+
     private void notifyExpired(Player player, ActiveDebuff debuff) {
         for (DebuffListener listener : listeners) {
             listener.onExpired(player, debuff.type(), debuff.durationMillis(), debuff.strength());
@@ -230,4 +245,23 @@ public class DebuffManager {
         if (debuff == null || debuff.attackerId() == null) return null;
         return Bukkit.getPlayer(debuff.attackerId());
     }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        clear(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
+        clear(event.getEntity());
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        clear(event.getPlayer());
+    }
+
+
+
+
 }

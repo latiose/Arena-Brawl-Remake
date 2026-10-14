@@ -86,6 +86,11 @@ public class ProjectileAoeListener implements Listener {
         Projectile projectile = event.getEntity();
         if (!(projectile.getShooter() instanceof Player shooter)) return;
 
+        String abilityName = projectile.getPersistentDataContainer().get(
+                AbilityItemKeys.PROJECTILE_SOURCE_ABILITY, PersistentDataType.STRING
+        );
+        if ("Snowball".equals(abilityName)) return;
+
         Double radius = projectile.getPersistentDataContainer().get(
                 AbilityItemKeys.PROJECTILE_AOE_RADIUS, PersistentDataType.DOUBLE
         );

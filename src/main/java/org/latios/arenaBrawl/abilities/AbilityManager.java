@@ -13,7 +13,11 @@ import java.util.UUID;
 
 public class AbilityManager {
 
+    private static final long FAIL_MESSAGE_COOLDOWN_MS = 500;
+
     private final Map<UUID, Map<AbilitySlot, Ability>> playerAbilities = new HashMap<>();
+    private final Map<UUID, Integer> lastTick = new HashMap<>();
+    private final Map<UUID, Long> lastFailMessage = new HashMap<>();
 
     public void setAbility(Player player, AbilitySlot slot, Ability ability) {
         playerAbilities
@@ -23,16 +27,25 @@ public class AbilityManager {
 
     public void clearAbilities(Player player) {
         playerAbilities.remove(player.getUniqueId());
+        lastTick.remove(player.getUniqueId());
+        lastFailMessage.remove(player.getUniqueId());
     }
 
-    private final Map<UUID, Integer> lastTick = new HashMap<>();
+    private void sendFailMessage(Player player, String message) {
+        long nowMs = System.currentTimeMillis();
+        Long last = lastFailMessage.get(player.getUniqueId());
+        if (last != null && nowMs - last < FAIL_MESSAGE_COOLDOWN_MS) return;
+
+        lastFailMessage.put(player.getUniqueId(), nowMs);
+        player.sendMessage(message);
+    }
 
     public boolean tryActivate(Player player, AbilitySlot slot) {
         if (player.getGameMode() == GameMode.SPECTATOR) return false;
 
         Map<AbilitySlot, Ability> abilities = playerAbilities.get(player.getUniqueId());
         if (abilities == null || !abilities.containsKey(slot)) {
-            player.sendMessage("§cYou have no ability assigned to that slot.");
+            sendFailMessage(player, "§cYou have no ability assigned to that slot.");
             return false;
         }
 
@@ -45,11 +58,11 @@ public class AbilityManager {
 
         if (!cost.canPay(player)) {
             if (cost instanceof EnergyCost) {
-                player.sendMessage("§e" + cost.describeRemaining(player));
+                sendFailMessage(player, "§e" + cost.describeRemaining(player));
             } else if (cost instanceof UltimateCost && cost.isPermanentlyUnavailable(player)) {
-                player.sendMessage("§e" + cost.describeRemaining(player));
+                sendFailMessage(player, "§e" + cost.describeRemaining(player));
             } else {
-                player.sendMessage("§eWait another " + cost.describeRemaining(player));
+                sendFailMessage(player, "§eWait another " + cost.describeRemaining(player));
             }
             return false;
         }
