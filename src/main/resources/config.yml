@@ -324,6 +324,14 @@ ability-values:
     min-size: 0.3
     max-size: 1.6
     max-target-distance: 45
+
+  flamesword:
+    damage-multiplier: 3.5
+    energy-cost: 100.0
+    duration-ticks: 120
+    particle-interval-ticks: 20
+    energy-modifier: 0.8
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000

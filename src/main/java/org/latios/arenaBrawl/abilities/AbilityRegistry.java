@@ -52,41 +52,23 @@ public class AbilityRegistry {
                 deps -> new FlameBreath(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("flamebreath")));
         register(AbilitySlot.OFFENSIVE, "lightningstrike",
                 deps -> new LightningStrike(deps.teamManager(), deps.energyManager(), deps.combatService(), deps.debuffManager(), configManager.get("lightningstrike")));
-        register(AbilitySlot.OFFENSIVE, "consume",
-                deps -> new Consume(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.playerHealthManager(), configManager.get("consume")));
-        register(AbilitySlot.OFFENSIVE, "dash",
-                deps -> new DashAbility(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("dash")));
-        register(AbilitySlot.OFFENSIVE, "rocketchicken",
-                deps -> new RocketChicken(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("rocketchicken")));
-        register(AbilitySlot.OFFENSIVE, "mysticshot",
-                deps -> new MysticShot(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("mysticshot")));
-        register(AbilitySlot.OFFENSIVE, "laywaste",
-                deps -> new LayWaste(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("laywaste")));
-        register(AbilitySlot.OFFENSIVE, "particlebeam",
-                deps -> new ParticleBeam(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("particlebeam")));
-        register(AbilitySlot.OFFENSIVE, "burstfire",
-                deps -> new BurstFire(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("burstfire")));
-        register(AbilitySlot.OFFENSIVE, "cookieshotgun",
-                deps -> new CookieShotgun(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("cookieshotgun")));
-        register(AbilitySlot.OFFENSIVE, "spikegrenade",
-                deps -> new SpikeGrenade(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("spikegrenade")));
-        register(AbilitySlot.OFFENSIVE, "void",
-                deps -> new Void(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("void")));
-        register(AbilitySlot.OFFENSIVE, "cowthrow",
-                deps -> new CowThrow(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("cowthrow")));
-        register(AbilitySlot.OFFENSIVE, "necromancy",
-                deps -> new Necromancy(deps.energyManager(),deps.skeletonEntityManager(), configManager.get("necromancy")));
-        register(AbilitySlot.OFFENSIVE, "seismicwave",
-                deps -> new SeismicWave(plugin,deps.energyManager(),deps.teamManager(), deps.combatService(),deps.demolitionService(),configManager.get("seismicwave")));
-        register(AbilitySlot.OFFENSIVE, "venombloom",
-                deps -> new VenomBloom(deps.energyManager(), deps.teamManager(), deps.combatService(),
-                        deps.debuffManager(), configManager.get("venombloom")));
-        register(AbilitySlot.OFFENSIVE, "icespear",
-                deps -> new IceSpear(deps.energyManager(), deps.teamManager(), deps.combatService(),
-                        deps.debuffManager(), configManager.get("icespear")));
-        register(AbilitySlot.OFFENSIVE, "soulcannon",
-                deps -> new SoulCannon(deps.energyManager(), deps.teamManager(), deps.combatService(),
-                        configManager.get("soulcannon")));
+        register(AbilitySlot.OFFENSIVE, "consume", deps -> new Consume(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.playerHealthManager(), configManager.get("consume")));
+        register(AbilitySlot.OFFENSIVE, "dash", deps -> new DashAbility(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("dash")));
+        register(AbilitySlot.OFFENSIVE, "rocketchicken", deps -> new RocketChicken(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("rocketchicken")));
+        register(AbilitySlot.OFFENSIVE, "mysticshot", deps -> new MysticShot(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("mysticshot")));
+        register(AbilitySlot.OFFENSIVE, "laywaste", deps -> new LayWaste(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("laywaste")));
+        register(AbilitySlot.OFFENSIVE, "particlebeam", deps -> new ParticleBeam(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("particlebeam")));
+        register(AbilitySlot.OFFENSIVE, "burstfire", deps -> new BurstFire(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("burstfire")));
+        register(AbilitySlot.OFFENSIVE, "cookieshotgun", deps -> new CookieShotgun(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("cookieshotgun")));
+        register(AbilitySlot.OFFENSIVE, "spikegrenade", deps -> new SpikeGrenade(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("spikegrenade")));
+        register(AbilitySlot.OFFENSIVE, "void", deps -> new Void(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("void")));
+        register(AbilitySlot.OFFENSIVE, "cowthrow", deps -> new CowThrow(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("cowthrow")));
+        register(AbilitySlot.OFFENSIVE, "necromancy", deps -> new Necromancy(deps.energyManager(),deps.skeletonEntityManager(), configManager.get("necromancy")));
+        register(AbilitySlot.OFFENSIVE, "seismicwave", deps -> new SeismicWave(plugin,deps.energyManager(),deps.teamManager(), deps.combatService(),deps.demolitionService(),configManager.get("seismicwave")));
+        register(AbilitySlot.OFFENSIVE, "venombloom", deps -> new VenomBloom(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("venombloom")));
+        register(AbilitySlot.OFFENSIVE, "icespear", deps -> new IceSpear(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("icespear")));
+        register(AbilitySlot.OFFENSIVE, "soulcannon", deps -> new SoulCannon(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("soulcannon")));
+        register(AbilitySlot.OFFENSIVE, "flamesword", deps -> new FlameSword(deps.energyManager(), deps.energyModifierManager(), configManager.get("flamesword")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -127,8 +109,6 @@ public class AbilityRegistry {
                 deps -> new PrimalRoar(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.shieldManager(), deps.debuffManager(), deps.teamManager(), configManager.get("primalroar")));
         register(AbilitySlot.UTILITY, "grit",
                 deps -> new Grit(deps.cooldownManager(),deps.combatUpgradeManager(),deps.shieldManager(), configManager.get("grit")));
-        register(AbilitySlot.UTILITY, "grapplinghook",
-                deps -> new GrapplingHook(deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("grapplinghook")));
 
 
 

@@ -214,6 +214,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.skeletonEntityManager.setCombatService(combatService);
         combatService.registerMeleeHitEffect(new LifeLeechMeleeEffect(lifeLeechManager, playerHealthManager,abilityConfigManager.get("lifeleech")));
         combatService.registerMeleeHitEffect(new BerserkMeleeEffect());
+        combatService.registerMeleeHitEffect(new FlameSword(energyManager, energyModifierManager, abilityConfigManager.get("flamesword")));
         combatService.registerMeleeHitEffect(new Grit(cooldownManager,combatUpgradeManager,shieldManager,abilityConfigManager.get("grit")));
         combatService.registerMeleeHitEffect(new ScavengerMeleeEffect(scavengerManager,energyManager,abilityConfigManager.get("scavenger")));
         debuffManager.registerListener(new PolymorphEffectListener(playerHealthManager));

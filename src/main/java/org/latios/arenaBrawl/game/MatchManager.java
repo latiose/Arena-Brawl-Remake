@@ -1,10 +1,7 @@
 
 package org.latios.arenaBrawl.game;
 
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -35,6 +32,8 @@ import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.team.Team;
 
 import java.util.*;
+
+import static org.latios.arenaBrawl.general.ParticleUtils.spawnBloodEffect;
 
 public class MatchManager {
 
@@ -102,19 +101,20 @@ public class MatchManager {
     public void onPlayerEliminated(Player player) {
         Match match = activeMatches.get(player.getUniqueId());
         if (match == null) return;
+
         Player killer = null;
         UUID attackerId = healthManager.getLastAttacker(player);
         if (attackerId != null) {
             killer = Bukkit.getPlayer(attackerId);
             if (killer != null && killer.isOnline() && !killer.equals(player)) {
                 statsManager.addKill(killer);
-                killer.sendMessage(String.format("§3You killed %s§3!", player.getName()));
+                killer.sendMessage(String.format("§3You killed §c%s§3!", player.getName()));
             }
         }
         statsManager.addDeath(player);
 
         if (killer != null && killer.isOnline() && !killer.equals(player)) {
-            player.sendMessage(String.format("§3You were killed by %s§3!", killer.getName()));
+            player.sendMessage(String.format("§3You were killed by §c%s§3!", killer.getName()));
         } else {
             player.sendMessage("§3You were killed!");
         }
@@ -123,10 +123,12 @@ public class MatchManager {
             if (viewer.equals(player)) continue;
             if (viewer.equals(killer)) continue;
 
-            String victimName = "§3" + player.getName();
+            String victimColor = teamManager.isAlly(viewer, player) ? "§a" : "§c";
+            String victimName = victimColor + player.getName();
 
             if (killer != null && killer.isOnline()) {
-                String killerName = "§3" + killer.getName();
+                String killerColor = teamManager.isAlly(viewer, killer) ? "§a" : "§c";
+                String killerName = killerColor + killer.getName();
                 viewer.sendMessage(String.format("%s §3was killed by %s§3!", victimName, killerName));
             } else {
                 viewer.sendMessage(String.format("%s §3was killed!", victimName));
@@ -134,7 +136,7 @@ public class MatchManager {
         }
 
         Location loc = player.getLocation();
-        player.getWorld().playSound(loc, Sound.BLOCK_STONE_BREAK, 15.0f, 2.0f);
+        player.getWorld().playSound(loc, Sound.BLOCK_GLASS_BREAK, 10.0f, 1.0f);
         org.bukkit.entity.Firework fw = loc.getWorld().spawn(loc, org.bukkit.entity.Firework.class);
         org.bukkit.inventory.meta.FireworkMeta meta = fw.getFireworkMeta();
         meta.addEffect(org.bukkit.FireworkEffect.builder()
@@ -143,7 +145,7 @@ public class MatchManager {
                 .build());
         fw.setFireworkMeta(meta);
         fw.detonate();
-
+        spawnBloodEffect(loc);
         org.bukkit.Material[] materials = {
                 org.bukkit.Material.PORKCHOP, org.bukkit.Material.PORKCHOP,
                 org.bukkit.Material.BONE, org.bukkit.Material.BONE,
@@ -159,6 +161,7 @@ public class MatchManager {
             double vz = (random.nextDouble() - 0.5) * 0.5;
 
             item.setVelocity(new org.bukkit.util.Vector(vx, vy, vz));
+
         }
 
         player.setGameMode(GameMode.SPECTATOR);
@@ -448,4 +451,6 @@ public class MatchManager {
     public boolean isInMatch(Player player) {
         return activeMatches.containsKey(player.getUniqueId());
     }
+
+
 }
