@@ -416,22 +416,23 @@ public class MatchManager {
     }
 
     private void finishMatch(Match match) {
-
         BukkitTask task = scoreboardTasks.remove(match);
         if (task != null) task.cancel();
-
         match.getPowerupManager().clear();
+        broodMotherEntityManager.clearForMatch(match);
+        zombieEntityManager.clearForMatch(match);
+        skeletonEntityManager.clearForMatch(match);
+
+        if (match.getArenaMap() != null) {
+            EntityCleanupUtils.sweepArenaEntities(match.getArenaMap().getWorld());
+        } else if (lobbySpawn != null) {
+            EntityCleanupUtils.sweepArenaEntities(lobbySpawn.getWorld());
+        }
+
+        structureManager.clearAll();
 
         activeMatchesList.remove(match);
         arenaMapManager.releaseMap(match.getArenaMap());
-
-        if (!match.getAllPlayers().isEmpty()) {
-            EntityCleanupUtils.sweepArenaEntities(match.getAllPlayers().getFirst().getWorld());
-        }
-        structureManager.clearAll();
-
-
-
     }
 
     public void leaveMatch(Player player) {

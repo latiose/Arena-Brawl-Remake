@@ -1,12 +1,9 @@
 package org.latios.arenaBrawl.abilities.offensive;
 
-import org.bukkit.Color;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
@@ -20,7 +17,10 @@ import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.joml.Math.lerp;
@@ -41,7 +41,7 @@ public class SoulCannon implements Ability {
     private final EnergyManager energyManager;
     private final TeamManager teamManager;
     private final CombatService combatService;
-
+    private static final double MIN_HIT_RADIUS = 0.6;
     public SoulCannon(EnergyManager energyManager, TeamManager teamManager,
                       CombatService combatService, AbilityConfig config) {
         this.minEnergy = config.getDouble("min-energy", 10.0);
@@ -108,6 +108,12 @@ public class SoulCannon implements Ability {
 
         final Location current = player.getEyeLocation().clone();
         final Vector direction = current.getDirection().normalize();
+        final double hitRadius = Math.max(size, MIN_HIT_RADIUS);
+        final Map<UUID, BoundingBox> previous = new HashMap<>();
+
+        for (Player p : current.getWorld().getPlayers()) {
+            previous.put(p.getUniqueId(), p.getBoundingBox());
+        }
 
         new BukkitRunnable() {
             double traveled = 0;
@@ -119,29 +125,50 @@ public class SoulCannon implements Ability {
                     return;
                 }
 
+                World world = current.getWorld();
                 double step = Math.min(speed, maxDistance - traveled);
+                Vector start = current.toVector();
 
-                RayTraceResult hit = current.getWorld().rayTrace(
-                        current,
-                        direction,
-                        step,
-                        FluidCollisionMode.NEVER,
-                        true,
-                        size,
-                        entity -> entity instanceof Player p
-                                && !p.equals(player)
-                                && !p.isDead()
-                                && teamManager.isEnemy(player, p)
-                );
+                RayTraceResult blockHit = world.rayTraceBlocks(current, direction, step, FluidCollisionMode.NEVER, true);
+                double limit = blockHit != null ? start.distance(blockHit.getHitPosition()) : step;
 
-                if (hit != null) {
-                    cancel();
-                    Location impact = hit.getHitPosition().toLocation(current.getWorld());
-                    drawProjectile(current, direction, current.distance(impact), size, t);
+                Player victim = null;
+                Vector impactPosition = null;
+                double best = limit;
 
-                    if (hit.getHitEntity() instanceof Player victim) {
-                        combatService.applyAbilityDamage(player, victim, damage, getName(), impact);
+                for (Player p : world.getPlayers()) {
+                    BoundingBox now = p.getBoundingBox();
+                    BoundingBox before = previous.getOrDefault(p.getUniqueId(), now);
+                    previous.put(p.getUniqueId(), now.clone());
+
+                    if (p.equals(player) || p.isDead() || p.getGameMode() == GameMode.SPECTATOR) continue;
+                    if (!teamManager.isEnemy(player, p)) continue;
+
+                    BoundingBox swept = now.clone().union(before).expand(hitRadius);
+                    RayTraceResult result = swept.rayTrace(start, direction, limit);
+                    if (result == null) continue;
+
+                    double distance = start.distance(result.getHitPosition());
+                    if (distance <= best) {
+                        best = distance;
+                        victim = p;
+                        impactPosition = result.getHitPosition();
                     }
+                }
+
+                if (victim != null) {
+                    cancel();
+                    Location impact = impactPosition.toLocation(world);
+                    drawProjectile(current, direction, best, size, t);
+                    combatService.applyAbilityDamage(player, victim, damage, getName(), impact);
+                    impactEffect(impact, size, t);
+                    return;
+                }
+
+                if (blockHit != null) {
+                    cancel();
+                    Location impact = blockHit.getHitPosition().toLocation(world);
+                    drawProjectile(current, direction, limit, size, t);
                     impactEffect(impact, size, t);
                     return;
                 }
@@ -156,7 +183,6 @@ public class SoulCannon implements Ability {
                 }
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
-
         return true;
     }
 

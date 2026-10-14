@@ -54,7 +54,7 @@ public class SnowballAbility implements Ability {
     @Override
     public boolean activate(Player player) {
         Snowball snowball = AbilityProjectileFactory.launchAoe(
-                player, Snowball.class, damage, getName(), 0, speedMultiplier
+                player, Snowball.class, damage, getName(), 2, speedMultiplier
         );
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1.0f, 1.0f);
         new TrackedProjectileTask(snowball, player, damage, 1, getName(), teamManager, combatService, debuffManager, DebuffType.SLOW, slowDurationTicks, slowChance, ProjectileImpactEffect.SNOWBALL)

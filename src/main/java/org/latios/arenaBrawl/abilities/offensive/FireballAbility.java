@@ -43,7 +43,7 @@ public class FireballAbility implements Ability {
     @Override
     public boolean activate(Player player) {
         Fireball fireball = AbilityProjectileFactory.launchAoe(
-                player, Fireball.class, damage, getName(), aoeRadius
+                player, Fireball.class, damage, getName(), aoeRadius,2.0
         );
         fireball.setYield(0f);
         fireball.setIsIncendiary(false);

@@ -16,16 +16,35 @@ import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public abstract class Breath implements Ability {
-
     protected static final double HIT_RADIUS = 2.5;
-    protected static final double VERTICAL_HIT_RADIUS = 2.8;
-    protected static final double MAX_DISTANCE = 8.0;
-    protected static final double STEP_SIZE = 0.25;
-    protected static final double RADIUS_GROWTH = 0.3;
+    protected static final double HIT_RADIUS_SQUARED = HIT_RADIUS * HIT_RADIUS;
+
+    protected static final int POINT_COUNT = 80;
+    protected static final double DEPTH_SEPARATION = 0.065;
+    protected static final double AMPLITUDE_SCALE = 2.0 / (POINT_COUNT - 1);
+    protected static final double ANGLE_STEP = Math.toRadians(15.0);
+    protected static final double EYE_HEIGHT = 1.62;
+    protected static final double SNEAK_EYE_OFFSET = -0.08;
+    protected static final double VERTICAL_WEIGHT = 1.25;
+    private static final double[][] CONE = buildCone();
+
+    private static double[][] buildCone() {
+        double[][] points = new double[POINT_COUNT][3];
+        for (int i = 0; i < POINT_COUNT; i++) {
+            double amplitude = i * AMPLITUDE_SCALE;
+            points[i][0] = Math.cos(ANGLE_STEP * i) * amplitude;
+            points[i][1] = Math.sin(ANGLE_STEP * i) * amplitude;
+            points[i][2] = (i + 1) * DEPTH_SEPARATION;
+        }
+        return points;
+    }
 
     protected final AbilityCost cost;
     protected final TeamManager teamManager;
@@ -33,13 +52,14 @@ public abstract class Breath implements Ability {
     protected final DebuffManager debuffManager;
     protected final Plugin plugin;
     protected final MatchManager matchManager;
+
     public Breath(EnergyManager energyManager, double energyCost, TeamManager teamManager,
-                  CombatService combatService, DebuffManager debuffManager,MatchManager matchManager) {
-        this(null, energyManager, energyCost, teamManager, combatService, debuffManager,matchManager);
+                  CombatService combatService, DebuffManager debuffManager, MatchManager matchManager) {
+        this(null, energyManager, energyCost, teamManager, combatService, debuffManager, matchManager);
     }
 
     public Breath(Plugin plugin, EnergyManager energyManager, double energyCost, TeamManager teamManager,
-                  CombatService combatService, DebuffManager debuffManager,MatchManager matchManager) {
+                  CombatService combatService, DebuffManager debuffManager, MatchManager matchManager) {
         this.plugin = plugin;
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
@@ -55,48 +75,35 @@ public abstract class Breath implements Ability {
 
     @Override
     public boolean activate(Player player) {
-
         MatchSoundUtils.play(matchManager, player, getCastSound(), 1.0f, 1.0f);
-        Location origin = player.getLocation().add(0, 1.4, 0);
 
-        Vector axis = player.getLocation().getDirection().setY(0);
-        if (axis.lengthSquared() < 1e-6) {
-            axis = player.getLocation().getDirection().setY(0);
+        Location eye = player.getLocation().add(0, EYE_HEIGHT + (player.isSneaking() ? SNEAK_EYE_OFFSET : 0), 0);
+
+        double yawRad = Math.toRadians(eye.getYaw());
+        double si = Math.sin(yawRad);
+        double co = Math.cos(yawRad);
+
+        List<Player> candidates = new ArrayList<>();
+        for (Player candidate : eye.getWorld().getPlayers()) {
+            if (candidate.equals(player)) continue;
+            if (!isTargetValid(player, candidate)) continue;
+            candidates.add(candidate);
         }
-        axis.normalize();
-
-        Vector right = new Vector(-axis.getZ(), 0, axis.getX()).normalize();
-        Vector upStandard = new Vector(0, 1, 0);
-        Vector upInverted = new Vector(0, -1, 0);
 
         Set<Player> hitPlayers = new HashSet<>();
-        double currentAngle = 0.0;
 
-        double maxParticleDistance = MAX_DISTANCE - (HIT_RADIUS / 2.0);
+        for (double[] p : CONE) {
+            double dx = co * p[0] - si * p[2];
+            double dz = si * p[0] + co * p[2];
 
-        for (double distance = -1.0; distance <= maxParticleDistance; distance += STEP_SIZE) {
-            double radius = Math.abs(distance) * RADIUS_GROWTH;
 
-            double deltaTheta = 0.35 + (0.05 / (Math.abs(distance) + 0.1));
-            currentAngle += deltaTheta;
+            Location upright = eye.clone().add(dx, p[1], dz);
+            spawnTrailParticles(upright);
+            checkHit(upright, candidates, hitPlayers);
 
-            Location center = origin.clone().add(axis.clone().multiply(distance));
 
-            Location strand1 = helixPoint(center, right, upStandard, radius, currentAngle);
-            Location strand2 = helixPoint(center, right, upStandard, radius, currentAngle + Math.PI);
-
-            Location strand1Inverted = helixPoint(center, right, upInverted, radius, currentAngle);
-            Location strand2Inverted = helixPoint(center, right, upInverted, radius, currentAngle + Math.PI);
-
-            spawnTrailParticles(strand1);
-            spawnTrailParticles(strand2);
-            spawnTrailParticles(strand1Inverted);
-            spawnTrailParticles(strand2Inverted);
-
-            checkHit(player, strand1, hitPlayers);
-            checkHit(player, strand2, hitPlayers);
-            checkHit(player, strand1Inverted, hitPlayers);
-            checkHit(player, strand2Inverted, hitPlayers);
+            Location inverted = eye.clone().add(dx, -p[1], dz);
+            checkHit(inverted, candidates, hitPlayers);
         }
 
         for (Player target : hitPlayers) {
@@ -106,31 +113,18 @@ public abstract class Breath implements Ability {
         return true;
     }
 
-    protected Location helixPoint(Location center, Vector right, Vector up, double radius, double angle) {
-        Vector offset = right.clone().multiply(Math.cos(angle) * radius)
-                .add(up.clone().multiply(Math.sin(angle) * radius));
-        return center.clone().add(offset);
-    }
 
-    protected void checkHit(Player caster, Location point, Set<Player> hitPlayers) {
-        for (Player candidate : point.getWorld().getPlayers()) {
-            if (candidate.equals(caster)) continue;
-            if (!isTargetValid(caster, candidate)) continue;
-            if (hitPlayers.contains(candidate)) continue;
-
-            Location candidateLocation = candidate.getLocation();
-            double horizontalDistanceSquared = Math.pow(
-                    candidateLocation.getX() - point.getX(),
-                    2
-            ) + Math.pow(
-                    candidateLocation.getZ() - point.getZ(),
-                    2
-            );
-            double verticalDistance = Math.abs(candidateLocation.getY() - point.getY());
-
-            if (horizontalDistanceSquared < HIT_RADIUS * HIT_RADIUS
-                    && verticalDistance < VERTICAL_HIT_RADIUS) {
+    protected void checkHit(Location point, List<Player> candidates, Set<Player> hitPlayers) {
+        Iterator<Player> it = candidates.iterator();
+        while (it.hasNext()) {
+            Player candidate = it.next();
+            Location loc = candidate.getLocation();
+            double dx = loc.getX() - point.getX();
+            double dy = (loc.getY() - point.getY()) * VERTICAL_WEIGHT;
+            double dz = loc.getZ() - point.getZ();
+            if (dx * dx + dy * dy + dz * dz < HIT_RADIUS_SQUARED) {
                 hitPlayers.add(candidate);
+                it.remove();
             }
         }
     }
@@ -147,16 +141,48 @@ public abstract class Breath implements Ability {
 
 
     protected void applySpike(Player target) {
-        if (!target.isOnGround() && target.getGameMode() != GameMode.SPECTATOR) {
-            Vector velocity = target.getVelocity();
-            velocity.setY(-1.0);
+        if (target.getGameMode() == GameMode.SPECTATOR) return;
 
+        Vector velocity = target.getVelocity();
+        if (velocity.getY() < 0) {
+            velocity.setY(velocity.getY() * 2.0);
             target.setVelocity(velocity);
         }
     }
 
-    protected double getMaxParticleDistance() {
-        return MAX_DISTANCE - (HIT_RADIUS / 2.0);
+    protected List<Location> conePoints(Player player, boolean inverted) {
+        Location eye = player.getLocation().add(0, EYE_HEIGHT + (player.isSneaking() ? SNEAK_EYE_OFFSET : 0), 0);
+        double yawRad = Math.toRadians(eye.getYaw());
+        double si = Math.sin(yawRad);
+        double co = Math.cos(yawRad);
+
+        List<Location> points = new ArrayList<>(POINT_COUNT);
+        for (double[] p : CONE) {
+            double dx = co * p[0] - si * p[2];
+            double dz = si * p[0] + co * p[2];
+            points.add(eye.clone().add(dx, inverted ? -p[1] : p[1], dz));
+        }
+        return points;
+    }
+
+    protected List<Player> collectCandidates(Player caster) {
+        List<Player> candidates = new ArrayList<>();
+        for (Player candidate : caster.getWorld().getPlayers()) {
+            if (candidate.equals(caster)) continue;
+            if (!isTargetValid(caster, candidate)) continue;
+            candidates.add(candidate);
+        }
+        return candidates;
+    }
+
+    protected Set<Player> findHits(Player caster, List<Location> points) {
+        List<Player> candidates = collectCandidates(caster);
+        Set<Player> hitPlayers = new HashSet<>();
+        for (Location point : points) {
+            if (candidates.isEmpty()) break;
+            checkHit(point, candidates, hitPlayers);
+        }
+        return hitPlayers;
     }
 
     protected abstract Sound getCastSound();

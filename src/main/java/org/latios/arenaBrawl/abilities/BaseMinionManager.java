@@ -7,12 +7,11 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.latios.arenaBrawl.game.Match;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.team.TeamManager;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class BaseMinionManager {
 
@@ -21,6 +20,7 @@ public abstract class BaseMinionManager {
     protected final Map<UUID, UUID> currentTarget = new HashMap<>();
     protected final Map<UUID, Long> lastLandedHitAt = new HashMap<>();
     protected final Map<UUID, Long> lastAttackAt = new HashMap<>();
+    protected final Map<UUID, LivingEntity> activeEntities = new HashMap<>();
 
     protected final TeamManager teamManager;
     protected CombatService combatService;
@@ -36,6 +36,7 @@ public abstract class BaseMinionManager {
 
     protected void registerControlledEntity(LivingEntity entity, UUID ownerId, int hitCount) {
         UUID id = entity.getUniqueId();
+        activeEntities.put(id, entity);
         remainingHits.put(id, hitCount);
         ownerOf.put(id, ownerId);
         lastLandedHitAt.put(id, System.currentTimeMillis());
@@ -132,22 +133,94 @@ public abstract class BaseMinionManager {
 
     protected void handleDeath(LivingEntity entity) {
         UUID id = entity.getUniqueId();
+        activeEntities.remove(id);
+        remainingHits.remove(id);
         ownerOf.remove(id);
         currentTarget.remove(id);
         lastLandedHitAt.remove(id);
         lastAttackAt.remove(id);
 
-        entity.getWorld().spawnParticle(Particle.EXPLOSION, entity.getLocation(), 2);
-        entity.getWorld().playSound(entity.getLocation(), getDeathSound(), 1f, 1f);
-        entity.remove();
+        if (entity.isValid()) {
+            entity.getWorld().spawnParticle(Particle.EXPLOSION, entity.getLocation(), 2);
+            entity.getWorld().playSound(entity.getLocation(), getDeathSound(), 1f, 1f);
+            entity.remove();
+        }
     }
 
+
     public void clearAll() {
+        for (LivingEntity entity : activeEntities.values()) {
+            if (entity != null && entity.isValid()) {
+                entity.remove();
+            }
+        }
+        activeEntities.clear();
         remainingHits.clear();
         ownerOf.clear();
         currentTarget.clear();
         lastLandedHitAt.clear();
         lastAttackAt.clear();
+    }
+
+    public void clearForMatch(Match match) {
+        if (match == null) return;
+
+        Set<UUID> playerIds = new HashSet<>();
+        for (Player p : match.getAllPlayers()) {
+            playerIds.add(p.getUniqueId());
+        }
+
+        List<UUID> toRemove = new ArrayList<>();
+        for (Map.Entry<UUID, UUID> entry : ownerOf.entrySet()) {
+            UUID minionId = entry.getKey();
+            UUID ownerId = entry.getValue();
+
+            if (playerIds.contains(ownerId)) {
+                LivingEntity entity = activeEntities.get(minionId);
+                if (entity != null && entity.isValid()) {
+                    entity.remove();
+                }
+                toRemove.add(minionId);
+            }
+        }
+
+        for (UUID minionId : toRemove) {
+            activeEntities.remove(minionId);
+            remainingHits.remove(minionId);
+            ownerOf.remove(minionId);
+            currentTarget.remove(minionId);
+            lastLandedHitAt.remove(minionId);
+            lastAttackAt.remove(minionId);
+        }
+    }
+
+
+    public void clearForPlayer(Player player) {
+        if (player == null) return;
+        UUID playerId = player.getUniqueId();
+
+        List<UUID> toRemove = new ArrayList<>();
+        for (Map.Entry<UUID, UUID> entry : ownerOf.entrySet()) {
+            UUID minionId = entry.getKey();
+            UUID ownerId = entry.getValue();
+
+            if (playerId.equals(ownerId)) {
+                LivingEntity entity = activeEntities.get(minionId);
+                if (entity != null && entity.isValid()) {
+                    entity.remove();
+                }
+                toRemove.add(minionId);
+            }
+        }
+
+        for (UUID minionId : toRemove) {
+            activeEntities.remove(minionId);
+            remainingHits.remove(minionId);
+            ownerOf.remove(minionId);
+            currentTarget.remove(minionId);
+            lastLandedHitAt.remove(minionId);
+            lastAttackAt.remove(minionId);
+        }
     }
 
     public void setCombatService(CombatService combatService) {
