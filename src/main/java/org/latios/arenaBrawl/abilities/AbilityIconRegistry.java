@@ -50,6 +50,7 @@ public class AbilityIconRegistry {
         icons.put("icespear", Material.ICE);
         icons.put("soulcannon", Material.SOUL_SAND);
         icons.put("flamesword", Material.NETHERITE_SWORD);
+        icons.put("boomerangaxe", Material.IRON_AXE);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
@@ -70,6 +71,8 @@ public class AbilityIconRegistry {
         icons.put("dodgeroll", Material.LEATHER_BOOTS);
         icons.put("scavenger", Material.HOPPER);
         icons.put("grit", Material.BOW);
+        icons.put("blink", Material.CHORUS_FRUIT);
+        icons.put("gust", Material.WIND_CHARGE);
 
         // --- SUPPORT ---
         icons.put("holywater", Material.POTION);
@@ -111,6 +114,8 @@ public class AbilityIconRegistry {
         icons.put("ninjadash", Material.STICK);
         icons.put("berserk", Material.BLAZE_ROD);
         icons.put("zombieapocalypse", Material.ZOMBIE_HEAD);
+        icons.put("bloodmoon", Material.REDSTONE);
+        icons.put("cataclysm", Material.MAGMA_BLOCK);
     }
 
     public Material getIcon(AbilitySlot slot, String id) {

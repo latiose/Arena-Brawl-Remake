@@ -16,6 +16,7 @@ import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldType;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.Berserk;
+import org.latios.arenaBrawl.abilities.ultimate.BloodMoon;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.Match;
@@ -130,6 +131,7 @@ public class CombatService {
 
         healthManager.damage(victim, finalDamage, attacker);
         Bloodthirst.onDamageDealt(attacker, victim, finalDamage, healthManager);
+        BloodMoon.onDamageDealt(attacker, victim, finalDamage, healthManager);
         if (abilityName.equals("Melee")) {
             playDamageFeedback(victim);
 
@@ -270,6 +272,7 @@ public class CombatService {
 
         healthManager.damageSilent(victim, finalDamage, owner);
         Bloodthirst.onDamageDealt(owner, victim, finalDamage, healthManager);
+        BloodMoon.onDamageDealt(owner, victim, finalDamage, healthManager);
         if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
             boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, finalDamage, 30.0);
             if (shouldBreak) {

@@ -69,6 +69,8 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "icespear", deps -> new IceSpear(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("icespear")));
         register(AbilitySlot.OFFENSIVE, "soulcannon", deps -> new SoulCannon(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("soulcannon")));
         register(AbilitySlot.OFFENSIVE, "flamesword", deps -> new FlameSword(deps.energyManager(), deps.energyModifierManager(), configManager.get("flamesword")));
+        register(AbilitySlot.OFFENSIVE, "boomerangaxe",
+                deps -> new BoomerangAxe(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("boomerangaxe")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -109,6 +111,10 @@ public class AbilityRegistry {
                 deps -> new PrimalRoar(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.shieldManager(), deps.debuffManager(), deps.teamManager(), configManager.get("primalroar")));
         register(AbilitySlot.UTILITY, "grit",
                 deps -> new Grit(deps.cooldownManager(),deps.combatUpgradeManager(),deps.shieldManager(), configManager.get("grit")));
+        register(AbilitySlot.UTILITY, "blink",
+                deps -> new Blink(deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("blink")));
+        register(AbilitySlot.UTILITY, "gust",
+                deps -> new Gust(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("gust")));
 
 
 
@@ -188,6 +194,10 @@ public class AbilityRegistry {
                 deps -> new Berserk(plugin, deps.cooldownManager(), deps.usageManager(), deps.speedBuffManager(), configManager.get("berserk")));
         register(AbilitySlot.ULTIMATE, "zombieapocalypse",
                 deps -> new ZombieApocalypse(deps.cooldownManager(), deps.usageManager(), deps.zombieEntityManager(), deps.teamManager(), configManager.get("zombieapocalypse")));
+        register(AbilitySlot.ULTIMATE, "bloodmoon",
+                deps -> new BloodMoon(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.debuffManager(), configManager.get("bloodmoon")));
+        register(AbilitySlot.ULTIMATE, "cataclysm",
+                deps -> new Cataclysm(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.combatService(), deps.demolitionService(), configManager.get("cataclysm")));
 
 
         // --- DEFAULTS ---
