@@ -32,7 +32,7 @@ public abstract class Breath implements Ability {
     protected static final double ANGLE_STEP = Math.toRadians(15.0);
     protected static final double EYE_HEIGHT = 1.62;
     protected static final double SNEAK_EYE_OFFSET = -0.08;
-    protected static final double VERTICAL_WEIGHT = 1.25;
+    protected static final double VERTICAL_WEIGHT = 1.35;
     private static final double[][] CONE = buildCone();
 
     private static double[][] buildCone() {

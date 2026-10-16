@@ -2,139 +2,49 @@ package org.latios.arenaBrawl.abilities;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.block.Block;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.team.TeamManager;
+
+import java.util.function.Predicate;
 
 public class AbilityTargeting {
 
     private static final double STEP_SIZE = 0.2;
 
     public static Player findEnemyAlongRay(Player caster, TeamManager teamManager, double maxRange) {
-        Location eye = caster.getEyeLocation();
-        Vector direction = eye.getDirection().normalize();
-
-        Vector behindDirection = direction.clone().multiply(-0.3);
-        Location behindCursor = eye.clone();
-
-        for (double traveled = 0; traveled <= 1.0; traveled += STEP_SIZE) {
-            behindCursor.add(behindDirection.clone().multiply(STEP_SIZE));
-
-            if (blocksRay(behindCursor.getBlock())) break;
-
-            for (Player candidate : behindCursor.getWorld().getPlayers()) {
-                if (!isValidEnemyTarget(caster, candidate, teamManager)) continue;
-
-                if (isInsideHitbox(candidate, behindCursor)) {
-                    return candidate;
-                }
-            }
-        }
-
-        Location cursor = eye.clone();
-        Player bestTarget = null;
-        double bestAngle = Double.MAX_VALUE;
-
-        for (double traveled = 0; traveled < maxRange; traveled += STEP_SIZE) {
-            cursor.add(direction.clone().multiply(STEP_SIZE));
-
-            Block block = cursor.getBlock();
-            if (blocksRay(block)) {
-                break;
-            }
-
-            for (Player candidate : cursor.getWorld().getPlayers()) {
-                if (!isValidEnemyTarget(caster, candidate, teamManager)) continue;
-
-                if (isInsideHitbox(candidate, cursor)) {
-                    Vector toCandidate = candidate.getEyeLocation().toVector().subtract(eye.toVector()).normalize();
-                    double angle = direction.angle(toCandidate);
-
-                    if (angle < bestAngle) {
-                        bestAngle = angle;
-                        bestTarget = candidate;
-                    }
-                }
-            }
-
-            if (bestTarget != null) {
-                return bestTarget;
-            }
-        }
-
-        return null;
+        return findAlongRay(caster, maxRange, c -> isValidEnemyTarget(caster, c, teamManager));
     }
 
     public static Player findAllyAlongRay(Player caster, TeamManager teamManager, double maxRange) {
-        Location eye = caster.getEyeLocation();
-        Vector direction = eye.getDirection().normalize();
-
-        Vector behindDirection = direction.clone().multiply(-0.3);
-        Location behindCursor = eye.clone();
-
-        for (double traveled = 0; traveled <= 1.0; traveled += STEP_SIZE) {
-            behindCursor.add(behindDirection.clone().multiply(STEP_SIZE));
-
-            if (blocksRay(behindCursor.getBlock())) break;
-
-            for (Player candidate : behindCursor.getWorld().getPlayers()) {
-                if (!isValidAllyTarget(caster, candidate, teamManager)) continue;
-
-                if (isInsideHitbox(candidate, behindCursor)) {
-                    return candidate;
-                }
-            }
-        }
-
-        Location cursor = eye.clone();
-        Player bestTarget = null;
-        double bestAngle = Double.MAX_VALUE;
-
-        for (double traveled = 0; traveled < maxRange; traveled += STEP_SIZE) {
-            cursor.add(direction.clone().multiply(STEP_SIZE));
-
-            Block block = cursor.getBlock();
-            if (blocksRay(block)) {
-                break;
-            }
-
-            for (Player candidate : cursor.getWorld().getPlayers()) {
-                if (!isValidAllyTarget(caster, candidate, teamManager)) continue;
-
-                if (isInsideHitbox(candidate, cursor)) {
-                    Vector toCandidate = candidate.getEyeLocation().toVector().subtract(eye.toVector()).normalize();
-                    double angle = direction.angle(toCandidate);
-
-                    if (angle < bestAngle) {
-                        bestAngle = angle;
-                        bestTarget = candidate;
-                    }
-                }
-            }
-
-            if (bestTarget != null) {
-                return bestTarget;
-            }
-        }
-
-        return null;
+        return findAlongRay(caster, maxRange, c -> isValidAllyTarget(caster, c, teamManager));
     }
+
     public static Player findTargetAlongRay(Player caster, double maxRange) {
+        return findAlongRay(caster, maxRange, c -> isValidAnyTarget(caster, c));
+    }
+
+    /**
+     * Casts a ray from the caster's eyes. If multiple valid targets lie along the ray,
+     * the one at the END of the line (furthest along the ray) is returned.
+     * Targets do not block the ray; only full solid blocks do.
+     */
+    private static Player findAlongRay(Player caster, double maxRange, Predicate<Player> validator) {
         Location eye = caster.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
 
-        Vector behindDirection = direction.clone().multiply(-0.3);
+        Vector behindStep = direction.clone().multiply(-0.3 * STEP_SIZE);
         Location behindCursor = eye.clone();
 
         for (double traveled = 0; traveled <= 1.0; traveled += STEP_SIZE) {
-            behindCursor.add(behindDirection.clone().multiply(STEP_SIZE));
+            behindCursor.add(behindStep);
 
             if (blocksRay(behindCursor.getBlock())) break;
 
             for (Player candidate : behindCursor.getWorld().getPlayers()) {
-                if (!isValidAnyTarget(caster, candidate)) continue;
+                if (!validator.test(candidate)) continue;
 
                 if (isInsideHitbox(candidate, behindCursor)) {
                     return candidate;
@@ -143,37 +53,39 @@ public class AbilityTargeting {
         }
 
         Location cursor = eye.clone();
-        Player bestTarget = null;
-        double bestAngle = Double.MAX_VALUE;
+        Vector step = direction.clone().multiply(STEP_SIZE);
+        Player furthestTarget = null;
 
         for (double traveled = 0; traveled < maxRange; traveled += STEP_SIZE) {
-            cursor.add(direction.clone().multiply(STEP_SIZE));
+            cursor.add(step);
 
-            Block block = cursor.getBlock();
-            if (blocksRay(block)) {
+            if (blocksRay(cursor.getBlock())) {
                 break;
             }
 
+            Player stepBest = null;
+            double stepBestAngle = Double.MAX_VALUE;
+
             for (Player candidate : cursor.getWorld().getPlayers()) {
-                if (!isValidAnyTarget(caster, candidate)) continue;
+                if (!validator.test(candidate)) continue;
+                if (!isInsideHitbox(candidate, cursor)) continue;
 
-                if (isInsideHitbox(candidate, cursor)) {
-                    Vector toCandidate = candidate.getEyeLocation().toVector().subtract(eye.toVector()).normalize();
-                    double angle = direction.angle(toCandidate);
+                Vector toCandidate = candidate.getEyeLocation().toVector().subtract(eye.toVector());
+                if (toCandidate.lengthSquared() < 1e-9) continue;
 
-                    if (angle < bestAngle) {
-                        bestAngle = angle;
-                        bestTarget = candidate;
-                    }
+                double angle = direction.angle(toCandidate.normalize());
+                if (angle < stepBestAngle) {
+                    stepBestAngle = angle;
+                    stepBest = candidate;
                 }
             }
 
-            if (bestTarget != null) {
-                return bestTarget;
+            if (stepBest != null) {
+                furthestTarget = stepBest;
             }
         }
 
-        return null;
+        return furthestTarget;
     }
 
     private static boolean isValidEnemyTarget(Player caster, Player candidate, TeamManager teamManager) {

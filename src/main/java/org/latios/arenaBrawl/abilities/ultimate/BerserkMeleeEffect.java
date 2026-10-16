@@ -23,11 +23,11 @@ public class BerserkMeleeEffect implements MeleeHitEffect {
     @Override
     public void onMeleeHit(Player attacker, Player victim, double finalDamage, Location impactLocation) {
         if (!Berserk.BERSERK_ACTIVE_PLAYERS.contains(attacker.getUniqueId())) return;
-
-        spawnBloodEffect(impactLocation);
+        Location impact2 = impactLocation.clone().subtract(0, 1.2, 0);
+        spawnBloodEffect(impact2);
         spawnFallingDrips(victim, impactLocation);
 
-        victim.getWorld().playSound(impactLocation, Sound.BLOCK_STONE_BREAK, 4.0f, 2f);
+        victim.getWorld().playSound(impactLocation, Sound.BLOCK_STONE_BREAK, 7.0f, 2f);
     }
 
     private void spawnFallingDrips(Player victim, Location impactLocation) {

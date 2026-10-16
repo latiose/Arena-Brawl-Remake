@@ -82,10 +82,6 @@ public class FlameBreath extends Breath {
                         spawnTrailParticles(upright.get(i));
                     }
                     spawned = targetIndex;
-                } else {
-                    for (Location point : upright) {
-                        spawnTrailParticles(point);
-                    }
                 }
 
                 if (tick == 20 || tick == 40) {
