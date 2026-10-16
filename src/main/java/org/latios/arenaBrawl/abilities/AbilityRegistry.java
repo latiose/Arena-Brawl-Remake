@@ -71,6 +71,10 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "flamesword", deps -> new FlameSword(deps.energyManager(), deps.energyModifierManager(), configManager.get("flamesword")));
         register(AbilitySlot.OFFENSIVE, "boomerangaxe",
                 deps -> new BoomerangAxe(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("boomerangaxe")));
+        register(AbilitySlot.OFFENSIVE, "seekerbolt",
+                deps -> new SeekerBolt(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("seekerbolt")));
+        register(AbilitySlot.OFFENSIVE, "shockmine",
+                deps -> new ShockMine(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("shockmine")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -115,6 +119,8 @@ public class AbilityRegistry {
                 deps -> new Blink(deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("blink")));
         register(AbilitySlot.UTILITY, "gust",
                 deps -> new Gust(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("gust")));
+        register(AbilitySlot.UTILITY, "echodecoy",
+                deps -> new EchoDecoy(plugin, deps.cooldownManager(), deps.teamManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("echodecoy")));
 
 
 
@@ -164,6 +170,12 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "rallybanner",
                 deps -> new RallyBanner(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.teamManager(), deps.damageBuffManager(), deps.speedBuffManager(), deps.playerHealthManager(), configManager.get("rallybanner")));
         register(AbilitySlot.SUPPORT, "gamblersshield", deps -> new GamblersShield(deps.cooldownManager(), deps.orbitShieldManager(), deps.combatUpgradeManager(), configManager.get("gamblersshield")));
+        register(AbilitySlot.SUPPORT, "secondwind",
+                deps -> new SecondWind(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("secondwind")));
+        register(AbilitySlot.SUPPORT, "overcharge",
+                deps -> new Overcharge(deps.energyManager(), deps.playerHealthManager(), configManager.get("overcharge")));
+        register(AbilitySlot.SUPPORT, "bloodprojectile",
+                deps -> new BloodProjectile(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("bloodprojectile")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
@@ -198,6 +210,8 @@ public class AbilityRegistry {
                 deps -> new BloodMoon(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.debuffManager(), configManager.get("bloodmoon")));
         register(AbilitySlot.ULTIMATE, "cataclysm",
                 deps -> new Cataclysm(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.combatService(), deps.demolitionService(), configManager.get("cataclysm")));
+        register(AbilitySlot.ULTIMATE, "timestop",
+                deps -> new TimeStop(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.debuffManager(), configManager.get("timestop")));
 
 
         // --- DEFAULTS ---

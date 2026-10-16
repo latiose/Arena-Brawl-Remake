@@ -246,9 +246,14 @@ public class AbilitySelectorGUI {
 
             RuneConfig cfg = runeConfigManager.get(rune.getConfigId());
 
-            ItemStack item = new ItemStack(selected ? Material.LIME_DYE : Material.GRAY_DYE);
+            ItemStack item = new ItemStack(dyeForRune(rune));
             ItemMeta meta = item.getItemMeta();
             meta.setDisplayName((selected ? "§a✔ " : "§f") + rune.getDisplayName());
+
+            if (selected) {
+                meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
 
             List<String> lore = new ArrayList<>();
             lore.add("");
@@ -295,6 +300,16 @@ public class AbilitySelectorGUI {
             positions[i] = row * 9 + start + i * spacing;
         }
         return positions;
+    }
+
+    private Material dyeForRune(RuneType rune) {
+        return switch (rune) {
+            case SPEED -> Material.WHITE_DYE;
+            case SLOW -> Material.PURPLE_DYE;
+            case ENERGY -> Material.YELLOW_DYE;
+            case DAMAGE -> Material.RED_DYE;
+            case CONFUSION -> Material.BLACK_DYE;
+        };
     }
 
     private double defaultProcChance(RuneType rune) {

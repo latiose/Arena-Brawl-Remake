@@ -340,6 +340,28 @@ ability-values:
     hit-radius: 1.3
     catch-radius: 1.6
 
+  seekerbolt:
+    energy-cost: 60.0
+    bolt-count: 3
+    bolt-interval-ticks: 4
+    damage: 45.0
+    aoe-radius: 1.5
+    speed: 0.7
+    turn-rate: 0.25
+    track-radius: 25.0
+    hit-radius: 0.6
+    spread: 0.12
+    max-lifetime-ticks: 90
+
+  shockmine:
+    energy-cost: 40.0
+    damage: 120.0
+    trigger-radius: 2.2
+    blast-radius: 3.5
+    stun-duration-ms: 1000
+    duration-ms: 15000
+    max-range: 20.0
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -364,6 +386,15 @@ ability-values:
     range: 7.0
     cone-angle-degrees: 70.0
     knockback-strength: 2.1
+
+  echodecoy:
+    cooldown-ms: 26000
+    duration-ms: 10000
+    move-speed: 0.32
+    bait-radius: 2.5
+    surprise-radius: 5.0
+    arm-delay-ms: 2000
+    stun-duration-ms: 2000
 
   dodgeroll:
     cooldown-ms: 22000
@@ -602,6 +633,27 @@ ability-values:
     speed-amplifier: 1
     cooldown-ms: 35000
 
+  secondwind:
+    cooldown-ms: 35000
+    base-heal: 250.0
+    missing-health-percent: 0.25
+    hot-total-heal: 100.0
+    hot-duration-ms: 5000
+    hot-interval-ticks: 10
+
+  overcharge:
+    min-energy: 25.0
+    heal-per-energy: 6.0
+    max-heal: 275.0
+
+  bloodprojectile:
+    cooldown-ms: 30000
+    heal-amount: 450.0
+    projectile-speed: 1.1
+    max-flight-ticks: 60
+    orb-lifetime-ms: 6000
+    collect-radius: 2.0
+
   # --- ULTIMATE ---
   shieldwall:
     damage-reduction: 0.70
@@ -712,6 +764,10 @@ ability-values:
     knockback-strength: 1.6
     warning-ticks: 16
     charge-time-millis: 60000
+
+  timestop:
+    charge-time-ms: 60000
+    stun-duration-ms: 5000
 
 rune-values:
   speed:

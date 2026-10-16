@@ -78,11 +78,11 @@ public class RuneManager {
                     int newSlot;
 
                     do {
-                        newSlot = random.nextInt(9);
+                        newSlot = random.nextInt(4);
                     } while (newSlot == currentSlot);
 
                     victim.getInventory().setHeldItemSlot(newSlot);
-                    attacker.sendMessage("§eYour §d" + rune.getDisplayName() + " §ewas activated!");
+                    attacker.sendMessage("§eYour §0" + rune.getDisplayName() + " §ewas activated!");
                 }
                 return 1.0;
             }
