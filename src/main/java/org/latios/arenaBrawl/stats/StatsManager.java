@@ -38,7 +38,10 @@ public class StatsManager {
 
 
     public PlayerStats getStats(Player player) {
-        UUID id = player.getUniqueId();
+        return getStats(player.getUniqueId());
+    }
+
+    public PlayerStats getStats(UUID id) {
         if (cache.containsKey(id)) return cache.get(id);
 
         PlayerStats stats = new PlayerStats();
@@ -58,51 +61,71 @@ public class StatsManager {
     }
 
     public int addWin(Player player) {
-        PlayerStats stats = getStats(player);
+        return addWin(player.getUniqueId());
+    }
+
+    public int addWin(UUID id) {
+        PlayerStats stats = getStats(id);
         stats.wins++;
         int winReward = 80;
         winReward *= multiplier;
         stats.coins += winReward;
-        save(player, stats);
+        save(id, stats);
 
-        int totalEarnedInMatch = matchCoins.getOrDefault(player.getUniqueId(), 0) + winReward;
-        matchCoins.remove(player.getUniqueId());
+        int totalEarnedInMatch = matchCoins.getOrDefault(id, 0) + winReward;
+        matchCoins.remove(id);
         return totalEarnedInMatch;
     }
 
     public int addLoss(Player player) {
-        PlayerStats stats = getStats(player);
+        return addLoss(player.getUniqueId());
+    }
+
+    public int addLoss(UUID id) {
+        PlayerStats stats = getStats(id);
         stats.losses++;
         int lossReward = 40;
         lossReward *= multiplier;
         stats.coins += lossReward;
-        save(player, stats);
+        save(id, stats);
 
-        int totalEarnedInMatch = matchCoins.getOrDefault(player.getUniqueId(), 0) + lossReward;
-        matchCoins.remove(player.getUniqueId());
+        int totalEarnedInMatch = matchCoins.getOrDefault(id, 0) + lossReward;
+        matchCoins.remove(id);
         return totalEarnedInMatch;
     }
 
     public void addKill(Player player) {
-        PlayerStats stats = getStats(player);
+        addKill(player.getUniqueId());
+    }
+
+    public void addKill(UUID id) {
+        PlayerStats stats = getStats(id);
         stats.kills++;
         int killReward = 8;
         killReward *= multiplier;
         stats.coins += killReward;
 
-        matchCoins.put(player.getUniqueId(), matchCoins.getOrDefault(player.getUniqueId(), 0) + killReward);
+        matchCoins.put(id, matchCoins.getOrDefault(id, 0) + killReward);
 
-        save(player, stats);
+        save(id, stats);
     }
 
     public void addDeath(Player player) {
-        PlayerStats stats = getStats(player);
+        addDeath(player.getUniqueId());
+    }
+
+    public void addDeath(UUID id) {
+        PlayerStats stats = getStats(id);
         stats.deaths++;
-        save(player, stats);
+        save(id, stats);
     }
 
     private void save(Player player, PlayerStats stats) {
-        String path = player.getUniqueId().toString();
+        save(player.getUniqueId(), stats);
+    }
+
+    private void save(UUID id, PlayerStats stats) {
+        String path = id.toString();
         config.set(path + ".wins", stats.wins);
         config.set(path + ".losses", stats.losses);
         config.set(path + ".kills", stats.kills);

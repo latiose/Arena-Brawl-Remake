@@ -102,18 +102,19 @@ public class MatchManager {
         Match match = activeMatches.get(player.getUniqueId());
         if (match == null) return;
 
-        Player killer = null;
         UUID attackerId = healthManager.getLastAttacker(player);
-        if (attackerId != null) {
-            killer = Bukkit.getPlayer(attackerId);
-            if (killer != null && killer.isOnline() && !killer.equals(player)) {
-                statsManager.addKill(killer);
+        Player killer = attackerId != null ? findParticipant(match, attackerId) : null;
+        boolean hasKiller = killer != null && !killer.getUniqueId().equals(player.getUniqueId());
+
+        if (hasKiller) {
+            statsManager.addKill(killer.getUniqueId());
+            if (killer.isOnline()) {
                 killer.sendMessage(String.format("§3You killed §c%s§3!", player.getName()));
             }
         }
         statsManager.addDeath(player);
 
-        if (killer != null && killer.isOnline() && !killer.equals(player)) {
+        if (hasKiller) {
             player.sendMessage(String.format("§3You were killed by §c%s§3!", killer.getName()));
         } else {
             player.sendMessage("§3You were killed!");
@@ -121,12 +122,12 @@ public class MatchManager {
 
         for (Player viewer : match.getAllPlayers()) {
             if (viewer.equals(player)) continue;
-            if (viewer.equals(killer)) continue;
+            if (killer != null && viewer.equals(killer)) continue;
 
             String victimColor = teamManager.isAlly(viewer, player) ? "§a" : "§c";
             String victimName = victimColor + player.getName();
 
-            if (killer != null && killer.isOnline()) {
+            if (hasKiller) {
                 String killerColor = teamManager.isAlly(viewer, killer) ? "§a" : "§c";
                 String killerName = killerColor + killer.getName();
                 viewer.sendMessage(String.format("%s §3was killed by %s§3!", victimName, killerName));
@@ -176,27 +177,42 @@ public class MatchManager {
 
     private Map<UUID, RatingChange> applyRatingChanges(List<Player> winners, List<Player> losers) {
         Map<UUID, RatingChange> changes = new HashMap<>();
-        double losersAvg = losers.stream().mapToDouble(ratingManager::getRating).average().orElse(1000.0);
-        double winnersAvg = winners.stream().mapToDouble(ratingManager::getRating).average().orElse(1000.0);
+        double losersAvg = losers.stream().mapToDouble(p -> ratingManager.getRating(p.getUniqueId())).average().orElse(1000.0);
+        double winnersAvg = winners.stream().mapToDouble(p -> ratingManager.getRating(p.getUniqueId())).average().orElse(1000.0);
 
         for (Player winner : winners) {
-            if (!winner.isOnline()) continue;
-            double gain = ratingManager.calculateGain(ratingManager.getRating(winner), losersAvg);
-            ratingManager.applyDelta(winner, gain);
-            changes.put(winner.getUniqueId(), new RatingChange(gain, floorRating(winner)));
+            UUID id = winner.getUniqueId();
+            double gain = ratingManager.calculateGain(ratingManager.getRating(id), losersAvg);
+            ratingManager.applyDelta(id, gain);
+            changes.put(id, new RatingChange(gain, floorRating(id)));
         }
 
         for (Player loser : losers) {
-            if (!loser.isOnline()) continue;
-            double loss = ratingManager.calculateLoss(ratingManager.getRating(loser), winnersAvg);
-            ratingManager.applyDelta(loser, loss);
-            changes.put(loser.getUniqueId(), new RatingChange(loss, floorRating(loser)));
+            UUID id = loser.getUniqueId();
+            double loss = ratingManager.calculateLoss(ratingManager.getRating(id), winnersAvg);
+            ratingManager.applyDelta(id, loss);
+            changes.put(id, new RatingChange(loss, floorRating(id)));
         }
         return changes;
     }
 
     private long floorRating(Player player) {
-        return (long) Math.floor(ratingManager.getRating(player));
+        return floorRating(player.getUniqueId());
+    }
+
+    private long floorRating(UUID id) {
+        return (long) Math.floor(ratingManager.getRating(id));
+    }
+
+    /**
+     * Resolves the player behind an id among the match participants (online or offline),
+     * falling back to any currently online player.
+     */
+    private Player findParticipant(Match match, UUID id) {
+        for (Player participant : match.getAllPlayers()) {
+            if (participant.getUniqueId().equals(id)) return participant;
+        }
+        return Bukkit.getPlayer(id);
     }
 
 
@@ -242,7 +258,9 @@ public class MatchManager {
 
     private String resultLine(Match match, Player player, RatingChange change) {
         long rating = change == null ? floorRating(player) : change.rating();
-        String delta = change == null ? "" : String.format(Locale.US, " §b(%+.2f)", change.delta());
+        String delta = (change == null || change.delta() == 0.0)
+                ? ""
+                : String.format(Locale.US, " §b(%+.2f)", change.delta());
         return String.format("§c%s§7/§a%s §e%s §b%d%s",
                 formatK(match.getDamageDealt(player)),
                 formatK(match.getHealingDone(player)),
@@ -373,14 +391,14 @@ public class MatchManager {
         announceMatchResult(match, winners, losers, ratingChanges);
 
         for (Player winner : winners) {
+            int earnedCoins = statsManager.addWin(winner);
             if (winner.isOnline()) {
-                int earnedCoins = statsManager.addWin(winner);
                 winner.sendMessage(String.format("§6You earned a total of %d Coins!", earnedCoins));
             }
         }
         for (Player loser : losers) {
+            int earnedCoins = statsManager.addLoss(loser);
             if (loser.isOnline()) {
-                int earnedCoins = statsManager.addLoss(loser);
                 loser.sendMessage(String.format("§6You earned a total of %d Coins!", earnedCoins));
             }
         }

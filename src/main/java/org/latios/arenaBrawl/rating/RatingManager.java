@@ -39,7 +39,10 @@ public class RatingManager {
     }
 
     public double getRating(Player player) {
-        UUID id = player.getUniqueId();
+        return getRating(player.getUniqueId());
+    }
+
+    public double getRating(UUID id) {
         if (cache.containsKey(id)) return cache.get(id);
 
         double rating = config.getDouble(id.toString(), STARTING_RATING);
@@ -90,9 +93,13 @@ public class RatingManager {
     }
 
     public void applyDelta(Player player, double delta) {
-        double newRating = getRating(player) + delta;
-        cache.put(player.getUniqueId(), newRating);
-        config.set(player.getUniqueId().toString(), newRating);
+        applyDelta(player.getUniqueId(), delta);
+    }
+
+    public void applyDelta(UUID id, double delta) {
+        double newRating = getRating(id) + delta;
+        cache.put(id, newRating);
+        config.set(id.toString(), newRating);
         saveToDisk();
     }
 
