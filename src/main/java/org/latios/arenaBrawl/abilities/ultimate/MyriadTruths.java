@@ -10,7 +10,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-import org.latios.arenaBrawl.game.Match;
+import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.DamageVulnerabilityManager;
 import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
@@ -109,9 +109,8 @@ public class MyriadTruths implements Ability {
 
 
     private List<Player> getMatchPlayers(Player caster) {
-        var matchManager = config.getMatchManager();
-        Match match = matchManager != null ? matchManager.getMatchFor(caster) : null;
-        return match != null ? match.getAllPlayers() : caster.getWorld().getPlayers();
+        MatchManager matchManager = config.getMatchManager();
+        return matchManager != null ? matchManager.getMatchPlayers(caster) : List.of();
     }
 
     @Override

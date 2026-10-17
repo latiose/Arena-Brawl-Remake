@@ -153,6 +153,9 @@ public class BloodMoon implements Ability {
             if (now >= active.endMs()) continue;
             Player caster = Bukkit.getPlayer(active.casterId());
             if (caster == null || !caster.isOnline() || caster.isDead()) continue;
+            // Instances live in separate worlds; never mix matches and never
+            // measure distance across worlds (that throws).
+            if (!attacker.getWorld().equals(caster.getWorld())) continue;
             if (!attacker.equals(caster) && !active.teamManager().isAlly(caster, attacker)) continue;
             if (attacker.getLocation().distanceSquared(caster.getLocation()) > active.radius() * active.radius()) {
                 continue;

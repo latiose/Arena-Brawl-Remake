@@ -32,6 +32,15 @@ leaderboard-signs:
   - { x: -1.75, y: -59.51, z: 35.7 }
   - { x: -2.75, y: -59.51, z: 35.7 }
 
+map-instancing:
+  enabled: true
+  # Folder holding the world templates. Empty = use each arena world's real folder
+  template-folder: ""
+  # Prefix used for the temporary instance world folders created per match.
+  instance-prefix: "ab_instance_"
+  # Max simultaneous matches per map. 0 = unlimited.
+  max-instances-per-map: 0
+
 maps:
   Bridge:
     world: "Bridge"

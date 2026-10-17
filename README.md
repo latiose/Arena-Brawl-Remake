@@ -80,9 +80,9 @@ org.latios.arenaBrawl
 
 `MatchManager` does not handle a single match. It manages a list of all active simultaneous matches, one per map in use, indexed by player.
 
-`ArenaMapManager` resolves the **4 physical maps, concurrent matches** requirement. Each map — *Bridge*, *Jungle*, *Highlink*, and *Zeus* — is a distinct Bukkit world loaded explicitly and registered in `config.yml`.
+`ArenaMapManager` resolves the **map reuse, concurrent matches** requirement. Each map — *Bridge*, *Jungle*, *Highlink*, and *Zeus* — is registered in `config.yml` and acts as a read-only **template**.
 
-When starting a match, an available map is claimed through `claimAvailableMap()`. If all 4 maps are occupied, the queue waits without discarding players.
+When a match starts, an available map is claimed through `claimAvailableMap(type)`. With map instancing enabled, each match receives its own disposable copy of the template world (see [Multi-Map System](#multi-map-system)), so the same map can host many simultaneous matches and is reusable the moment a match ends.
 ## Ability System
 
 ### Components
@@ -405,17 +405,43 @@ Each player receives an individual, unshared scoreboard displaying:
 
 ## Multi-Map System
 
-`ArenaMap` encapsulates everything specific to a given map:
+The map system is split in two objects:
 
-- World reference
-- 4 spawn points
-- Power-up spawn locations
+| Class | Responsibility |
+|---|---|
+| `ArenaMapTemplate` | Immutable coordinates read from `config.yml` (spawns, power-ups). Not bound to any `World`. One per configured map. |
+| `ArenaMap` | A concrete, live map bound to a specific `World`. One per running match. |
 
-`ArenaMapManager` loads the map catalog from the `maps` section of `config.yml` during plugin startup.
+`ArenaMapManager` loads the catalog from the `maps` section of `config.yml` during plugin startup.
 
-Each referenced world is verified to be loaded by the server.
+### Map Instancing (Hypixel-style)
 
-If a world is unloaded, the map is flagged as **unavailable** rather than crashing the plugin.
+By default (`map-instancing.enabled: true`) each match runs in its **own isolated world copy**:
+
+1. `claimAvailableMap(type)` picks a template that has valid spawns for the match type and is under its instance cap.
+2. The template world folder is copied to a unique instance folder (`ab_instance_<Map>_<n>`) and loaded as a new `World`.
+3. All coordinates are rebuilt from the template against that world — because the copy is identical, no offset math is needed.
+4. When the match ends, `releaseMap()` unloads the instance world and deletes its folder, so the map is immediately reusable and never accumulates state (broken blocks, leftover entities, etc.) between matches.
+
+This means the same map can host a practically unlimited number of simultaneous matches (bounded by `max-instances-per-map`, `0` = unlimited).
+
+Relevant `config.yml` options:
+
+```yaml
+map-instancing:
+  enabled: true
+  template-folder: ""        # empty = server root (where the arena worlds live)
+  instance-prefix: "ab_instance_"
+  max-instances-per-map: 0   # 0 = unlimited
+```
+
+Notes:
+
+- **Paper 1.21.9+ / 26.x world storage:** a Bukkit world is a *dimension* of the main level, so a map called `Bridge` actually lives at `<server>/world/dimensions/minecraft/bridge` (not `<server>/Bridge`). The manager never guesses this path: it materialises the world and asks `World#getWorldFolder()` for the real folder, then creates each instance as a sibling dimension next to it.
+- The copy deliberately omits Paper's `data/paper/metadata.dat`. That file holds the world's unique UUID, and Paper refuses to load a second world that reuses an existing UUID (`"… is a duplicate of another world"`). Omitting it makes Paper assign a fresh, unique UUID to every instance, which is what allows many matches on the same map at once.
+- Template worlds must **not** be loaded as normal worlds while instancing is active. The manager unloads them on startup and warns; remove them from `bukkit.yml` `worlds` to keep startup clean.
+- Leftover instance folders from a crash are deleted automatically on startup and on plugin disable.
+- Setting `enabled: false` restores the legacy behaviour: one persistent world per map with a single concurrent match each.
 
 ---
 
@@ -479,8 +505,8 @@ Once registered, the structure automatically becomes compatible with `StructureD
 
 ### Adding a New Map
 
-1. Load the world through `bukkit.yml` or `WorldCreator`.
-2. Add its configuration entry under `maps` in `config.yml`.
+1. Place the map world wherever your server keeps its worlds (on modern Paper that is `<server>/world/dimensions/minecraft/<lowercase name>`, but any loaded world works), or in `map-instancing.template-folder`.
+2. Add its configuration entry under `maps` in `config.yml` (`world` = the world name).
 3. Restart the server.
 
-`ArenaMapManager` will automatically detect and register the map during startup.
+With instancing enabled, `ArenaMapManager` treats the world as a template; it never needs to be loaded permanently. If the world does not exist yet, an empty one is generated once and used as the template so development servers keep working.

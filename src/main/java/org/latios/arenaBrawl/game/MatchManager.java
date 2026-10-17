@@ -357,6 +357,20 @@ public class MatchManager {
         return activeMatches.get(player.getUniqueId());
     }
 
+    /**
+     * Players participating in the same match as the given player.
+     *
+     * <p>Use this for any effect that is meant to be "global" (Time Stop,
+     * Myriad Truths, ...). Iterating {@code Bukkit.getOnlinePlayers()} or every
+     * player in a world would leak the effect into other simultaneous matches.</p>
+     *
+     * @return the match participants, or an empty list when the player is not in a match.
+     */
+    public List<Player> getMatchPlayers(Player player) {
+        Match match = getMatchFor(player);
+        return match != null ? match.getAllPlayers() : List.of();
+    }
+
     public void recordDamage(PlayerHealthManager.DamageEvent event) {
         Match match = activeMatches.get(event.attacker().getUniqueId());
         if (match != null && match.contains(event.victim())) {

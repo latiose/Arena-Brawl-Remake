@@ -425,6 +425,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
             EntityCleanupUtils.sweepArenaEntities(world); //powerups
         }
         structureManager.clearAll();
+        arenaMapManager.shutdown();
         getLogger().info("ArenaBrawl off.");
         debuffManager.clearAll();
     }

@@ -120,7 +120,7 @@ public class ArenaManager {
     }
 
     public void startMatch(MatchType type, List<Player> players) {
-        ArenaMap map = arenaMapManager.claimAvailableMap();
+        ArenaMap map = arenaMapManager.claimAvailableMap(type);
 
         if (map == null || !map.isValid(type)) {
             if (map != null) {

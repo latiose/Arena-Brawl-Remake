@@ -1,6 +1,5 @@
 package org.latios.arenaBrawl.abilities.ultimate;
 
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -15,6 +14,7 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
+import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -58,10 +58,16 @@ public class TimeStop implements Ability {
 
     @Override
     public boolean activate(Player player) {
+        // "Global" means the whole match, never the whole server: only the
+        // players sharing this player's match may be affected.
+        MatchManager matchManager = config.getMatchManager();
+        List<Player> matchPlayers = matchManager != null ? matchManager.getMatchPlayers(player) : List.of();
+
         List<Player> victims = new ArrayList<>();
-        for (Player candidate : Bukkit.getOnlinePlayers()) {
+        for (Player candidate : matchPlayers) {
             if (candidate.equals(player)) continue;
-            if (candidate.isDead() || candidate.getGameMode() == GameMode.SPECTATOR) continue;
+            if (!candidate.isOnline() || candidate.isDead()
+                    || candidate.getGameMode() == GameMode.SPECTATOR) continue;
             if (!teamManager.isEnemy(player, candidate)) continue;
             victims.add(candidate);
         }

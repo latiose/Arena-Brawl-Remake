@@ -221,7 +221,7 @@ public class QueueManager implements Listener {
                 continue;
             }
             Set<UUID> queue = queuedPlayers.get(type);
-            if (queue.size() < type.playersNeeded() || arenaMapManager.getAvailableMapCount() == 0) continue;
+            if (queue.size() < type.playersNeeded() || arenaMapManager.getAvailableMapCount(type) == 0) continue;
 
             boolean fifo = type == MatchType.TEAMS;
 
@@ -319,7 +319,7 @@ public class QueueManager implements Listener {
     }
 
     private void tryStartRatedMatches() {
-        while (arenaMapManager.getAvailableMapCount() > 0) {
+        while (arenaMapManager.getAvailableMapCount(MatchType.TEAMS) > 0) {
             ratedEntries.values().removeIf(entry -> {
                 if (isEntryValid(entry)) return false;
                 for (Player p : onlinePlayers(entry)) {
