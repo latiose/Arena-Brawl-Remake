@@ -53,6 +53,8 @@ public class AbilityIconRegistry {
         icons.put("boomerangaxe", Material.IRON_AXE);
         icons.put("seekerbolt", Material.SPECTRAL_ARROW);
         icons.put("shockmine", Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
+        icons.put("backstabber", Material.DIAMOND_SWORD);
+        icons.put("ashenfield", Material.CAMPFIRE);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
@@ -76,6 +78,9 @@ public class AbilityIconRegistry {
         icons.put("blink", Material.CHORUS_FRUIT);
         icons.put("gust", Material.WIND_CHARGE);
         icons.put("echodecoy", Material.ARMOR_STAND);
+        icons.put("counter", Material.SHIELD);
+        icons.put("taunt", Material.TURTLE_HELMET);
+        icons.put("portal", Material.ENDER_PEARL);
 
         // --- SUPPORT ---
         icons.put("holywater", Material.POTION);
@@ -104,6 +109,9 @@ public class AbilityIconRegistry {
         icons.put("secondwind", Material.GLISTERING_MELON_SLICE);
         icons.put("overcharge", Material.EXPERIENCE_BOTTLE);
         icons.put("bloodprojectile", Material.NETHER_WART);
+        icons.put("momentum", Material.RABBIT_FOOT);
+        icons.put("lonewolf", Material.BONE);
+        icons.put("thornheart", Material.SWEET_BERRIES);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);
@@ -123,6 +131,9 @@ public class AbilityIconRegistry {
         icons.put("bloodmoon", Material.REDSTONE);
         icons.put("cataclysm", Material.MAGMA_BLOCK);
         icons.put("timestop", Material.MAP);
+        icons.put("warhorn", Material.GOAT_HORN);
+        icons.put("sanctuary", Material.BEACON);
+        icons.put("intervention", Material.ENCHANTED_GOLDEN_APPLE);
     }
 
     public Material getIcon(AbilitySlot slot, String id) {

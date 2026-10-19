@@ -89,6 +89,17 @@ public class DamageBuffManager {
         return finalMultiplier;
     }
 
+    public void removeBuff(Player player, String title) {
+        List<ActiveBuff> buffs = activeBuffs.get(player.getUniqueId());
+        if (buffs == null) return;
+
+        buffs.removeIf(buff -> buff.title().equalsIgnoreCase(title));
+
+        if (buffs.isEmpty()) {
+            activeBuffs.remove(player.getUniqueId());
+        }
+    }
+
     public void clear(Player player) {
         activeBuffs.remove(player.getUniqueId());
     }

@@ -15,6 +15,7 @@ import org.bukkit.util.Transformation;
 import org.joml.Vector3f;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
+import org.latios.arenaBrawl.abilities.ultimate.Intervention;
 import org.latios.arenaBrawl.abilities.ultimate.Rewind;
 
 import java.util.HashMap;
@@ -211,6 +212,28 @@ public class PlayerHealthManager {
             }
         }
         if (updated <= 0) {
+            Intervention.Save save = Intervention.consumeSave(player);
+            if (save != null) {
+                currentHealth.put(player.getUniqueId(), save.reviveHealth());
+
+                Location loc = player.getLocation();
+                loc.getWorld().playSound(loc, Sound.ITEM_TOTEM_USE, 1.0f, 1.4f);
+                loc.getWorld().playSound(loc, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
+                loc.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, loc.clone().add(0, 1, 0), 100, 0.5, 0.8, 0.5, 0.25);
+                loc.getWorld().spawnParticle(Particle.HEART, loc.clone().add(0, 1, 0), 25, 0.5, 0.5, 0.5, 0.0);
+
+                Player caster = Bukkit.getPlayer(save.casterId());
+                if (caster != null && caster.isOnline()) {
+                    caster.sendMessage(MessageUtils.positive() + String.format(
+                            "§eYour Intervention saved %s with §a%d HP§3!", player.getName(), (int) save.reviveHealth()));
+                }
+                player.sendMessage(MessageUtils.positive() + "§3Intervention saved you from death! Restored §a"
+                        + (int) save.reviveHealth() + " HP§3!");
+                syncVanilla(player);
+                return;
+            }
+        }
+        if (updated <= 0) {
             eliminated.add(player.getUniqueId());
             eliminationCallback.accept(player);
         }
@@ -285,6 +308,28 @@ public class PlayerHealthManager {
                     caster.sendMessage(MessageUtils.positive() + String.format("§eYour Rewind revived %s with §a400 HP§3!", player.getName()));
                 }
                 player.sendMessage(MessageUtils.positive() + "§3Rewind saved you from death! Restored §a400 HP§3!");
+                return;
+            }
+        }
+        if (updated <= 0) {
+            Intervention.Save save = Intervention.consumeSave(player);
+            if (save != null) {
+                currentHealth.put(player.getUniqueId(), save.reviveHealth());
+
+                Location loc = player.getLocation();
+                loc.getWorld().playSound(loc, Sound.ITEM_TOTEM_USE, 1.0f, 1.4f);
+                loc.getWorld().playSound(loc, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
+                loc.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, loc.clone().add(0, 1, 0), 100, 0.5, 0.8, 0.5, 0.25);
+                loc.getWorld().spawnParticle(Particle.HEART, loc.clone().add(0, 1, 0), 25, 0.5, 0.5, 0.5, 0.0);
+
+                Player caster = Bukkit.getPlayer(save.casterId());
+                if (caster != null && caster.isOnline()) {
+                    caster.sendMessage(MessageUtils.positive() + String.format(
+                            "§eYour Intervention saved %s with §a%d HP§3!", player.getName(), (int) save.reviveHealth()));
+                }
+                player.sendMessage(MessageUtils.positive() + "§3Intervention saved you from death! Restored §a"
+                        + (int) save.reviveHealth() + " HP§3!");
+                syncVanillaSilent(player);
                 return;
             }
         }

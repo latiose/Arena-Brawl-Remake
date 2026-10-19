@@ -372,6 +372,20 @@ ability-values:
     duration-ms: 15000
     max-range: 20.0
 
+  backstabber:
+    damage: 90.0
+    bonus-damage: 80.0
+    energy-cost: 40.0
+    max-range: 20.0
+
+  ashenfield:
+    energy-cost: 60.0
+    damage-per-pulse: 30.0
+    max-target-distance: 20.0
+    radius: 4.0
+    duration-ticks: 100
+    pulse-interval-ticks: 20
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -496,6 +510,17 @@ ability-values:
     pull-speed: 1.1
     climb-speed: 0.85
     ledge-push: 0.45
+
+  counter:
+    cooldown-ms: 22000
+    window-ms: 1500
+
+  taunt:
+    cooldown-ms: 20000
+    duration-ms: 2000
+    max-range: 3.0
+    melee-range: 3.5
+    attack-interval-ms: 500
 
   # --- SUPPORT ---
   holywater:
@@ -665,6 +690,25 @@ ability-values:
     orb-lifetime-ms: 6000
     collect-radius: 2.0
 
+  momentum:
+    cooldown-ms: 28000
+    duration-ms: 6000
+    heal-per-second: 35.0
+    stationary-break-ms: 500
+
+  lonewolf:
+    cooldown-ms:
+    duration-ms: 8000
+    heal-per-second: 25.0
+    ally-radius: 10.0
+    damage-bonus: 0.08
+
+  thornheart:
+    cooldown-ms: 30000
+    duration-ms: 5000
+    thorn-damage: 100.0
+    heal-per-hit: 80.0
+
   # --- ULTIMATE ---
   shieldwall:
     damage-reduction: 0.70
@@ -779,6 +823,32 @@ ability-values:
   timestop:
     charge-time-ms: 60000
     stun-duration-ms: 5000
+
+  warhorn:
+    charge-time-ms: 60000
+    duration-ms: 8000
+    damage-increase: 1.40
+    speed-amplifier: 1
+    radius: 10.0
+    heal-amount: 100.0
+
+  sanctuary:
+    charge-time-ms: 60000
+    duration-ms: 4000
+    radius: 5.0
+
+  intervention:
+    charge-time-ms: 60000
+    max-range: 20.0
+    duration-ms: 10000
+    revive-health: 500.0
+    immunity-ms: 1500
+    guard-reduction: 0.30
+
+  portal:
+    charge-time-ms: 60000
+    max-target-distance: 20.0
+    portal-radius: 1.4
 
 rune-values:
   speed:

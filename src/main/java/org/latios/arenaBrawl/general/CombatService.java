@@ -17,6 +17,7 @@ import org.latios.arenaBrawl.abilities.OrbitShieldType;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.Berserk;
 import org.latios.arenaBrawl.abilities.ultimate.BloodMoon;
+import org.latios.arenaBrawl.abilities.utility.Counter;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.Match;
@@ -71,7 +72,6 @@ public class CombatService {
 
         double multiplier = damageBuffManager.getMultiplier(attacker);
 
-
         if (abilityName.equals("Melee")) {
             for (MeleeHitEffect effect : meleeHitEffects) {
                 double effectMultiplier = effect.getMultiplier(attacker);
@@ -85,6 +85,41 @@ public class CombatService {
         }
 
         double adjustedDamage = rawDamage * multiplier;
+
+        Counter.CounterState counter = Counter.consumeActive(victim);
+        if (counter != null) {
+            double counterReduction = shieldManager.getDamageReduction(victim);
+            double reflectedDamage = counterReduction > 0 ? adjustedDamage * (1 - counterReduction) : adjustedDamage;
+
+            double counterVulnerability = damageVulnerabilityManager.getBonusMultiplier(victim);
+            if (counterVulnerability > 0) {
+                reflectedDamage *= (1 + counterVulnerability);
+            }
+
+            Location counterLoc = victim.getLocation().add(0, 1.0, 0);
+            victim.getWorld().spawnParticle(Particle.ENCHANTED_HIT, counterLoc, 25, 0.3, 0.5, 0.3, 0.1);
+            victim.getWorld().spawnParticle(Particle.SWEEP_ATTACK, counterLoc, 4, 0.4, 0.4, 0.4, 0.0);
+            victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.2f, 1.0f);
+            victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 1.0f, 1.4f);
+
+            if (attacker != null && !attacker.equals(victim)) {
+                int roundedReflected = (int) Math.round(reflectedDamage);
+
+                healthManager.damage(attacker, reflectedDamage, victim);
+                spawnHologram(attacker, String.valueOf(roundedReflected),
+                        attacker.getLocation().add(0, attacker.getHeight() * 0.5, 0));
+
+                victim.sendMessage(MessageUtils.positive() + String.format(
+                        "§3Your %s hit §3%s §3for §c%d §3damage.",
+                        "Counter", attacker.getName(), roundedReflected
+                ));
+                attacker.sendMessage(MessageUtils.negative() + String.format(
+                        "§3%s's %s hit §3you §3for §c%d §3damage.",
+                        victim.getName(), "Counter", roundedReflected
+                ));
+            }
+            return;
+        }
 
         if (orbitShieldManager.hasActiveShield(victim)) {
             OrbitShieldType type = orbitShieldManager.getActiveType(victim);
@@ -130,6 +165,9 @@ public class CombatService {
         }
 
         healthManager.damage(victim, finalDamage, attacker);
+        if (abilityName.equals("Melee")) {
+            Thornheart.onMeleeDamageTaken(victim, attacker, healthManager);
+        }
         Bloodthirst.onDamageDealt(attacker, victim, finalDamage, healthManager);
         BloodMoon.onDamageDealt(attacker, victim, finalDamage, healthManager);
         if (abilityName.equals("Melee")) {

@@ -75,6 +75,10 @@ public class AbilityRegistry {
                 deps -> new SeekerBolt(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("seekerbolt")));
         register(AbilitySlot.OFFENSIVE, "shockmine",
                 deps -> new ShockMine(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("shockmine")));
+        register(AbilitySlot.OFFENSIVE, "backstabber",
+                deps -> new Backstabber(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), deps.damageVulnerabilityManager(), configManager.get("backstabber")));
+        register(AbilitySlot.OFFENSIVE, "ashenfield",
+                deps -> new AshenField(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("ashenfield")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -121,6 +125,10 @@ public class AbilityRegistry {
                 deps -> new Gust(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("gust")));
         register(AbilitySlot.UTILITY, "echodecoy",
                 deps -> new EchoDecoy(plugin, deps.cooldownManager(), deps.teamManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("echodecoy")));
+        register(AbilitySlot.UTILITY, "counter",
+                deps -> new Counter(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("counter")));
+        register(AbilitySlot.UTILITY, "taunt",
+                deps -> new Taunt(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), deps.combatService(), deps.debuffManager(), configManager.get("taunt")));
 
 
 
@@ -176,6 +184,12 @@ public class AbilityRegistry {
                 deps -> new Overcharge(deps.energyManager(), deps.playerHealthManager(), configManager.get("overcharge")));
         register(AbilitySlot.SUPPORT, "bloodprojectile",
                 deps -> new BloodProjectile(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("bloodprojectile")));
+        register(AbilitySlot.SUPPORT, "momentum",
+                deps -> new Momentum(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("momentum")));
+        register(AbilitySlot.SUPPORT, "lonewolf",
+                deps -> new LoneWolf(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.damageBuffManager(), deps.combatUpgradeManager(), configManager.get("lonewolf")));
+        register(AbilitySlot.SUPPORT, "thornheart",
+                deps -> new Thornheart(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("thornheart")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
@@ -212,6 +226,14 @@ public class AbilityRegistry {
                 deps -> new Cataclysm(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.combatService(), deps.demolitionService(), configManager.get("cataclysm")));
         register(AbilitySlot.ULTIMATE, "timestop",
                 deps -> new TimeStop(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.debuffManager(), configManager.get("timestop")));
+        register(AbilitySlot.ULTIMATE, "warhorn",
+                deps -> new WarHorn(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.damageBuffManager(), deps.speedBuffManager(), deps.playerHealthManager(), configManager.get("warhorn")));
+        register(AbilitySlot.ULTIMATE, "sanctuary",
+                deps -> new Sanctuary(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.shieldManager(), configManager.get("sanctuary")));
+        register(AbilitySlot.ULTIMATE, "intervention",
+                deps -> new Intervention(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.shieldManager(), configManager.get("intervention")));
+        register(AbilitySlot.ULTIMATE, "portal",
+                deps -> new Portal(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.structureManager(), configManager.get("portal")));
 
 
         // --- DEFAULTS ---
