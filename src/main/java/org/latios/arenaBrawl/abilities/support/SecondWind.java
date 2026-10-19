@@ -85,7 +85,7 @@ public class SecondWind implements Ability {
                     cancel();
                     return;
                 }
-                healthManager.heal(player, healPerPulse);
+                healthManager.heal(player, healPerPulse, getName());
                 player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0, 2, 0), 1, 0.3, 0.1, 0.3, 0.0);
                 done++;
             }

@@ -15,6 +15,7 @@ import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MeleeHitEffect;
+import org.latios.arenaBrawl.general.MessageUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -118,6 +119,17 @@ public class FlameSword implements Ability, MeleeHitEffect {
         Location loc = impactLocation != null ? impactLocation : victim.getLocation().add(0, 1, 0);
         loc.getWorld().spawnParticle(Particle.FLAME, loc, 25, 0.3, 0.4, 0.3, 0.08);
         loc.getWorld().spawnParticle(Particle.LAVA, loc, 5, 0.3, 0.3, 0.3, 0.0);
+
+        int roundedDamage = (int) Math.round(finalDamage);
+        attacker.sendMessage(MessageUtils.positive() + String.format(
+                "§3Your %s hit §3%s §3for §c%d §3damage.",
+                getName(), victim.getName(), roundedDamage
+        ));
+
+        victim.sendMessage(MessageUtils.negative() + String.format(
+                "§3%s's %s hit §3you §3for §c%d §3damage.",
+                attacker.getName(), getName(), roundedDamage
+        ));
     }
 
     @Override

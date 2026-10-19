@@ -9,6 +9,8 @@ import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
@@ -37,6 +39,7 @@ public class BoomerangAxe implements Ability {
     private final double maxDistance;
     private final double projectileSpeed;
     private final double hitRadius;
+    private final double groundHitRadius;
     private final double catchRadius;
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -49,7 +52,8 @@ public class BoomerangAxe implements Ability {
         this.energyCost = config.getDouble("energy-cost", 50.0);
         this.maxDistance = config.getDouble("max-distance", 22.0);
         this.projectileSpeed = config.getDouble("projectile-speed", 1.4);
-        this.hitRadius = config.getDouble("hit-radius", 1.3);
+        this.hitRadius = config.getDouble("hit-radius", 1.6);
+        this.groundHitRadius = config.getDouble("ground-hit-radius", 2.8);
         this.catchRadius = config.getDouble("catch-radius", 1.6);
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
@@ -132,9 +136,10 @@ public class BoomerangAxe implements Ability {
                     }
                 }
 
+                Location from = current.clone();
                 Location next = current.clone().add(direction.clone().multiply(projectileSpeed));
                 if (!returning && next.getBlock().getType().isSolid()) {
-                    beginReturn();
+                    handleGroundHit(next);
                     return;
                 }
 
@@ -149,7 +154,7 @@ public class BoomerangAxe implements Ability {
                 current.getWorld().spawnParticle(Particle.DUST, current, 2, 0.05, 0.05, 0.05, 0,
                         new Particle.DustOptions(Color.fromRGB(180, 180, 190), 1.0f));
 
-                damageNearby();
+                damageNearby(from, current);
 
                 if (!returning && traveled >= maxDistance) {
                     beginReturn();
@@ -162,21 +167,51 @@ public class BoomerangAxe implements Ability {
                 MatchSoundUtils.play(config, player, Sound.ITEM_TRIDENT_RETURN, 0.7f, 1.4f);
             }
 
-            private void damageNearby() {
-                for (Player target : current.getWorld().getPlayers()) {
+            private void handleGroundHit(Location impact) {
+                Location effectLoc = impact.clone().add(0, 0.15, 0);
+                effectLoc.getWorld().spawnParticle(Particle.EXPLOSION, effectLoc, 1, 0, 0, 0, 0);
+                effectLoc.getWorld().spawnParticle(Particle.CRIT, effectLoc, 20, 0.4, 0.2, 0.4, 0.08);
+                effectLoc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, effectLoc, 6, 0.4, 0.1, 0.4, 0.0);
+                MatchSoundUtils.play(config, player, Sound.ITEM_AXE_STRIP, 1.0f, 0.5f);
+                MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_ATTACK_CRIT, 0.8f, 0.9f);
+
+                damageAround(effectLoc, groundHitRadius);
+                beginReturn();
+            }
+
+            private void damageNearby(Location from, Location to) {
+                for (Player target : to.getWorld().getPlayers()) {
                     if (target.equals(player) || target.isDead()) continue;
                     if (!teamManager.isEnemy(player, target)) continue;
                     if (hitThisPass.contains(target.getUniqueId())) continue;
-                    if (target.getLocation().add(0, 1.0, 0).distanceSquared(current) > hitRadius * hitRadius) {
+                    if (!segmentIntersectsBox(target.getBoundingBox(), from.toVector(), to.toVector(), hitRadius)) {
                         continue;
                     }
 
                     hitThisPass.add(target.getUniqueId());
-                    combatService.applyAbilityDamage(player, target, damage, getName(), current);
-                    target.getWorld().playSound(target.getLocation(), Sound.ITEM_AXE_STRIP, 1.0f, 0.8f);
-                    target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1.0, 0),
-                            12, 0.2, 0.3, 0.2, 0.05);
+                    applyHit(target, to);
                 }
+            }
+
+            private void damageAround(Location center, double radius) {
+                for (Player target : center.getWorld().getPlayers()) {
+                    if (target.equals(player) || target.isDead()) continue;
+                    if (!teamManager.isEnemy(player, target)) continue;
+                    if (hitThisPass.contains(target.getUniqueId())) continue;
+                    if (target.getLocation().add(0, 1.0, 0).distanceSquared(center) > radius * radius) {
+                        continue;
+                    }
+
+                    hitThisPass.add(target.getUniqueId());
+                    applyHit(target, center);
+                }
+            }
+
+            private void applyHit(Player target, Location impact) {
+                combatService.applyAbilityDamage(player, target, damage, getName(), impact);
+                target.getWorld().playSound(target.getLocation(), Sound.ITEM_AXE_STRIP, 1.0f, 0.8f);
+                target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1.0, 0),
+                        12, 0.2, 0.3, 0.2, 0.05);
             }
 
             private void cleanup() {
@@ -188,5 +223,27 @@ public class BoomerangAxe implements Ability {
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
 
         return true;
+    }
+
+    /**
+     * Checks whether the sweep from {@code start} to {@code end} intersects the player's
+     * bounding box, expanded by {@code padding}. This replaces the old single-point check so
+     * fast-moving axes no longer tunnel through players between ticks.
+     */
+    private static boolean segmentIntersectsBox(BoundingBox box, Vector start, Vector end, double padding) {
+        BoundingBox expanded = box.clone().expand(padding);
+        if (expanded.contains(start)) {
+            return true;
+        }
+
+        Vector delta = end.clone().subtract(start);
+        double length = delta.length();
+        if (length < 1.0e-6) {
+            return false;
+        }
+
+        Vector direction = delta.multiply(1.0 / length);
+        RayTraceResult hit = expanded.rayTrace(start, direction, length);
+        return hit != null;
     }
 }

@@ -75,7 +75,7 @@ public class AbilityTriggerListener implements Listener {
         }
 
         if (abilitySlot == AbilitySlot.OFFENSIVE) {
-            holdTask.markRightClick(player);
+            holdTask.onRightClick(player);
             return;
         }
 

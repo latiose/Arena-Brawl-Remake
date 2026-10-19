@@ -18,6 +18,8 @@ import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 
 public class ShockMine implements Ability {
@@ -37,8 +39,7 @@ public class ShockMine implements Ability {
     private final double maxRange;
     private final int maxMines;
 
-    private int activeMines = 0;
-
+    private final Deque<ShockMineTask> activeMines = new ArrayDeque<>();
     public ShockMine(Plugin plugin, EnergyManager energyManager, TeamManager teamManager,
                      CombatService combatService, DebuffManager debuffManager, AbilityConfig config) {
         this.plugin = plugin;
@@ -65,11 +66,6 @@ public class ShockMine implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        if (activeMines >= maxMines) {
-            player.sendMessage("§eYou already have §6" + maxMines + " §emines placed!");
-            return false;
-        }
-
         RayTraceResult result = player.rayTraceBlocks(maxRange);
         if (result == null || result.getHitBlock() == null) {
             player.sendMessage(MessageUtils.noValidBlock());
@@ -79,13 +75,22 @@ public class ShockMine implements Ability {
         BlockFace face = result.getHitBlockFace() != null ? result.getHitBlockFace() : BlockFace.UP;
         Location location = result.getHitBlock().getRelative(face).getLocation().add(0.5, 0.1, 0.5);
 
+        // At the limit, remove the oldest mine (FIFO) instead of blocking the new placement.
+        while (activeMines.size() >= maxMines) {
+            ShockMineTask oldest = activeMines.pollFirst();
+            if (oldest == null) break;
+            oldest.deactivate();
+        }
+
         MatchSoundUtils.play(config, player, Sound.BLOCK_TRIPWIRE_ATTACH, 0.9f, 0.6f);
         MatchSoundUtils.play(config, player, Sound.BLOCK_BEACON_POWER_SELECT, 0.7f, 1.7f);
 
-        activeMines++;
-        new ShockMineTask(player, location, damage, triggerRadius, blastRadius, stunDurationMs,
-                 teamManager, combatService, debuffManager, () -> activeMines--)
-                .runTaskTimer(plugin, 0L, 2L);
+        final ShockMineTask[] holder = new ShockMineTask[1];
+        ShockMineTask mine = new ShockMineTask(player, location, damage, triggerRadius, blastRadius, stunDurationMs,
+                 teamManager, combatService, debuffManager, () -> activeMines.remove(holder[0]));
+        holder[0] = mine;
+        activeMines.addLast(mine);
+        mine.runTaskTimer(plugin, 0L, 2L);
 
         return true;
     }

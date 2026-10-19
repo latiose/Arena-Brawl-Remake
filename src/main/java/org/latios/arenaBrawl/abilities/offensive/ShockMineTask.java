@@ -55,6 +55,15 @@ public class ShockMineTask extends BukkitRunnable {
         if (onEnd != null) onEnd.run();
     }
 
+    /**
+     * Removes this mine without detonating it. Used when the owner has reached the
+     * mine limit and the oldest mine is replaced by a newly placed one.
+     */
+    public void deactivate() {
+        if (isCancelled()) return;
+        fade();
+    }
+
     @Override
     public void run() {
         ticks += INTERVAL_TICKS;
