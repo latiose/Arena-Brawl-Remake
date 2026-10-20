@@ -10,7 +10,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
@@ -41,13 +40,15 @@ public class EtherealBody implements Ability {
 
     @Override
     public String getDescription() {
-        return "Converts your body into an ethereal state, healing you for the total amount received afterwards.";
+        return "Converts your body into an ethereal state, absorbing 100% of incoming damage. "
+                + "When it ends, you heal for the total damage absorbed.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Duration", (durationMillis / 1000L) + "s"),
+                new AbilityStat("Mitigation", "100%"),
                 new AbilityStat("Effect", "Absorbs damage & heals back"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
@@ -56,8 +57,8 @@ public class EtherealBody implements Ability {
     @Override
     public boolean activate(Player player) {
         etherealBodyManager.activate(player, durationMillis);
-        MatchSoundUtils.play(config, player,  Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.6f);
-        MatchSoundUtils.play(config, player,  Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 1.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 10.0f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 10.0f, 1.5f);
 
         player.getWorld().spawnParticle(
                 Particle.DUST,

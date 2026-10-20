@@ -12,7 +12,6 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
@@ -105,8 +104,8 @@ public class WarHorn implements Ability {
             applyTo(player, ally);
         }
 
-        MatchSoundUtils.play(config, player, Sound.ITEM_GOAT_HORN_SOUND_0, 1.5f, 1.0f);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_ENDER_DRAGON_GROWL, 0.8f, 1.4f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_0, 10.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 10.0f, 1.4f);
 
         center.getWorld().spawnParticle(Particle.NOTE, center.clone().add(0, 2.0, 0), 30, 0.6, 0.4, 0.6, 1.0);
         center.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, center.clone().add(0, 1.0, 0), 60, 0.6, 0.8, 0.6, 0.2);

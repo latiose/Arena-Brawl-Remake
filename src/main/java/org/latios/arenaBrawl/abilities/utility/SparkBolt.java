@@ -8,7 +8,6 @@ import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -70,7 +69,7 @@ public class SparkBolt implements Ability {
                     + "§3's Spark Bolt! Energy regen halved for " + (durationMillis / 1000L) + "s.");
         }
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.5f, 2.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 10.0f, 2.0f);
 
         return true;
     }

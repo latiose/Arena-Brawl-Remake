@@ -20,7 +20,6 @@ import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashMap;
@@ -100,7 +99,7 @@ public class VenomBloom implements Ability {
         Location start = player.getEyeLocation();
         Vector velocity = start.getDirection().normalize().multiply(projectileSpeed);
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_SPLASH_POTION_THROW, 1.0f, 0.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SPLASH_POTION_THROW, 10.0f, 0.8f);
 
         new BukkitRunnable() {
             final Location current = start.clone();
@@ -154,7 +153,7 @@ public class VenomBloom implements Ability {
 
     private void createCloud(Player caster, Location center) {
         center.getWorld().playSound(center, Sound.ENTITY_SPLASH_POTION_BREAK, 1.0f, 0.7f);
-        MatchSoundUtils.play(config, caster, Sound.BLOCK_BREWING_STAND_BREW, 1.0f, 0.6f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BREWING_STAND_BREW, 10.0f, 0.6f);
         center.getWorld().spawnParticle(Particle.DUST, center, 40, 0.5, 0.4, 0.5,
                 new Particle.DustOptions(Color.fromRGB(70, 180, 50), 1.6f));
 

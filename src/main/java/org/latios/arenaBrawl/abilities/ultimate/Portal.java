@@ -18,7 +18,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.abilities.structures.PortalStructure;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -126,8 +125,8 @@ public class Portal implements Ability {
         structureManager.register(portal);
         portal.start();
 
-        MatchSoundUtils.play(config, player, Sound.BLOCK_PORTAL_TRIGGER, 1.2f, 1.4f);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_PORTAL_TRIGGER, 10.0f, 1.4f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10.0f, 1.0f);
 
         portalA.getWorld().spawnParticle(Particle.PORTAL, portalA.clone().add(0, 1.0, 0), 40, 0.4, 0.8, 0.4, 0.5);
         portalB.getWorld().spawnParticle(Particle.PORTAL, portalB.clone().add(0, 1.0, 0), 40, 0.4, 0.8, 0.4, 0.5);

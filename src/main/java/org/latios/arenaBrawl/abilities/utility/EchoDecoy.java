@@ -18,7 +18,6 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -96,8 +95,8 @@ public class EchoDecoy implements Ability {
             stand.getEquipment().setItemInMainHand(player.getInventory().getItemInMainHand());
         });
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_ILLUSIONER_PREPARE_MIRROR, 0.9f, 1.3f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ILLUSIONER_PREPARE_MIRROR, 10.0f, 1.3f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 10.0f, 1.6f);
 
         new EchoDecoyTask(decoy, player, direction, moveSpeed, baitRadius, surpriseRadius,
                 armDelayMs, durationMs, stunDurationMs, teamManager, debuffManager)

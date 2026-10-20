@@ -15,7 +15,6 @@ import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.MatchManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -90,8 +89,8 @@ public class TimeStop implements Ability {
             victim.getWorld().playSound(victim.getLocation(), Sound.BLOCK_GLASS_BREAK, 0.8f, 0.6f);
         }
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 0.6f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_BEACON_DEACTIVATE, 1.0f, 0.7f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 10.0f, 0.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 10.0f, 0.7f);
 
         player.sendMessage("§bYou shattered time! §7" + victims.size()
                 + (victims.size() == 1 ? " enemy is" : " enemies are") + " frozen in place.");

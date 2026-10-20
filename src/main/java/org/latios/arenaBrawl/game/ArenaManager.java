@@ -13,9 +13,12 @@ import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
+import org.latios.arenaBrawl.abilities.ultimate.GuardianColossusEntityManager;
+import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
 import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
+import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -68,6 +71,9 @@ public class ArenaManager {
     private final ScavengerManager scavengerManager;
     private final SkeletonEntityManager skeletonEntityManager;
     private final SwordSelectionManager swordSelectionManager;
+    private final ShadowCloakManager shadowCloakManager;
+    private final SoulLinkManager soulLinkManager;
+    private final GuardianColossusEntityManager guardianColossusEntityManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
@@ -77,7 +83,8 @@ public class ArenaManager {
                         LifeLeechManager lifeLeechManager, StructureDemolitionService demolitionService,EnergyModifierManager energyModifierManager, DamageBuffManager damageBuffManager,
                         EtherealBodyManager etherealBodyManager, DamageVulnerabilityManager damageVulnerabilityManager,SpeedBuffManager speedBuffManager,ZombieEntityManager zombieEntityManager,
                         ScavengerManager scavengerManager,SkeletonEntityManager skeletonEntityManager,
-                        SwordSelectionManager swordSelectionManager) {
+                        SwordSelectionManager swordSelectionManager, ShadowCloakManager shadowCloakManager,
+                        SoulLinkManager soulLinkManager, GuardianColossusEntityManager guardianColossusEntityManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -113,6 +120,9 @@ public class ArenaManager {
         this.scavengerManager = scavengerManager;
         this.skeletonEntityManager = skeletonEntityManager;
         this.swordSelectionManager = swordSelectionManager;
+        this.shadowCloakManager = shadowCloakManager;
+        this.soulLinkManager = soulLinkManager;
+        this.guardianColossusEntityManager = guardianColossusEntityManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -145,7 +155,8 @@ public class ArenaManager {
 
         List<Player> allPlayers = List.copyOf(players);
         AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,
-                energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager,scavengerManager,skeletonEntityManager);
+                energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager,scavengerManager,skeletonEntityManager,
+                shadowCloakManager,soulLinkManager,guardianColossusEntityManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(false);

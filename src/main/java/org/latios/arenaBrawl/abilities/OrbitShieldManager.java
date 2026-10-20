@@ -14,7 +14,6 @@ import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 
 import java.util.*;
 
@@ -218,6 +217,6 @@ public class OrbitShieldManager {
 
     private void playShieldBreakSound(Player player, OrbitShieldType type) {
         if (player == null || !player.isOnline() || type == null || matchManager == null) return;
-        MatchSoundUtils.play(matchManager, player, type.getBreakSound(), 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), type.getBreakSound(), 10.0f, 1.0f);
     }
 }

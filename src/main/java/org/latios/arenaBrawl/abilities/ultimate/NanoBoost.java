@@ -8,7 +8,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
@@ -94,7 +93,7 @@ public class NanoBoost implements Ability {
         damageBuffManager.applyBuff(target, damageIncrease, durationMillis, "Nano boost");
 
         target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 40, 0.4, 0.8, 0.4);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.3f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 10.0f, 1.3f);
 
         target.sendMessage("§eYou're powered up! Get in there!");
         player.sendMessage("§eYou nano boosted §e" + target.getName() + "§e!");

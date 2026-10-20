@@ -14,7 +14,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashMap;
@@ -103,8 +102,8 @@ public class SoulCannon implements Ability {
         }
 
         float pitch = (float) lerp(1.8, 0.6, t);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_WARDEN_SONIC_BOOM, (float) lerp(0.3, 1.0, t), pitch);
-        MatchSoundUtils.play(config, player, Sound.PARTICLE_SOUL_ESCAPE, 1.0f, pitch);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 10.0f, pitch);
+        player.getWorld().playSound(player.getLocation(), Sound.PARTICLE_SOUL_ESCAPE, 10.0f, pitch);
 
         final Location current = player.getEyeLocation().clone();
         final Vector direction = current.getDirection().normalize();

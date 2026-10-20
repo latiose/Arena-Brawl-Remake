@@ -7,6 +7,7 @@ import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
 
 public class DamageBuffParticleTask extends BukkitRunnable {
 
@@ -14,15 +15,19 @@ public class DamageBuffParticleTask extends BukkitRunnable {
     private static final int PARTICLE_COUNT = 12;
 
     private final DamageBuffManager damageBuffManager;
+    private final ShadowCloakManager shadowCloakManager;
 
-    public DamageBuffParticleTask(DamageBuffManager damageBuffManager) {
+    public DamageBuffParticleTask(DamageBuffManager damageBuffManager, ShadowCloakManager shadowCloakManager) {
         this.damageBuffManager = damageBuffManager;
+        this.shadowCloakManager = shadowCloakManager;
     }
 
     @Override
     public void run() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (damageBuffManager.getMultiplier(player) <= 1.0) continue; // no active buff, skip
+
+            if (shadowCloakManager != null && shadowCloakManager.isActive(player)) continue;
 
             spawnFireRing(player);
         }

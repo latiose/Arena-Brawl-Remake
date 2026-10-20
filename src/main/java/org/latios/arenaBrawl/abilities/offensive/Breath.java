@@ -13,7 +13,6 @@ import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.ArrayList;
@@ -75,7 +74,7 @@ public abstract class Breath implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        MatchSoundUtils.play(matchManager, player, getCastSound(), 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), getCastSound(), 10.0f, 1.0f);
 
         Location eye = player.getLocation().add(0, EYE_HEIGHT + (player.isSneaking() ? SNEAK_EYE_OFFSET : 0), 0);
 

@@ -12,7 +12,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.DamageVulnerabilityManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -66,8 +65,8 @@ public class MyriadTruths implements Ability {
     public boolean activate(Player player) {
         Location center = player.getLocation();
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_WITHER_SPAWN, 0.7f, 1.5f);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, 10.0f, 1.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 10.0f, 1.2f);
 
         center.getWorld().spawnParticle(Particle.WITCH, center.clone().add(0, 1, 0), 80, 2.5, 1.0, 2.5, 0.1);
         center.getWorld().spawnParticle(Particle.SMOKE, center.clone().add(0, 1, 0), 50, 2.0, 1.0, 2.0, 0.05);

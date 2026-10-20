@@ -10,7 +10,6 @@ import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -59,7 +58,7 @@ public class StaticField implements Ability {
     @Override
     public boolean activate(Player player) {
         Location center = player.getLocation();
-        MatchSoundUtils.play(config, player, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.6f, 1.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 10.0f, 1.8f);
         int points = 36;
         for (int i = 0; i < points; i++) {
             double angle = 2 * Math.PI * i / points;
@@ -79,7 +78,7 @@ public class StaticField implements Ability {
                 combatService.applyAbilityDamage(player, enemy, damage, getName());
 
                 debuffManager.tryApply(enemy, DebuffType.SILENCE, silenceDurationMs);
-                MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_HURT, 0.8f, 1.5f);
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_HURT, 10.0f, 1.5f);
                 enemy.getWorld().spawnParticle(Particle.CRIT, enemy.getLocation().add(0, 1.0, 0), 15, 0.3, 0.3, 0.3, 0.1);
             }
         }

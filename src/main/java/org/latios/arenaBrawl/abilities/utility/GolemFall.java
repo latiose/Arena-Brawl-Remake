@@ -21,7 +21,6 @@ import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.PlacedStructure;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -137,8 +136,8 @@ public class GolemFall implements Ability {
 
     private void triggerImpact(Player caster, Location impactLocation) {
         impactLocation.getWorld().spawnParticle(Particle.EXPLOSION, impactLocation, 3);
-        MatchSoundUtils.play(config, caster,Sound.BLOCK_ANVIL_LAND, 1.5f, 0.8f);
-        MatchSoundUtils.play(config, caster,Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_ANVIL_LAND, 10.0f, 0.8f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_IRON_GOLEM_ATTACK, 10.0f, 1f);
 
 
         List<PlacedStructure> nearbyStructures = demolitionService.findStructuresInRadius(impactLocation, impactRadius);

@@ -15,7 +15,6 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -67,7 +66,7 @@ public class ArenaDomain implements Ability {
     @Override
     public boolean activate(Player player) {
         Location center = player.getLocation().clone();
-        MatchSoundUtils.play(config, player,Sound.BLOCK_BEACON_ACTIVATE, 1.5f, 0.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 10.0f, 0.8f);
 
         new BukkitRunnable() {
             int ticks = 0;
@@ -79,7 +78,7 @@ public class ArenaDomain implements Ability {
                 ticks++;
 
                 if (ticks >= durationSeconds * 20 || !player.isOnline() || player.isDead()) {
-                    MatchSoundUtils.play(config, player,Sound.BLOCK_BEACON_DEACTIVATE, 1.5f, 1.2f);
+                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 10.0f, 1.2f);
                     cancel();
                     return;
                 }
@@ -87,7 +86,7 @@ public class ArenaDomain implements Ability {
                 Location playerLoc = player.getLocation();
                 Vector fromCenterToPlayer = playerLoc.toVector().subtract(center.toVector()).setY(0);
                 if (fromCenterToPlayer.lengthSquared() > radiusSquared) {
-                    MatchSoundUtils.play(config, player,Sound.BLOCK_GLASS_BREAK, 1.5f, 0.5f);
+                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_GLASS_BREAK, 10.0f, 0.5f);
                     cancel();
                     return;
                 }
@@ -117,7 +116,7 @@ public class ArenaDomain implements Ability {
                         newLoc.setPitch(targetLoc.getPitch());
 
                         target.teleport(newLoc);
-                        MatchSoundUtils.play(config, player,Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 0.5f);
+                        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 10.0f, 0.5f);
                         target.getWorld().spawnParticle(Particle.CRIT, targetLoc.add(0, 1, 0), 10, 0.2, 0.5, 0.2, 0.05);
                     }
                 }

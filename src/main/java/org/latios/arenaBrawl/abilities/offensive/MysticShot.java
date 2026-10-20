@@ -14,7 +14,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -73,7 +72,7 @@ public class MysticShot implements Ability {
     public boolean activate(Player player) {
         Location startLoc = player.getEyeLocation().subtract(0, 0.2, 0);
         Vector direction = startLoc.getDirection().normalize();
-        MatchSoundUtils.play(config, player,Sound.ENTITY_FIREWORK_ROCKET_SHOOT, 1.0f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_SHOOT, 10.0f, 1.6f);
 
         new BukkitRunnable() {
             private Location currentLoc = startLoc.clone();
@@ -89,7 +88,7 @@ public class MysticShot implements Ability {
 
                 if (currentLoc.getBlock().getType().isSolid()) {
                     currentLoc.getWorld().spawnParticle(Particle.CRIT, currentLoc, 10, 0.2, 0.2, 0.2, 0.1);
-                    MatchSoundUtils.play(config, player,Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.5f);
+                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 10.0f, 1.5f);
                     cancel();
                     return;
                 }

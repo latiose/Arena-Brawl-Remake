@@ -13,7 +13,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MeleeHitEffect;
 import org.latios.arenaBrawl.general.MessageUtils;
 
@@ -76,8 +75,8 @@ public class FlameSword implements Ability, MeleeHitEffect {
         stop(id);
         ACTIVE_UNTIL.put(id, System.currentTimeMillis() + durationTicks * 50L);
         energyManager.addModifier(player, "flame_sword", energyModifier, durationTicks * 50L);
-        MatchSoundUtils.play(config, player, Sound.ITEM_FIRECHARGE_USE, 1.0f, 0.7f);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 0.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_FIRECHARGE_USE, 10.0f, 0.7f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 10.0f, 0.8f);
         player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 1, 0), 40, 0.5, 0.8, 0.5, 0.08);
 
         BukkitRunnable task = new BukkitRunnable() {

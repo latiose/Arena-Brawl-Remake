@@ -16,7 +16,6 @@ import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.general.CombatService;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -94,7 +93,7 @@ public class DivineJudgment implements Ability {
         shieldManager.applyShield(target, 1.0, durationMillis, "Divine judgment");
         target.getWorld().spawnParticle(Particle.END_ROD, target.getLocation().add(0, 1, 0), 30, 0.3, 1, 0.3);
         target.sendMessage("§eYou are protected by Divine Judgment! Go!");
-        MatchSoundUtils.play(config, player, Sound.ITEM_TOTEM_USE, 1f, 1f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 10.0f, 1f);
 
         new BukkitRunnable() {
             int ticksElapsed = 0;
@@ -119,7 +118,7 @@ public class DivineJudgment implements Ability {
     private void triggerExplosion(Player caster) {
         Location center = caster.getLocation();
         center.getWorld().spawnParticle(Particle.EXPLOSION, center, 5);
-        MatchSoundUtils.play(config, caster, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.8f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10.0f, 0.8f);
 
         for (Entity nearby : center.getWorld().getNearbyEntities(center, explosionRadius, explosionRadius, explosionRadius)) {
             if (nearby instanceof Player target && teamManager.isEnemy(caster, target)) {

@@ -17,7 +17,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.HashSet;
@@ -70,8 +69,8 @@ public class MagneticImpulse implements Ability {
     public boolean activate(Player player) {
         Location casterLoc = player.getLocation();
 
-        MatchSoundUtils.play(config, player,Sound.BLOCK_BEACON_POWER_SELECT, 1.2f, 0.5f);
-        MatchSoundUtils.play(config, player,Sound.ENTITY_IRON_GOLEM_ATTACK, 1.0f, 1.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 10.0f, 0.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_IRON_GOLEM_ATTACK, 10.0f, 1.8f);
 
         Set<Player> targets = new HashSet<>();
         for (Entity entity : casterLoc.getWorld().getNearbyEntities(casterLoc, radius, radius, radius)) {

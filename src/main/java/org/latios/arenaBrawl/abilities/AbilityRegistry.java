@@ -79,6 +79,10 @@ public class AbilityRegistry {
                 deps -> new Backstabber(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), deps.damageVulnerabilityManager(), configManager.get("backstabber")));
         register(AbilitySlot.OFFENSIVE, "ashenfield",
                 deps -> new AshenField(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("ashenfield")));
+        register(AbilitySlot.OFFENSIVE, "hemorrhage",
+                deps -> new Hemorrhage(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("hemorrhage")));
+        register(AbilitySlot.OFFENSIVE, "contagionbomb",
+                deps -> new ContagionBomb(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("contagionbomb")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -129,6 +133,10 @@ public class AbilityRegistry {
                 deps -> new Counter(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("counter")));
         register(AbilitySlot.UTILITY, "taunt",
                 deps -> new Taunt(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), deps.combatService(), deps.debuffManager(), configManager.get("taunt")));
+        register(AbilitySlot.UTILITY, "tether",
+                deps -> new Tether(plugin, deps.cooldownManager(), deps.teamManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("tether")));
+        register(AbilitySlot.UTILITY, "shadowcloak",
+                deps -> new ShadowCloak(deps.cooldownManager(), deps.shadowCloakManager(), deps.combatUpgradeManager(), configManager.get("shadowcloak")));
 
 
 
@@ -190,6 +198,8 @@ public class AbilityRegistry {
                 deps -> new LoneWolf(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.damageBuffManager(), deps.combatUpgradeManager(), configManager.get("lonewolf")));
         register(AbilitySlot.SUPPORT, "thornheart",
                 deps -> new Thornheart(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("thornheart")));
+        register(AbilitySlot.SUPPORT, "vitalsiphon",
+                deps -> new VitalSiphon(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.combatService(), deps.combatUpgradeManager(), configManager.get("vitalsiphon")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
@@ -234,6 +244,10 @@ public class AbilityRegistry {
                 deps -> new Intervention(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.shieldManager(), configManager.get("intervention")));
         register(AbilitySlot.ULTIMATE, "portal",
                 deps -> new Portal(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.structureManager(), configManager.get("portal")));
+        register(AbilitySlot.ULTIMATE, "soullink",
+                deps -> new SoulLink(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.soulLinkManager(), configManager.get("soullink")));
+        register(AbilitySlot.ULTIMATE, "guardiancolossus",
+                deps -> new GuardianColossus(deps.cooldownManager(), deps.usageManager(), deps.guardianColossusEntityManager(), configManager.get("guardiancolossus")));
 
 
         // --- DEFAULTS ---
@@ -249,6 +263,12 @@ public class AbilityRegistry {
 
     public Ability create(AbilitySlot slot, String id, AbilityDependencies deps) {
         AbilityFactory factory = registry.get(slot).get(id);
+        if (factory == null) {
+            // The id can be stale if an ability was removed while players still
+            // have it saved in abilities.yml. Fall back to the slot default so
+            // match creation (and previews) never fail on an unknown id.
+            factory = registry.get(slot).get(getDefault(slot));
+        }
         if (factory == null) {
             throw new IllegalArgumentException("Ability with id '" + id + "' doesn't exist");
         }

@@ -14,7 +14,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -98,7 +97,7 @@ public class ParticleBeam implements Ability {
                 }
             }
         }
-        MatchSoundUtils.play(config, player,Sound.BLOCK_BEACON_POWER_SELECT, 2f, 2f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 10.0f, 2f);
 
         for (Player victim : hitEnemies) {
             combatService.applyAbilityDamage(player, victim, damage, getName());

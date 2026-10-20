@@ -21,7 +21,6 @@ import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -86,8 +85,8 @@ public class IceSpear implements Ability {
         Location current = player.getEyeLocation().clone();
         Vector direction = current.getDirection().normalize();
 
-        MatchSoundUtils.play(config, player, Sound.ITEM_TRIDENT_THROW, 1.0f, 1.6f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_GLASS_BREAK, 0.5f, 2.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_THROW, 10.0f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_GLASS_BREAK, 10.0f, 2.0f);
 
         new BukkitRunnable() {
             double traveled = 0;
@@ -157,7 +156,7 @@ public class IceSpear implements Ability {
         drawImpactRing(impact);
 
         impact.getWorld().playSound(impact, Sound.BLOCK_GLASS_BREAK, 1.2f, 0.8f);
-        MatchSoundUtils.play(config, caster, Sound.ENTITY_PLAYER_HURT_FREEZE, 1.0f, 1.0f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_PLAYER_HURT_FREEZE, 10.0f, 1.0f);
 
         for (Entity entity : impact.getWorld().getNearbyEntities(impact, radius, radius, radius)) {
             if (!(entity instanceof Player victim)) continue;

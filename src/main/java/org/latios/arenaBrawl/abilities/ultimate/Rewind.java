@@ -9,7 +9,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -61,8 +60,8 @@ public class Rewind implements Ability {
         final UUID playerUuid = player.getUniqueId();
         ACTIVE_REWUNDS.put(playerUuid, playerUuid);
 
-        MatchSoundUtils.play(config, player, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.2f, 1.8f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_BEACON_POWER_SELECT, 1.0f, 1.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 10.0f, 1.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 10.0f, 1.5f);
 
         new BukkitRunnable() {
             int ticksElapsed = 0;

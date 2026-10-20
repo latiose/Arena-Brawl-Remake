@@ -16,7 +16,6 @@ import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.general.CombatService;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -84,8 +83,8 @@ public class NinjaDash implements Ability {
     public boolean activate(Player player) {
         Vector direction = player.getLocation().getDirection().normalize();
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.5f, 1.8f);
-        MatchSoundUtils.play(config, player, Sound.ITEM_TRIDENT_THROW, 1.2f, 0.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 10.0f, 1.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_THROW, 10.0f, 0.6f);
 
         Set<Player> hitEnemies = new HashSet<>();
 

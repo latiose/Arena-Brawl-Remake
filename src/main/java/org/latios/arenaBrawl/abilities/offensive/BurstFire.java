@@ -14,7 +14,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -53,8 +52,8 @@ public class BurstFire implements Ability {
         Location startLoc = player.getEyeLocation().subtract(0, 0.2, 0);
         Vector direction = startLoc.getDirection().normalize();
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 0.8f, 1.8f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 2.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_BLAST, 10.0f, 1.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 10.0f, 2.0f);
 
         new BukkitRunnable() {
             int shotsFired = 0;

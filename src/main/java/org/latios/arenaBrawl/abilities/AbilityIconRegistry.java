@@ -55,6 +55,8 @@ public class AbilityIconRegistry {
         icons.put("shockmine", Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
         icons.put("backstabber", Material.DIAMOND_SWORD);
         icons.put("ashenfield", Material.CAMPFIRE);
+        icons.put("hemorrhage", Material.REDSTONE);
+        icons.put("contagionbomb", Material.SLIME_BALL);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
@@ -80,6 +82,8 @@ public class AbilityIconRegistry {
         icons.put("echodecoy", Material.ARMOR_STAND);
         icons.put("counter", Material.SHIELD);
         icons.put("taunt", Material.TURTLE_HELMET);
+        icons.put("tether", Material.IRON_CHAIN);
+        icons.put("shadowcloak", Material.BLACK_DYE);
         icons.put("portal", Material.ENDER_PEARL);
 
         // --- SUPPORT ---
@@ -112,6 +116,7 @@ public class AbilityIconRegistry {
         icons.put("momentum", Material.RABBIT_FOOT);
         icons.put("lonewolf", Material.BONE);
         icons.put("thornheart", Material.SWEET_BERRIES);
+        icons.put("vitalsiphon", Material.FERMENTED_SPIDER_EYE);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);
@@ -134,6 +139,8 @@ public class AbilityIconRegistry {
         icons.put("warhorn", Material.GOAT_HORN);
         icons.put("sanctuary", Material.BEACON);
         icons.put("intervention", Material.ENCHANTED_GOLDEN_APPLE);
+        icons.put("soullink", Material.SOUL_LANTERN);
+        icons.put("guardiancolossus", Material.IRON_GOLEM_SPAWN_EGG);
     }
 
     public Material getIcon(AbilitySlot slot, String id) {

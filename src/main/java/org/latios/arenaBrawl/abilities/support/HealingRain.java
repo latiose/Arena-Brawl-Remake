@@ -12,7 +12,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -63,8 +62,8 @@ public class HealingRain implements Ability {
         Location groundCenter = player.getLocation().getBlock().getLocation().add(0.5, 0.1, 0.5);
         Location cloudCenter = groundCenter.clone().add(0, cloudHeight, 0);
 
-        MatchSoundUtils.play(config, player,  Sound.WEATHER_RAIN, 1.0f, 1.2f);
-        MatchSoundUtils.play(config, player,  Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.WEATHER_RAIN, 10.0f, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 10.0f, 1.5f);
 
 
         new BukkitRunnable() {

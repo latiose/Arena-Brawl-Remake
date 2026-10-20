@@ -26,7 +26,7 @@ leaderboard-signs:
   - { x: -0.75, y: -58.51, z: 35.7 }
   - { x: -1.75, y: -58.51, z: 35.7 }
   - { x: -2.75, y: -58.51, z: 35.7 }
-  - { x: 1.75, y: -59.51, z: 35.7 }w
+  - { x: 1.75, y: -59.51, z: 35.7 }
   - { x: 0.75, y: -59.51, z: 35.7 }
   - { x: -0.75, y: -59.51, z: 35.7 }
   - { x: -1.75, y: -59.51, z: 35.7 }
@@ -386,6 +386,26 @@ ability-values:
     duration-ticks: 100
     pulse-interval-ticks: 20
 
+  hemorrhage:
+    energy-cost: 40.0
+    damage: 90.0
+    range: 4.5
+    cone-degrees: 80.0
+    antiheal-percent: 40.0
+    antiheal-duration-ms: 4000
+
+  contagionbomb:
+    energy-cost: 60.0
+    impact-damage: 180.0
+    split-damage: 120.0
+    ground-damage: 120.0
+    ally-radius: 4.0
+    ground-radius: 3.0
+    hitbox-radius: 1.9
+    projectile-speed: 1.6
+    fuse-ms: 2500
+    max-flight-ticks: 80
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -502,14 +522,20 @@ ability-values:
     duration-ms: 5000
     energy-per-hit: 10.0
 
-  grapplinghook:
+  tether:
     cooldown-ms: 30000
-    max-target-distance: 25.0
-    max-wall-height: 14.0
-    extra-height: 3.0
-    pull-speed: 1.1
-    climb-speed: 0.85
-    ledge-push: 0.45
+    max-range: 20.0
+    break-distance: 8.0
+    duration-ms: 3000
+    pull-strength: 1.1
+    slow-duration-ms: 1000
+    tick-interval-ticks: 5
+
+  shadowcloak:
+    cooldown-ms: 28000
+    duration-ms: 3000
+    damage-bonus: 0.25
+    speed-amplifier: 0
 
   counter:
     cooldown-ms: 22000
@@ -697,7 +723,7 @@ ability-values:
     stationary-break-ms: 500
 
   lonewolf:
-    cooldown-ms:
+    cooldown-ms: 35000
     duration-ms: 8000
     heal-per-second: 25.0
     ally-radius: 10.0
@@ -708,6 +734,13 @@ ability-values:
     duration-ms: 5000
     thorn-damage: 100.0
     heal-per-hit: 80.0
+
+  vitalsiphon:
+    cooldown-ms: 30000
+    max-range: 16.0
+    duration-ms: 4000
+    damage-per-second: 50.0
+    heal-per-second: 65.0
 
   # --- ULTIMATE ---
   shieldwall:
@@ -849,6 +882,24 @@ ability-values:
     charge-time-ms: 60000
     max-target-distance: 20.0
     portal-radius: 1.4
+
+  soullink:
+    charge-time-millis: 60000
+    duration-ms: 6000
+    reflect-percent: 0.30
+
+  guardiancolossus:
+    charge-time-millis: 60000
+    duration-ms: 10000
+    hits-to-kill: 30
+    max-health: 3000
+    attack-damage: 60.0
+    taunt-radius: 8.0
+    taunt-interval-ms: 2000
+    taunt-slow-ms: 800
+    taunt-pull-strength: 0.25
+    teleport-timeout-millis: 60000
+    attack-cooldown-millis: 1000
 
 rune-values:
   speed:

@@ -12,7 +12,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
 
@@ -71,7 +70,7 @@ public class Berserk implements Ability {
 
         BERSERK_ACTIVE_PLAYERS.add(uuid);
 
-        MatchSoundUtils.play(config, player,Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 0.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 10.0f, 0.8f);
         spawnFlameRings(player);
         spawnLavaRing(player);
 

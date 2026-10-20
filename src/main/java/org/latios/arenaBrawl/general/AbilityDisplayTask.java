@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 import org.latios.arenaBrawl.abilities.AbilitySlot;
+import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
 import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 
 public class AbilityDisplayTask extends BukkitRunnable {
@@ -17,7 +18,8 @@ public class AbilityDisplayTask extends BukkitRunnable {
     private final AbilityManager abilityManager;
     private final SwordSelectionManager swordSelectionManager;
 
-    public AbilityDisplayTask(AbilityManager abilityManager, SwordSelectionManager swordSelectionManager) {
+    public AbilityDisplayTask(AbilityManager abilityManager, SwordSelectionManager swordSelectionManager,
+                              ShadowCloakManager shadowCloakManager) {
         this.abilityManager = abilityManager;
         this.swordSelectionManager = swordSelectionManager;
     }
@@ -25,6 +27,7 @@ public class AbilityDisplayTask extends BukkitRunnable {
     @Override
     public void run() {
         for (Player player : Bukkit.getOnlinePlayers()) {
+
             for (AbilitySlot slot : AbilitySlot.values()) {
                 updateSlot(player, slot);
             }

@@ -13,7 +13,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -57,7 +56,7 @@ public class RocketGrab implements Ability {
     public boolean activate(Player player) {
         Location startLoc = player.getEyeLocation().subtract(0, 0.2, 0);
         Vector direction = startLoc.getDirection().normalize();
-        MatchSoundUtils.play(config, player,Sound.ITEM_CROSSBOW_SHOOT, 1.0f, 0.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_CROSSBOW_SHOOT, 10.0f, 0.6f);
 
         new BukkitRunnable() {
             private Location currentLoc = startLoc.clone();
@@ -72,7 +71,7 @@ public class RocketGrab implements Ability {
                 currentLoc.getWorld().spawnParticle(Particle.SCRAPE, currentLoc, 1, 0, 0, 0, 0);
 
                 if (currentLoc.getBlock().getType().isSolid()) {
-                    MatchSoundUtils.play(config, player,Sound.BLOCK_ANVIL_PLACE, 0.6f, 1.8f);
+                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 10.0f, 1.8f);
                     cancel();
                     return;
                 }
@@ -97,7 +96,7 @@ public class RocketGrab implements Ability {
     }
 
     private void pullEnemyOverTime(Player caster, Player target) {
-        MatchSoundUtils.play(config, caster,Sound.BLOCK_CHAIN_BREAK, 1.0f, 0.8f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_CHAIN_BREAK, 10.0f, 0.8f);
 
 
         new BukkitRunnable() {

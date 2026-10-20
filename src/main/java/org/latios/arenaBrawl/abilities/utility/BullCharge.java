@@ -14,7 +14,6 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MovementLockManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -74,7 +73,7 @@ public class BullCharge implements Ability {
         movementLockManager.lock(player);
 
 
-        MatchSoundUtils.play(config, player,Sound.ENTITY_COW_AMBIENT, 1f, 0.7f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_COW_AMBIENT, 10.0f, 0.7f);
         player.sendMessage("§eMoooove out of the way!");
         new BullChargeTask(player, direction, demolitionService, movementLockManager)
                 .runTaskTimer(plugin, 0L, 1L);

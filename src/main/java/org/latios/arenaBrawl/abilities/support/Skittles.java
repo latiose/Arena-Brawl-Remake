@@ -14,7 +14,6 @@ import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
@@ -147,7 +146,7 @@ public class Skittles implements Ability {
     }
 
     private void playEatFeedback(Player player, SkittleColor color) {
-        MatchSoundUtils.play(config, player,  Sound.ENTITY_GENERIC_EAT, 1f, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EAT, 10.0f, 1.2f);
 
         Particle.DustOptions dust = new Particle.DustOptions(getParticleColor(color), 1.2f);
         player.getWorld().spawnParticle(Particle.DUST, player.getLocation().add(0, 1.2, 0), 15, 0.3, 0.3, 0.3, dust);

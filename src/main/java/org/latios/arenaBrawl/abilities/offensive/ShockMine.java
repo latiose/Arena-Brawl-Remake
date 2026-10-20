@@ -14,7 +14,6 @@ import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -82,8 +81,8 @@ public class ShockMine implements Ability {
             oldest.deactivate();
         }
 
-        MatchSoundUtils.play(config, player, Sound.BLOCK_TRIPWIRE_ATTACH, 0.9f, 0.6f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_BEACON_POWER_SELECT, 0.7f, 1.7f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_TRIPWIRE_ATTACH, 10.0f, 0.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 10.0f, 1.7f);
 
         final ShockMineTask[] holder = new ShockMineTask[1];
         ShockMineTask mine = new ShockMineTask(player, location, damage, triggerRadius, blastRadius, stunDurationMs,

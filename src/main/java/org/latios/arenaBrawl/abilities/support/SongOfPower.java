@@ -15,7 +15,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -110,7 +109,7 @@ public class SongOfPower implements Ability {
                     return;
                 }
                 Location loc = caster.getLocation();
-                MatchSoundUtils.play(config, caster,  Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.2f);
+                caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 10.0f, 1.2f);
                 loc.getWorld().spawnParticle(Particle.NOTE, loc.clone().add(0, 1.5, 0), 4, 0.5, 0.3, 0.5, 0.1);
 
                 ticksElapsed += 20;

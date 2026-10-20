@@ -19,7 +19,6 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -88,7 +87,7 @@ public class BloodProjectile implements Ability {
         });
         EntityCleanupUtils.markAsArenaEntity(orb);
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_WITCH_THROW, 0.9f, 0.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITCH_THROW, 10.0f, 0.8f);
 
         new BloodOrbTask(orb, player, target).runTaskTimer(plugin, 0L, 1L);
         return true;
@@ -315,8 +314,8 @@ public class BloodProjectile implements Ability {
             lastLocation.getWorld().spawnParticle(Particle.DUST, lastLocation, 30, 0.4, 0.4, 0.4,
                     new Particle.DustOptions(Color.fromRGB(220, 20, 20), 1.4f));
 
-            MatchSoundUtils.play(config, owner, Sound.ENTITY_GENERIC_DRINK, 1.0f, 1.1f);
-            MatchSoundUtils.play(config, owner, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.6f);
+            owner.getWorld().playSound(owner.getLocation(), Sound.ENTITY_GENERIC_DRINK, 10.0f, 1.1f);
+            owner.getWorld().playSound(owner.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 10.0f, 1.6f);
         }
 
         private void fade() {

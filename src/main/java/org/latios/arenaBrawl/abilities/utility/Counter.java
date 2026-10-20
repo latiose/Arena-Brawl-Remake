@@ -12,7 +12,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
@@ -93,8 +92,8 @@ public class Counter implements Ability {
         UUID uuid = player.getUniqueId();
         ACTIVE_COUNTERS.put(uuid, new CounterState(System.currentTimeMillis() + windowMs));
 
-        MatchSoundUtils.play(config, player, Sound.ITEM_SHIELD_BLOCK, 1.2f, 1.4f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_ANVIL_LAND, 0.5f, 1.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 10.0f, 1.4f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 10.0f, 1.8f);
 
         Location loc = player.getLocation();
         loc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, loc.clone().add(0, 1.0, 0), 6, 0.4, 0.4, 0.4, 0.0);

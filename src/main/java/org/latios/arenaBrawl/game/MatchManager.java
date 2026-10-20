@@ -14,9 +14,12 @@ import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
+import org.latios.arenaBrawl.abilities.ultimate.GuardianColossusEntityManager;
+import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
+import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -64,13 +67,17 @@ public class MatchManager {
     private final ZombieEntityManager zombieEntityManager;
     private final SkeletonEntityManager skeletonEntityManager;
     private final LifeLeechManager lifeLeechManager;
+    private final ShadowCloakManager shadowCloakManager;
+    private final SoulLinkManager soulLinkManager;
+    private final GuardianColossusEntityManager guardianColossusEntityManager;
 
     private static final String SEPARATOR_LINE = "§a§l---------------------------------------------";
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
                         ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin, ArenaMapManager arenaMapManager, StructureManager structureManager,
-                        SongOfPowerManager songOfPowerManager, DrawVoteManager drawVoteManager, ZombieEntityManager zombieEntityManager, SkeletonEntityManager skeletonEntityManager, LifeLeechManager lifeLeechManage, SwordSelectionManager swordSelectionManager ) {
+                        SongOfPowerManager songOfPowerManager, DrawVoteManager drawVoteManager, ZombieEntityManager zombieEntityManager, SkeletonEntityManager skeletonEntityManager, LifeLeechManager lifeLeechManage, SwordSelectionManager swordSelectionManager,
+                        ShadowCloakManager shadowCloakManager, SoulLinkManager soulLinkManager, GuardianColossusEntityManager guardianColossusEntityManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -95,6 +102,9 @@ public class MatchManager {
         this.skeletonEntityManager = skeletonEntityManager;
         this.lifeLeechManager = lifeLeechManage;
         this.swordSelectionManager = swordSelectionManager;
+        this.shadowCloakManager = shadowCloakManager;
+        this.soulLinkManager = soulLinkManager;
+        this.guardianColossusEntityManager = guardianColossusEntityManager;
     }
 
 
@@ -167,6 +177,8 @@ public class MatchManager {
 
         player.setGameMode(GameMode.SPECTATOR);
         debuffManager.clear(player);
+        shadowCloakManager.clear(player);
+        soulLinkManager.clear(player);
         Team winner = match.eliminate(player);
         if (winner != null) {
             endMatch(match, winner);
@@ -315,6 +327,7 @@ public class MatchManager {
         broodMotherEntityManager.clearAll();
         zombieEntityManager.clearAll();
         skeletonEntityManager.clearAll();
+        guardianColossusEntityManager.clearAll();
     }
 
     public void cleanupPlayerHub(Player player) {
@@ -328,6 +341,8 @@ public class MatchManager {
         orbitShieldManager.clear(player);
         songOfPowerManager.clear(player);
         lifeLeechManager.clear(player);
+        shadowCloakManager.clear(player);
+        soulLinkManager.clear(player);
         if (!player.isOnline()) return;
 
         player.setGameMode(org.bukkit.GameMode.SURVIVAL);
@@ -457,6 +472,7 @@ public class MatchManager {
         broodMotherEntityManager.clearForMatch(match);
         zombieEntityManager.clearForMatch(match);
         skeletonEntityManager.clearForMatch(match);
+        guardianColossusEntityManager.clearForMatch(match);
 
         if (match.getArenaMap() != null) {
             EntityCleanupUtils.sweepArenaEntities(match.getArenaMap().getWorld());

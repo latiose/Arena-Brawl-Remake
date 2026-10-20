@@ -16,7 +16,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -85,7 +84,7 @@ public class PrimalRoar implements Ability {
     public boolean activate(Player player) {
         shieldManager.applyShield(player, shieldPercent, shieldDurationMs, "PRIMAL_ROAR");
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_WOLF_GROWL, 1.0f, 0.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WOLF_GROWL, 10.0f, 0.8f);
 
         BukkitTask particleTask = new BukkitRunnable() {
             @Override
@@ -107,7 +106,7 @@ public class PrimalRoar implements Ability {
 
             Location center = player.getLocation();
 
-            MatchSoundUtils.play(config, player, Sound.ENTITY_ENDER_DRAGON_GROWL, 0.6f, 1.2f);
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 10.0f, 1.2f);
 
             int points = 32;
             for (int i = 0; i < points; i++) {
@@ -126,7 +125,7 @@ public class PrimalRoar implements Ability {
 
                 if (enemy.getLocation().distance(center) <= radius) {
                     debuffManager.tryApply(enemy, DebuffType.SILENCE, silenceDurationMs);
-                    MatchSoundUtils.play(config, enemy, Sound.ENTITY_BAT_TAKEOFF, 0.8f, 0.6f);
+                    enemy.getWorld().playSound(enemy.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 10.0f, 0.6f);
                     enemy.getWorld().spawnParticle(Particle.SMOKE, enemy.getLocation().add(0, 1.0, 0), 20, 0.3, 0.5, 0.3, 0.05);
                 }
             }

@@ -12,7 +12,6 @@ import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -66,7 +65,7 @@ public class LightningStrike implements Ability {
         }
 
         target.getWorld().strikeLightningEffect(target.getLocation());
-        MatchSoundUtils.play(config, player,Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.1f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 10.0f, 1.0f);
         return true;
     }
 

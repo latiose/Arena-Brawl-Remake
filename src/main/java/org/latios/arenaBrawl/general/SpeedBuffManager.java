@@ -17,10 +17,12 @@ public class SpeedBuffManager {
     private static class SpeedBuff {
         private final int amplifier;
         private final long expireTimeMillis;
+        private final String source;
 
-        public SpeedBuff(int amplifier, long durationMillis) {
+        public SpeedBuff(int amplifier, long durationMillis, String source) {
             this.amplifier = amplifier;
             this.expireTimeMillis = System.currentTimeMillis() + durationMillis;
+            this.source = source;
         }
 
         public boolean isExpired() {
@@ -33,6 +35,10 @@ public class SpeedBuffManager {
 
         public long getExpireTimeMillis() {
             return expireTimeMillis;
+        }
+
+        public String getSource() {
+            return source;
         }
 
         public boolean dominates(SpeedBuff other) {
@@ -49,10 +55,14 @@ public class SpeedBuffManager {
     }
 
     public void applyBuff(Player player, int amplifier, long durationMillis) {
+        applyBuff(player, amplifier, durationMillis, null);
+    }
+
+    public void applyBuff(Player player, int amplifier, long durationMillis, String source) {
         if (player == null || !player.isOnline()) return;
 
         UUID uuid = player.getUniqueId();
-        SpeedBuff incoming = new SpeedBuff(amplifier, durationMillis);
+        SpeedBuff incoming = new SpeedBuff(amplifier, durationMillis, source);
 
         List<SpeedBuff> buffs = activeBuffs.computeIfAbsent(uuid, k -> new CopyOnWriteArrayList<>());
         buffs.removeIf(SpeedBuff::isExpired);
@@ -158,6 +168,20 @@ public class SpeedBuffManager {
                 }
             }
         }.runTaskTimer(plugin, 10L, 2L);
+    }
+
+    public void removeBuff(Player player, String source) {
+        if (player == null || source == null) return;
+
+        List<SpeedBuff> buffs = activeBuffs.get(player.getUniqueId());
+        if (buffs == null) return;
+
+        buffs.removeIf(buff -> source.equals(buff.getSource()));
+        if (buffs.isEmpty()) {
+            activeBuffs.remove(player.getUniqueId());
+        }
+
+        updatePlayerSpeed(player);
     }
 
     public void clearBuffs(Player player) {

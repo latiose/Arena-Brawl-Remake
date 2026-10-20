@@ -15,7 +15,6 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -98,7 +97,7 @@ public class HealingWind implements Ability {
         }
 
         center.getWorld().spawnParticle(Particle.CLOUD, center, 60, 3, 1, 3, 0.1);
-        MatchSoundUtils.play(config, player,Sound.ENTITY_PHANTOM_FLAP, 1.5f, 0.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PHANTOM_FLAP, 10.0f, 0.6f);
 
         new BukkitRunnable() {
             long elapsedMillis = 0;

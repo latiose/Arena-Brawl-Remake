@@ -17,6 +17,7 @@ import org.latios.arenaBrawl.abilities.OrbitShieldType;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.Berserk;
 import org.latios.arenaBrawl.abilities.ultimate.BloodMoon;
+import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
 import org.latios.arenaBrawl.abilities.utility.Counter;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
@@ -41,6 +42,7 @@ public class CombatService {
             List.of(DebuffType.STUN, DebuffType.IMMOBILIZE, DebuffType.SLOW);
     private final EtherealBodyManager etherealBodyManager;
     private final DamageVulnerabilityManager damageVulnerabilityManager;
+    private final SoulLinkManager soulLinkManager;
     private final List<MeleeHitEffect> meleeHitEffects = new ArrayList<>();
 
     public void registerMeleeHitEffect(MeleeHitEffect effect) {
@@ -50,7 +52,7 @@ public class CombatService {
     public CombatService(PlayerHealthManager healthManager, ShieldManager shieldManager,
                          DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                          DamageBuffManager damageBuffManager, MatchManager matchManager, EtherealBodyManager etherealBodyManager,
-                         DamageVulnerabilityManager damageVulnerabilityManager) {
+                         DamageVulnerabilityManager damageVulnerabilityManager, SoulLinkManager soulLinkManager) {
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
@@ -59,6 +61,7 @@ public class CombatService {
         this.matchManager = matchManager;
         this.etherealBodyManager = etherealBodyManager;
         this.damageVulnerabilityManager = damageVulnerabilityManager;
+        this.soulLinkManager = soulLinkManager;
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
@@ -70,7 +73,7 @@ public class CombatService {
             return;
         }
 
-        double multiplier = damageBuffManager.getMultiplier(attacker);
+        double multiplier = damageBuffManager.getAndConsumeMultiplier(attacker);
 
         if (abilityName.equals("Melee")) {
             for (MeleeHitEffect effect : meleeHitEffects) {
@@ -139,7 +142,9 @@ public class CombatService {
             victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 10, 0.3, 0.5, 0.3, 0.1);
         }
 
-        etherealBodyManager.processIncomingDamage(victim, finalDamage);
+        if (etherealBodyManager.processIncomingDamage(victim, finalDamage)) {
+            return;
+        }
 
         UUID casterUUID = LifeBond.ACTIVE_BONDS.get(victim.getUniqueId());
         if (casterUUID != null) {
@@ -165,6 +170,9 @@ public class CombatService {
         }
 
         healthManager.damage(victim, finalDamage, attacker);
+        if (soulLinkManager != null && !healthManager.isEliminated(victim)) {
+            soulLinkManager.applyMirrorDamage(victim, attacker, finalDamage);
+        }
         if (abilityName.equals("Melee")) {
             Thornheart.onMeleeDamageTaken(victim, attacker, healthManager);
         }
@@ -178,6 +186,7 @@ public class CombatService {
                 effect.onMeleeHit(attacker, victim, finalDamage, impactLoc);
             }
         }
+
         if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
             boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, finalDamage, 30.0);
             if (shouldBreak) {
@@ -309,6 +318,9 @@ public class CombatService {
         }
 
         healthManager.damageSilent(victim, finalDamage, owner);
+        if (soulLinkManager != null && !healthManager.isEliminated(victim)) {
+            soulLinkManager.applyMirrorDamage(victim, owner, finalDamage);
+        }
         Bloodthirst.onDamageDealt(owner, victim, finalDamage, healthManager);
         BloodMoon.onDamageDealt(owner, victim, finalDamage, healthManager);
         if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {

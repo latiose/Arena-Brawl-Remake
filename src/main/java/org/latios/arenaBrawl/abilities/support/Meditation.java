@@ -12,7 +12,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -66,7 +65,7 @@ public class Meditation implements Ability {
         int maxTicks = (int) (maxDurationMs / 50L);
         double healPerPulse = healPerSecond * (HEAL_INTERVAL_TICKS / 20.0);
 
-        MatchSoundUtils.play(config, player, Sound.BLOCK_BEACON_AMBIENT, 1.0f, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_AMBIENT, 10.0f, 1.2f);
 
         BukkitRunnable task = new BukkitRunnable() {
             private int elapsed = 0;

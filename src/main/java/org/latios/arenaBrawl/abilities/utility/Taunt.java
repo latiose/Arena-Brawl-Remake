@@ -19,7 +19,6 @@ import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -142,9 +141,9 @@ public class Taunt implements Ability {
         // Root the target for the duration so it cannot walk out of melee range.
         debuffManager.tryApply(player, taunted, DebuffType.IMMOBILIZE, durationMs);
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_RAVAGER_ROAR, 0.9f, 1.1f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_ANVIL_LAND, 0.7f, 0.8f);
-        MatchSoundUtils.play(config, taunted, Sound.ENTITY_ELDER_GUARDIAN_CURSE, 0.9f, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_RAVAGER_ROAR, 10.0f, 1.1f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 10.0f, 0.8f);
+        taunted.getWorld().playSound(taunted.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 10.0f, 1.2f);
 
         player.sendMessage(MessageUtils.positive() + String.format(
                 "§3You taunted §c%s§3 for §e%.1fs§3!",

@@ -14,7 +14,6 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -125,8 +124,8 @@ public class Intervention implements Ability {
             shieldManager.applyShield(target, guardReduction, durationMs, "Intervention");
         }
 
-        MatchSoundUtils.play(config, player, Sound.BLOCK_BEACON_ACTIVATE, 1.2f, 1.6f);
-        MatchSoundUtils.play(config, target, Sound.ITEM_TOTEM_USE, 0.6f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 10.0f, 1.6f);
+        target.getWorld().playSound(target.getLocation(), Sound.ITEM_TOTEM_USE, 10.0f, 1.6f);
 
         player.sendMessage(MessageUtils.positive() + "§3You placed §bIntervention§3 on " + target.getName() + "§3!");
         target.sendMessage(MessageUtils.positive() + "§3" + player.getName() + " will intervene if you fall!");
@@ -160,7 +159,7 @@ public class Intervention implements Ability {
                     Location loc = target.getLocation().add(0, 1, 0);
                     loc.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, loc, 100, 0.5, 0.8, 0.5, 0.25);
                     loc.getWorld().spawnParticle(Particle.HEART, loc, 25, 0.5, 0.5, 0.5, 0.0);
-                    MatchSoundUtils.play(config, target, Sound.BLOCK_BEACON_POWER_SELECT, 1.5f, 1.2f);
+                    target.getWorld().playSound(target.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 10.0f, 1.2f);
 
                     cancel();
                     return;

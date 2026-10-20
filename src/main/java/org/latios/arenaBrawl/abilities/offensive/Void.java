@@ -14,7 +14,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -54,8 +53,8 @@ public class Void implements Ability {
     @Override
     public boolean activate(Player player) {
         Location center = player.getLocation();
-        MatchSoundUtils.play(config, player,  Sound.ENTITY_WITHER_SPAWN, 0.5f, 0.5f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 1.0f, 0.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, 10.0f, 0.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 10.0f, 0.5f);
 
 
         for (Player target : center.getWorld().getPlayers()) {

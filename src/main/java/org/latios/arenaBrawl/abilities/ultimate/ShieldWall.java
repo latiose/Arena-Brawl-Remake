@@ -9,7 +9,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
 
 import java.util.List;
@@ -53,7 +52,7 @@ public class ShieldWall implements Ability {
     @Override
     public boolean activate(Player player) {
         shieldManager.applyShield(player, damageReduction, durationMillis, "Shield Wall");
-        MatchSoundUtils.play(config, player, Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 10.0f, 1.0f);
 
         spawnWaterRings(player);
 

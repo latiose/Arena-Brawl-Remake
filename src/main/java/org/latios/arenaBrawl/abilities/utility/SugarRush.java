@@ -12,7 +12,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -51,7 +50,7 @@ public class SugarRush implements Ability {
     public boolean activate(Player player) {
         speedBuffManager.applyBuff(player, speedAmplifier, speedDurationTicks * 50L);
         player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_BURP, 1f, 1f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 10.0f, 1f);
 
         new BukkitRunnable() {
             @Override
@@ -59,7 +58,7 @@ public class SugarRush implements Ability {
                 if (player.isOnline()) {
                     debuffManager.tryApply(player, DebuffType.SLOW, slowDurationMs);
                     player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(0, 1, 0), 10, 0.2, 0.3, 0.2, 0.02);
-                    MatchSoundUtils.play(config, player,  Sound.ENTITY_PLAYER_BREATH, 1f, 0.8f);
+                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BREATH, 10.0f, 0.8f);
                 }
             }
         }.runTaskLater(ArenaBrawlPlugin.getInstance(), speedDurationTicks);

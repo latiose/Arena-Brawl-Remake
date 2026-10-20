@@ -15,7 +15,6 @@ import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.DamageVulnerabilityManager;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -104,8 +103,8 @@ public class Backstabber implements Ability {
             target.getWorld().spawnParticle(Particle.ENCHANTED_HIT, impact, 15, 0.3, 0.5, 0.3, 0.1);
         }
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, 1.6f);
-        MatchSoundUtils.play(config, player, Sound.ITEM_TRIDENT_THROW, 0.7f, 1.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 10.0f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_THROW, 10.0f, 1.5f);
 
         return true;
     }

@@ -13,7 +13,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -93,8 +92,8 @@ public class Gust implements Ability {
             target.getWorld().spawnParticle(Particle.CLOUD, target.getLocation().add(0, 1, 0), 8, 0.3, 0.2, 0.3, 0.02);
         }
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_PHANTOM_FLAP, 1.4f, 1.4f);
-        MatchSoundUtils.play(config, player, Sound.ITEM_TRIDENT_RIPTIDE_1, 0.7f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PHANTOM_FLAP, 10.0f, 1.4f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_RIPTIDE_1, 10.0f, 1.6f);
         return true;
     }
 

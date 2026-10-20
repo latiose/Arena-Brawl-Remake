@@ -15,7 +15,6 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.general.DamageVulnerabilityManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -84,8 +83,8 @@ public class DiscordOrb implements Ability {
 
     private void applyDiscord(Player caster, Player target) {
         damageVulnerabilityManager.applyVulnerability(target, damageBonus, durationSeconds * 1000L, getName());
-        MatchSoundUtils.play(config, target,  Sound.ENTITY_WITHER_SHOOT, 0.8f, 1.8f);
-        MatchSoundUtils.play(config, target,  Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 1.5f);
+        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_WITHER_SHOOT, 10.0f, 1.8f);
+        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 10.0f, 1.5f);
         caster.sendMessage(MessageUtils.positive() + String.format("§3Marked %s §3with §5Discord Orb§3!", target.getName()));
         target.sendMessage(MessageUtils.negative() + String.format("§3%s afflicted you with §5Discord Orb§3!", caster.getName()));
 

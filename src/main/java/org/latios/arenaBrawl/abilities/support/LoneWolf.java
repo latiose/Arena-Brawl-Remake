@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities.support;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -12,7 +13,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
@@ -98,7 +98,7 @@ public class LoneWolf implements Ability {
         long maxTicks = durationMs / 50L;
         double healPerCheck = healPerSecond * (CHECK_INTERVAL_TICKS / 20.0);
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_ENDER_DRAGON_GROWL, 0.6f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 10.0f, 1.6f);
 
         new BukkitRunnable() {
             long elapsedTicks = 0;
@@ -141,7 +141,7 @@ public class LoneWolf implements Ability {
         double radiusSq = allyRadius * allyRadius;
 
         for (Player other : player.getWorld().getPlayers()) {
-            if (other.equals(player) || other.isDead() || !other.isOnline()) continue;
+            if (other.equals(player) || other.isDead() || !other.isOnline() || other.getGameMode() == GameMode.SPECTATOR) continue;
             if (!teamManager.isAlly(player, other)) continue;
             if (other.getLocation().distanceSquared(player.getLocation()) <= radiusSq) {
                 return true;

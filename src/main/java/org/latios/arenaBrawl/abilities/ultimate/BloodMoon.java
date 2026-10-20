@@ -19,7 +19,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -103,8 +102,8 @@ public class BloodMoon implements Ability {
         );
         ACTIVE.put(id, active);
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_WITHER_SPAWN, 0.6f, 1.6f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 0.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, 10.0f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 10.0f, 0.5f);
         player.sendMessage(MessageUtils.positive() + "§3The Blood Moon rises!");
 
         new BukkitRunnable() {

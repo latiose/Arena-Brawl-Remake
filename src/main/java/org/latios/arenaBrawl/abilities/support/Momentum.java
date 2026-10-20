@@ -12,7 +12,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -80,7 +79,7 @@ public class Momentum implements Ability {
     public boolean activate(Player player) {
         long maxTicks = durationMs / 50L;
 
-        MatchSoundUtils.play(config, player, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 10.0f, 1.5f);
 
         new BukkitRunnable() {
             long elapsedTicks = 0;

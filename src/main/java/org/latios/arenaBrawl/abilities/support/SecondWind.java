@@ -11,7 +11,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -64,8 +63,8 @@ public class SecondWind implements Ability {
         player.getWorld().spawnParticle(Particle.HEART, player.getLocation().add(0, 1, 0), 12, 0.5, 0.6, 0.5, 0.02);
         player.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, player.getLocation().add(0, 1, 0), 30, 0.5, 0.7, 0.5, 0.15);
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_LEVELUP, 0.9f, 1.1f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.4f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 10.0f, 1.1f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 10.0f, 1.4f);
 
         return true;
     }

@@ -13,7 +13,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -62,7 +61,7 @@ public class Bloodthirst implements Ability {
         Active active = new Active(System.currentTimeMillis() + durationMs, lifestealPercent / 100.0);
         ACTIVE.put(id, active);
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 0.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 10.0f, 0.6f);
         player.getWorld().spawnParticle(Particle.DUST, player.getLocation().add(0, 1, 0),
                 30, 0.5, 0.8, 0.5, 0, new Particle.DustOptions(Color.RED, 1.4f));
 

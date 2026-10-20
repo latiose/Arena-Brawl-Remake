@@ -33,7 +33,6 @@ import org.latios.arenaBrawl.abilities.structures.PlacedStructure;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -106,8 +105,8 @@ public class SeismicWave implements Ability {
         Vector dir = new Vector(-Math.sin(yaw), 0, Math.cos(yaw));
         Vector perp = new Vector(-dir.getZ(), 0, dir.getX());
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 0.6f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_STONE_BREAK, 1.2f, 0.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10.0f, 0.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_STONE_BREAK, 10.0f, 0.5f);
 
         new BukkitRunnable() {
             private double distance = START_OFFSET;
@@ -276,7 +275,7 @@ public class SeismicWave implements Ability {
 
 
     private void finish(Player caster, Location end) {
-        MatchSoundUtils.play(config, caster, Sound.ENTITY_GENERIC_EXPLODE, 0.6f, 1.2f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10.0f, 1.2f);
 
         Location spawn = end.clone().add(0, 1, 0);
         spawn.getWorld().spawn(spawn, Firework.class, firework -> {

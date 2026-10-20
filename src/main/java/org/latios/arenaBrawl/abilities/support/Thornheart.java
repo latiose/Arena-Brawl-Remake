@@ -12,7 +12,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -128,8 +127,8 @@ public class Thornheart implements Ability {
         State state = new State(System.currentTimeMillis() + durationMs, thornDamage, healPerHit);
         ACTIVE.put(uuid, state);
 
-        MatchSoundUtils.play(config, player, Sound.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, 1.0f, 1.2f);
-        MatchSoundUtils.play(config, player, Sound.ITEM_SHIELD_BLOCK, 0.7f, 1.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, 10.0f, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 10.0f, 1.5f);
 
         player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1.0, 0),
                 20, 0.4, 0.6, 0.4, 0.1);

@@ -17,7 +17,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -102,7 +101,7 @@ public class LayWaste implements Ability {
 
         Location targetLocation = result.getHitPosition().toLocation(player.getWorld());
 
-        MatchSoundUtils.play(config, player,Sound.BLOCK_CONDUIT_ATTACK_TARGET, 1.0f, 1.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_CONDUIT_ATTACK_TARGET, 10.0f, 1.8f);
 
         new BukkitRunnable() {
             int ticksElapsed = 0;
@@ -123,8 +122,8 @@ public class LayWaste implements Ability {
 
                 targetLocation.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, targetLocation, 35, 0.6, 0.4, 0.6, 0.08);
                 targetLocation.getWorld().spawnParticle(Particle.EXPLOSION, targetLocation, 2, 0.2, 0.2, 0.2, 0.0);
-                MatchSoundUtils.play(config, player,Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 1.8f);
-                MatchSoundUtils.play(config, player, Sound.ENTITY_EVOKER_CAST_SPELL, 1.0f, 1.2f);
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10.0f, 1.8f);
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EVOKER_CAST_SPELL, 10.0f, 1.2f);
 
                 Set<Player> targetsToHit = new HashSet<>();
                 for (Entity entity : targetLocation.getWorld().getNearbyEntities(targetLocation, radius, radius + 1.5, radius)) {

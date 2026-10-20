@@ -14,7 +14,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -70,7 +69,7 @@ public class Suzu implements Ability {
     public boolean activate(Player player) {
         Location startLoc = player.getEyeLocation().subtract(0, 0.2, 0);
         Vector direction = startLoc.getDirection().normalize();
-        MatchSoundUtils.play(config, player, Sound.ENTITY_EGG_THROW, 1.0f, 1.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 10.0f, 1.5f);
 
         new BukkitRunnable() {
             private Location currentLoc = startLoc.clone();
@@ -111,8 +110,8 @@ public class Suzu implements Ability {
     }
 
     private void triggerProtection(Player caster, Location center) {
-        MatchSoundUtils.play(config, caster, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.5f, 1.8f);
-        MatchSoundUtils.play(config, caster, Sound.ITEM_SHIELD_BLOCK, 1.2f, 1.2f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 10.0f, 1.8f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.ITEM_SHIELD_BLOCK, 10.0f, 1.2f);
 
         center.getWorld().spawnParticle(Particle.FIREWORK, center, 30, 0.5, 0.5, 0.5, 0.1);
         center.getWorld().spawnParticle(Particle.END_ROD, center, 20, 0.8, 0.8, 0.8, 0.05);

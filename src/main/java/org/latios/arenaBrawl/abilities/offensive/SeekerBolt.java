@@ -13,7 +13,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -68,8 +67,8 @@ public class SeekerBolt implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        MatchSoundUtils.play(config, player, Sound.ENTITY_ENDER_EYE_LAUNCH, 0.9f, 1.2f);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_BLAZE_SHOOT, 0.7f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_EYE_LAUNCH, 10.0f, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 10.0f, 1.6f);
 
         for (int i = 0; i < boltCount; i++) {
             final long delay = i * boltIntervalTicks;

@@ -24,7 +24,6 @@ import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -105,8 +104,8 @@ public class BoomerangAxe implements Ability {
         });
         EntityCleanupUtils.markAsArenaEntity(axe);
 
-        MatchSoundUtils.play(config, player, Sound.ITEM_TRIDENT_THROW, 1.0f, 0.7f);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.8f, 0.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_THROW, 10.0f, 0.7f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 10.0f, 0.8f);
 
         new BukkitRunnable() {
             private final Location current = start.clone();
@@ -127,7 +126,7 @@ public class BoomerangAxe implements Ability {
                 if (returning) {
                     Vector toThrower = player.getEyeLocation().toVector().subtract(current.toVector());
                     if (toThrower.lengthSquared() <= catchRadius * catchRadius) {
-                        MatchSoundUtils.play(config, player, Sound.ITEM_ARMOR_EQUIP_IRON, 0.8f, 1.4f);
+                        player.getWorld().playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_IRON, 10.0f, 1.4f);
                         cleanup();
                         return;
                     }
@@ -164,7 +163,7 @@ public class BoomerangAxe implements Ability {
             private void beginReturn() {
                 returning = true;
                 hitThisPass.clear();
-                MatchSoundUtils.play(config, player, Sound.ITEM_TRIDENT_RETURN, 0.7f, 1.4f);
+                player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_RETURN, 10.0f, 1.4f);
             }
 
             private void handleGroundHit(Location impact) {
@@ -172,8 +171,8 @@ public class BoomerangAxe implements Ability {
                 effectLoc.getWorld().spawnParticle(Particle.EXPLOSION, effectLoc, 1, 0, 0, 0, 0);
                 effectLoc.getWorld().spawnParticle(Particle.CRIT, effectLoc, 20, 0.4, 0.2, 0.4, 0.08);
                 effectLoc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, effectLoc, 6, 0.4, 0.1, 0.4, 0.0);
-                MatchSoundUtils.play(config, player, Sound.ITEM_AXE_STRIP, 1.0f, 0.5f);
-                MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_ATTACK_CRIT, 0.8f, 0.9f);
+                player.getWorld().playSound(player.getLocation(), Sound.ITEM_AXE_STRIP, 10.0f, 0.5f);
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 10.0f, 0.9f);
 
                 damageAround(effectLoc, groundHitRadius);
                 beginReturn();

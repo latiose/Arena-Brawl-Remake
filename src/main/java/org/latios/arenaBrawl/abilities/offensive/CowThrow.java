@@ -17,7 +17,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -58,8 +57,8 @@ public class CowThrow implements Ability {
         Vector direction = player.getLocation().getDirection().normalize().multiply(speed);
 
 
-        MatchSoundUtils.play(config, player,Sound.ENTITY_GHAST_SHOOT, 1.2f, 0.5f);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_COW_HURT, 1.5f, 0.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GHAST_SHOOT, 10.0f, 0.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_COW_HURT, 10.0f, 0.6f);
 
 
         Cow cow = (Cow) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.COW);
@@ -105,8 +104,8 @@ public class CowThrow implements Ability {
         Location impactLoc = cow.getLocation();
 
         impactLoc.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, impactLoc, 1);
-        MatchSoundUtils.play(config, caster,Sound.ENTITY_GENERIC_EXPLODE, 1f, 0.7f);
-        MatchSoundUtils.play(config, caster,  Sound.ENTITY_COW_DEATH, 1.5f, 0.5f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10.0f, 0.7f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_COW_DEATH, 10.0f, 0.5f);
 
         for (Player target : impactLoc.getWorld().getPlayers()) {
             if (target.equals(caster) || !teamManager.isEnemy(caster, target) || target.isDead()) {

@@ -11,7 +11,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -90,7 +89,7 @@ public class Blink implements Ability {
         player.teleport(lastSafe);
         player.setFallDistance(0);
         lastSafe.getWorld().spawnParticle(Particle.PORTAL, lastSafe.clone().add(0, 1, 0), 25, 0.3, 0.6, 0.3, 0.2);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_ENDERMAN_TELEPORT, 0.7f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10.0f, 1.6f);
 
         return true;
     }

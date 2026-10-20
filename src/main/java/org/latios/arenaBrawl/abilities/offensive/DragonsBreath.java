@@ -12,7 +12,6 @@ import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.ArrayList;
@@ -66,7 +65,7 @@ public class DragonsBreath extends Breath {
 
     @Override
     public boolean activate(Player player) {
-        MatchSoundUtils.play(matchManager, player, getCastSound(), 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), getCastSound(), 10.0f, 1.0f);
 
         List<Location> upright = conePoints(player, false);
         List<Location> hitboxPoints = new ArrayList<>(upright);

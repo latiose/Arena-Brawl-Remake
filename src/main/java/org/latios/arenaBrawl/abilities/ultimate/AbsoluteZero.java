@@ -19,7 +19,6 @@ import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashMap;
@@ -139,7 +138,7 @@ public class AbsoluteZero implements Ability {
 
             center.getWorld().spawnParticle(Particle.SNOWFLAKE, center, 30, radius / 2, 0.5, radius / 2, 0.02);
             if (ticksCharged % 10 == 0) {
-                MatchSoundUtils.play(config, player,Sound.BLOCK_GLASS_BREAK, 0.5f, 0.5f);
+                player.getWorld().playSound(player.getLocation(), Sound.BLOCK_GLASS_BREAK, 10.0f, 0.5f);
             }
 
             ticksCharged++;
@@ -169,7 +168,7 @@ public class AbsoluteZero implements Ability {
             }
 
             center.getWorld().spawnParticle(Particle.EXPLOSION, center, 5);
-            MatchSoundUtils.play(config, player,Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.6f);
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10.0f, 0.6f);
         }
     }
 }

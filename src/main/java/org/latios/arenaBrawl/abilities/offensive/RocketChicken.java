@@ -77,7 +77,7 @@ public class RocketChicken implements Ability {
         });
 
         EntityCleanupUtils.markAsArenaEntity(chicken);
-        MatchSoundUtils.play(config, player,Sound.ENTITY_CHICKEN_HURT, 1f, 1.4f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_CHICKEN_HURT, 10.0f, 1.4f);
 
         new TrackedLivingProjectileTask(
                 chicken, player, direction, launchSpeed, damage, directHitRadius, aoeRadius,

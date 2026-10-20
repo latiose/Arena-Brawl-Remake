@@ -6,7 +6,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.game.MatchManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 
 public class OrbitShieldSoundTask extends BukkitRunnable {
 
@@ -23,7 +22,7 @@ public class OrbitShieldSoundTask extends BukkitRunnable {
 
             OrbitShieldType type = orbitShieldManager.getActiveType(player);
             if (type == null) continue;
-            player.getWorld().playSound(player.getLocation(), type.getAmbientSound(), 8.0f, 1.0f );
+            player.getWorld().playSound(player.getLocation(), type.getAmbientSound(), 10.0f, 1.0f );
         }
     }
 }

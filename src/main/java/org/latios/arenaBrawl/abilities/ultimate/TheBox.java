@@ -13,7 +13,6 @@ import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.ArrayList;
@@ -67,7 +66,7 @@ public class TheBox implements Ability {
     @Override
     public boolean activate(Player player) {
         Location center = player.getLocation();
-        MatchSoundUtils.play(config, player, Sound.ENTITY_WITHER_SPAWN, 0.7f, 0.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, 10.0f, 0.5f);
 
         List<Location> vertices = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -111,7 +110,7 @@ public class TheBox implements Ability {
                             combatService.applyAbilityDamage(player, enemy, damage, getName());
                             debuffManager.tryApply(enemy, DebuffType.SLOW, slowDurationMs);
 
-                            MatchSoundUtils.play(config, player, Sound.BLOCK_GLASS_BREAK, 1.2f, 0.6f);
+                            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_GLASS_BREAK, 10.0f, 0.6f);
                             enemy.getWorld().spawnParticle(Particle.SOUL, enemy.getLocation().add(0, 1, 0), 40, 0.4, 0.6, 0.4, 0.1);
 
                             cancel();

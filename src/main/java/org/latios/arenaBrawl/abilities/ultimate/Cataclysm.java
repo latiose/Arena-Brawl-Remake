@@ -21,7 +21,6 @@ import org.latios.arenaBrawl.abilities.cost.UltimateCost;
 import org.latios.arenaBrawl.abilities.structures.PlacedStructure;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.general.CombatService;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -95,8 +94,8 @@ public class Cataclysm implements Ability {
     @Override
     public boolean activate(Player player) {
         Location impact = resolveTargetLocation(player);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_WITHER_SHOOT, 0.8f, 0.5f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_ANVIL_PLACE, 0.6f, 0.4f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_SHOOT, 10.0f, 0.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 10.0f, 0.4f);
 
         new BukkitRunnable() {
             int ticks = 0;
@@ -149,8 +148,8 @@ public class Cataclysm implements Ability {
     private void triggerImpact(Player caster, Location impactLocation) {
         impactLocation.getWorld().spawnParticle(Particle.EXPLOSION, impactLocation, 6, 0.8, 0.3, 0.8, 0);
         impactLocation.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, impactLocation, 20, 1.2, 0.4, 1.2, 0.02);
-        MatchSoundUtils.play(config, caster, Sound.ENTITY_GENERIC_EXPLODE, 1.6f, 0.6f);
-        MatchSoundUtils.play(config, caster, Sound.ENTITY_IRON_GOLEM_DEATH, 0.8f, 0.5f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10.0f, 0.6f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_IRON_GOLEM_DEATH, 10.0f, 0.5f);
 
         for (PlacedStructure structure : demolitionService.findStructuresInRadius(impactLocation, impactRadius)) {
             if (demolitionService.isEnemyStructure(caster, structure)) {

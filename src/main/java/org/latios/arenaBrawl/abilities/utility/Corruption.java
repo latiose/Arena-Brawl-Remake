@@ -9,7 +9,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -86,7 +85,7 @@ public class Corruption implements Ability {
 
         if (!appliedToAny) return false;
 
-        MatchSoundUtils.play(config, player,Sound.ENTITY_WITHER_HURT, 0.5f, 2.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_HURT, 10.0f, 2.0f);
 
         return true;
     }

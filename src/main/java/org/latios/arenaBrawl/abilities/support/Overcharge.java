@@ -9,7 +9,6 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 
 import java.util.List;
@@ -56,8 +55,8 @@ public class Overcharge implements Ability {
         player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1, 0), 40, 0.5, 0.8, 0.5, 1.0);
         player.getWorld().spawnParticle(Particle.WAX_ON, player.getLocation().add(0, 1, 0), 20, 0.4, 0.6, 0.4, 0.05);
 
-        MatchSoundUtils.play(config, player, Sound.BLOCK_BEACON_POWER_SELECT, 1.0f, 1.6f);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_PLAYER_LEVELUP, 0.8f, 1.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 10.0f, 1.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 10.0f, 1.5f);
 
         player.sendMessage("§bOvercharge §7converted §e" + (int) energyUsed + " §7energy into health!");
         return true;

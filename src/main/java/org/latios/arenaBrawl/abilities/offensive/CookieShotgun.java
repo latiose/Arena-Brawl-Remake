@@ -16,7 +16,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -73,8 +72,8 @@ public class CookieShotgun implements Ability {
         Location eyeLoc = player.getEyeLocation();
         Vector direction = eyeLoc.getDirection().normalize();
 
-        MatchSoundUtils.play(config, player, Sound.ENTITY_GENERIC_EXPLODE, 0.7f, 1.8f);
-        MatchSoundUtils.play(config, player, Sound.ENTITY_ITEM_BREAK, 1.2f, 0.6f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10.0f, 1.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 10.0f, 0.6f);
 
         for (int i = 0; i < cookieCount; i++) {
             Vector spreadDir = applySpread(direction.clone(), 0.28);

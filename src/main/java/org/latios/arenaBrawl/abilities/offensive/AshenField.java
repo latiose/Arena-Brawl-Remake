@@ -16,7 +16,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -102,8 +101,8 @@ public class AshenField implements Ability {
 
         Location center = result.getHitPosition().toLocation(player.getWorld());
 
-        MatchSoundUtils.play(config, player, Sound.ITEM_FIRECHARGE_USE, 1.0f, 0.8f);
-        MatchSoundUtils.play(config, player, Sound.BLOCK_FIRE_AMBIENT, 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_FIRECHARGE_USE, 10.0f, 0.8f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 10.0f, 1.0f);
 
         new BukkitRunnable() {
             long ticksElapsed = 0;

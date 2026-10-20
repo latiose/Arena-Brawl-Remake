@@ -20,7 +20,6 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -83,7 +82,7 @@ public class SpikeGrenade implements Ability {
     public boolean activate(Player player) {
         Location start = player.getEyeLocation();
         Vector direction = start.getDirection().normalize();
-        MatchSoundUtils.play(config, player, Sound.ENTITY_EGG_THROW, 1.2f, 0.7f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 10.0f, 0.7f);
 
         new BukkitRunnable() {
             private final Location pos = start.clone();
@@ -132,8 +131,8 @@ public class SpikeGrenade implements Ability {
 
     private void explode(Player caster, Location center, Player directTarget, BlockFace face) {
         World world = center.getWorld();
-        MatchSoundUtils.play(config, caster, Sound.ENTITY_ITEM_BREAK, 7f, 0.5f);
-        MatchSoundUtils.play(config, caster, Sound.BLOCK_BONE_BLOCK_BREAK, 7f, 1.4f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_ITEM_BREAK, 10.0f, 0.5f);
+        caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BONE_BLOCK_BREAK, 10.0f, 1.4f);
 
         world.spawnParticle(Particle.ITEM_SLIME, center, 35, 0.4, 0.4, 0.4, 0.15);
         world.spawnParticle(Particle.SCRAPE, center, 20, 0.3, 0.3, 0.3, 0.1);

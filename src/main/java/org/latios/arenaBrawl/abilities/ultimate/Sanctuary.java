@@ -15,7 +15,6 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.UltimateCost;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -86,8 +85,8 @@ public class Sanctuary implements Ability {
     public boolean activate(Player player) {
         Location center = player.getLocation().clone();
 
-        MatchSoundUtils.play(config, player, Sound.BLOCK_BEACON_ACTIVATE, 1.5f, 1.2f);
-        MatchSoundUtils.play(config, player, Sound.ITEM_TOTEM_USE, 1.0f, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 10.0f, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 10.0f, 1.2f);
 
         // Grant immunity once to the caster and every ally currently inside the dome.
         shieldManager.applyShield(player, 1.0, durationMs, "Sanctuary");

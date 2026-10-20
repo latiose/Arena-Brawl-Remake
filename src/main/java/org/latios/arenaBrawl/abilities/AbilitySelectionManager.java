@@ -39,7 +39,15 @@ public class AbilitySelectionManager {
         if (playerSelections == null || !playerSelections.containsKey(slot)) {
             return registry.getDefault(slot);
         }
-        return playerSelections.get(slot);
+
+        String selected = playerSelections.get(slot);
+        // A saved ability can be removed from the registry (e.g. a retired
+        // ability); fall back to the slot default instead of letting match
+        // creation fail on an unknown id.
+        if (selected == null || !registry.getAvailableIds(slot).contains(selected)) {
+            return registry.getDefault(slot);
+        }
+        return selected;
     }
 
     public void unloadPlayer(Player player) {

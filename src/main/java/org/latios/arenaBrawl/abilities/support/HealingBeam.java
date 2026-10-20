@@ -15,7 +15,6 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
-import org.latios.arenaBrawl.general.MatchSoundUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -107,8 +106,8 @@ public class HealingBeam implements Ability {
                 }
             }
         }
-        MatchSoundUtils.play(config, player,  Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.5f, 1.2f);
-        MatchSoundUtils.play(config, player,  Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 0.8f, 1.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 10.0f, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 10.0f, 1.5f);
 
         for (Player ally : hitAllies) {
             healthManager.healAlly(player, ally, healAmount, getName());
