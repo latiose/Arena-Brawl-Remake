@@ -30,6 +30,7 @@ public class Portal implements Ability {
     private final long chargeTimeMillis;
     private final double maxTargetDistance;
     private final double portalRadius;
+    private final long durationMillis;
 
     private final Plugin plugin;
     private final AbilityCost cost;
@@ -44,6 +45,7 @@ public class Portal implements Ability {
         this.chargeTimeMillis = config.getLong("charge-time-ms", 60000L);
         this.maxTargetDistance = config.getDouble("max-target-distance", 20.0);
         this.portalRadius = config.getDouble("portal-radius", 1.4);
+        this.durationMillis = config.getLong("duration-ms", 60000L);
 
         this.cost = new UltimateCost(cooldownManager, usageManager, "portal");
         this.cooldownManager = cooldownManager;
@@ -69,15 +71,15 @@ public class Portal implements Ability {
 
     @Override
     public String getDescription() {
-        return "Aim at the top of a ground block to open a permanent two-way portal between that block "
-                + "and your current position. It lasts until the match ends.";
+        return "Aim at the top of a ground block to open a two-way portal between that block "
+                + "and your current position. It lasts for one minute and can be destroyed by demolition abilities.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Range", (int) maxTargetDistance + "m"),
-                new AbilityStat("Duration", "Permanent"),
+                new AbilityStat("Duration", "60s"),
                 new AbilityStat("Target", "Ground block"),
                 new AbilityStat("Uses", "1 per match")
         );
@@ -121,7 +123,7 @@ public class Portal implements Ability {
             return false;
         }
 
-        PortalStructure portal = new PortalStructure(player, portalA, portalB, plugin, teamManager, portalRadius);
+        PortalStructure portal = new PortalStructure(player, portalA, portalB, plugin, teamManager, portalRadius, durationMillis);
         structureManager.register(portal);
         portal.start();
 

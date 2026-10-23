@@ -44,6 +44,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class SeismicWave implements Ability {
 
     private static final double START_OFFSET = 1.0;
+    /** How far behind the caster the wave hitbox reaches, so point-blank targets are not skipped. */
+    private static final double POINT_BLANK_MARGIN = 0.75;
     private static final int RISE_TICKS = 2;
     private static final int HOLD_TICKS = 7;
     private static final int SINK_TICKS = 5;
@@ -112,6 +114,7 @@ public class SeismicWave implements Ability {
             private double distance = START_OFFSET;
             private int standY = origin.getBlockY();
             private Location lastCenter = origin.clone();
+            private Location previousCenter = origin.clone();
             private final Set<UUID> alreadyHit = new HashSet<>();
             private final Set<Block> risen = new HashSet<>();
 
@@ -153,7 +156,8 @@ public class SeismicWave implements Ability {
                 raiseColumn(center, perp);
                 world.playSound(center, Sound.BLOCK_STONE_BREAK, 0.8f, 0.7f);
 
-                hitEnemies(player, center, dir, perp);
+                hitEnemies(player, previousCenter, center, dir, perp);
+                previousCenter = center.clone();
                 demolishStructures(player, center);
 
                 distance += speed;
@@ -172,9 +176,19 @@ public class SeismicWave implements Ability {
                 }
             }
 
-            private void hitEnemies(Player caster, Location center, Vector dir, Vector perp) {
+            private void hitEnemies(Player caster, Location from, Location to, Vector dir, Vector perp) {
                 double forwardWindow = speed / 2.0 + 0.6;
                 double lateralWindow = width / 2.0 + 0.4;
+
+                // Sweep the hitbox along the segment travelled since the last tick instead of checking
+                // a single point. This keeps the area between the caster and the wave covered, so
+                // enemies standing right in front (or overlapping) are hit too.
+                Vector start = from.toVector();
+                Vector segment = to.toVector().subtract(start);
+                double segmentLength = segment.length();
+                Vector segmentDir = segmentLength > 1.0E-4
+                        ? segment.clone().multiply(1.0 / segmentLength)
+                        : dir;
 
                 for (Player enemy : world.getPlayers()) {
                     if (enemy.isDead() || enemy.getGameMode() == GameMode.SPECTATOR) continue;
@@ -182,12 +196,13 @@ public class SeismicWave implements Ability {
                     if (alreadyHit.contains(enemy.getUniqueId())) continue;
 
                     Location loc = enemy.getLocation();
-                    Vector rel = loc.toVector().subtract(center.toVector());
-                    double forward = rel.dot(dir);
+                    Vector rel = loc.toVector().subtract(start);
+                    double forward = rel.dot(segmentDir);
                     double lateral = rel.dot(perp);
-                    double vertical = loc.getY() - center.getY();
+                    double vertical = loc.getY() - to.getY();
 
-                    if (Math.abs(forward) > forwardWindow || Math.abs(lateral) > lateralWindow) continue;
+                    if (forward < -POINT_BLANK_MARGIN || forward > segmentLength + forwardWindow) continue;
+                    if (Math.abs(lateral) > lateralWindow) continue;
                     if (vertical < -1.5 || vertical > 2.5) continue;
 
                     alreadyHit.add(enemy.getUniqueId());

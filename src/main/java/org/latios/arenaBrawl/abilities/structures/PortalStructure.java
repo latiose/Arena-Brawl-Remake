@@ -11,15 +11,17 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.latios.arenaBrawl.team.TeamManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A permanent two-way portal pair linking the caster's position to a targeted ground block.
- * It has no duration limit; the caster's own team can travel through either end. The portal is
- * registered as a structure so it is automatically removed when the match ends.
+ * A temporary two-way portal pair linking the caster's position to a targeted ground block.
+ * It expires after {@code durationMillis} (one minute by default); the caster's own team can travel
+ * through either end. The portal is registered as a structure so it is automatically removed when
+ * the match ends or when a demolition ability destroys it.
  */
 public class PortalStructure extends PlacedStructure {
 
@@ -32,19 +34,21 @@ public class PortalStructure extends PlacedStructure {
     private final Location portalA;
     private final Location portalB;
     private final double radius;
+    private final long durationMillis;
 
     private final Map<UUID, Integer> lastInside = new ConcurrentHashMap<>();
 
     private BukkitTask task;
 
     public PortalStructure(Player owner, Location portalA, Location portalB,
-                           Plugin plugin, TeamManager teamManager, double radius) {
+                           Plugin plugin, TeamManager teamManager, double radius, long durationMillis) {
         super(owner, portalA);
         this.portalA = portalA;
         this.portalB = portalB;
         this.plugin = plugin;
         this.teamManager = teamManager;
         this.radius = radius;
+        this.durationMillis = durationMillis;
     }
 
     public void start() {
@@ -140,8 +144,7 @@ public class PortalStructure extends PlacedStructure {
 
     @Override
     public boolean tick() {
-        // Never expires on its own; only removed when the match ends or it is replaced.
-        return false;
+        return System.currentTimeMillis() - getPlacedAt() >= durationMillis;
     }
 
     @Override
@@ -165,5 +168,22 @@ public class PortalStructure extends PlacedStructure {
     @Override
     public List<Block> getOccupiedBlocks() {
         return List.of();
+    }
+
+    @Override
+    public List<Location> getHitLocations() {
+        List<Location> hits = new ArrayList<>();
+        hits.addAll(portalHitPoints(portalA));
+        hits.addAll(portalHitPoints(portalB));
+        return hits;
+    }
+
+    /** Vertical samples across each portal so demolition abilities can hit it even though it is only particles. */
+    private List<Location> portalHitPoints(Location base) {
+        return List.of(
+                base.clone().add(0, 0.25, 0),
+                base.clone().add(0, 1.0, 0),
+                base.clone().add(0, 1.75, 0)
+        );
     }
 }

@@ -9,13 +9,13 @@ import org.bukkit.entity.TextDisplay;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
+import org.latios.arenaBrawl.general.HologramUtils;
 
 import java.util.*;
 
 public class HatPhraseListener {
 
     private static final double PHRASE_CHANCE = 0.20;
-    private static final double HOLOGRAM_HEIGHT_OFFSET = 2.3;
     private static final long HOLOGRAM_LIFETIME_TICKS = 40;
 
     private final HatSelectionManager hatSelectionManager;
@@ -50,7 +50,7 @@ public class HatPhraseListener {
             }
         }
 
-        Location location = wearer.getLocation().add(0, HOLOGRAM_HEIGHT_OFFSET, 0);
+        Location location = HologramUtils.randomAround(wearer, 0.9, 1.6, 1.8, 2.6);
         TextColor color = TextColor.color(TextColor.color(0xFFA500));
 
         TextDisplay hologram = wearer.getWorld().spawn(location, TextDisplay.class, d -> {
@@ -83,7 +83,6 @@ public class HatPhraseListener {
                     return;
                 }
 
-                hologram.teleport(wearer.getLocation().add(0, HOLOGRAM_HEIGHT_OFFSET, 0));
                 ticksElapsed++;
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);

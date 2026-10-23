@@ -21,12 +21,11 @@ public class StructureDemolitionService {
         this.teamManager = teamManager;
     }
 
-    /** Finds the nearest structure with a block within `radius` of the given point, or null if none. */
+    /** Finds the nearest structure with a hit point within `radius` of the given point, or null if none. */
     public PlacedStructure findStructureNear(Location point, double radius) {
         for (PlacedStructure structure : new ArrayList<>(structureManager.getAll())) {
-            for (Block block : structure.getOccupiedBlocks()) {
-                Location blockCenter = block.getLocation().add(0.5, 0.5, 0.5);
-                if (blockCenter.distance(point) <= radius) {
+            for (Location hitPoint : structure.getHitLocations()) {
+                if (hitPoint.distance(point) <= radius) {
                     return structure;
                 }
             }
@@ -34,13 +33,12 @@ public class StructureDemolitionService {
         return null;
     }
 
-    /** Finds every structure with any block within `radius` of the given point (for AoE effects like GolemFall). */
+    /** Finds every structure with any hit point within `radius` of the given point (for AoE effects like GolemFall). */
     public List<PlacedStructure> findStructuresInRadius(Location center, double radius) {
         List<PlacedStructure> found = new ArrayList<>();
         for (PlacedStructure structure : new ArrayList<>(structureManager.getAll())) {
-            for (Block block : structure.getOccupiedBlocks()) {
-                Location blockCenter = block.getLocation().add(0.5, 0.5, 0.5);
-                if (blockCenter.distance(center) <= radius) {
+            for (Location hitPoint : structure.getHitLocations()) {
+                if (hitPoint.distance(center) <= radius) {
                     found.add(structure);
                     break;
                 }

@@ -1,9 +1,6 @@
 package org.latios.arenaBrawl.abilities.offensive;
 
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -144,14 +141,15 @@ public class SeekerBoltTask extends BukkitRunnable {
         return entity instanceof Player candidate
                 && !candidate.equals(shooter)
                 && !candidate.isDead()
-                && teamManager.isEnemy(shooter, candidate);
+                && teamManager.isEnemy(shooter, candidate)
+                && candidate.getGameMode() != GameMode.SPECTATOR;
     }
 
     private Player findNearestEnemy(Location from) {
         Player nearest = null;
         double closest = trackRadius * trackRadius;
         for (Player candidate : from.getWorld().getPlayers()) {
-            if (!isEnemy(candidate)) continue;
+            if (!isEnemy(candidate) || candidate.getGameMode() == GameMode.SPECTATOR) continue;
             double distance = candidate.getLocation().distanceSquared(from);
             if (distance <= closest) {
                 closest = distance;

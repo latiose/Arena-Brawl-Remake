@@ -30,14 +30,19 @@ public class Counter implements Ability {
 
     private static final Map<UUID, CounterState> ACTIVE_COUNTERS = new ConcurrentHashMap<>();
 
-    /** Removes and returns the active counter of a player, or {@code null} if none/expired. */
-    public static CounterState consumeActive(Player player) {
-        CounterState state = ACTIVE_COUNTERS.get(player.getUniqueId());
+    /**
+     * Returns the active counter of a player, or {@code null} if none/expired. The state is not
+     * consumed, so every hit received during the window is reflected.
+     */
+    public static CounterState getActive(Player player) {
+        UUID uuid = player.getUniqueId();
+        CounterState state = ACTIVE_COUNTERS.get(uuid);
         if (state == null) return null;
 
-        ACTIVE_COUNTERS.remove(player.getUniqueId());
-
-        if (System.currentTimeMillis() >= state.expiresAt()) return null;
+        if (System.currentTimeMillis() >= state.expiresAt()) {
+            ACTIVE_COUNTERS.remove(uuid, state);
+            return null;
+        }
         return state;
     }
 
@@ -74,7 +79,7 @@ public class Counter implements Ability {
 
     @Override
     public String getDescription() {
-        return "Raises a parry stance. The next hit taken within the window is negated and its damage "
+        return "Raises a parry stance. Every hit taken within the window is negated and its damage "
                 + "is reflected back at the attacker.";
     }
 
@@ -82,7 +87,7 @@ public class Counter implements Ability {
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Window", (windowMs / 1000.0) + "s"),
-                new AbilityStat("Reflect", "100% of the damage"),
+                new AbilityStat("Reflect", "100% of every hit"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
@@ -90,7 +95,8 @@ public class Counter implements Ability {
     @Override
     public boolean activate(Player player) {
         UUID uuid = player.getUniqueId();
-        ACTIVE_COUNTERS.put(uuid, new CounterState(System.currentTimeMillis() + windowMs));
+        CounterState state = new CounterState(System.currentTimeMillis() + windowMs);
+        ACTIVE_COUNTERS.put(uuid, state);
 
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 10.0f, 1.4f);
         player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 10.0f, 1.8f);
@@ -104,8 +110,12 @@ public class Counter implements Ability {
 
             @Override
             public void run() {
-                CounterState state = ACTIVE_COUNTERS.get(uuid);
-                if (state == null || ticksElapsed >= windowMs / 50L || !player.isOnline() || player.isDead()) {
+                CounterState current = ACTIVE_COUNTERS.get(uuid);
+                if (current != state || !player.isOnline() || player.isDead()
+                        || System.currentTimeMillis() >= state.expiresAt()) {
+                    if (current == state) {
+                        ACTIVE_COUNTERS.remove(uuid, state);
+                    }
                     cancel();
                     return;
                 }

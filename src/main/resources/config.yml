@@ -139,6 +139,8 @@ maps:
       - {x: 15, y: 55.5, z: 134.91}
       - {x: -13.951, y: 55.5, z: 106.1}
 
+
+
 ability-values:
   # --- OFFENSIVE ---
   fireball:
@@ -882,6 +884,7 @@ ability-values:
     charge-time-ms: 60000
     max-target-distance: 20.0
     portal-radius: 1.4
+    duration-ms: 60000
 
   soullink:
     charge-time-millis: 60000

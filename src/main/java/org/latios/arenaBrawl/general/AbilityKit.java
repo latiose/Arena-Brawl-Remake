@@ -13,7 +13,9 @@ import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Consumable;
 import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 public class AbilityKit {
@@ -45,16 +47,20 @@ public class AbilityKit {
             Ability ability = abilityManager.getAbility(player, slot);
             String name = ability != null ? ability.getName() : slot.name();
             player.getInventory().setItem(slot.ordinal(),
-                    namedItem(getIcon(player, slot, swordSelectionManager), "§e" + name));
+                    namedItem(getIcon(player, slot, swordSelectionManager), "§e" + name, ability));
         }
     }
 
-    private static ItemStack namedItem(Material material, String name) {
+    private static ItemStack namedItem(Material material, String name, Ability ability) {
         ItemStack item = new ItemStack(material);
 
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.setDisplayName(name);
+            List<String> lore = buildAbilityLore(ability);
+            if (!lore.isEmpty()) {
+                meta.setLore(lore);
+            }
             item.setItemMeta(meta);
         }
 
@@ -73,11 +79,21 @@ public class AbilityKit {
     }
 
     public static ItemStack createAbilityItem(Material material, String name) {
+        return createAbilityItem(material, name, null);
+    }
+
+    public static ItemStack createAbilityItem(Material material, String name, Ability ability) {
         ItemStack item = new ItemStack(material);
 
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.setDisplayName(name);
+
+            List<String> lore = buildAbilityLore(ability);
+            if (!lore.isEmpty()) {
+                meta.setLore(lore);
+            }
+
             item.setItemMeta(meta);
         }
 
@@ -93,5 +109,50 @@ public class AbilityKit {
         }
 
         return item;
+    }
+
+    /** Builds the item tooltip shown in the match kit: wrapped ability description. */
+    private static List<String> buildAbilityLore(Ability ability) {
+        if (ability == null) return List.of();
+
+        String description = ability.getDescription();
+        if (description == null || description.isBlank()) return List.of();
+
+        List<String> lore = new ArrayList<>();
+        lore.add("");
+        for (String line : wrapText(description, 40)) {
+            lore.add("§7" + line);
+        }
+        return lore;
+    }
+
+    /** Splits text into lines of at most {@code lineLength} characters without breaking words. */
+    public static List<String> wrapText(String text, int lineLength) {
+        List<String> result = new ArrayList<>();
+        if (text == null || text.isEmpty()) {
+            return result;
+        }
+
+        String[] words = text.split(" ");
+        StringBuilder currentLine = new StringBuilder();
+
+        for (String word : words) {
+            if (currentLine.length() + word.length() + 1 > lineLength) {
+                if (!currentLine.isEmpty()) {
+                    result.add(currentLine.toString());
+                    currentLine.setLength(0);
+                }
+            }
+            if (!currentLine.isEmpty()) {
+                currentLine.append(" ");
+            }
+            currentLine.append(word);
+        }
+
+        if (!currentLine.isEmpty()) {
+            result.add(currentLine.toString());
+        }
+
+        return result;
     }
 }

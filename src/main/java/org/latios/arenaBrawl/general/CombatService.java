@@ -8,9 +8,7 @@ import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
-import org.joml.Vector3f;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldType;
@@ -89,7 +87,7 @@ public class CombatService {
 
         double adjustedDamage = rawDamage * multiplier;
 
-        Counter.CounterState counter = Counter.consumeActive(victim);
+        Counter.CounterState counter = Counter.getActive(victim);
         if (counter != null) {
             double counterReduction = shieldManager.getDamageReduction(victim);
             double reflectedDamage = counterReduction > 0 ? adjustedDamage * (1 - counterReduction) : adjustedDamage;
@@ -109,8 +107,7 @@ public class CombatService {
                 int roundedReflected = (int) Math.round(reflectedDamage);
 
                 healthManager.damage(attacker, reflectedDamage, victim);
-                spawnHologram(attacker, String.valueOf(roundedReflected),
-                        attacker.getLocation().add(0, attacker.getHeight() * 0.5, 0));
+                spawnHologram(attacker, String.valueOf(roundedReflected));
 
                 victim.sendMessage(MessageUtils.positive() + String.format(
                         "§3Your %s hit §3%s §3for §c%d §3damage.",
@@ -208,22 +205,7 @@ public class CombatService {
             ));
         }
 
-        Location resolvedImpact = impactLocation != null ? impactLocation : estimateMeleeImpact(attacker, victim);
-        spawnHologram(victim, String.valueOf((int) Math.round(finalDamage)), resolvedImpact);
-    }
-
-    private Location estimateMeleeImpact(Player attacker, Player victim) {
-        Location eye = attacker.getEyeLocation();
-        org.bukkit.util.Vector direction = eye.getDirection();
-        org.bukkit.util.BoundingBox box = victim.getBoundingBox();
-
-        org.bukkit.util.RayTraceResult result = box.rayTrace(eye.toVector(), direction, 6.0);
-
-        if (result != null) {
-            return result.getHitPosition().toLocation(victim.getWorld());
-        }
-
-        return victim.getLocation().add(0, victim.getHeight() * 0.5, 0);
+        spawnHologram(victim, String.valueOf((int) Math.round(finalDamage)));
     }
 
     public void resolveShieldEffect(OrbitShieldType type, Player attacker, Player victim) {
@@ -340,16 +322,11 @@ public class CombatService {
                 owner.getName(), sourceName, roundedDamage
         ));
 
-        Location resolvedImpact = impactLocation != null ? impactLocation : victim.getLocation().add(0, victim.getHeight() * 0.5, 0);
-        spawnHologram(victim, String.valueOf(roundedDamage), resolvedImpact);
+        spawnHologram(victim, String.valueOf(roundedDamage));
     }
 
-    private void spawnHologram(Player victim, String phrase, Location impactLocation) {
-        float jitterX = (float) ThreadLocalRandom.current().nextDouble(-0.15, 0.15);
-        float jitterY = (float) ThreadLocalRandom.current().nextDouble(-0.1, 0.1);
-        float jitterZ = (float) ThreadLocalRandom.current().nextDouble(-0.15, 0.15);
-
-        Location spawnLoc = impactLocation.clone();
+    private void spawnHologram(Player victim, String phrase) {
+        Location spawnLoc = HologramUtils.randomAround(victim);
         TextColor color = TextColor.color(0xFF474C);
 
         TextDisplay hologram = victim.getWorld().spawn(spawnLoc, TextDisplay.class, d -> {
@@ -358,16 +335,6 @@ public class CombatService {
             d.setSeeThrough(true);
             d.setShadowed(true);
             d.setBackgroundColor(org.bukkit.Color.fromARGB(100, 40, 0, 10));
-
-            Transformation currentTransform = d.getTransformation();
-            Vector3f translation = new Vector3f(jitterX, jitterY, jitterZ);
-
-            d.setTransformation(new Transformation(
-                    translation,
-                    currentTransform.getLeftRotation(),
-                    currentTransform.getScale(),
-                    currentTransform.getRightRotation()
-            ));
         });
         EntityCleanupUtils.markAsArenaEntity(hologram);
 
@@ -387,7 +354,6 @@ public class CombatService {
                     return;
                 }
 
-                hologram.teleport(hologram.getLocation().add(0, 0.02, 0));
                 ticksElapsed++;
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
@@ -411,8 +377,7 @@ public class CombatService {
         }
 
         healthManager.damage(attacker, damageAmount, victim);
-        spawnHologram(attacker, String.valueOf(roundedDamage),
-                attacker.getLocation().add(0, attacker.getHeight() * 0.5, 0));
+        spawnHologram(attacker, String.valueOf(roundedDamage));
 
         victim.sendMessage(MessageUtils.positive() + String.format(
                 "§3Your %s hit §3%s §3for §c%d §3damage.", sourceName, attacker.getName(), roundedDamage));

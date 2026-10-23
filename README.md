@@ -166,9 +166,9 @@ Resolution order inside `applyAbilityDamage`:
 4. **Health subtraction**
     - Actual health is reduced through `PlayerHealthManager`.
     - Visual and audio feedback is triggered.
-    - A damage-number hologram is positioned at the exact impact point:
-        - Melee: raycast against the collision box.
-        - Ranged: projectile location.
+    - A damage-number hologram appears at a random spot around the victim:
+        - It no longer uses the exact impact point.
+        - It stays static for its whole lifetime.
 
 5. **Polymorph progress**
     - Damage contributes towards breaking `Polymorph`.

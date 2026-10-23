@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,4 +34,17 @@ public abstract class PlacedStructure {
 
     /** All physical blocks belonging to this structure, used for hit-detection by abilities like Bull Charge/GolemFall. */
     public abstract List<Block> getOccupiedBlocks();
+
+    /**
+     * Points used by demolition abilities (Seismic Wave, GolemFall, Cataclysm, Bull Charge) to detect a hit.
+     * Defaults to the center of every occupied block. Structures made only of particles (like the Portal)
+     * override this so they can still be targeted and demolished.
+     */
+    public List<Location> getHitLocations() {
+        List<Location> locations = new ArrayList<>();
+        for (Block block : getOccupiedBlocks()) {
+            locations.add(block.getLocation().add(0.5, 0.5, 0.5));
+        }
+        return locations;
+    }
 }

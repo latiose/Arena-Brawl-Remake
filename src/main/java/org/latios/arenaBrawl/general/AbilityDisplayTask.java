@@ -45,7 +45,7 @@ public class AbilityDisplayTask extends BukkitRunnable {
             Material unavailableMat = (slot.ordinal() == 0)
                     ? AbilityKit.getIcon(player, slot, swordSelectionManager)
                     : Material.GRAY_DYE;
-            setItem(player, slot, unavailableMat, 1, readyColorCode + ability.getName());
+            setItem(player, slot, unavailableMat, 1, readyColorCode + ability.getName(), ability);
             return;
         }
 
@@ -62,12 +62,12 @@ public class AbilityDisplayTask extends BukkitRunnable {
 
             int amount = (slot.ordinal() == 0) ? 1 : Math.min(remaining, 64);
 
-            setItem(player, slot, cdMaterial, amount, name);
+            setItem(player, slot, cdMaterial, amount, name, ability);
         } else {
             String readyColorCode = getReadyColorCode(slot);
             String readyName = readyColorCode + ability.getName() + " §f- §b§lRIGHT CLICK";
 
-            setItem(player, slot, AbilityKit.getIcon(player, slot, swordSelectionManager), 1, readyName);
+            setItem(player, slot, AbilityKit.getIcon(player, slot, swordSelectionManager), 1, readyName, ability);
         }
     }
 
@@ -81,8 +81,8 @@ public class AbilityDisplayTask extends BukkitRunnable {
         };
     }
 
-    private void setItem(Player player, AbilitySlot slot, Material material, int amount, String name) {
-        ItemStack item = AbilityKit.createAbilityItem(material, name);
+    private void setItem(Player player, AbilitySlot slot, Material material, int amount, String name, Ability ability) {
+        ItemStack item = AbilityKit.createAbilityItem(material, name, ability);
         item.setAmount(amount);
         player.getInventory().setItem(slot.ordinal(), item);
     }

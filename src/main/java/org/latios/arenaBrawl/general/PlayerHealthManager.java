@@ -11,8 +11,6 @@ import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Transformation;
-import org.joml.Vector3f;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.ultimate.Intervention;
@@ -24,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 public class PlayerHealthManager {
@@ -140,14 +137,14 @@ public class PlayerHealthManager {
         }
 
         int roundedHeal = (int) Math.round(healedAmount);
-        spawnHologram(player, String.valueOf(roundedHeal), player.getLocation());
+        spawnHologram(player, String.valueOf(roundedHeal));
         syncVanilla(player);
         return healedAmount;
     }
 
     public double heal(Player player, double amount, String sourceName) {
         double healedAmount = heal(player, amount);
-        int roundedHeal = (int) Math.round(healedAmount);
+        int roundedHeal = (int) Math.round(amount * getHealingMultiplier(player));
 
         player.sendMessage(MessageUtils.positive() + String.format(
                 "§3Your %s healed you for §a%d §3health!",
@@ -161,7 +158,7 @@ public class PlayerHealthManager {
 
         double healedAmount = heal(target, amount, false);
         healingCallback.accept(new HealingEvent(healer, target, healedAmount));
-        int roundedHeal = (int) Math.round(healedAmount);
+        int roundedHeal = (int) Math.round(amount * getHealingMultiplier(target));
 
         healer.sendMessage(MessageUtils.positive() + String.format(
                 "§3Your %s healed %s §3for §a%d §3health!",
@@ -347,12 +344,8 @@ public class PlayerHealthManager {
         healReductions.remove(player.getUniqueId());
     }
 
-    private void spawnHologram(Player victim, String phrase, Location impactLocation) {
-        float jitterX = (float) ThreadLocalRandom.current().nextDouble(-0.15, 0.15);
-        float jitterY = (float) ThreadLocalRandom.current().nextDouble(-0.1, 0.1);
-        float jitterZ = (float) ThreadLocalRandom.current().nextDouble(-0.15, 0.15);
-
-        Location spawnLoc = impactLocation.clone().add(0, 1.0, 0);
+    private void spawnHologram(Player victim, String phrase) {
+        Location spawnLoc = HologramUtils.randomAround(victim);
         TextColor color = TextColor.color(0x90EE90);
 
         TextDisplay hologram = victim.getWorld().spawn(spawnLoc, TextDisplay.class, d -> {
@@ -361,16 +354,6 @@ public class PlayerHealthManager {
             d.setSeeThrough(true);
             d.setShadowed(true);
             d.setBackgroundColor(org.bukkit.Color.fromARGB(100, 10, 50, 20));
-
-            Transformation currentTransform = d.getTransformation();
-            Vector3f translation = new Vector3f(jitterX, jitterY, jitterZ);
-
-            d.setTransformation(new Transformation(
-                    translation,
-                    currentTransform.getLeftRotation(),
-                    currentTransform.getScale(),
-                    currentTransform.getRightRotation()
-            ));
         });
         EntityCleanupUtils.markAsArenaEntity(hologram);
 
@@ -389,7 +372,6 @@ public class PlayerHealthManager {
                     cancel();
                     return;
                 }
-                hologram.teleport(hologram.getLocation().add(0, 0.02, 0));
                 ticksElapsed++;
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
