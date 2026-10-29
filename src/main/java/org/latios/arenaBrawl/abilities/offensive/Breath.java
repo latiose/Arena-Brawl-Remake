@@ -22,25 +22,33 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class Breath implements Ability {
+
     protected static final double HIT_RADIUS = 2.5;
     protected static final double HIT_RADIUS_SQUARED = HIT_RADIUS * HIT_RADIUS;
-
     protected static final int POINT_COUNT = 80;
     protected static final double DEPTH_SEPARATION = 0.065;
-    protected static final double AMPLITUDE_SCALE = 2.0 / (POINT_COUNT - 1);
+    protected static final double MAX_AMPLITUDE = 2.0;
+    protected static final double AMPLITUDE_SCALE = MAX_AMPLITUDE / (POINT_COUNT - 1);
     protected static final double ANGLE_STEP = Math.toRadians(15.0);
     protected static final double EYE_HEIGHT = 1.62;
     protected static final double SNEAK_EYE_OFFSET = -0.08;
-    protected static final double VERTICAL_WEIGHT = 1.5;
+
+    protected static final double REAR_TRIM = 0.25;
+    protected static final double VERTICAL_REDUCTION = 0.1;
+    private static final double VERTICAL_SCALE = (MAX_AMPLITUDE - VERTICAL_REDUCTION) / MAX_AMPLITUDE;
+
     private static final double[][] CONE = buildCone();
 
     private static double[][] buildCone() {
+        double totalDepth = POINT_COUNT * DEPTH_SEPARATION;
+        double depthScale = (totalDepth - REAR_TRIM) / totalDepth;
+
         double[][] points = new double[POINT_COUNT][3];
         for (int i = 0; i < POINT_COUNT; i++) {
             double amplitude = i * AMPLITUDE_SCALE;
             points[i][0] = Math.cos(ANGLE_STEP * i) * amplitude;
-            points[i][1] = Math.sin(ANGLE_STEP * i) * amplitude;
-            points[i][2] = (i + 1) * DEPTH_SEPARATION;
+            points[i][1] = Math.sin(ANGLE_STEP * i) * amplitude * VERTICAL_SCALE;
+            points[i][2] = REAR_TRIM + (i + 1) * DEPTH_SEPARATION * depthScale;
         }
         return points;
     }
@@ -95,11 +103,9 @@ public abstract class Breath implements Ability {
             double dx = co * p[0] - si * p[2];
             double dz = si * p[0] + co * p[2];
 
-
             Location upright = eye.clone().add(dx, p[1], dz);
             spawnTrailParticles(upright);
             checkHit(upright, candidates, hitPlayers);
-
 
             Location inverted = eye.clone().add(dx, -p[1], dz);
             checkHit(inverted, candidates, hitPlayers);
@@ -112,16 +118,11 @@ public abstract class Breath implements Ability {
         return true;
     }
 
-
     protected void checkHit(Location point, List<Player> candidates, Set<Player> hitPlayers) {
         Iterator<Player> it = candidates.iterator();
         while (it.hasNext()) {
             Player candidate = it.next();
-            Location loc = candidate.getLocation();
-            double dx = loc.getX() - point.getX();
-            double dy = (loc.getY() - point.getY()) * VERTICAL_WEIGHT;
-            double dz = loc.getZ() - point.getZ();
-            if (dx * dx + dy * dy + dz * dz < HIT_RADIUS_SQUARED) {
+            if (candidate.getLocation().distanceSquared(point) < HIT_RADIUS_SQUARED) {
                 hitPlayers.add(candidate);
                 it.remove();
             }
@@ -137,7 +138,6 @@ public abstract class Breath implements Ability {
         combatService.applyAbilityDamage(caster, target, getDamage(), getName());
         applySpike(target);
     }
-
 
     protected void applySpike(Player target) {
         if (target.getGameMode() == GameMode.SPECTATOR) return;
@@ -189,3 +189,4 @@ public abstract class Breath implements Ability {
     protected abstract void spawnTrailParticles(Location point);
     protected abstract void applyHitEffects(Player target);
 }
+

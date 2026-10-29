@@ -138,7 +138,533 @@ maps:
     damage-powerups:
       - {x: 15, y: 55.5, z: 134.91}
       - {x: -13.951, y: 55.5, z: 106.1}
-
+  Sunforge:
+    world: "Sunforge"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 81.5, z: 0.5}
+    damage-powerups:
+      - {x: 11.5, y: 91.5, z: 0.5}
+      - {x: -10.5, y: 91.5, z: 0.5}
+  Mossheart:
+    world: "Mossheart"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 87.5, z: 0.5}
+    damage-powerups:
+      - {x: 12.5, y: 86.5, z: 0.5}
+      - {x: -11.5, y: 86.5, z: 0.5}
+  Duskfall:
+    world: "Duskfall"
+    spawns:
+      1v1:
+        - {x: -14.5, y: 81, z: -26.5, yaw: -45, pitch: 0}
+        - {x: 15.5, y: 81, z: 26.5, yaw: 135, pitch: 0}
+      2v2:
+        - {x: -16.5, y: 81, z: -26.5, yaw: -45, pitch: 0}
+        - {x: -11.5, y: 81, z: -26.5, yaw: -45, pitch: 0}
+        - {x: 16.5, y: 81, z: 26.5, yaw: 135, pitch: 0}
+        - {x: 11.5, y: 81, z: 26.5, yaw: 135, pitch: 0}
+      1v1v1v1:
+        - {x: -16.5, y: 81, z: -26.5, yaw: -45, pitch: 0}
+        - {x: -11.5, y: 81, z: -26.5, yaw: -45, pitch: 0}
+        - {x: 16.5, y: 81, z: 26.5, yaw: 135, pitch: 0}
+        - {x: 11.5, y: 81, z: 26.5, yaw: 135, pitch: 0}
+    red-spawn-1: {x: -16.5, y: 81, z: -26.5, yaw: -45, pitch: 0}
+    red-spawn-2: {x: -11.5, y: 81, z: -26.5, yaw: -45, pitch: 0}
+    blue-spawn-1: {x: 16.5, y: 81, z: 26.5, yaw: 135, pitch: 0}
+    blue-spawn-2: {x: 11.5, y: 81, z: 26.5, yaw: 135, pitch: 0}
+    health-powerup: {x: 0.5, y: 81.5, z: 0.5}
+    damage-powerups:
+      - {x: -14.5, y: 91.5, z: 15.5}
+      - {x: 15.5, y: 91.5, z: -14.5}
+  Tidebreak:
+    world: "Tidebreak"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 81.5, z: 0.5}
+    damage-powerups:
+      - {x: 17.5, y: 86.5, z: 0.5}
+      - {x: -16.5, y: 86.5, z: 0.5}
+  Emberworks:
+    world: "Emberworks"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 81.5, z: 0.5}
+    damage-powerups:
+      - {x: 0.5, y: 86.5, z: 5.5}
+      - {x: 0.5, y: 86.5, z: -5.5}
+  Mycelia:
+    world: "Mycelia"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 89.5, z: 0.5}
+    damage-powerups:
+      - {x: 0.5, y: 85.5, z: 13.5}
+      - {x: 0.5, y: 85.5, z: -12.5}
+  Nimbus:
+    world: "Nimbus"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 90.5, z: 0.5}
+    damage-powerups:
+      - {x: 12.5, y: 85.5, z: 0.5}
+      - {x: -11.5, y: 85.5, z: 0.5}
+  Aurelia:
+    world: "Aurelia"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 81.5, z: 0.5}
+    damage-powerups:
+      - {x: 15.5, y: 89.5, z: 0.5}
+      - {x: -14.5, y: 89.5, z: 0.5}
+  Blackwake:
+    world: "Blackwake"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 86.5, z: 0.5}
+    damage-powerups:
+      - {x: 0.5, y: 89.5, z: 15.5}
+      - {x: 0.5, y: 89.5, z: -14.5}
+  Hanami:
+    world: "Hanami"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 81.5, z: 0.5}
+    damage-powerups:
+      - {x: 5.5, y: 91.5, z: 0.5}
+      - {x: -4.5, y: 91.5, z: 0.5}
+  Geode:
+    world: "Geode"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 86.5, z: 0.5}
+    damage-powerups:
+      - {x: 12.5, y: 87.5, z: 0.5}
+      - {x: -11.5, y: 87.5, z: 0.5}
+  Redrock:
+    world: "Redrock"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 81.5, z: 0.5}
+    damage-powerups:
+      - {x: 8.5, y: 89.5, z: 0.5}
+      - {x: -7.5, y: 89.5, z: 0.5}
+  Aurora:
+    world: "Aurora"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 81.5, z: 0.5}
+    damage-powerups:
+      - {x: 5.5, y: 91.5, z: 0.5}
+      - {x: -4.5, y: 91.5, z: 0.5}
+  Ziggurat:
+    world: "Ziggurat"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 96.5, z: 0.5}
+    damage-powerups:
+      - {x: 16.5, y: 84.5, z: 0.5}
+      - {x: -15.5, y: 84.5, z: 0.5}
+  Foundry:
+    world: "Foundry"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 81.5, z: 0.5}
+    damage-powerups:
+      - {x: 8.5, y: 87.5, z: 0.5}
+      - {x: -7.5, y: 87.5, z: 0.5}
+  Citadel:
+    world: "Citadel"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 81.5, z: 0.5}
+    damage-powerups:
+      - {x: 4.5, y: 91.5, z: 0.5}
+      - {x: -3.5, y: 91.5, z: 0.5}
+  Verdant:
+    world: "Verdant"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 93.5, z: 0.5}
+    damage-powerups:
+      - {x: 10.5, y: 86.5, z: 0.5}
+      - {x: -9.5, y: 86.5, z: 0.5}
+  Colosseum:
+    world: "Colosseum"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 82.5, z: 0.5}
+    damage-powerups:
+      - {x: 15.5, y: 84.5, z: 0.5}
+      - {x: -14.5, y: 84.5, z: 0.5}
+  Observatory:
+    world: "Observatory"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 100.5, z: 0.5}
+    damage-powerups:
+      - {x: 7.5, y: 93.5, z: 0.5}
+      - {x: -6.5, y: 93.5, z: 0.5}
+  Bazaar:
+    world: "Bazaar"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 4.5, y: 87.5, z: 0.5}
+    damage-powerups:
+      - {x: 8.5, y: 86.5, z: 0.5}
+      - {x: -7.5, y: 86.5, z: 0.5}
+  Shipwreck:
+    world: "Shipwreck"
+    spawns:
+      1v1:
+        - {x: 0.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 0.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      2v2:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+      1v1v1v1:
+        - {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+        - {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+        - {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    red-spawn-1: {x: -1.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    red-spawn-2: {x: 2.5, y: 81, z: -26.5, yaw: 0, pitch: 0}
+    blue-spawn-1: {x: -1.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    blue-spawn-2: {x: 2.5, y: 81, z: 27.5, yaw: 180, pitch: 0}
+    health-powerup: {x: 0.5, y: 86.5, z: 0.5}
+    damage-powerups:
+      - {x: 5.5, y: 86.5, z: 0.5}
+      - {x: -4.5, y: 86.5, z: 0.5}
+  1v1Purple:
+    world: "1v1Purple"
+    spawns:
+      1v1:
+        - {x: 26.472, y: 41, z: 0.498, yaw: 90, pitch: 0}
+        - {x: -25.544, y: 41, z: 0.498, yaw: -90, pitch: 0}
+      2v2:
+        - {x: 26.472, y: 41, z: 0.498, yaw: 90, pitch: 0}
+        - {x: 26.472, y: 41, z: 1.498, yaw: 90, pitch: 0}
+        - {x: -25.544, y: 41, z: 0.498, yaw: -90, pitch: 0}
+        - {x: -25.544, y: 41, z: 1.498, yaw: -90, pitch: 0}
+      1v1v1v1:
+        - {x: 26.472, y: 41, z: 0.498, yaw: 90, pitch: 0}
+        - {x: 26.472, y: 41, z: 1.498, yaw: 90, pitch: 0}
+        - {x: -25.544, y: 41, z: 0.498, yaw: -90, pitch: 0}
+        - {x: -25.544, y: 41, z: 1.498, yaw: -90, pitch: 0}
+    red-spawn-1: {x: 26.472, y: 41, z: 0.498, yaw: 90, pitch: 0}
+    red-spawn-2: {x: 26.472, y: 41, z: 1.498, yaw: 90, pitch: 0}
+    blue-spawn-1: {x: -25.544, y: 41, z: 0.498, yaw: -90, pitch: 0}
+    blue-spawn-2: {x: -25.544, y: 41, z: 1.498, yaw: -90, pitch: 0}
+    health-powerup: {x: 0.5, y: 46, z: -24.5}
+    damage-powerups:
+      - {x: 0.5, y: 46, z: 25.5}
 
 
 ability-values:

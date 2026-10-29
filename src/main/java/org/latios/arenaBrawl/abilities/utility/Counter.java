@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities.utility;
 
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -98,12 +99,28 @@ public class Counter implements Ability {
         CounterState state = new CounterState(System.currentTimeMillis() + windowMs);
         ACTIVE_COUNTERS.put(uuid, state);
 
-        player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 10.0f, 1.4f);
-        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 10.0f, 1.8f);
-
         Location loc = player.getLocation();
-        loc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, loc.clone().add(0, 1.0, 0), 6, 0.4, 0.4, 0.4, 0.0);
-        loc.getWorld().spawnParticle(Particle.CRIT, loc.clone().add(0, 1.0, 0), 12, 0.3, 0.5, 0.3, 0.1);
+        var world = loc.getWorld();
+        Location body = loc.clone().add(0, 1.0, 0);
+
+        // Distinct activation sound so the parry stance is easy to notice.
+        world.playSound(loc, Sound.ITEM_SHIELD_BLOCK, 1.6f, 0.8f);
+        world.playSound(loc, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.5f);
+        world.playSound(loc, Sound.BLOCK_ANVIL_LAND, 1.2f, 1.8f);
+
+        // Bright shockwave ring + vertical pillar to make the activation obvious.
+        int ringPoints = 36;
+        for (int i = 0; i < ringPoints; i++) {
+            double angle = Math.toRadians((360.0 / ringPoints) * i);
+            double x = Math.cos(angle) * 1.15;
+            double z = Math.sin(angle) * 1.15;
+            world.spawnParticle(Particle.END_ROD, body.clone().add(x, 0, z), 1, 0, 0, 0, 0);
+            world.spawnParticle(Particle.DUST, loc.clone().add(x, 0.15, z), 1, 0, 0, 0, 0,
+                    new Particle.DustOptions(Color.fromRGB(0, 210, 255), 1.2f));
+        }
+        world.spawnParticle(Particle.END_ROD, body, 18, 0.35, 0.9, 0.35, 0.02);
+        world.spawnParticle(Particle.ENCHANTED_HIT, body, 35, 0.5, 0.8, 0.5, 0.15);
+        world.spawnParticle(Particle.SWEEP_ATTACK, body, 8, 0.6, 0.6, 0.6, 0.0);
 
         new BukkitRunnable() {
             long ticksElapsed = 0;
@@ -121,10 +138,17 @@ public class Counter implements Ability {
                 }
 
                 Location body = player.getLocation().add(0, 1.0, 0);
-                double angle = (ticksElapsed * 30) % 360;
-                double rad = Math.toRadians(angle);
-                body.getWorld().spawnParticle(Particle.ENCHANTED_HIT,
-                        body.clone().add(Math.cos(rad) * 0.7, 0, Math.sin(rad) * 0.7), 1, 0, 0, 0, 0);
+                double baseAngle = ticksElapsed * 22.0;
+                double radius = 0.95;
+                for (int i = 0; i < 3; i++) {
+                    double rad = Math.toRadians(baseAngle + i * 120.0);
+                    double x = Math.cos(rad) * radius;
+                    double z = Math.sin(rad) * radius;
+                    body.getWorld().spawnParticle(Particle.END_ROD, body.clone().add(x, 0.25, z), 1, 0, 0, 0, 0);
+                    body.getWorld().spawnParticle(Particle.DUST, body.clone().add(x, -0.45, z), 1, 0, 0, 0, 0,
+                            new Particle.DustOptions(Color.fromRGB(0, 190, 255), 1.0f));
+                }
+                body.getWorld().spawnParticle(Particle.ENCHANTED_HIT, body, 1, 0.45, 0.55, 0.45, 0.01);
 
                 ticksElapsed += 2;
             }

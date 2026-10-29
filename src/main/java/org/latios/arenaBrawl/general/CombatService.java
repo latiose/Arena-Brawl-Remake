@@ -28,6 +28,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class CombatService {
 
+    private static final String MELEE = "Melee";
+
     private final PlayerHealthManager healthManager;
     private final ShieldManager shieldManager;
     private final DebuffManager debuffManager;
@@ -35,7 +37,7 @@ public class CombatService {
     private final DamageBuffManager damageBuffManager;
     private final MatchManager matchManager;
     private static final long HOLOGRAM_LIFETIME_TICKS = 30;
-    private static final long STAR_SHIELD_EFFECT_DURATION_MILLIS = 4_000;
+    private static final long STAR_SHIELD_EFFECT_DURATION_MILLIS = 3_000;
     private static final List<DebuffType> STAR_SHIELD_POSSIBLE_DEBUFFS =
             List.of(DebuffType.STUN, DebuffType.IMMOBILIZE, DebuffType.SLOW);
     private final EtherealBodyManager etherealBodyManager;
@@ -71,16 +73,18 @@ public class CombatService {
             return;
         }
 
-        double multiplier = damageBuffManager.getAndConsumeMultiplier(attacker);
+        boolean melee = abilityName.equals(MELEE);
 
-        if (abilityName.equals("Melee")) {
+        double multiplier = attacker != null ? damageBuffManager.getAndConsumeMultiplier(attacker) : 1.0;
+
+        if (melee && attacker != null) {
             for (MeleeHitEffect effect : meleeHitEffects) {
                 double effectMultiplier = effect.getMultiplier(attacker);
                 multiplier *= effectMultiplier;
             }
         }
 
-        Match match = matchManager.getMatchFor(attacker);
+        Match match = attacker != null ? matchManager.getMatchFor(attacker) : null;
         if (match != null && match.isDoubleDamageActive()) {
             multiplier *= 2.0;
         }
@@ -89,35 +93,7 @@ public class CombatService {
 
         Counter.CounterState counter = Counter.getActive(victim);
         if (counter != null) {
-            double counterReduction = shieldManager.getDamageReduction(victim);
-            double reflectedDamage = counterReduction > 0 ? adjustedDamage * (1 - counterReduction) : adjustedDamage;
-
-            double counterVulnerability = damageVulnerabilityManager.getBonusMultiplier(victim);
-            if (counterVulnerability > 0) {
-                reflectedDamage *= (1 + counterVulnerability);
-            }
-
-            Location counterLoc = victim.getLocation().add(0, 1.0, 0);
-            victim.getWorld().spawnParticle(Particle.ENCHANTED_HIT, counterLoc, 25, 0.3, 0.5, 0.3, 0.1);
-            victim.getWorld().spawnParticle(Particle.SWEEP_ATTACK, counterLoc, 4, 0.4, 0.4, 0.4, 0.0);
-            victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.2f, 1.0f);
-            victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 1.0f, 1.4f);
-
-            if (attacker != null && !attacker.equals(victim)) {
-                int roundedReflected = (int) Math.round(reflectedDamage);
-
-                healthManager.damage(attacker, reflectedDamage, victim);
-                spawnHologram(attacker, String.valueOf(roundedReflected));
-
-                victim.sendMessage(MessageUtils.positive() + String.format(
-                        "§3Your %s hit §3%s §3for §c%d §3damage.",
-                        "Counter", attacker.getName(), roundedReflected
-                ));
-                attacker.sendMessage(MessageUtils.negative() + String.format(
-                        "§3%s's %s hit §3you §3for §c%d §3damage.",
-                        victim.getName(), "Counter", roundedReflected
-                ));
-            }
+            resolveCounter(attacker, victim, adjustedDamage);
             return;
         }
 
@@ -143,39 +119,18 @@ public class CombatService {
             return;
         }
 
-        UUID casterUUID = LifeBond.ACTIVE_BONDS.get(victim.getUniqueId());
-        if (casterUUID != null) {
-            Player caster = Bukkit.getPlayer(casterUUID);
-
-            if (caster != null && caster.isOnline() && !caster.isDead()) {
-                double redirectedDamage = finalDamage * 0.30;
-                finalDamage = finalDamage * 0.70;
-
-                healthManager.damage(caster, redirectedDamage, attacker);
-                caster.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, caster.getLocation().add(0, 1, 0), 3);
-
-                caster.sendMessage(MessageUtils.negative() + String.format(
-                        "§3You absorbed §c%d §3damage for §a%s §3via Life Bond!",
-                        (int) Math.round(redirectedDamage), victim.getName()
-                ));
-
-                victim.sendMessage(MessageUtils.positive() + String.format(
-                        "§a%s §3absorbed §c%d §3of your damage via Life Bond!",
-                        caster.getName(), (int) Math.round(redirectedDamage)
-                ));
-            }
-        }
+        finalDamage = applyLifeBond(victim, attacker, finalDamage);
 
         healthManager.damage(victim, finalDamage, attacker);
-        if (soulLinkManager != null && !healthManager.isEliminated(victim)) {
-            soulLinkManager.applyMirrorDamage(victim, attacker, finalDamage);
-        }
-        if (abilityName.equals("Melee")) {
+        applySoulLink(victim, attacker, finalDamage);
+        if (melee && attacker != null) {
             Thornheart.onMeleeDamageTaken(victim, attacker, healthManager);
         }
-        Bloodthirst.onDamageDealt(attacker, victim, finalDamage, healthManager);
-        BloodMoon.onDamageDealt(attacker, victim, finalDamage, healthManager);
-        if (abilityName.equals("Melee")) {
+        if (attacker != null) {
+            Bloodthirst.onDamageDealt(attacker, victim, finalDamage, healthManager);
+            BloodMoon.onDamageDealt(attacker, victim, finalDamage, healthManager);
+        }
+        if (melee) {
             playDamageFeedback(victim);
 
             Location impactLoc = impactLocation != null ? impactLocation : victim.getLocation().add(0, 1.0, 0);
@@ -184,28 +139,135 @@ public class CombatService {
             }
         }
 
-        if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
-            boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, finalDamage, 30.0);
-            if (shouldBreak) {
-                debuffManager.clear(victim);
-            }
-        }
+        applyPolymorphDamage(victim, finalDamage);
 
-        if (!abilityName.equals("Melee")) {
+        if (!melee) {
             int roundedDamage = (int) Math.round(finalDamage);
 
-            attacker.sendMessage(MessageUtils.positive() + String.format(
-                    "§3Your %s hit §3%s §3for §c%d §3damage.",
-                    abilityName, victim.getName(), roundedDamage
-            ));
+            if (attacker != null) {
+                attacker.sendMessage(MessageUtils.positive() + String.format(
+                        "§3Your %s hit §3%s §3for §c%d §3damage.",
+                        abilityName, victim.getName(), roundedDamage
+                ));
+            }
 
             victim.sendMessage(MessageUtils.negative() + String.format(
                     "§3%s's %s hit §3you §3for §c%d §3damage.",
-                    attacker.getName(), abilityName, roundedDamage
+                    attacker != null ? attacker.getName() : "Unknown", abilityName, roundedDamage
             ));
         }
 
         spawnHologram(victim, String.valueOf((int) Math.round(finalDamage)));
+    }
+
+    private void resolveCounter(Player attacker, Player victim, double adjustedDamage) {
+        double counterReduction = shieldManager.getDamageReduction(victim);
+        double reflectedDamage = counterReduction > 0 ? adjustedDamage * (1 - counterReduction) : adjustedDamage;
+
+        double counterVulnerability = damageVulnerabilityManager.getBonusMultiplier(victim);
+        if (counterVulnerability > 0) {
+            reflectedDamage *= (1 + counterVulnerability);
+        }
+
+        Location counterLoc = victim.getLocation().add(0, 1.0, 0);
+        victim.getWorld().spawnParticle(Particle.ENCHANTED_HIT, counterLoc, 25, 0.3, 0.5, 0.3, 0.1);
+        victim.getWorld().spawnParticle(Particle.SWEEP_ATTACK, counterLoc, 4, 0.4, 0.4, 0.4, 0.0);
+        victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.2f, 1.0f);
+        victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 1.0f, 1.4f);
+
+        if (attacker != null && !attacker.equals(victim)) {
+            if (orbitShieldManager.hasActiveShield(attacker)) {
+                OrbitShieldType attackerShield = orbitShieldManager.getActiveType(attacker);
+                if (attackerShield != null) {
+                    orbitShieldManager.consumeCharge(attacker);
+                    resolveShieldEffect(attackerShield, victim, attacker, true);
+
+                    victim.sendMessage(MessageUtils.negative() + String.format(
+                            "§3Your %s was blocked by §e%s§3's %s!",
+                            "Counter", attacker.getName(), attackerShield.getDisplayName()
+                    ));
+                    return;
+                }
+            }
+
+            double dealt = damageReflectedTarget(attacker, victim, reflectedDamage);
+            if (dealt < 0) {
+                return;
+            }
+
+            int roundedReflected = (int) Math.round(dealt);
+            spawnHologram(attacker, String.valueOf(roundedReflected));
+
+            victim.sendMessage(MessageUtils.positive() + String.format(
+                    "§3Your %s hit §3%s §3for §c%d §3damage.",
+                    "Counter", attacker.getName(), roundedReflected
+            ));
+            attacker.sendMessage(MessageUtils.negative() + String.format(
+                    "§3%s's %s hit §3you §3for §c%d §3damage.",
+                    victim.getName(), "Counter", roundedReflected
+            ));
+        }
+    }
+
+
+    private double damageReflectedTarget(Player receiver, Player source, double damage) {
+        if (receiver.getGameMode() == GameMode.SPECTATOR || healthManager.isEliminated(receiver)) {
+            return -1;
+        }
+        if (etherealBodyManager.processIncomingDamage(receiver, damage)) {
+            return -1;
+        }
+
+        double finalDamage = applyLifeBond(receiver, source, damage);
+
+        healthManager.damage(receiver, finalDamage, source);
+        applySoulLink(receiver, source, finalDamage);
+        applyPolymorphDamage(receiver, finalDamage);
+        return finalDamage;
+    }
+
+    private double applyLifeBond(Player victim, Player attacker, double finalDamage) {
+        UUID casterUUID = LifeBond.ACTIVE_BONDS.get(victim.getUniqueId());
+        if (casterUUID == null) {
+            return finalDamage;
+        }
+
+        Player caster = Bukkit.getPlayer(casterUUID);
+        if (caster == null || !caster.isOnline() || caster.isDead()) {
+            return finalDamage;
+        }
+
+        double redirectedDamage = finalDamage * 0.30;
+
+        healthManager.damage(caster, redirectedDamage, attacker);
+        caster.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, caster.getLocation().add(0, 1, 0), 3);
+
+        caster.sendMessage(MessageUtils.negative() + String.format(
+                "§3You absorbed §c%d §3damage for §a%s §3via Life Bond!",
+                (int) Math.round(redirectedDamage), victim.getName()
+        ));
+
+        victim.sendMessage(MessageUtils.positive() + String.format(
+                "§a%s §3absorbed §c%d §3of your damage via Life Bond!",
+                caster.getName(), (int) Math.round(redirectedDamage)
+        ));
+
+        return finalDamage * 0.70;
+    }
+
+    private void applySoulLink(Player victim, Player attacker, double damage) {
+        if (soulLinkManager != null && !healthManager.isEliminated(victim)) {
+            soulLinkManager.applyMirrorDamage(victim, attacker, damage);
+        }
+    }
+
+    private void applyPolymorphDamage(Player victim, double damage) {
+        if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
+            boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, damage, 30.0);
+            if (shouldBreak) {
+                debuffManager.clear(victim);
+            }
+        }
     }
 
     public void resolveShieldEffect(OrbitShieldType type, Player attacker, Player victim) {
@@ -229,6 +291,7 @@ public class CombatService {
             healVictim(victim, type.getHealPerCharge(), type.getDisplayName());
         }
 
+        if (attacker == null) return;
 
         if (type.isRandom()) {
             org.latios.arenaBrawl.general.GamblerEffects.Entry result = org.latios.arenaBrawl.general.GamblerEffects.roll();
@@ -281,6 +344,17 @@ public class CombatService {
         }
 
         double ownerMultiplier = damageBuffManager.getMultiplier(owner);
+
+        Match match = matchManager.getMatchFor(owner);
+        if (match != null && match.isDoubleDamageActive()) {
+            ownerMultiplier *= 2.0;
+        }
+
+        if (Counter.getActive(victim) != null) {
+            resolveCounter(owner, victim, rawDamage * ownerMultiplier);
+            return;
+        }
+
         double reduction = shieldManager.getDamageReduction(victim);
 
         double finalDamage = rawDamage * ownerMultiplier * (1 - Math.max(0, reduction));
@@ -288,7 +362,6 @@ public class CombatService {
         if (vulnerabilityBonus > 0) {
             finalDamage *= (1 + vulnerabilityBonus);
         }
-        int roundedDamage = (int) Math.round(finalDamage);
 
         if (orbitShieldManager.hasActiveShield(victim)) {
             OrbitShieldType type = orbitShieldManager.getActiveType(victim);
@@ -299,18 +372,18 @@ public class CombatService {
             }
         }
 
-        healthManager.damageSilent(victim, finalDamage, owner);
-        if (soulLinkManager != null && !healthManager.isEliminated(victim)) {
-            soulLinkManager.applyMirrorDamage(victim, owner, finalDamage);
+        if (etherealBodyManager.processIncomingDamage(victim, finalDamage)) {
+            return;
         }
+
+        finalDamage = applyLifeBond(victim, owner, finalDamage);
+        int roundedDamage = (int) Math.round(finalDamage);
+
+        healthManager.damageSilent(victim, finalDamage, owner);
+        applySoulLink(victim, owner, finalDamage);
         Bloodthirst.onDamageDealt(owner, victim, finalDamage, healthManager);
         BloodMoon.onDamageDealt(owner, victim, finalDamage, healthManager);
-        if (debuffManager.hasDebuff(victim, DebuffType.POLYMORPH)) {
-            boolean shouldBreak = debuffManager.addAccumulatedDamage(victim, finalDamage, 30.0);
-            if (shouldBreak) {
-                debuffManager.clear(victim);
-            }
-        }
+        applyPolymorphDamage(victim, finalDamage);
 
         owner.sendMessage(MessageUtils.positive() + String.format(
                 "§3Your %s hit §3%s §3for §c%d §3damage.",
@@ -364,7 +437,6 @@ public class CombatService {
         double damageAmount = baseDamage
                 * damageBuffManager.getMultiplier(victim)
                 * (1.0 + damageVulnerabilityManager.getBonusMultiplier(attacker));
-        int roundedDamage = (int) Math.round(damageAmount);
 
         OrbitShieldType attackerShield = (!reflected && orbitShieldManager.hasActiveShield(attacker))
                 ? orbitShieldManager.getActiveType(attacker)
@@ -376,7 +448,17 @@ public class CombatService {
             return;
         }
 
-        healthManager.damage(attacker, damageAmount, victim);
+        double reduction = shieldManager.getDamageReduction(attacker);
+        if (reduction > 0) {
+            damageAmount *= (1 - reduction);
+        }
+
+        double dealt = damageReflectedTarget(attacker, victim, damageAmount);
+        if (dealt < 0) {
+            return;
+        }
+
+        int roundedDamage = (int) Math.round(dealt);
         spawnHologram(attacker, String.valueOf(roundedDamage));
 
         victim.sendMessage(MessageUtils.positive() + String.format(
