@@ -17,12 +17,14 @@ import java.util.List;
 public class Barricade implements Ability {
 
     private final long cooldownMs;
+    private final long durationMs;
     private final AbilityCost cost;
     private final StructureManager structureManager;
 
     public Barricade(CooldownManager cooldownManager, CombatUpgradeManager upgradeManager,
                      StructureManager structureManager, AbilityConfig config) {
         this.cooldownMs = config.getLong("cooldown-ms", 30000L);
+        this.durationMs = config.getLong("duration-ms", 4000L);
         this.cost = new CooldownCost(cooldownManager, "barricade", cooldownMs, upgradeManager);
         this.structureManager = structureManager;
     }
@@ -35,17 +37,24 @@ public class Barricade implements Ability {
 
     @Override
     public String getDescription() {
-        return "Builds a climbable wall around you with a gap to slip through at the top. Cannot be broken by melee attacks.";
+        return "Builds a climbable stone dome around you with a small gap at the top. Cannot be broken by melee attacks.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Duration", "5s"),
-                new AbilityStat("Height", "3 blocks"),
+                new AbilityStat("Duration", formatSeconds(durationMs)),
+                new AbilityStat("Height", "4 blocks"),
                 new AbilityStat("Melee resistant", "Yes"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
+    }
+
+    private static String formatSeconds(long millis) {
+        if (millis % 1000L == 0L) {
+            return (millis / 1000L) + "s";
+        }
+        return String.format("%.1fs", millis / 1000.0);
     }
 
     @Override
@@ -58,7 +67,7 @@ public class Barricade implements Ability {
             return false;
         }
 
-        BarricadeStructure structure = new BarricadeStructure(player, placementLocation, blueprint);
+        BarricadeStructure structure = new BarricadeStructure(player, placementLocation, blueprint, durationMs);
         structureManager.register(structure);
 
         return true;

@@ -267,6 +267,7 @@ public class AbilitySelectorGUI {
                 case SLOW -> lore.add("§bDuration: §f" + secondsSlow(cfg.getLong("duration-ticks", 3000)));
                 case DAMAGE -> lore.add("§bDamage multiplier: §fx" + num(cfg.getDouble("damage-multiplier", 2.0)));
                 case ENERGY -> lore.add("§bEnergy gained: §f+" + num(cfg.getDouble("energy-amount", 10.0)));
+                case IMMOBILIZE -> lore.add("§bDuration: §f" + secondsSlow(cfg.getLong("duration-ticks", 3000)));
                 default -> { }
             }
 
@@ -309,6 +310,7 @@ public class AbilitySelectorGUI {
             case ENERGY -> Material.YELLOW_DYE;
             case DAMAGE -> Material.RED_DYE;
             case CONFUSION -> Material.BLACK_DYE;
+            case IMMOBILIZE -> Material.LIME_DYE;
         };
     }
 
@@ -318,6 +320,7 @@ public class AbilitySelectorGUI {
             case SLOW, ENERGY -> 0.15;
             case DAMAGE -> 0.48;
             case CONFUSION -> 0.20;
+            case IMMOBILIZE -> 0.01;
         };
     }
 

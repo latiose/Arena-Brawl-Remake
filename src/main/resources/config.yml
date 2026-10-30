@@ -934,6 +934,54 @@ ability-values:
     fuse-ms: 2500
     max-flight-ticks: 80
 
+  skyfall:
+    energy-cost: 60.0
+    damage: 120.0
+    radius: 3.0
+    height: 10.0
+    airborne-bonus: 1.6
+    knock-down: 0.8
+
+  mortar:
+    energy-cost: 50.0
+    base-damage: 90.0
+    damage-per-5-blocks: 20.0
+    max-damage: 200.0
+    aoe-radius: 3.5
+    projectile-speed: 1.1
+    gravity: 0.05
+    max-flight-ticks: 100
+    hit-radius: 0.5
+
+  plunge:
+    energy-cost: 50.0
+    base-damage: 140.0
+    damage-per-block: 20.0
+    max-damage: 260.0
+    radius: 4.0
+    knock-up: 0.5
+    min-fall: 1.0
+    dive-speed: 1.5
+    max-ticks: 60
+
+  ricochet:
+    energy-cost: 40.0
+    damage: 70.0
+    max-bounces: 3
+    speed: 1.2
+    max-lifetime-ticks: 40
+    hit-radius: 0.8
+
+  whirlwind:
+    energy-cost: 65.0
+    damage: 32.0
+    radius: 3.5
+    height-tolerance: 2.0
+    duration-ticks: 20
+    hit-interval-ticks: 5
+    speed-amplifier: 1
+    knockback: 0.0
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -1013,6 +1061,7 @@ ability-values:
 
   barricade:
     cooldown-ms: 30000
+    duration-ms: 4000
 
   golemfall:
     max-range: 20.0
@@ -1065,6 +1114,12 @@ ability-values:
     damage-bonus: 0.25
     speed-amplifier: 0
 
+  updraft:
+    cooldown-ms: 20000
+    launch-velocity: 1.3
+    glide-ms: 1500
+    max-fall-speed: -0.15
+    
   counter:
     cooldown-ms: 22000
     window-ms: 1500
@@ -1446,6 +1501,9 @@ rune-values:
     energy-amount: 10.0
   confusion:
     proc-chance: 0.15
+  immobilize:
+    proc-chance: 0.01
+    duration-ticks: 3000
 
 hats:
   # --- COMMON HATS ---

@@ -83,6 +83,17 @@ public class AbilityRegistry {
                 deps -> new Hemorrhage(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("hemorrhage")));
         register(AbilitySlot.OFFENSIVE, "contagionbomb",
                 deps -> new ContagionBomb(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("contagionbomb")));
+        register(AbilitySlot.OFFENSIVE, "skyfall",
+                deps -> new Skyfall(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("skyfall")));
+        register(AbilitySlot.OFFENSIVE, "mortar",
+                deps -> new Mortar(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("mortar")));
+        register(AbilitySlot.OFFENSIVE, "plunge",
+                deps -> new Plunge(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("plunge")));
+        register(AbilitySlot.OFFENSIVE, "ricochet",
+                deps -> new Ricochet(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("ricochet")));
+        register(AbilitySlot.OFFENSIVE, "whirlwind",
+                deps -> new Whirlwind(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(),
+                        deps.speedBuffManager(), configManager.get("whirlwind")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -137,7 +148,8 @@ public class AbilityRegistry {
                 deps -> new Tether(plugin, deps.cooldownManager(), deps.teamManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("tether")));
         register(AbilitySlot.UTILITY, "shadowcloak",
                 deps -> new ShadowCloak(deps.cooldownManager(), deps.shadowCloakManager(), deps.combatUpgradeManager(), configManager.get("shadowcloak")));
-
+        register(AbilitySlot.UTILITY, "updraft",
+                deps -> new Updraft(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("updraft")));
 
 
         // --- SUPPORT ---

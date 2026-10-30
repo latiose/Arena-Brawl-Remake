@@ -57,6 +57,11 @@ public class AbilityIconRegistry {
         icons.put("ashenfield", Material.CAMPFIRE);
         icons.put("hemorrhage", Material.REDSTONE);
         icons.put("contagionbomb", Material.SLIME_BALL);
+        icons.put("skyfall", Material.END_CRYSTAL);
+        icons.put("mortar", Material.FIREWORK_ROCKET);
+        icons.put("plunge", Material.NETHERITE_BOOTS);
+        icons.put("ricochet", Material.AMETHYST_SHARD);
+        icons.put("whirlwind", Material.NETHERITE_SWORD);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
@@ -84,6 +89,7 @@ public class AbilityIconRegistry {
         icons.put("taunt", Material.TURTLE_HELMET);
         icons.put("tether", Material.IRON_CHAIN);
         icons.put("shadowcloak", Material.BLACK_DYE);
+        icons.put("updraft", Material.BREEZE_ROD);
         icons.put("portal", Material.ENDER_PEARL);
 
         // --- SUPPORT ---

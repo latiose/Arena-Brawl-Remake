@@ -72,6 +72,12 @@ public class RuneManager {
                 attacker.sendMessage("§eYour §e" + rune.getDisplayName() + " §ewas activated!");
                 return 1.0;
             }
+            case IMMOBILIZE -> {
+                long durationMillis = config.getLong("duration-ticks", 3000);
+                debuffManager.tryApply(victim, DebuffType.IMMOBILIZE, durationMillis);
+                attacker.sendMessage("§eYour §a" + rune.getDisplayName() + " §ewas activated!");
+                return 1.0;
+            }
             case CONFUSION -> {
                 if (victim != null) {
                     int currentSlot = victim.getInventory().getHeldItemSlot();
@@ -98,6 +104,7 @@ public class RuneManager {
             case SLOW, ENERGY -> 0.15;
             case DAMAGE -> 0.48;
             case CONFUSION -> 0.20;
+            case IMMOBILIZE -> 0.01;
         };
     }
 }

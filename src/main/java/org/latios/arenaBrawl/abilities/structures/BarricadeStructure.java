@@ -14,13 +14,14 @@ import java.util.Map;
 
 public class BarricadeStructure extends PlacedStructure {
 
-    private static final long DURATION_MILLIS = 4_000;
+    private final long durationMillis;
 
     private final Map<Block, BlockData> originalBlockData = new HashMap<>();
     private final List<Block> placedBlocks = new ArrayList<>();
 
-    public BarricadeStructure(Player owner, Location center, StructureBlueprint blueprint) {
+    public BarricadeStructure(Player owner, Location center, StructureBlueprint blueprint, long durationMillis) {
         super(owner, center.getBlock().getLocation());
+        this.durationMillis = durationMillis;
         build(center.getBlock().getLocation(), blueprint);
     }
 
@@ -84,7 +85,7 @@ public class BarricadeStructure extends PlacedStructure {
 
     @Override
     public boolean tick() {
-        return System.currentTimeMillis() - getPlacedAt() >= DURATION_MILLIS;
+        return System.currentTimeMillis() - getPlacedAt() >= durationMillis;
     }
 
     @Override
