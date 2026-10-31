@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.runes;
 
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -53,29 +54,34 @@ public class RuneManager {
 
                 speedBuffManager.applyBuff(attacker, amplifier, durationTicks * 50L);
                 attacker.sendMessage("§eYour §f" + rune.getDisplayName() + " §ewas activated!");
+                attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
                 return 1.0;
             }
             case SLOW -> {
                 long durationTicks = config.getLong("duration-ticks", 3000);
                 debuffManager.tryApply(victim, DebuffType.SLOW, durationTicks);
                 attacker.sendMessage("§eYour §5" + rune.getDisplayName() + " §ewas activated!");
+                attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
                 return 1.0;
             }
             case DAMAGE -> {
                 double multiplier = config.getDouble("damage-multiplier", 2.0);
                 attacker.sendMessage("§eYour §c" + rune.getDisplayName() + " §ewas activated!");
+                attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
                 return multiplier;
             }
             case ENERGY -> {
                 double amount = config.getDouble("energy-amount", 10.0);
                 energyManager.addEnergy(attacker, amount);
                 attacker.sendMessage("§eYour §e" + rune.getDisplayName() + " §ewas activated!");
+                attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
                 return 1.0;
             }
             case IMMOBILIZE -> {
                 long durationMillis = config.getLong("duration-ticks", 3000);
                 debuffManager.tryApply(victim, DebuffType.IMMOBILIZE, durationMillis);
                 attacker.sendMessage("§eYour §a" + rune.getDisplayName() + " §ewas activated!");
+                attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 0.5f);
                 return 1.0;
             }
             case CONFUSION -> {
@@ -98,6 +104,7 @@ public class RuneManager {
         }
     }
 
+
     private double getDefaultProcChance(RuneType rune) {
         return switch (rune) {
             case SPEED -> 0.2;
@@ -106,5 +113,9 @@ public class RuneManager {
             case CONFUSION -> 0.20;
             case IMMOBILIZE -> 0.01;
         };
+
+
     }
+
+
 }

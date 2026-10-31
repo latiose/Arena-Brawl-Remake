@@ -69,18 +69,8 @@ public class EchoDecoyTask extends BukkitRunnable {
         decoy.getWorld().spawnParticle(Particle.SCULK_SOUL, decoy.getLocation().add(0, 1, 0), 1,
                 0.15, 0.3, 0.15, 0.0);
 
-        // Once armed, catching anyone in the wider radius stuns them all.
-        if (ticks >= armDelayTicks) {
-            List<Player> caught = enemiesWithin(surpriseRadius);
-            if (!caught.isEmpty()) {
-                stunCaught(caught);
-                vanish(true);
-                return;
-            }
-        }
-
-        // Keep the original bait: vanishing when an enemy gets right up to it.
-        if (!enemiesWithin(baitRadius).isEmpty()) {
+        if (ticks >= armDelayTicks && !enemiesWithin(baitRadius).isEmpty()) {
+            stunCaught(enemiesWithin(surpriseRadius));
             vanish(true);
         }
     }

@@ -99,18 +99,26 @@ public class Whirlwind implements Ability {
         }
 
         new BukkitRunnable() {
+            private Location last = player.getLocation().clone();
             private int ticks = 0;
             private double angle = 0.0;
 
             @Override
             public void run() {
+
                 if (!player.isOnline() || player.isDead()
                         || player.getGameMode() == GameMode.SPECTATOR) {
                     stop();
                     cancel();
                     return;
                 }
-
+                Location now = player.getLocation();
+                if (!now.getWorld().equals(last.getWorld()) || now.distanceSquared(last) > 36) {
+                    stop();
+                    cancel();
+                    return;
+                }
+                last = now.clone();
                 ticks++;
                 angle += 0.55;
                 spawnSpinEffects(player, angle);

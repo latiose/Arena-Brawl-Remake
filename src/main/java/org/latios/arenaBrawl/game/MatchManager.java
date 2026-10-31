@@ -213,23 +213,10 @@ public class MatchManager {
         soulLinkManager.clear(player);
         Team winner = match.eliminate(player);
 
-        // A death/disconnect changes the set of players that must agree, so any
-        // vote cast so far is no longer valid. The requirement itself drops by
-        // one automatically because it is based on the alive player count.
         drawVoteManager.reset(match);
 
         if (winner != null) {
             endMatch(match, winner);
-        } else if (!match.isEnded()) {
-            int requiredVotes = drawVoteManager.getRequiredVotes(match);
-            for (Player viewer : match.getAlivePlayers()) {
-                if (viewer.isOnline()) {
-                    viewer.sendMessage(String.format(
-                            "§bDraw vote reset. §b%d §bvote%s now required.",
-                            requiredVotes, requiredVotes == 1 ? "" : "s"
-                    ));
-                }
-            }
         }
     }
 
@@ -370,13 +357,8 @@ public class MatchManager {
     }
 
     public void cleanupPlayer(Player player) {
+        clearSummons(player);
         cleanupPlayerHub(player);
-        // Only this player's minions: clearing the whole manager would wipe
-        // minions from every other match running at the same time.
-        broodMotherEntityManager.clearForPlayer(player);
-        zombieEntityManager.clearForPlayer(player);
-        skeletonEntityManager.clearForPlayer(player);
-        guardianColossusEntityManager.clearForPlayer(player);
     }
 
     public void cleanupPlayerHub(Player player) {
@@ -410,20 +392,12 @@ public class MatchManager {
         activeMatchesList.add(match);
     }
 
-    /** Returns the match a specific player is currently in, or null. */
+
     public Match getMatchFor(Player player) {
         return activeMatches.get(player.getUniqueId());
     }
 
-    /**
-     * Players participating in the same match as the given player.
-     *
-     * <p>Use this for any effect that is meant to be "global" (Time Stop,
-     * Myriad Truths, ...). Iterating {@code Bukkit.getOnlinePlayers()} or every
-     * player in a world would leak the effect into other simultaneous matches.</p>
-     *
-     * @return the match participants, or an empty list when the player is not in a match.
-     */
+
     public List<Player> getMatchPlayers(Player player) {
         Match match = getMatchFor(player);
         return match != null ? match.getAllPlayers() : List.of();
@@ -443,7 +417,6 @@ public class MatchManager {
         }
     }
 
-    /** Returns all matches currently running (needed for tasks that iterate every active game). */
     public List<Match> getActiveMatches() {
         return new ArrayList<>(activeMatchesList);
     }
@@ -522,7 +495,9 @@ public class MatchManager {
 
         if (match.getArenaMap() != null) {
             EntityCleanupUtils.sweepArenaEntities(match.getArenaMap().getWorld());
-        } else if (lobbySpawn != null) {
+        }
+        if (lobbySpawn != null && (match.getArenaMap() == null
+                || !lobbySpawn.getWorld().equals(match.getArenaMap().getWorld()))) {
             EntityCleanupUtils.sweepArenaEntities(lobbySpawn.getWorld());
         }
         structureManager.clearForMatch(match);
@@ -531,20 +506,12 @@ public class MatchManager {
     }
 
 
-    /**
-     * Drops every combat effect (debuffs, damage buffs, shields, vulnerabilities,
-     * speed/energy modifiers, melee effects and ability-held state) of a player.
-     *
-     * <p>Called both when a match ends and when the player is sent to the hub, so
-     * nothing can leak into the lobby or into a later match.</p>
-     */
+
+
     private void clearCombatEffects(Player player) {
         debuffManager.clear(player);
 
         if (player.isOnline()) {
-            // Safety net for potion effects applied outside the debuff manager
-            // (strength, absorption, jump boost, slowness...). Base speed is
-            // reapplied by the SpeedBuffManager right below.
             for (org.bukkit.potion.PotionEffect effect : new ArrayList<>(player.getActivePotionEffects())) {
                 if (effect.getType() != PotionEffectType.SPEED) {
                     player.removePotionEffect(effect.getType());
@@ -581,16 +548,20 @@ public class MatchManager {
         Meditation.clear(player);
     }
 
-    /**
-     * Clears every buff/effect from the match participants as soon as the match
-     * ends, instead of waiting for the delayed cleanup.
-     */
     private void clearRemainingEffects(Match match) {
         for (Player player : match.getAllPlayers()) {
             if (player.isOnline()) {
                 clearCombatEffects(player);
             }
+            clearSummons(player);
         }
+    }
+
+    private void clearSummons(Player player) {
+        broodMotherEntityManager.clearForPlayer(player);
+        zombieEntityManager.clearForPlayer(player);
+        skeletonEntityManager.clearForPlayer(player);
+        guardianColossusEntityManager.clearForPlayer(player);
     }
 
     public void leaveMatch(Player player) {

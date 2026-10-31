@@ -20,21 +20,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Utility parry stance. For a short window the next direct hit (melee or ability) is fully
- * negated and its damage is reflected back at the attacker. The reflection amount is resolved
- * inside {@code CombatService} from the damage the hit would have dealt.
- */
 public class Counter implements Ability {
 
-    public record CounterState(long expiresAt) {}
+    public record CounterState(long expiresAt, double reflectMultiplier) {}
 
     private static final Map<UUID, CounterState> ACTIVE_COUNTERS = new ConcurrentHashMap<>();
 
-    /**
-     * Returns the active counter of a player, or {@code null} if none/expired. The state is not
-     * consumed, so every hit received during the window is reflected.
-     */
     public static CounterState getActive(Player player) {
         UUID uuid = player.getUniqueId();
         CounterState state = ACTIVE_COUNTERS.get(uuid);
@@ -53,6 +44,7 @@ public class Counter implements Ability {
 
     private final long cooldownMs;
     private final long windowMs;
+    private final double reflectMultiplier;
 
     private final Plugin plugin;
     private final AbilityCost cost;
@@ -63,6 +55,7 @@ public class Counter implements Ability {
         this.plugin = plugin;
         this.cooldownMs = config.getLong("cooldown-ms", 22000L);
         this.windowMs = config.getLong("window-ms", 1500L);
+        this.reflectMultiplier = config.getDouble("reflect-multiplier", 0.75);
 
         this.cost = new CooldownCost(cooldownManager, "counter", cooldownMs, combatUpgradeManager);
         this.config = config;
@@ -88,7 +81,7 @@ public class Counter implements Ability {
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Window", (windowMs / 1000.0) + "s"),
-                new AbilityStat("Reflect", "100% of every hit"),
+                new AbilityStat("Reflect", (int)(reflectMultiplier * 100) + "% of every hit"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
@@ -96,19 +89,17 @@ public class Counter implements Ability {
     @Override
     public boolean activate(Player player) {
         UUID uuid = player.getUniqueId();
-        CounterState state = new CounterState(System.currentTimeMillis() + windowMs);
+        CounterState state = new CounterState(System.currentTimeMillis() + windowMs, reflectMultiplier);
         ACTIVE_COUNTERS.put(uuid, state);
 
         Location loc = player.getLocation();
         var world = loc.getWorld();
         Location body = loc.clone().add(0, 1.0, 0);
 
-        // Distinct activation sound so the parry stance is easy to notice.
         world.playSound(loc, Sound.ITEM_SHIELD_BLOCK, 1.6f, 0.8f);
         world.playSound(loc, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.5f);
         world.playSound(loc, Sound.BLOCK_ANVIL_LAND, 1.2f, 1.8f);
 
-        // Bright shockwave ring + vertical pillar to make the activation obvious.
         int ringPoints = 36;
         for (int i = 0; i < ringPoints; i++) {
             double angle = Math.toRadians((360.0 / ringPoints) * i);

@@ -11,6 +11,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 
 import java.util.HashMap;
@@ -107,6 +108,20 @@ public class SoulLinkManager {
         } finally {
             resolvingMirror = false;
         }
+
+        int roundedDamage = (int) Math.round(mirroredDamage);
+
+        if (attacker != null) {
+            attacker.sendMessage(MessageUtils.positive() + String.format(
+                    "§3Your %s hit §3%s §3for §c%d §3damage.",
+                    "Soul Link", partner.getName(), roundedDamage
+            ));
+        }
+
+        partner.sendMessage(MessageUtils.negative() + String.format(
+                "§3%s's %s hit §3you §3for §c%d §3damage.",
+                attacker != null ? attacker.getName() : "Unknown", "Soul Link", roundedDamage
+        ));
 
         partner.getWorld().spawnParticle(
                 Particle.DAMAGE_INDICATOR, partner.getLocation().add(0, 1.0, 0), 8,

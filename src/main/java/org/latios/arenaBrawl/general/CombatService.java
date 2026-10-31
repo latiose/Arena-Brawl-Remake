@@ -93,7 +93,7 @@ public class CombatService {
 
         Counter.CounterState counter = Counter.getActive(victim);
         if (counter != null) {
-            resolveCounter(attacker, victim, adjustedDamage);
+            resolveCounter(attacker, victim, adjustedDamage, counter);
             return;
         }
 
@@ -160,7 +160,9 @@ public class CombatService {
         spawnHologram(victim, String.valueOf((int) Math.round(finalDamage)));
     }
 
-    private void resolveCounter(Player attacker, Player victim, double adjustedDamage) {
+    private void resolveCounter(Player attacker, Player victim, double adjustedDamage, Counter.CounterState counter) {
+        double reflectMultiplier = counter.reflectMultiplier();
+
         double counterReduction = shieldManager.getDamageReduction(victim);
         double reflectedDamage = counterReduction > 0 ? adjustedDamage * (1 - counterReduction) : adjustedDamage;
 
@@ -168,6 +170,8 @@ public class CombatService {
         if (counterVulnerability > 0) {
             reflectedDamage *= (1 + counterVulnerability);
         }
+
+        reflectedDamage *= reflectMultiplier;
 
         Location counterLoc = victim.getLocation().add(0, 1.0, 0);
         victim.getWorld().spawnParticle(Particle.ENCHANTED_HIT, counterLoc, 25, 0.3, 0.5, 0.3, 0.1);
@@ -350,8 +354,9 @@ public class CombatService {
             ownerMultiplier *= 2.0;
         }
 
-        if (Counter.getActive(victim) != null) {
-            resolveCounter(owner, victim, rawDamage * ownerMultiplier);
+        Counter.CounterState counter = Counter.getActive(victim);
+        if (counter != null) {
+            resolveCounter(owner, victim, rawDamage * ownerMultiplier, counter);
             return;
         }
 
@@ -434,14 +439,26 @@ public class CombatService {
 
 
     void reflectDamage(Player attacker, Player victim, double baseDamage, String sourceName, boolean reflected) {
-        double damageAmount = baseDamage
-                * damageBuffManager.getMultiplier(victim)
-                * (1.0 + damageVulnerabilityManager.getBonusMultiplier(attacker));
+        if (attacker == null || attacker.getGameMode() == GameMode.SPECTATOR || healthManager.isEliminated(attacker)) {
+            return;
+        }
+
+        double damageAmount = baseDamage * damageBuffManager.getMultiplier(victim);
+
+        Match match = matchManager.getMatchFor(victim);
+        if (match != null && match.isDoubleDamageActive()) {
+            damageAmount *= 2.0;
+        }
+
+        Counter.CounterState counter = Counter.getActive(attacker);
+        if (counter != null) {
+            resolveCounter(victim, attacker, damageAmount, counter);
+            return;
+        }
 
         OrbitShieldType attackerShield = (!reflected && orbitShieldManager.hasActiveShield(attacker))
                 ? orbitShieldManager.getActiveType(attacker)
                 : null;
-
         if (attackerShield != null) {
             orbitShieldManager.consumeCharge(attacker);
             resolveShieldEffect(attackerShield, victim, attacker, true);
@@ -453,10 +470,19 @@ public class CombatService {
             damageAmount *= (1 - reduction);
         }
 
+        double vulnerabilityBonus = damageVulnerabilityManager.getBonusMultiplier(attacker);
+        if (vulnerabilityBonus > 0) {
+            damageAmount *= (1 + vulnerabilityBonus);
+            attacker.getWorld().spawnParticle(Particle.CRIT, attacker.getLocation().add(0, 1.0, 0), 10, 0.3, 0.5, 0.3, 0.1);
+        }
+
         double dealt = damageReflectedTarget(attacker, victim, damageAmount);
         if (dealt < 0) {
             return;
         }
+
+        Bloodthirst.onDamageDealt(victim, attacker, dealt, healthManager);
+        BloodMoon.onDamageDealt(victim, attacker, dealt, healthManager);
 
         int roundedDamage = (int) Math.round(dealt);
         spawnHologram(attacker, String.valueOf(roundedDamage));

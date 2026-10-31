@@ -10,6 +10,7 @@ import org.bukkit.entity.Skeleton;
 import org.bukkit.inventory.ItemStack;
 import org.latios.arenaBrawl.abilities.BaseMinionManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
+import org.latios.arenaBrawl.game.Match;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -24,7 +25,7 @@ public class SkeletonEntityManager extends BaseMinionManager {
     private final double arrowDamage;
     private final int maxSkeletons = 4;
 
-    private final Map playerSkeletonCount = new HashMap<>();
+    private final Map<UUID, Integer> playerSkeletonCount = new HashMap<>();
 
     public SkeletonEntityManager(TeamManager teamManager, CombatService combatService, AbilityConfig config) {
         super(teamManager, combatService, Long.MAX_VALUE,
@@ -36,7 +37,7 @@ public class SkeletonEntityManager extends BaseMinionManager {
 
     public boolean summonSkeleton(Player owner, Player target) {
         UUID ownerId = owner.getUniqueId();
-        int currentCount = (int) playerSkeletonCount.getOrDefault(ownerId, 0);
+        int currentCount = playerSkeletonCount.getOrDefault(ownerId, 0);
 
         if (currentCount >= maxSkeletons) {
             return false;
@@ -129,7 +130,7 @@ public class SkeletonEntityManager extends BaseMinionManager {
     }
 
     public void reduceSkeletonCount(UUID ownerId) {
-        int current = (int) playerSkeletonCount.getOrDefault(ownerId, 0);
+        int current = playerSkeletonCount.getOrDefault(ownerId, 0);
         if (current <= 1) {
             playerSkeletonCount.remove(ownerId);
         } else {
@@ -141,6 +142,20 @@ public class SkeletonEntityManager extends BaseMinionManager {
     public void clearAll() {
         super.clearAll();
         playerSkeletonCount.clear();
+    }
+
+    @Override
+    public void clearForPlayer(Player player) {
+        super.clearForPlayer(player);
+        playerSkeletonCount.remove(player.getUniqueId());
+    }
+
+    @Override
+    public void clearForMatch(Match match) {
+        super.clearForMatch(match);
+        for (Player player : match.getAllPlayers()) {
+            playerSkeletonCount.remove(player.getUniqueId());
+        }
     }
 
     @Override

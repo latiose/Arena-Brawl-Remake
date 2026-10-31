@@ -2,6 +2,7 @@ package org.latios.arenaBrawl.game;
 
 
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
@@ -179,6 +180,7 @@ public class ArenaManager {
             player.updateInventory();
             player.getInventory().setHeldItemSlot(0);
             player.setGameMode(org.bukkit.GameMode.SURVIVAL);
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 1.0f, 1.0f);
         }
 
         var match = new Match(type, teams, map);

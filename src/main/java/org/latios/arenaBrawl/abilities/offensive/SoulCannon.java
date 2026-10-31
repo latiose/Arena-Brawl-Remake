@@ -41,6 +41,7 @@ public class SoulCannon implements Ability {
     private final TeamManager teamManager;
     private final CombatService combatService;
     private static final double MIN_HIT_RADIUS = 0.6;
+    private final double aoeRadius;
     public SoulCannon(EnergyManager energyManager, TeamManager teamManager,
                       CombatService combatService, AbilityConfig config) {
         this.minEnergy = config.getDouble("min-energy", 10.0);
@@ -52,6 +53,7 @@ public class SoulCannon implements Ability {
         this.minSize = config.getDouble("min-size", 0.3);
         this.maxSize = config.getDouble("max-size", 1.6);
         this.maxDistance = config.getDouble("max-target-distance", 45.0);
+        this.aoeRadius = config.getDouble("ground-aoe-radius", 2.0);
         this.cost = new EnergyCost(energyManager, minEnergy);
         this.energyManager = energyManager;
         this.teamManager = teamManager;
@@ -169,9 +171,9 @@ public class SoulCannon implements Ability {
                     Location impact = blockHit.getHitPosition().toLocation(world);
                     drawProjectile(current, direction, limit, size, t);
                     impactEffect(impact, size, t);
+                    applyGroundAoe(player,impact, damage);
                     return;
                 }
-
                 drawProjectile(current, direction, step, size, t);
                 current.add(direction.clone().multiply(step));
                 traveled += step;
@@ -217,6 +219,17 @@ public class SoulCannon implements Ability {
         impact.getWorld().playSound(impact, Sound.PARTICLE_SOUL_ESCAPE, 1.0f, 0.7f);
     }
 
+
+
+    private void applyGroundAoe(Player owner, Location impact, double damage) {
+        Vector center = impact.toVector();
+        for (Player p : impact.getWorld().getPlayers()) {
+            if (p.equals(owner) || p.isDead() || p.getGameMode() == GameMode.SPECTATOR) continue;
+            if (!teamManager.isEnemy(owner, p)) continue;
+            if (!p.getBoundingBox().expand(aoeRadius).contains(center)) continue;
+            combatService.applyAbilityDamage(owner, p, damage, getName(), impact);
+        }
+    }
     private static double lerp(double a, double b, double t) {
         return a + (b - a) * t;
     }
