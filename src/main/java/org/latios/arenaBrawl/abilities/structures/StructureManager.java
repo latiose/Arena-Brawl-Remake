@@ -1,8 +1,15 @@
 
 package org.latios.arenaBrawl.abilities.structures;
 
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.latios.arenaBrawl.game.Match;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class StructureManager {
 
@@ -33,10 +40,49 @@ public class StructureManager {
         return structures;
     }
 
-    public void clearAll() {
+
+    public void clearForMatch(Match match) {
+        if (match == null) return;
+
+        Set<UUID> owners = new HashSet<>();
+        for (Player player : match.getAllPlayers()) {
+            owners.add(player.getUniqueId());
+        }
+
+        World matchWorld = match.getArenaMap() != null ? match.getArenaMap().getWorld() : null;
+
+        List<PlacedStructure> toRemove = new ArrayList<>();
         for (PlacedStructure structure : structures) {
+            if (structure.getOwnerId() == null || !owners.contains(structure.getOwnerId())) {
+                continue;
+            }
+
+            World structureWorld = structure.getLocation() != null
+                    ? structure.getLocation().getWorld()
+                    : null;
+            if (matchWorld != null && structureWorld != null && !matchWorld.equals(structureWorld)) {
+                continue;
+            }
+
+            toRemove.add(structure);
+        }
+
+        for (PlacedStructure structure : toRemove) {
             structure.remove();
         }
+        structures.removeAll(toRemove);
+    }
+
+
+    public void unregister(PlacedStructure structure) {
+        structures.remove(structure);
+    }
+
+    public void clearAll() {
+        List<PlacedStructure> toRemove = new ArrayList<>(structures);
         structures.clear();
+        for (PlacedStructure structure : toRemove) {
+            structure.remove();
+        }
     }
 }

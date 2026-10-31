@@ -74,7 +74,7 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "seekerbolt",
                 deps -> new SeekerBolt(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("seekerbolt")));
         register(AbilitySlot.OFFENSIVE, "shockmine",
-                deps -> new ShockMine(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("shockmine")));
+                deps -> new ShockMine(plugin, deps.energyManager(), deps.teamManager(), deps.structureManager(), deps.combatService(), deps.debuffManager(), configManager.get("shockmine")));
         register(AbilitySlot.OFFENSIVE, "backstabber",
                 deps -> new Backstabber(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), deps.damageVulnerabilityManager(), configManager.get("backstabber")));
         register(AbilitySlot.OFFENSIVE, "ashenfield",

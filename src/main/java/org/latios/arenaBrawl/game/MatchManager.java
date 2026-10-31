@@ -4,6 +4,7 @@ package org.latios.arenaBrawl.game;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 
@@ -324,16 +325,19 @@ public class MatchManager {
     public void cleanupPlayer(Player player) {
         cleanupPlayerHub(player);
         EntityCleanupUtils.sweepArenaEntities(player.getWorld());
-        broodMotherEntityManager.clearAll();
-        zombieEntityManager.clearAll();
-        skeletonEntityManager.clearAll();
-        guardianColossusEntityManager.clearAll();
+        broodMotherEntityManager.clearForPlayer(player);
+        zombieEntityManager.clearForPlayer(player);
+        skeletonEntityManager.clearForPlayer(player);
+        guardianColossusEntityManager.clearForPlayer(player);
     }
 
     public void cleanupPlayerHub(Player player) {
         activeMatches.remove(player.getUniqueId());
         teamManager.clear(player);
         debuffManager.clear(player);
+        if (player.isOnline()) {
+            player.removePotionEffect(PotionEffectType.POISON);
+        }
         abilityManager.clearAbilities(player);
         damageBuffManager.clear(player);
         cooldownManager.clearPlayer(player);
@@ -408,6 +412,7 @@ public class MatchManager {
     private void endMatch(Match match, Team winnerTeam) {
         if (match.isEnded()) return;
         match.setEnded(true);
+        clearRemainingDebuffs(match);
         List<Player> winners = match.getTeamPlayers(winnerTeam);
         List<Player> losers = match.getAllPlayers().stream()
                 .filter(player -> !winners.contains(player))
@@ -447,6 +452,7 @@ public class MatchManager {
     public void endMatchAsDraw(Match match) {
         if (match.isEnded()) return;
         match.setEnded(true);
+        clearRemainingDebuffs(match);
         drawVoteManager.clear(match);
         for (Player player : match.getAllPlayers()) {
             if (player.isOnline()) {
@@ -479,11 +485,18 @@ public class MatchManager {
         } else if (lobbySpawn != null) {
             EntityCleanupUtils.sweepArenaEntities(lobbySpawn.getWorld());
         }
-
-        structureManager.clearAll();
-
+        structureManager.clearForMatch(match);
         activeMatchesList.remove(match);
         arenaMapManager.releaseMap(match.getArenaMap());
+    }
+
+
+    private void clearRemainingDebuffs(Match match) {
+        for (Player player : match.getAllPlayers()) {
+            if (player.isOnline()) {
+                debuffManager.clear(player);
+            }
+        }
     }
 
     public void leaveMatch(Player player) {

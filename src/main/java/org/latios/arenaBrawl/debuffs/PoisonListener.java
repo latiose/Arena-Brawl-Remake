@@ -72,12 +72,11 @@ public class PoisonListener implements DebuffListener, Listener {
                 UUID attackerId = activeAttackers.get(victim.getUniqueId());
                 if (attackerId != null) {
                     Player attackerPlayer = Bukkit.getPlayer(attackerId);
-                    assert attackerPlayer != null;
-                    victim.sendMessage(MessageUtils.negative() + String.format(
-                        "§3%s's poison hit §3you §3for §c%d §3damage.",attackerPlayer.getName(), roundedDamage
-                ));
+                    if (attackerPlayer != null && attackerPlayer.isOnline()) {
+                        victim.sendMessage(MessageUtils.negative() + String.format(
+                                "§3%s's poison hit §3you §3for §c%d §3damage.", attackerPlayer.getName(), roundedDamage
+                        ));
 
-                    if (attackerPlayer.isOnline()) {
                         attackerPlayer.sendMessage(MessageUtils.positive() + String.format(
                                 "§3Your poison hit §3%s §3for §c%d §3damage.", victim.getName(), roundedDamage
                         ));

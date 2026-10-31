@@ -97,7 +97,7 @@ public class ShockMineTask extends BukkitRunnable {
         for (Entity nearby : location.getWorld().getNearbyEntities(location, blastRadius, blastRadius, blastRadius)) {
             if (nearby instanceof Player target && teamManager.isEnemy(owner, target) && !target.isDead()) {
                 combatService.applyAbilityDamage(owner, target, damage, "Shock Mine", location);
-                debuffManager.tryApply(owner, target, DebuffType.STUN, stunDurationMs);
+                debuffManager.tryApply(owner, target, DebuffType.IMMOBILIZE, stunDurationMs);
             }
         }
 
