@@ -34,6 +34,13 @@ public class Intervention implements Ability {
 
     private static final Map<UUID, Save> ACTIVE_SAVES = new ConcurrentHashMap<>();
 
+    /** Removes any intervention save cast by or applied to this player. */
+    public static void clear(Player player) {
+        UUID id = player.getUniqueId();
+        ACTIVE_SAVES.entrySet().removeIf(entry ->
+                entry.getKey().equals(id) || entry.getValue().casterId().equals(id));
+    }
+
     /** Removes and returns the active save of a player, or {@code null} if none/expired. */
     public static Save consumeSave(Player player) {
         Save save = ACTIVE_SAVES.get(player.getUniqueId());

@@ -24,6 +24,11 @@ public class Berserk implements Ability {
 
     public static final Set<UUID> BERSERK_ACTIVE_PLAYERS = new HashSet<>();
 
+    /** Drops the melee rage state (doubled melee damage) for a player. */
+    public static void clear(Player player) {
+        BERSERK_ACTIVE_PLAYERS.remove(player.getUniqueId());
+    }
+
     private final long durationMillis;
     private final long chargeTimeMillis;
     private final int speedAmplifier;
@@ -80,12 +85,17 @@ public class Berserk implements Ability {
 
             @Override
             public void run() {
-                if (!player.isOnline() || player.isDead() || secondsElapsed >= maxSeconds) {
+                boolean expiredNaturally = secondsElapsed >= maxSeconds;
+                if (!player.isOnline() || player.isDead()
+                        || !BERSERK_ACTIVE_PLAYERS.contains(uuid)
+                        || expiredNaturally) {
                     BERSERK_ACTIVE_PLAYERS.remove(uuid);
-                    Component expireMessage = Component.text("Your ", NamedTextColor.YELLOW)
-                            .append(Component.text("BERSERK", NamedTextColor.RED, TextDecoration.BOLD))
-                            .append(Component.text(" has expired!", NamedTextColor.YELLOW));
-                    player.sendMessage(expireMessage);
+                    if (expiredNaturally && player.isOnline()) {
+                        Component expireMessage = Component.text("Your ", NamedTextColor.YELLOW)
+                                .append(Component.text("BERSERK", NamedTextColor.RED, TextDecoration.BOLD))
+                                .append(Component.text(" has expired!", NamedTextColor.YELLOW));
+                        player.sendMessage(expireMessage);
+                    }
                     cancel();
                     return;
                 }

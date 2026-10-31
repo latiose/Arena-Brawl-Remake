@@ -21,6 +21,11 @@ public class Rewind implements Ability {
 
     public static final Map<UUID, UUID> ACTIVE_REWUNDS = new HashMap<>();
 
+    /** Removes any stored rewind position for this player. */
+    public static void clear(Player player) {
+        ACTIVE_REWUNDS.remove(player.getUniqueId());
+    }
+
     private final long durationTicks;
     private final long chargeTimeMillis;
     private final double reviveHealth;

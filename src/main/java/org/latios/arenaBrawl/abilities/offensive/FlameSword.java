@@ -146,7 +146,12 @@ public class FlameSword implements Ability, MeleeHitEffect {
         return true;
     }
 
-    private void stop(UUID id) {
+    /** Removes the flaming weapon state (damage multiplier) of a player. */
+    public static void clear(Player player) {
+        stop(player.getUniqueId());
+    }
+
+    private static void stop(UUID id) {
         ACTIVE_UNTIL.remove(id);
         BukkitRunnable task = TASKS.remove(id);
         if (task != null) {

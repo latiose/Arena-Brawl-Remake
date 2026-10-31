@@ -79,6 +79,11 @@ public class EtherealBodyManager {
         return activeShields.containsKey(player.getUniqueId());
     }
 
+    /** Drops the ethereal state without healing the accumulated damage. */
+    public void clear(Player player) {
+        activeShields.remove(player.getUniqueId());
+    }
+
     public boolean processIncomingDamage(Player victim, double damage) {
         if (!isActive(victim)) return false;
 

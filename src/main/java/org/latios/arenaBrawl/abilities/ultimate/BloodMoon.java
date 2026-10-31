@@ -34,6 +34,11 @@ public class BloodMoon implements Ability {
 
     private static final Map<UUID, Active> ACTIVE = new HashMap<>();
 
+    /** Removes the blood moon lifesteal aura cast by a player. */
+    public static void clear(Player player) {
+        ACTIVE.remove(player.getUniqueId());
+    }
+
     private final double radius;
     private final long durationMs;
     private final double lifestealPercent;

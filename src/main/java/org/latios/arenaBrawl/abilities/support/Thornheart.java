@@ -31,6 +31,11 @@ public class Thornheart implements Ability {
 
     private static final Map<UUID, State> ACTIVE = new ConcurrentHashMap<>();
 
+    /** Removes the thorns/self-heal state of a player. */
+    public static void clear(Player player) {
+        ACTIVE.remove(player.getUniqueId());
+    }
+
     /** Called by CombatService after a melee hit has been applied. */
     public static void onMeleeDamageTaken(Player victim, Player attacker, PlayerHealthManager healthManager) {
         if (victim == null || attacker == null || attacker.equals(victim)) return;

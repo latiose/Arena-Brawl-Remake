@@ -28,6 +28,11 @@ public class Bloodthirst implements Ability {
 
     private static final Map<UUID, Active> ACTIVE = new HashMap<>();
 
+    /** Removes the lifesteal-on-hit state of a player. */
+    public static void clear(Player player) {
+        ACTIVE.remove(player.getUniqueId());
+    }
+
     private final long cooldownMs;
     private final long durationMs;
     private final double lifestealPercent;

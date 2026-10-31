@@ -69,6 +69,16 @@ public class Match {
         return teams.values().stream().flatMap(List::stream).toList();
     }
 
+    /** Players still fighting (not eliminated) in this match. */
+    public List<Player> getAlivePlayers() {
+        return alive.values().stream().flatMap(List::stream).toList();
+    }
+
+    /** Number of players still fighting (not eliminated) in this match. */
+    public int getAliveCount() {
+        return alive.values().stream().mapToInt(List::size).sum();
+    }
+
     public Team eliminate(Player player) {
         eliminationOrder.add(player);
         alive.values().forEach(l -> l.remove(player));

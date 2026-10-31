@@ -25,5 +25,12 @@ public class MatchDisconnectListener implements Listener {
         if (healthManager.isEliminated(player)) return;
 
         healthManager.damage(player, healthManager.getHealth(player));
+
+        // A revive effect (Rewind/Intervention) can consume the killing blow.
+        // The player still left the match, so eliminate them anyway: otherwise
+        // they would keep counting as alive for the draw vote.
+        if (!healthManager.isEliminated(player)) {
+            matchManager.onPlayerEliminated(player);
+        }
     }
 }

@@ -25,7 +25,24 @@ public class DamageBuffManager {
         }
     }
 
+    /**
+     * A single-use buff is meant to empower one attack, but one attack can hit
+     * several targets (AoE abilities, whirlwind-style swings). Each target is
+     * resolved with its own damage call, so after the first one consumes the
+     * buff the rest of the same attack must still see its multiplier. Consumed
+     * bonuses stay valid for this short window, which covers every target of
+     * the same hit while being far shorter than any ability cooldown.
+     */
+    private static final long CONSUMED_WINDOW_MILLIS = 100L;
+
+    private record ConsumedBonus(double multiplier, long consumedAt) {
+        public boolean isExpired() {
+            return System.currentTimeMillis() - consumedAt > CONSUMED_WINDOW_MILLIS;
+        }
+    }
+
     private final Map<UUID, List<ActiveBuff>> activeBuffs = new HashMap<>();
+    private final Map<UUID, List<ConsumedBonus>> consumedBonuses = new HashMap<>();
 
     public void applyBuff(Player player, double multiplier, long durationMillis, String title) {
         applyBuff(player, multiplier, durationMillis, title, false);
@@ -57,8 +74,10 @@ public class DamageBuffManager {
     }
 
     private double getMultiplier(Player player, boolean includeSingleUse) {
+        double consumedBonus = includeSingleUse ? getConsumedBonusMultiplier(player) : 1.0;
+
         List<ActiveBuff> buffs = activeBuffs.get(player.getUniqueId());
-        if (buffs == null || buffs.isEmpty()) return 1.0;
+        if (buffs == null || buffs.isEmpty()) return consumedBonus;
 
         List<ActiveBuff> expiredBuffs = new ArrayList<>();
         for (ActiveBuff buff : buffs) {
@@ -79,7 +98,7 @@ public class DamageBuffManager {
 
         if (buffs.isEmpty()) {
             activeBuffs.remove(player.getUniqueId());
-            return 1.0;
+            return consumedBonus;
         }
 
         ActiveBuff highestRegularBuff = null;
@@ -101,6 +120,7 @@ public class DamageBuffManager {
         }
 
         double baseMultiplier = (highestRegularBuff != null) ? highestRegularBuff.multiplier() : 1.0;
+        baseMultiplier = Math.max(baseMultiplier, consumedBonus);
         double extraPowerupMultiplier = (powerupBuff != null) ? powerupBuff.multiplier() - 1 : 0.0;
         double finalMultiplier = baseMultiplier + extraPowerupMultiplier;
 
@@ -112,6 +132,27 @@ public class DamageBuffManager {
         }
 
         return finalMultiplier;
+    }
+
+    /**
+     * Highest multiplier from single-use buffs consumed within the current
+     * attack window, or {@code 1.0} when there is none.
+     */
+    private double getConsumedBonusMultiplier(Player player) {
+        List<ConsumedBonus> bonuses = consumedBonuses.get(player.getUniqueId());
+        if (bonuses == null) return 1.0;
+
+        bonuses.removeIf(ConsumedBonus::isExpired);
+        if (bonuses.isEmpty()) {
+            consumedBonuses.remove(player.getUniqueId());
+            return 1.0;
+        }
+
+        double highest = 1.0;
+        for (ConsumedBonus bonus : bonuses) {
+            highest = Math.max(highest, bonus.multiplier());
+        }
+        return highest;
     }
 
     private void consumeSingleUseBuffs(Player player) {
@@ -129,6 +170,15 @@ public class DamageBuffManager {
         buffs.removeAll(consumed);
         if (buffs.isEmpty()) {
             activeBuffs.remove(player.getUniqueId());
+        }
+
+        // Register the bonus before running callbacks: the callback may remove
+        // the buff's title, and every target of the same attack still needs it.
+        long now = System.currentTimeMillis();
+        List<ConsumedBonus> bonuses = consumedBonuses.computeIfAbsent(
+                player.getUniqueId(), k -> new ArrayList<>());
+        for (ActiveBuff buff : consumed) {
+            bonuses.add(new ConsumedBonus(buff.multiplier(), now));
         }
 
         for (ActiveBuff buff : consumed) {
@@ -152,5 +202,6 @@ public class DamageBuffManager {
 
     public void clear(Player player) {
         activeBuffs.remove(player.getUniqueId());
+        consumedBonuses.remove(player.getUniqueId());
     }
 }

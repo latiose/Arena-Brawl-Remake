@@ -9,18 +9,32 @@ import org.bukkit.scheduler.BukkitTask;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
+import org.latios.arenaBrawl.abilities.offensive.FlameSword;
 import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.support.Bloodthirst;
+import org.latios.arenaBrawl.abilities.support.EtherealBodyManager;
+import org.latios.arenaBrawl.abilities.support.LifeBond;
 import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
+import org.latios.arenaBrawl.abilities.support.Meditation;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
+import org.latios.arenaBrawl.abilities.support.Thornheart;
+import org.latios.arenaBrawl.abilities.ultimate.Berserk;
+import org.latios.arenaBrawl.abilities.ultimate.BloodMoon;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.GuardianColossusEntityManager;
+import org.latios.arenaBrawl.abilities.ultimate.Intervention;
+import org.latios.arenaBrawl.abilities.ultimate.Rewind;
 import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
+import org.latios.arenaBrawl.abilities.utility.Counter;
+import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
 import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
+import org.latios.arenaBrawl.abilities.utility.Taunt;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
@@ -55,6 +69,13 @@ public class MatchManager {
     private final StatsManager statsManager;
     private final LobbyScoreboardManager lobbyScoreboardManager;
     private final DamageBuffManager damageBuffManager;
+    private final ShieldManager shieldManager;
+    private final DamageVulnerabilityManager damageVulnerabilityManager;
+    private final SpeedBuffManager speedBuffManager;
+    private final EtherealBodyManager etherealBodyManager;
+    private final EnergyModifierManager energyModifierManager;
+    private final ScavengerManager scavengerManager;
+    private final MovementLockManager movementLockManager;
     private final ArmorTierManager armorTierManager;
     private  SwordSelectionManager swordSelectionManager;
     private final HatSelectionManager hatSelectionManager;
@@ -78,7 +99,10 @@ public class MatchManager {
                         CooldownManager cooldownManager, UsageManager usageManager, StatsManager statsManager, LobbyScoreboardManager lobbyScoreboardManager, DamageBuffManager damageBuffManager,
                         ArmorTierManager armorTierManager, HatSelectionManager hatSelectionManager, BroodMotherEntityManager broodMotherEntityManager, Plugin plugin, ArenaMapManager arenaMapManager, StructureManager structureManager,
                         SongOfPowerManager songOfPowerManager, DrawVoteManager drawVoteManager, ZombieEntityManager zombieEntityManager, SkeletonEntityManager skeletonEntityManager, LifeLeechManager lifeLeechManage, SwordSelectionManager swordSelectionManager,
-                        ShadowCloakManager shadowCloakManager, SoulLinkManager soulLinkManager, GuardianColossusEntityManager guardianColossusEntityManager) {
+                        ShadowCloakManager shadowCloakManager, SoulLinkManager soulLinkManager, GuardianColossusEntityManager guardianColossusEntityManager,
+                        ShieldManager shieldManager, DamageVulnerabilityManager damageVulnerabilityManager, SpeedBuffManager speedBuffManager,
+                        EtherealBodyManager etherealBodyManager, EnergyModifierManager energyModifierManager,
+                        ScavengerManager scavengerManager, MovementLockManager movementLockManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -106,6 +130,13 @@ public class MatchManager {
         this.shadowCloakManager = shadowCloakManager;
         this.soulLinkManager = soulLinkManager;
         this.guardianColossusEntityManager = guardianColossusEntityManager;
+        this.shieldManager = shieldManager;
+        this.damageVulnerabilityManager = damageVulnerabilityManager;
+        this.speedBuffManager = speedBuffManager;
+        this.etherealBodyManager = etherealBodyManager;
+        this.energyModifierManager = energyModifierManager;
+        this.scavengerManager = scavengerManager;
+        this.movementLockManager = movementLockManager;
     }
 
 
@@ -181,8 +212,24 @@ public class MatchManager {
         shadowCloakManager.clear(player);
         soulLinkManager.clear(player);
         Team winner = match.eliminate(player);
+
+        // A death/disconnect changes the set of players that must agree, so any
+        // vote cast so far is no longer valid. The requirement itself drops by
+        // one automatically because it is based on the alive player count.
+        drawVoteManager.reset(match);
+
         if (winner != null) {
             endMatch(match, winner);
+        } else if (!match.isEnded()) {
+            int requiredVotes = drawVoteManager.getRequiredVotes(match);
+            for (Player viewer : match.getAlivePlayers()) {
+                if (viewer.isOnline()) {
+                    viewer.sendMessage(String.format(
+                            "§bDraw vote reset. §b%d §bvote%s now required.",
+                            requiredVotes, requiredVotes == 1 ? "" : "s"
+                    ));
+                }
+            }
         }
     }
 
@@ -324,7 +371,8 @@ public class MatchManager {
 
     public void cleanupPlayer(Player player) {
         cleanupPlayerHub(player);
-        EntityCleanupUtils.sweepArenaEntities(player.getWorld());
+        // Only this player's minions: clearing the whole manager would wipe
+        // minions from every other match running at the same time.
         broodMotherEntityManager.clearForPlayer(player);
         zombieEntityManager.clearForPlayer(player);
         skeletonEntityManager.clearForPlayer(player);
@@ -334,19 +382,10 @@ public class MatchManager {
     public void cleanupPlayerHub(Player player) {
         activeMatches.remove(player.getUniqueId());
         teamManager.clear(player);
-        debuffManager.clear(player);
-        if (player.isOnline()) {
-            player.removePotionEffect(PotionEffectType.POISON);
-        }
+        clearCombatEffects(player);
         abilityManager.clearAbilities(player);
-        damageBuffManager.clear(player);
         cooldownManager.clearPlayer(player);
         usageManager.resetPlayer(player);
-        orbitShieldManager.clear(player);
-        songOfPowerManager.clear(player);
-        lifeLeechManager.clear(player);
-        shadowCloakManager.clear(player);
-        soulLinkManager.clear(player);
         if (!player.isOnline()) return;
 
         player.setGameMode(org.bukkit.GameMode.SURVIVAL);
@@ -412,7 +451,8 @@ public class MatchManager {
     private void endMatch(Match match, Team winnerTeam) {
         if (match.isEnded()) return;
         match.setEnded(true);
-        clearRemainingDebuffs(match);
+        clearRemainingEffects(match);
+        drawVoteManager.clear(match);
         List<Player> winners = match.getTeamPlayers(winnerTeam);
         List<Player> losers = match.getAllPlayers().stream()
                 .filter(player -> !winners.contains(player))
@@ -452,7 +492,7 @@ public class MatchManager {
     public void endMatchAsDraw(Match match) {
         if (match.isEnded()) return;
         match.setEnded(true);
-        clearRemainingDebuffs(match);
+        clearRemainingEffects(match);
         drawVoteManager.clear(match);
         for (Player player : match.getAllPlayers()) {
             if (player.isOnline()) {
@@ -491,10 +531,64 @@ public class MatchManager {
     }
 
 
-    private void clearRemainingDebuffs(Match match) {
+    /**
+     * Drops every combat effect (debuffs, damage buffs, shields, vulnerabilities,
+     * speed/energy modifiers, melee effects and ability-held state) of a player.
+     *
+     * <p>Called both when a match ends and when the player is sent to the hub, so
+     * nothing can leak into the lobby or into a later match.</p>
+     */
+    private void clearCombatEffects(Player player) {
+        debuffManager.clear(player);
+
+        if (player.isOnline()) {
+            // Safety net for potion effects applied outside the debuff manager
+            // (strength, absorption, jump boost, slowness...). Base speed is
+            // reapplied by the SpeedBuffManager right below.
+            for (org.bukkit.potion.PotionEffect effect : new ArrayList<>(player.getActivePotionEffects())) {
+                if (effect.getType() != PotionEffectType.SPEED) {
+                    player.removePotionEffect(effect.getType());
+                }
+            }
+        }
+
+        healthManager.clearRegenDisable(player);
+        speedBuffManager.clearBuffs(player);
+        damageBuffManager.clear(player);
+        damageVulnerabilityManager.clear(player, false);
+        shieldManager.clear(player);
+        energyModifierManager.clear(player);
+        scavengerManager.clear(player);
+        etherealBodyManager.clear(player);
+        movementLockManager.unlock(player);
+        orbitShieldManager.clear(player);
+        songOfPowerManager.clear(player);
+        lifeLeechManager.clear(player);
+        shadowCloakManager.clear(player);
+        soulLinkManager.clear(player);
+
+        // Ability-held per-player state lives in static maps.
+        Berserk.clear(player);
+        FlameSword.clear(player);
+        Counter.clear(player);
+        Taunt.clear(player);
+        Thornheart.clear(player);
+        Bloodthirst.clear(player);
+        BloodMoon.clear(player);
+        LifeBond.clear(player);
+        Rewind.clear(player);
+        Intervention.clear(player);
+        Meditation.clear(player);
+    }
+
+    /**
+     * Clears every buff/effect from the match participants as soon as the match
+     * ends, instead of waiting for the delayed cleanup.
+     */
+    private void clearRemainingEffects(Match match) {
         for (Player player : match.getAllPlayers()) {
             if (player.isOnline()) {
-                debuffManager.clear(player);
+                clearCombatEffects(player);
             }
         }
     }

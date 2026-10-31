@@ -111,6 +111,11 @@ public class Meditation implements Ability {
         // Damage no longer interrupts meditation.
     }
 
+    /** Cancels a running meditation channel. */
+    public static void clear(Player player) {
+        stop(player, null);
+    }
+
     private static void stop(Player player, String message) {
         BukkitRunnable task = ACTIVE.remove(player.getUniqueId());
         if (task == null) return;

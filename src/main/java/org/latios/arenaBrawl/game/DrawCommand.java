@@ -29,25 +29,35 @@ public class DrawCommand implements CommandExecutor {
         }
 
         if (match.isEnded()) {
-            return true; // match already ending, ignore
+            player.sendMessage("§cThe match has already ended.");
+            return true;
+        }
+
+        if (match.isEliminated(player)) {
+            player.sendMessage("§cEliminated players cannot vote for a draw.");
+            return true;
         }
 
         DrawVoteManager.VoteResult result = drawVoteManager.registerVote(player, match);
-        int totalPlayers = match.getAllPlayers().size();
+        int requiredVotes = drawVoteManager.getRequiredVotes(match);
 
         switch (result) {
             case ALREADY_VOTED -> player.sendMessage("§cYou already voted for a draw.");
 
+            case ELIMINATED -> player.sendMessage("§cEliminated players cannot vote for a draw.");
+
+            case MATCH_ENDED -> player.sendMessage("§cThe match has already ended.");
+
             case RECORDED -> {
                 int votesNow = drawVoteManager.getVoteCount(match);
                 broadcastToMatch(match, String.format(
-                        "§b%s §bvoted to draw the match! §b(%d/%d)", player.getName(), votesNow, totalPlayers
+                        "§b%s §bvoted to draw the match! §b(%d/%d)", player.getName(), votesNow, requiredVotes
                 ));
             }
 
             case UNANIMOUS -> {
                 broadcastToMatch(match, String.format(
-                        "§b%s §bvoted to draw the match! §b(%d/%d)", player.getName(), totalPlayers, totalPlayers
+                        "§b%s §bvoted to draw the match! §b(%d/%d)", player.getName(), requiredVotes, requiredVotes
                 ));
                 broadcastToMatch(match, "§bAll players agreed, the match will end in a draw!");
                 matchManager.endMatchAsDraw(match);

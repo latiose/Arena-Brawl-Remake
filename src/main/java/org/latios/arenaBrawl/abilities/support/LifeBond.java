@@ -28,6 +28,13 @@ public class LifeBond implements Ability {
 
     public static final Map<UUID, UUID> ACTIVE_BONDS = new HashMap<>();
 
+    /** Removes any life bond cast by or applied to this player. */
+    public static void clear(Player player) {
+        UUID id = player.getUniqueId();
+        ACTIVE_BONDS.remove(id);
+        ACTIVE_BONDS.values().removeIf(id::equals);
+    }
+
     private final double range;
     private final double healPerSecond;
     private final int durationSeconds;
