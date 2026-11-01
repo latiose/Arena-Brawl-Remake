@@ -4,11 +4,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.game.Match;
 import org.latios.arenaBrawl.general.CombatService;
+import org.latios.arenaBrawl.team.Team;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.*;
@@ -17,6 +19,7 @@ public abstract class BaseMinionManager {
 
     protected final Map<UUID, Integer> remainingHits = new HashMap<>();
     protected final Map<UUID, UUID> ownerOf = new HashMap<>();
+    protected final Map<UUID, Team> teamOf = new HashMap<>();
     protected final Map<UUID, UUID> currentTarget = new HashMap<>();
     protected final Map<UUID, Long> lastLandedHitAt = new HashMap<>();
     protected final Map<UUID, Long> lastAttackAt = new HashMap<>();
@@ -34,11 +37,12 @@ public abstract class BaseMinionManager {
         this.attackCooldownMillis = attackCooldownMillis;
     }
 
-    protected void registerControlledEntity(LivingEntity entity, UUID ownerId, int hitCount) {
+    protected void registerControlledEntity(LivingEntity entity, Player owner, int hitCount) {
         UUID id = entity.getUniqueId();
         activeEntities.put(id, entity);
         remainingHits.put(id, hitCount);
-        ownerOf.put(id, ownerId);
+        ownerOf.put(id, owner != null ? owner.getUniqueId() : null);
+        teamOf.put(id, owner != null ? teamManager.getTeam(owner) : null);
         lastLandedHitAt.put(id, System.currentTimeMillis());
     }
 
@@ -59,12 +63,18 @@ public abstract class BaseMinionManager {
             return;
         }
 
+        acquireTarget(minion);
+    }
+
+    public void acquireTarget(LivingEntity minion) {
+        currentTarget.remove(minion.getUniqueId());
+
         Player nearest = null;
         double closestDistance = Double.MAX_VALUE;
 
         for (Player candidate : minion.getWorld().getPlayers()) {
             if (!candidate.isOnline() || candidate.isDead() || candidate.getGameMode() == GameMode.SPECTATOR) continue;
-            if (!teamManager.isEnemy(owner, candidate)) continue;
+            if (!isEnemyOf(minion, candidate)) continue;
 
             double distance = minion.getLocation().distance(candidate.getLocation());
             if (distance < closestDistance) {
@@ -79,11 +89,27 @@ public abstract class BaseMinionManager {
         }
     }
 
+    public boolean isEnemyOf(LivingEntity minion, Player target) {
+        Team minionTeam = teamOf.get(minion.getUniqueId());
+        if (minionTeam != null) {
+            Team targetTeam = teamManager.getTeam(target);
+            return targetTeam != null && minionTeam != targetTeam;
+        }
+
+        UUID ownerId = ownerOf.get(minion.getUniqueId());
+        Player owner = ownerId != null ? Bukkit.getPlayer(ownerId) : null;
+        return owner != null && teamManager.isEnemy(owner, target);
+    }
+
     public Player getCurrentTarget(LivingEntity minion) {
         UUID targetId = currentTarget.get(minion.getUniqueId());
         if (targetId == null) return null;
         Player target = Bukkit.getPlayer(targetId);
-        return (target != null && target.isOnline() && !target.isDead() && target.getGameMode() != GameMode.SPECTATOR) ? target : null;
+        if (target == null || !target.isOnline() || target.isDead() || target.getGameMode() == GameMode.SPECTATOR) {
+            return null;
+        }
+        if (!target.getWorld().equals(minion.getWorld())) return null;
+        return target;
     }
 
     public boolean shouldTeleportToTarget(LivingEntity minion) {
@@ -108,11 +134,17 @@ public abstract class BaseMinionManager {
     public boolean registerHit(LivingEntity entity, Player attacker) {
         UUID id = entity.getUniqueId();
         UUID ownerId = ownerOf.get(id);
-        if (ownerId == null) return false;
 
-        Player owner = Bukkit.getPlayer(ownerId);
-        if (owner != null && !teamManager.isEnemy(owner, attacker)) {
-            return false;
+        Team minionTeam = teamOf.get(id);
+        if (minionTeam != null) {
+            if (minionTeam == teamManager.getTeam(attacker)) {
+                return false;
+            }
+        } else {
+            Player owner = ownerId != null ? Bukkit.getPlayer(ownerId) : null;
+            if (owner != null && !teamManager.isEnemy(owner, attacker)) {
+                return false;
+            }
         }
 
         Integer remaining = remainingHits.get(id);
@@ -136,6 +168,7 @@ public abstract class BaseMinionManager {
         activeEntities.remove(id);
         remainingHits.remove(id);
         ownerOf.remove(id);
+        teamOf.remove(id);
         currentTarget.remove(id);
         lastLandedHitAt.remove(id);
         lastAttackAt.remove(id);
@@ -157,9 +190,35 @@ public abstract class BaseMinionManager {
         activeEntities.clear();
         remainingHits.clear();
         ownerOf.clear();
+        teamOf.clear();
         currentTarget.clear();
         lastLandedHitAt.clear();
         lastAttackAt.clear();
+    }
+
+    public void clearForWorld(World world) {
+        if (world == null) return;
+
+        List<UUID> toRemove = new ArrayList<>();
+        for (Map.Entry<UUID, LivingEntity> entry : activeEntities.entrySet()) {
+            LivingEntity entity = entry.getValue();
+            if (entity == null || !entity.isValid() || entity.getWorld().equals(world)) {
+                if (entity != null && entity.isValid()) {
+                    entity.remove();
+                }
+                toRemove.add(entry.getKey());
+            }
+        }
+
+        for (UUID minionId : toRemove) {
+            activeEntities.remove(minionId);
+            remainingHits.remove(minionId);
+            ownerOf.remove(minionId);
+            teamOf.remove(minionId);
+            currentTarget.remove(minionId);
+            lastLandedHitAt.remove(minionId);
+            lastAttackAt.remove(minionId);
+        }
     }
 
     public void clearForMatch(Match match) {
@@ -188,6 +247,7 @@ public abstract class BaseMinionManager {
             activeEntities.remove(minionId);
             remainingHits.remove(minionId);
             ownerOf.remove(minionId);
+            teamOf.remove(minionId);
             currentTarget.remove(minionId);
             lastLandedHitAt.remove(minionId);
             lastAttackAt.remove(minionId);
@@ -217,6 +277,7 @@ public abstract class BaseMinionManager {
             activeEntities.remove(minionId);
             remainingHits.remove(minionId);
             ownerOf.remove(minionId);
+            teamOf.remove(minionId);
             currentTarget.remove(minionId);
             lastLandedHitAt.remove(minionId);
             lastAttackAt.remove(minionId);

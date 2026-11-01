@@ -55,7 +55,7 @@ public class BroodMotherEntityManager extends BaseMinionManager {
         });
 
         EntityCleanupUtils.markAsArenaEntity(spider);
-        registerControlledEntity(spider, owner.getUniqueId(), bossHitCount);
+        registerControlledEntity(spider, owner, bossHitCount);
         bossEntities.add(spider.getUniqueId());
         acquireTarget(spider, owner, target);
     }
@@ -71,9 +71,9 @@ public class BroodMotherEntityManager extends BaseMinionManager {
         });
 
         EntityCleanupUtils.markAsArenaEntity(spiderling);
-        registerControlledEntity(spiderling, ownerId, spiderlingHitCount);
-
         Player owner = org.bukkit.Bukkit.getPlayer(ownerId);
+        registerControlledEntity(spiderling, owner, spiderlingHitCount);
+
         if (owner != null) acquireTarget(spiderling, owner, null);
     }
 
@@ -94,12 +94,15 @@ public class BroodMotherEntityManager extends BaseMinionManager {
 
     @Override
     public void onControlledAttack(LivingEntity attackerEntity, Player victim) {
+        if (!isEnemyOf(attackerEntity, victim)) return;
+
+        UUID ownerId = ownerOf.get(attackerEntity.getUniqueId());
+        Player owner = ownerId != null ? org.bukkit.Bukkit.getPlayer(ownerId) : null;
+        if (owner == null) return;
+
         lastLandedHitAt.put(attackerEntity.getUniqueId(), System.currentTimeMillis());
 
         boolean isBoss = bossEntities.contains(attackerEntity.getUniqueId());
-        UUID ownerId = ownerOf.get(attackerEntity.getUniqueId());
-        Player owner = ownerId != null ? org.bukkit.Bukkit.getPlayer(ownerId) : null;
-        if (teamManager.isAlly(owner, victim)) return;
 
         if (isBoss) {
             boolean applied = debuffManager.tryApply(owner, victim, DebuffType.POISON, poisonDurationMillis);

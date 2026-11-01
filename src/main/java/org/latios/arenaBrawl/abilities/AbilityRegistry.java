@@ -260,6 +260,8 @@ public class AbilityRegistry {
                 deps -> new SoulLink(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.soulLinkManager(), configManager.get("soullink")));
         register(AbilitySlot.ULTIMATE, "guardiancolossus",
                 deps -> new GuardianColossus(deps.cooldownManager(), deps.usageManager(), deps.guardianColossusEntityManager(), configManager.get("guardiancolossus")));
+        register(AbilitySlot.ULTIMATE, "reflectdamage",
+                deps -> new ReflectDamage(plugin, deps.cooldownManager(), deps.usageManager(), configManager.get("reflectdamage")));
 
 
         // --- DEFAULTS ---

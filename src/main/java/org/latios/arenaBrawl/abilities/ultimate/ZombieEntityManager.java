@@ -50,16 +50,18 @@ public class ZombieEntityManager extends BaseMinionManager {
             });
 
             EntityCleanupUtils.markAsArenaEntity(zombie);
-            registerControlledEntity(zombie, owner.getUniqueId(), zombieHitCount);
+            registerControlledEntity(zombie, owner, zombieHitCount);
             acquireTarget(zombie, owner, target);
         }
     }
 
     @Override
     public void onControlledAttack(LivingEntity attackerEntity, Player victim) {
+        if (!isEnemyOf(attackerEntity, victim)) return;
+
         UUID ownerId = ownerOf.get(attackerEntity.getUniqueId());
         Player owner = ownerId != null ? org.bukkit.Bukkit.getPlayer(ownerId) : null;
-        if (teamManager.isAlly(owner, victim)) return;
+        if (owner == null) return;
 
         combatService.applyMinionDamage(owner, victim, zombieDamage, "Zombie", victim.getLocation());
     }

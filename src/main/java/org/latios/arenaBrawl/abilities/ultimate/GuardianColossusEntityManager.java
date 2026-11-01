@@ -19,6 +19,8 @@ import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
+import java.util.UUID;
+
 /**
  * Tank minion manager for Guardian Colossus. The golem soaks hits through the
  * normal minion hit system and periodically taunts nearby enemies by pulling
@@ -72,7 +74,7 @@ public class GuardianColossusEntityManager extends BaseMinionManager {
         });
 
         EntityCleanupUtils.markAsArenaEntity(golem);
-        registerControlledEntity(golem, owner.getUniqueId(), hitCount);
+        registerControlledEntity(golem, owner, hitCount);
         acquireTarget(golem, owner, null);
 
         owner.getWorld().spawnParticle(
@@ -91,9 +93,7 @@ public class GuardianColossusEntityManager extends BaseMinionManager {
 
             @Override
             public void run() {
-                if (!owner.isOnline()
-                        || owner.getGameMode() == GameMode.SPECTATOR
-                        || System.currentTimeMillis() >= expiresAt
+                if (System.currentTimeMillis() >= expiresAt
                         || !golem.isValid()
                         || !isControlledEntity(golem)) {
                     if (golem.isValid()) {
@@ -123,7 +123,7 @@ public class GuardianColossusEntityManager extends BaseMinionManager {
         for (Player enemy : golem.getWorld().getPlayers()) {
             if (enemy.isDead()
                     || enemy.getGameMode() == GameMode.SPECTATOR
-                    || !teamManager.isEnemy(owner, enemy)) {
+                    || !isEnemyOf(golem, enemy)) {
                 continue;
             }
 
@@ -191,15 +191,11 @@ public class GuardianColossusEntityManager extends BaseMinionManager {
 
     @Override
     public void onControlledAttack(LivingEntity attackerEntity, Player victim) {
-        Player owner = ownerOf.get(attackerEntity.getUniqueId()) != null
-                ? org.bukkit.Bukkit.getPlayer(ownerOf.get(attackerEntity.getUniqueId()))
-                : null;
+        if (!isEnemyOf(attackerEntity, victim)) return;
 
-        if (owner == null || !owner.isOnline()
-                || owner.getGameMode() == GameMode.SPECTATOR
-                || teamManager.isAlly(owner, victim)) {
-            return;
-        }
+        UUID ownerId = ownerOf.get(attackerEntity.getUniqueId());
+        Player owner = ownerId != null ? org.bukkit.Bukkit.getPlayer(ownerId) : null;
+        if (owner == null || !owner.isOnline()) return;
         if (combatService == null) return;
 
         combatService.applyMinionDamage(

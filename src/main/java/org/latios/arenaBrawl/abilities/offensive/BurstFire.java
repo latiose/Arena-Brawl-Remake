@@ -16,7 +16,10 @@ import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class BurstFire implements Ability {
@@ -80,6 +83,7 @@ public class BurstFire implements Ability {
 
         Vector finalDir = direction.add(new Vector(spreadX, spreadY, spreadZ)).normalize();
         double step = 0.5;
+        Set<UUID> hitTargets = new HashSet<>();
 
         for (double traveled = 0; traveled <= maxRange; traveled += step) {
             Location point = origin.add(finalDir.clone().multiply(step));
@@ -92,7 +96,10 @@ public class BurstFire implements Ability {
             point.getWorld().spawnParticle(Particle.WAX_OFF, point, 1, 0, 0, 0, 0);
 
             for (Player target : point.getWorld().getPlayers()) {
-                if (target.equals(caster) || !teamManager.isEnemy(caster, target) || target.isDead()) {
+                if (target.equals(caster)
+                        || !teamManager.isEnemy(caster, target)
+                        || target.isDead()
+                        || hitTargets.contains(target.getUniqueId())) {
                     continue;
                 }
 
@@ -100,7 +107,7 @@ public class BurstFire implements Ability {
                     combatService.applyAbilityDamage(caster, target, damage / 3.0, getName(), point);
 
                     point.getWorld().playSound(point, Sound.ENTITY_PLAYER_HURT, 0.8f, 1.5f);
-                    return;
+                    hitTargets.add(target.getUniqueId());
                 }
             }
         }
@@ -108,7 +115,7 @@ public class BurstFire implements Ability {
 
     @Override
     public String getDescription() {
-        return "Fires a rapid short-range burst of electric sparks, dealing damage to the first enemy hit.";
+        return "Fires a rapid short-range burst of electric sparks, dealing damage to every enemy in its path.";
     }
 
     @Override

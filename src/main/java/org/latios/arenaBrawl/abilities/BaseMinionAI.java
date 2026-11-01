@@ -28,18 +28,10 @@ public class BaseMinionAI extends BukkitRunnable {
                 if (!(entity instanceof Mob mob)) continue;
                 if (!entityManager.isControlledEntity(mob)) continue;
 
-                Player owner = entityManager.getOwner(mob) != null
-                        ? Bukkit.getPlayer(entityManager.getOwner(mob)) : null;
-
-                if (owner == null || !owner.isOnline()) {
-                    mob.remove();
-                    continue;
-                }
-
                 Player target = entityManager.getCurrentTarget(mob);
 
-                if (target == null || !target.isOnline() || target.isDead() || target.getGameMode() == GameMode.SPECTATOR) {
-                    entityManager.acquireTarget(mob, owner, null);
+                if (target == null) {
+                    entityManager.acquireTarget(mob);
                     target = entityManager.getCurrentTarget(mob);
                 }
 

@@ -10,10 +10,11 @@ import org.latios.arenaBrawl.abilities.AbilityManager;
 
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
-import org.latios.arenaBrawl.abilities.offensive.FlameSword;
-import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
+import org.latios.arenaBrawl.abilities.ReflectStance;
+import org.latios.arenaBrawl.abilities.offensive.FlameSword;
+import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
 import org.latios.arenaBrawl.abilities.support.Bloodthirst;
 import org.latios.arenaBrawl.abilities.support.EtherealBodyManager;
 import org.latios.arenaBrawl.abilities.support.LifeBond;
@@ -31,7 +32,6 @@ import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
-import org.latios.arenaBrawl.abilities.utility.Counter;
 import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
 import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
 import org.latios.arenaBrawl.abilities.utility.Taunt;
@@ -537,7 +537,7 @@ public class MatchManager {
         // Ability-held per-player state lives in static maps.
         Berserk.clear(player);
         FlameSword.clear(player);
-        Counter.clear(player);
+        ReflectStance.clearState(player);
         Taunt.clear(player);
         Thornheart.clear(player);
         Bloodthirst.clear(player);
@@ -549,11 +549,18 @@ public class MatchManager {
     }
 
     private void clearRemainingEffects(Match match) {
+        org.bukkit.World matchWorld = match.getArenaMap().getWorld();
+
+        broodMotherEntityManager.clearForWorld(matchWorld);
+        zombieEntityManager.clearForWorld(matchWorld);
+        skeletonEntityManager.clearForWorld(matchWorld);
+        guardianColossusEntityManager.clearForWorld(matchWorld);
+
         for (Player player : match.getAllPlayers()) {
-            if (player.isOnline()) {
+            boolean belongsToMatch = activeMatches.get(player.getUniqueId()) == match;
+            if (player.isOnline() && belongsToMatch) {
                 clearCombatEffects(player);
             }
-            clearSummons(player);
         }
     }
 

@@ -66,7 +66,7 @@ public class SkeletonEntityManager extends BaseMinionManager {
         });
 
         EntityCleanupUtils.markAsArenaEntity(skeleton);
-        registerControlledEntity(skeleton, ownerId, skeletonHitCount);
+        registerControlledEntity(skeleton, owner, skeletonHitCount);
         acquireTarget(skeleton, owner, target);
         return true;
     }
@@ -75,32 +75,17 @@ public class SkeletonEntityManager extends BaseMinionManager {
     public void acquireTarget(LivingEntity minion, Player owner, Player target) {
         if (target != null && target.isOnline() && !target.isDead()
                 && target.getGameMode() != org.bukkit.GameMode.SPECTATOR
-                && teamManager.isEnemy(owner, target)) {
+                && isEnemyOf(minion, target)) {
 
             setSkeletonTarget(minion, target);
             return;
         }
 
-        Player nearestEnemy = null;
-        double closestDistance = Double.MAX_VALUE;
-
-        for (Player candidate : minion.getWorld().getPlayers()) {
-            if (!candidate.isOnline() || candidate.isDead()
-                    || candidate.getGameMode() == org.bukkit.GameMode.SPECTATOR) continue;
-
-            if (!teamManager.isEnemy(owner, candidate)) continue;
-
-            double distance = minion.getLocation().distance(candidate.getLocation());
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                nearestEnemy = candidate;
-            }
-        }
-
-        if (nearestEnemy != null) {
-            setSkeletonTarget(minion, nearestEnemy);
+        acquireTarget(minion);
+        Player reacquired = getCurrentTarget(minion);
+        if (reacquired != null) {
+            setSkeletonTarget(minion, reacquired);
         } else {
-            // Si no hay enemigos cerca, limpiar el target en la IA de Minecraft
             if (minion instanceof Skeleton sk) {
                 sk.setTarget(null);
             }
@@ -165,10 +150,11 @@ public class SkeletonEntityManager extends BaseMinionManager {
 
     @Override
     public void onControlledAttack(LivingEntity attackerEntity, Player victim) {
+        if (!isEnemyOf(attackerEntity, victim)) return;
+
         UUID ownerId = ownerOf.get(attackerEntity.getUniqueId());
         Player owner = ownerId != null ? org.bukkit.Bukkit.getPlayer(ownerId) : null;
-
-        if (owner != null && teamManager.isAlly(owner, victim)) return;
+        if (owner == null) return;
 
         combatService.applyMinionDamage(owner, victim, arrowDamage, "Skeleton", victim.getLocation());
     }

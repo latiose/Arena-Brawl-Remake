@@ -131,6 +131,12 @@ public class ArenaManager {
     }
 
     public void startMatch(MatchType type, List<Player> players) {
+        for (Player player : players) {
+            if (matchManager.isInMatch(player)) {
+                matchManager.leaveMatch(player);
+            }
+        }
+
         ArenaMap map = arenaMapManager.claimAvailableMap(type);
 
         if (map == null || !map.isValid(type)) {

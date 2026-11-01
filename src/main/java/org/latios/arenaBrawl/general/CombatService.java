@@ -12,11 +12,11 @@ import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldType;
+import org.latios.arenaBrawl.abilities.ReflectStance;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.Berserk;
 import org.latios.arenaBrawl.abilities.ultimate.BloodMoon;
 import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
-import org.latios.arenaBrawl.abilities.utility.Counter;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.Match;
@@ -91,9 +91,9 @@ public class CombatService {
 
         double adjustedDamage = rawDamage * multiplier;
 
-        Counter.CounterState counter = Counter.getActive(victim);
-        if (counter != null) {
-            resolveCounter(attacker, victim, adjustedDamage, counter);
+        ReflectStance.ReflectState stance = ReflectStance.getActiveState(victim);
+        if (stance != null) {
+            resolveReflectStance(attacker, victim, adjustedDamage, stance, abilityName);
             return;
         }
 
@@ -160,55 +160,83 @@ public class CombatService {
         spawnHologram(victim, String.valueOf((int) Math.round(finalDamage)));
     }
 
-    private void resolveCounter(Player attacker, Player victim, double adjustedDamage, Counter.CounterState counter) {
-        double reflectMultiplier = counter.reflectMultiplier();
+    private void resolveReflectStance(Player source, Player holder, double adjustedDamage,
+                                      ReflectStance.ReflectState stance, String damageSourceName) {
+        String stanceName = stance.sourceName();
 
-        double counterReduction = shieldManager.getDamageReduction(victim);
-        double reflectedDamage = counterReduction > 0 ? adjustedDamage * (1 - counterReduction) : adjustedDamage;
+        double takenDamage = adjustedDamage * (1 - stance.damageReduction());
+        double reflectedDamage = adjustedDamage * stance.reflectMultiplier();
 
-        double counterVulnerability = damageVulnerabilityManager.getBonusMultiplier(victim);
-        if (counterVulnerability > 0) {
-            reflectedDamage *= (1 + counterVulnerability);
+        double shieldReduction = shieldManager.getDamageReduction(holder);
+        if (shieldReduction > 0) {
+            takenDamage *= (1 - shieldReduction);
+            reflectedDamage *= (1 - shieldReduction);
         }
 
-        reflectedDamage *= reflectMultiplier;
+        double holderVulnerability = damageVulnerabilityManager.getBonusMultiplier(holder);
+        if (holderVulnerability > 0) {
+            reflectedDamage *= (1 + holderVulnerability);
+        }
 
-        Location counterLoc = victim.getLocation().add(0, 1.0, 0);
-        victim.getWorld().spawnParticle(Particle.ENCHANTED_HIT, counterLoc, 25, 0.3, 0.5, 0.3, 0.1);
-        victim.getWorld().spawnParticle(Particle.SWEEP_ATTACK, counterLoc, 4, 0.4, 0.4, 0.4, 0.0);
-        victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.2f, 1.0f);
-        victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 1.0f, 1.4f);
+        Location stanceLoc = holder.getLocation().add(0, 1.0, 0);
+        holder.getWorld().spawnParticle(Particle.ENCHANTED_HIT, stanceLoc, 25, 0.3, 0.5, 0.3, 0.1);
+        holder.getWorld().spawnParticle(Particle.SWEEP_ATTACK, stanceLoc, 4, 0.4, 0.4, 0.4, 0.0);
+        holder.getWorld().playSound(holder.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.2f, 1.0f);
+        holder.getWorld().playSound(holder.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 1.0f, 1.4f);
 
-        if (attacker != null && !attacker.equals(victim)) {
-            if (orbitShieldManager.hasActiveShield(attacker)) {
-                OrbitShieldType attackerShield = orbitShieldManager.getActiveType(attacker);
-                if (attackerShield != null) {
-                    orbitShieldManager.consumeCharge(attacker);
-                    resolveShieldEffect(attackerShield, victim, attacker, true);
+        if (takenDamage > 0) {
+            double finalTaken = applyLifeBond(holder, source, takenDamage);
 
-                    victim.sendMessage(MessageUtils.negative() + String.format(
+            healthManager.damage(holder, finalTaken, source);
+            applySoulLink(holder, source, finalTaken);
+            applyPolymorphDamage(holder, finalTaken);
+            spawnHologram(holder, String.valueOf((int) Math.round(finalTaken)));
+
+            int roundedTaken = (int) Math.round(finalTaken);
+
+            if (source != null) {
+                source.sendMessage(MessageUtils.positive() + String.format(
+                        "§3Your %s hit §3%s §3for §c%d §3damage.",
+                        damageSourceName, holder.getName(), roundedTaken
+                ));
+            }
+
+            holder.sendMessage(MessageUtils.negative() + String.format(
+                    "§3%s's %s hit §3you §3for §c%d §3damage.",
+                    source != null ? source.getName() : "Unknown", damageSourceName, roundedTaken
+            ));
+        }
+
+        if (source != null && !source.equals(holder)) {
+            if (orbitShieldManager.hasActiveShield(source)) {
+                OrbitShieldType sourceShield = orbitShieldManager.getActiveType(source);
+                if (sourceShield != null) {
+                    orbitShieldManager.consumeCharge(source);
+                    resolveShieldEffect(sourceShield, holder, source, true);
+
+                    holder.sendMessage(MessageUtils.negative() + String.format(
                             "§3Your %s was blocked by §e%s§3's %s!",
-                            "Counter", attacker.getName(), attackerShield.getDisplayName()
+                            stanceName, source.getName(), sourceShield.getDisplayName()
                     ));
                     return;
                 }
             }
 
-            double dealt = damageReflectedTarget(attacker, victim, reflectedDamage);
+            double dealt = damageReflectedTarget(source, holder, reflectedDamage);
             if (dealt < 0) {
                 return;
             }
 
             int roundedReflected = (int) Math.round(dealt);
-            spawnHologram(attacker, String.valueOf(roundedReflected));
+            spawnHologram(source, String.valueOf(roundedReflected));
 
-            victim.sendMessage(MessageUtils.positive() + String.format(
+            holder.sendMessage(MessageUtils.positive() + String.format(
                     "§3Your %s hit §3%s §3for §c%d §3damage.",
-                    "Counter", attacker.getName(), roundedReflected
+                    stanceName, source.getName(), roundedReflected
             ));
-            attacker.sendMessage(MessageUtils.negative() + String.format(
+            source.sendMessage(MessageUtils.negative() + String.format(
                     "§3%s's %s hit §3you §3for §c%d §3damage.",
-                    victim.getName(), "Counter", roundedReflected
+                    holder.getName(), stanceName, roundedReflected
             ));
         }
     }
@@ -354,9 +382,9 @@ public class CombatService {
             ownerMultiplier *= 2.0;
         }
 
-        Counter.CounterState counter = Counter.getActive(victim);
-        if (counter != null) {
-            resolveCounter(owner, victim, rawDamage * ownerMultiplier, counter);
+        ReflectStance.ReflectState stance = ReflectStance.getActiveState(victim);
+        if (stance != null) {
+            resolveReflectStance(owner, victim, rawDamage * ownerMultiplier, stance, sourceName);
             return;
         }
 
@@ -450,9 +478,9 @@ public class CombatService {
             damageAmount *= 2.0;
         }
 
-        Counter.CounterState counter = Counter.getActive(attacker);
-        if (counter != null) {
-            resolveCounter(victim, attacker, damageAmount, counter);
+        ReflectStance.ReflectState stance = ReflectStance.getActiveState(attacker);
+        if (stance != null) {
+            resolveReflectStance(victim, attacker, damageAmount, stance, sourceName);
             return;
         }
 

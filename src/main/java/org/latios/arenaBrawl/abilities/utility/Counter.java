@@ -11,36 +11,14 @@ import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
+import org.latios.arenaBrawl.abilities.ReflectStance;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class Counter implements Ability {
-
-    public record CounterState(long expiresAt, double reflectMultiplier) {}
-
-    private static final Map<UUID, CounterState> ACTIVE_COUNTERS = new ConcurrentHashMap<>();
-
-    public static CounterState getActive(Player player) {
-        UUID uuid = player.getUniqueId();
-        CounterState state = ACTIVE_COUNTERS.get(uuid);
-        if (state == null) return null;
-
-        if (System.currentTimeMillis() >= state.expiresAt()) {
-            ACTIVE_COUNTERS.remove(uuid, state);
-            return null;
-        }
-        return state;
-    }
-
-    public static void clear(Player player) {
-        ACTIVE_COUNTERS.remove(player.getUniqueId());
-    }
+public class Counter implements Ability, ReflectStance {
 
     private final long cooldownMs;
     private final long windowMs;
@@ -81,16 +59,16 @@ public class Counter implements Ability {
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Window", (windowMs / 1000.0) + "s"),
-                new AbilityStat("Reflect", (int)(reflectMultiplier * 100) + "% of every hit"),
+                new AbilityStat("Reflect", (int) (reflectMultiplier * 100) + "% of every hit"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 
     @Override
     public boolean activate(Player player) {
-        UUID uuid = player.getUniqueId();
-        CounterState state = new CounterState(System.currentTimeMillis() + windowMs, reflectMultiplier);
-        ACTIVE_COUNTERS.put(uuid, state);
+        ReflectStance.ReflectState state = new ReflectStance.ReflectState(
+                System.currentTimeMillis() + windowMs, reflectMultiplier, 1.0, getName());
+        ReflectStance.apply(player, state);
 
         Location loc = player.getLocation();
         var world = loc.getWorld();
@@ -118,11 +96,10 @@ public class Counter implements Ability {
 
             @Override
             public void run() {
-                CounterState current = ACTIVE_COUNTERS.get(uuid);
-                if (current != state || !player.isOnline() || player.isDead()
-                        || System.currentTimeMillis() >= state.expiresAt()) {
+                ReflectStance.ReflectState current = ReflectStance.getActiveState(player);
+                if (current != state || !player.isOnline() || player.isDead()) {
                     if (current == state) {
-                        ACTIVE_COUNTERS.remove(uuid, state);
+                        ReflectStance.clearState(player);
                     }
                     cancel();
                     return;

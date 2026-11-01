@@ -1485,6 +1485,12 @@ ability-values:
     teleport-timeout-millis: 60000
     attack-cooldown-millis: 1000
 
+  reflectdamage:
+    duration-ms: 9000
+    reflect-percent: 0.50
+    damage-reduction: 0.50
+    charge-time-ms: 60000
+
 rune-values:
   speed:
     proc-chance: 0.2
