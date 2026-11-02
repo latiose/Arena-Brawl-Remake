@@ -35,6 +35,9 @@ public class PlayerHealthManager {
     private final Map<UUID, Double> maxHealth = new HashMap<>();
     private record HealReduction(double percent, long durationMillis) {}
     private final Map<UUID, List<HealReduction>> healReductions = new HashMap<>();
+    private record RotMark(UUID casterId, long expiresAt) {}
+    private final Map<UUID, RotMark> rotMarks = new HashMap<>();
+
     private final Set<UUID> eliminated = new HashSet<>();
     private static final long HOLOGRAM_LIFETIME_TICKS = 35;
     private Consumer<Player> eliminationCallback = p -> {};
@@ -116,6 +119,31 @@ public class PlayerHealthManager {
         return Math.max(0.0, 1.0 - Math.min(100.0, reduction) / 100.0);
     }
 
+    public void markRot(Player victim, Player caster, long durationMillis) {
+        rotMarks.put(victim.getUniqueId(), new RotMark(caster.getUniqueId(),
+                System.currentTimeMillis() + durationMillis));
+    }
+
+    public boolean hasRotMark(Player player) {
+        return getRotMarkExpiry(player) != null;
+    }
+
+    public Long getRotMarkExpiry(Player player) {
+        RotMark mark = rotMarks.get(player.getUniqueId());
+        if (mark == null) return null;
+
+        if (System.currentTimeMillis() >= mark.expiresAt()) {
+            rotMarks.remove(player.getUniqueId());
+            return null;
+        }
+
+        return mark.expiresAt();
+    }
+
+    public void clearRotMark(Player player) {
+        rotMarks.remove(player.getUniqueId());
+    }
+
     public double heal(Player player, double amount) {
         return heal(player, amount, true);
     }
@@ -127,7 +155,39 @@ public class PlayerHealthManager {
         if (effectiveAmount <= 0.0) return 0.0;
 
         double max = getMaxHealth(player);
-        double healedAmount = Math.min(effectiveAmount, max - getHealth(player));
+        double missing = max - getHealth(player);
+
+        if (hasRotMark(player)) {
+            RotMark mark = rotMarks.get(player.getUniqueId());
+            Player rotCaster = mark != null ? Bukkit.getPlayer(mark.casterId()) : null;
+            Player caster = rotCaster != null && rotCaster.isOnline() ? rotCaster : null;
+
+            double denied = Math.min(effectiveAmount, Math.max(0.0, missing));
+            if (denied <= 0.0) return 0.0;
+
+            int roundedDenied = (int) Math.round(denied);
+
+            player.getWorld().spawnParticle(Particle.DUST, HologramUtils.randomAround(player), 12, 0.2, 0.5, 0.2, 0.0,
+                    new Particle.DustOptions(org.bukkit.Color.fromRGB(40, 90, 40), 1.4f));
+            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_SCULK_SPREAD, 1.2f, 0.5f);
+
+            if (caster != null && !caster.equals(player)) {
+                caster.sendMessage(MessageUtils.positive() + String.format(
+                        "§3Your Wound Rot hit §3%s §3for §c%d §3damage.",
+                        player.getName(), roundedDenied
+                ));
+            }
+
+            player.sendMessage(MessageUtils.negative() + String.format(
+                    "§3%s's Wound Rot hit §3you §3for §c%d §3damage.",
+                    caster != null ? caster.getName() : "Unknown", roundedDenied
+            ));
+
+            damage(player, denied, caster);
+            return 0.0;
+        }
+
+        double healedAmount = Math.min(effectiveAmount, missing);
         if (healedAmount <= 0.0) return 0.0;
 
         double updated = getHealth(player) + healedAmount;
@@ -144,11 +204,11 @@ public class PlayerHealthManager {
 
     public double heal(Player player, double amount, String sourceName) {
         double healedAmount = heal(player, amount);
-        int roundedHeal = (int) Math.round(amount * getHealingMultiplier(player));
+        if (healedAmount <= 0.0) return 0.0;
 
         player.sendMessage(MessageUtils.positive() + String.format(
                 "§3Your %s healed you for §a%d §3health!",
-                sourceName, roundedHeal
+                sourceName, (int) Math.round(healedAmount)
         ));
         return healedAmount;
     }
@@ -157,8 +217,10 @@ public class PlayerHealthManager {
         if (eliminated.contains(target.getUniqueId())) return;
 
         double healedAmount = heal(target, amount, false);
+        if (healedAmount <= 0.0) return;
+
         healingCallback.accept(new HealingEvent(healer, target, healedAmount));
-        int roundedHeal = (int) Math.round(amount * getHealingMultiplier(target));
+        int roundedHeal = (int) Math.round(healedAmount);
 
         healer.sendMessage(MessageUtils.positive() + String.format(
                 "§3Your %s healed %s §3for §a%d §3health!",
@@ -342,6 +404,7 @@ public class PlayerHealthManager {
 
     public void clearRegenDisable(Player player) {
         healReductions.remove(player.getUniqueId());
+        clearRotMark(player);
     }
 
     private void spawnHologram(Player victim, String phrase) {

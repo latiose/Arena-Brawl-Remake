@@ -521,6 +521,7 @@ public class MatchManager {
         }
 
         healthManager.clearRegenDisable(player);
+        healthManager.clearRotMark(player);
         speedBuffManager.clearBuffs(player);
         damageBuffManager.clear(player);
         damageVulnerabilityManager.clear(player, false);

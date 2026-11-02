@@ -90,6 +90,8 @@ public class AbilityIconRegistry {
         icons.put("tether", Material.IRON_CHAIN);
         icons.put("shadowcloak", Material.BLACK_DYE);
         icons.put("updraft", Material.BREEZE_ROD);
+        icons.put("cyclone", Material.LIGHT_BLUE_DYE);
+        icons.put("gravitywell", Material.END_PORTAL_FRAME);
         icons.put("portal", Material.ENDER_PEARL);
 
         // --- SUPPORT ---
@@ -123,6 +125,8 @@ public class AbilityIconRegistry {
         icons.put("lonewolf", Material.BONE);
         icons.put("thornheart", Material.SWEET_BERRIES);
         icons.put("vitalsiphon", Material.FERMENTED_SPIDER_EYE);
+        icons.put("adrenalinesurge", Material.RED_DYE);
+        icons.put("woundrot", Material.ROTTEN_FLESH);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);

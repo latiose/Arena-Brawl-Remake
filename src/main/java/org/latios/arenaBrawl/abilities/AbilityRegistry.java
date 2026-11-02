@@ -150,6 +150,10 @@ public class AbilityRegistry {
                 deps -> new ShadowCloak(deps.cooldownManager(), deps.shadowCloakManager(), deps.combatUpgradeManager(), configManager.get("shadowcloak")));
         register(AbilitySlot.UTILITY, "updraft",
                 deps -> new Updraft(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("updraft")));
+        register(AbilitySlot.UTILITY, "cyclone",
+                deps -> new Cyclone(plugin, deps.cooldownManager(), deps.teamManager(), deps.shieldManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("cyclone")));
+        register(AbilitySlot.UTILITY, "gravitywell",
+                deps -> new GravityWell(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("gravitywell")));
 
 
         // --- SUPPORT ---
@@ -212,6 +216,10 @@ public class AbilityRegistry {
                 deps -> new Thornheart(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("thornheart")));
         register(AbilitySlot.SUPPORT, "vitalsiphon",
                 deps -> new VitalSiphon(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.combatService(), deps.combatUpgradeManager(), configManager.get("vitalsiphon")));
+        register(AbilitySlot.SUPPORT, "adrenalinesurge",
+                deps -> new AdrenalineSurge(deps.cooldownManager(), deps.energyManager(), deps.damageVulnerabilityManager(), deps.combatUpgradeManager(), configManager.get("adrenalinesurge")));
+        register(AbilitySlot.SUPPORT, "woundrot",
+                deps -> new WoundRot(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("woundrot")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
