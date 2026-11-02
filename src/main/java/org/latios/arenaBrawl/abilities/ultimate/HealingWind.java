@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities.ultimate;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -104,7 +105,10 @@ public class HealingWind implements Ability {
 
             @Override
             public void run() {
-                if (!player.isOnline() || elapsedMillis >= healDurationMillis) {
+                if (!player.isOnline()
+                        || player.isDead()
+                        || player.getGameMode() == GameMode.SPECTATOR
+                        || elapsedMillis >= healDurationMillis) {
                     cancel();
                     return;
                 }

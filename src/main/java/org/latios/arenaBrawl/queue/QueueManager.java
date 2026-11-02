@@ -215,7 +215,7 @@ public class QueueManager implements Listener {
     }
 
     private void tryStartMatches() {
-          for (MatchType type : MatchType.values()) {
+        for (MatchType type : MatchType.values()) {
             if (type == MatchType.TEAMS && ratedTeamsEnabled) {
                 tryStartRatedMatches();
                 continue;
@@ -223,42 +223,77 @@ public class QueueManager implements Listener {
             Set<UUID> queue = queuedPlayers.get(type);
             if (queue.size() < type.playersNeeded() || arenaMapManager.getAvailableMapCount(type) == 0) continue;
 
-            boolean fifo = type == MatchType.TEAMS;
+            List<List<Player>> groups = buildQueuedGroups(queue, type);
+            if (groups.isEmpty()) continue;
 
-            List<List<Player>> groups = new ArrayList<>();
-            int total = 0;
-            Set<UUID> considered = new HashSet<>();
-            List<UUID> queueOrder = new ArrayList<>(queue);
-            if (!fifo) {
-                queueOrder.sort((first, second) -> Boolean.compare(isSoloPlayer(second), isSoloPlayer(first)));
+            if (type != MatchType.TEAMS) {
+                groups.sort((first, second) ->
+                        Boolean.compare(isSoloGroup(second), isSoloGroup(first)));
             }
 
+            List<List<Player>> selected = findExactFit(groups, type.playersNeeded());
+            if (selected == null) continue;
 
-            for (UUID id : queueOrder) {
-                if (!considered.add(id)) continue;
-                Player queuedPlayer = Bukkit.getPlayer(id);
-                if (queuedPlayer == null || !queuedPlayer.isOnline()) continue;
-                Party party = partyManager.getParty(queuedPlayer);
-                Collection<UUID> group = party == null ? List.of(id) : party.getMembers();
-                considered.addAll(group);
-                if (total + group.size() > type.playersNeeded()
-                        || group.stream().anyMatch(memberId -> !queue.contains(memberId)
-                        || Bukkit.getPlayer(memberId) == null || !Bukkit.getPlayer(memberId).isOnline())) {
-                    continue;
+            List<Player> players = type == MatchType.TEAMS
+                    ? arrangeByEntryOrder(selected, type.getTeamSize())
+                    : arrangeForType(type, selected);
+            if (players == null) continue;
+
+            for (List<Player> selectedGroup : selected) {
+                for (Player p : selectedGroup) {
+                    queue.remove(p.getUniqueId());
                 }
-                groups.add(group.stream().map(Bukkit::getPlayer).toList());
-                total += group.size();
-                if (total == type.playersNeeded()) break;
             }
-              if (total < type.playersNeeded()) continue;
-
-              List<Player> players = fifo
-                      ? arrangeByEntryOrder(groups, type.getTeamSize())
-                      : arrangeForType(type, groups);
-              if (players == null) continue;
-              players.forEach(p -> queue.remove(p.getUniqueId()));
-              arenaManager.startMatch(type, players);
+            arenaManager.startMatch(type, players);
         }
+    }
+
+    private List<List<Player>> buildQueuedGroups(Set<UUID> queue, MatchType type) {
+        List<List<Player>> groups = new ArrayList<>();
+        Set<UUID> considered = new HashSet<>();
+
+        for (UUID id : new ArrayList<>(queue)) {
+            if (!considered.add(id)) continue;
+            Player queuedPlayer = Bukkit.getPlayer(id);
+            if (queuedPlayer == null || !queuedPlayer.isOnline()) continue;
+
+            Party party = partyManager.getParty(queuedPlayer);
+            List<UUID> members = party == null ? List.of(id) : new ArrayList<>(party.getMembers());
+            considered.addAll(members);
+
+            if (members.size() > type.getTeamSize()
+                    || members.stream().anyMatch(memberId -> !queue.contains(memberId)
+                    || Bukkit.getPlayer(memberId) == null || !Bukkit.getPlayer(memberId).isOnline())) {
+                continue;
+            }
+
+            groups.add(members.stream().map(Bukkit::getPlayer).toList());
+        }
+        return groups;
+    }
+
+    private boolean isSoloGroup(List<Player> group) {
+        return group.size() == 1 && partyManager.getParty(group.get(0)) == null;
+    }
+
+    private List<List<Player>> findExactFit(List<List<Player>> groups, int needed) {
+        return findExactFit(groups, 0, new ArrayList<>(), 0, needed);
+    }
+
+    private List<List<Player>> findExactFit(List<List<Player>> groups, int index,
+                                            List<List<Player>> selected, int total, int needed) {
+        if (total == needed) return new ArrayList<>(selected);
+        if (index >= groups.size()) return null;
+
+        List<Player> group = groups.get(index);
+        if (total + group.size() <= needed) {
+            selected.add(group);
+            List<List<Player>> taken = findExactFit(groups, index + 1, selected, total + group.size(), needed);
+            selected.removeLast();
+            if (taken != null) return taken;
+        }
+
+        return findExactFit(groups, index + 1, selected, total, needed);
     }
 
     private List<Player> arrangeByEntryOrder(List<List<Player>> groups, int teamSize) {
@@ -420,11 +455,6 @@ public class QueueManager implements Listener {
         private int getRange() {
             return INITIAL_RATING_RANGE + (RATING_RANGE_INCREMENT * searchStep);
         }
-    }
-
-    private boolean isSoloPlayer(UUID playerId) {
-        Player player = Bukkit.getPlayer(playerId);
-        return player == null || partyManager.getParty(player) == null;
     }
 
     private static final double TEAMMATE_CLOSENESS_WEIGHT = 1.0;

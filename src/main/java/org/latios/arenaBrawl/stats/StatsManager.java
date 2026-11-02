@@ -51,6 +51,7 @@ public class StatsManager {
         stats.kills = config.getInt(path + ".kills", 0);
         stats.deaths = config.getInt(path + ".deaths", 0);
         stats.coins = config.getInt(path + ".coins", 0);
+        stats.winStreak = config.getInt(path + ".winStreak", 0);
 
         cache.put(id, stats);
         return stats;
@@ -67,6 +68,7 @@ public class StatsManager {
     public int addWin(UUID id) {
         PlayerStats stats = getStats(id);
         stats.wins++;
+        stats.winStreak++;
         int winReward = 80;
         winReward *= multiplier;
         stats.coins += winReward;
@@ -84,6 +86,7 @@ public class StatsManager {
     public int addLoss(UUID id) {
         PlayerStats stats = getStats(id);
         stats.losses++;
+        stats.winStreak = 0;
         int lossReward = 40;
         lossReward *= multiplier;
         stats.coins += lossReward;
@@ -114,6 +117,14 @@ public class StatsManager {
         addDeath(player.getUniqueId());
     }
 
+    /** Resets the win streak to zero (used on draws and when claiming streak rewards). */
+    public void resetWinStreak(UUID id) {
+        PlayerStats stats = getStats(id);
+        if (stats.winStreak == 0) return;
+        stats.winStreak = 0;
+        save(id, stats);
+    }
+
     public void addDeath(UUID id) {
         PlayerStats stats = getStats(id);
         stats.deaths++;
@@ -131,6 +142,7 @@ public class StatsManager {
         config.set(path + ".kills", stats.kills);
         config.set(path + ".deaths", stats.deaths);
         config.set(path + ".coins", stats.coins);
+        config.set(path + ".winStreak", stats.winStreak);
 
         try {
             config.save(file);

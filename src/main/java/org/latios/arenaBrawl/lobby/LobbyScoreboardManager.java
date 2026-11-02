@@ -28,8 +28,9 @@ public class LobbyScoreboardManager {
         PlayerStats stats = statsManager.getStats(player);
         int rating = (int) ratingManager.getRating(player);
 
-        obj.getScore("§fRating: §e" + rating).setScore(4);
-        obj.getScore("§fWins: §a" + stats.wins).setScore(3);
+        obj.getScore("§fRating: §e" + rating).setScore(5);
+        obj.getScore("§fWins: §a" + stats.wins).setScore(4);
+        obj.getScore("§fStreak: §e" + stats.winStreak).setScore(3);
         obj.getScore("§fKills: §c" + stats.kills).setScore(2);
         obj.getScore("§fCoins: §6" + stats.coins).setScore(1);
 
@@ -44,8 +45,9 @@ public class LobbyScoreboardManager {
         PlayerStats stats = statsManager.getStats(player);
         int rating = (int) ratingManager.getRating(player);
 
-        obj.getScore("§fRating: §e" + rating).setScore(4);
-        obj.getScore("§fWins: §a" + stats.wins).setScore(3);
+        obj.getScore("§fRating: §e" + rating).setScore(5);
+        obj.getScore("§fWins: §a" + stats.wins).setScore(4);
+        obj.getScore("§fStreak: §e" + stats.winStreak).setScore(3);
         obj.getScore("§fKills: §c" + stats.kills).setScore(2);
         obj.getScore("§fCoins: §6" + stats.coins).setScore(1);
 

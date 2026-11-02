@@ -6,4 +6,5 @@ public class PlayerStats {
     public int kills = 0;
     public int deaths = 0;
     public int coins = 0;
+    public int winStreak = 0;
 }

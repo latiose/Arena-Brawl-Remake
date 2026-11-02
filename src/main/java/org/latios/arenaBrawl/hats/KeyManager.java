@@ -76,6 +76,13 @@ public class KeyManager {
         return true;
     }
 
+    /** Grants keys directly (e.g. win streak rewards). */
+    public void addKeys(Player player, int amount) {
+        if (amount <= 0) return;
+        keys.put(player.getUniqueId(), getKeys(player) + amount);
+        save(player);
+    }
+
     public static int getKeyCost() { return KEY_COST; }
 
     private void save(Player player) {

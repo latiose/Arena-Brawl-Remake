@@ -1231,7 +1231,8 @@ ability-values:
   healingbeam:
     cooldown-ms: 10000
     max-range: 256.0
-    heal-amount: 80
+    self-heal: 125.0
+    ally-heal: 75.0
     step-size: 0.4
     hit-expansion: 0.6
 

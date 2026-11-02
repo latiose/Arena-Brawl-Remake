@@ -26,7 +26,8 @@ import java.util.Set;
 public class HealingBeam implements Ability {
 
     private final long cooldownMs;
-    private final double healAmount;
+    private final double selfHealAmount;
+    private final double allyHealAmount;
     private final double maxRange;
     private final double stepSize;
     private final double hitExpansion;
@@ -40,7 +41,8 @@ public class HealingBeam implements Ability {
                        PlayerHealthManager healthManager,
                        CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
         this.cooldownMs = config.getLong("cooldown-ms", 10000L);
-        this.healAmount = config.getDouble("heal-amount", 80.0);
+        this.selfHealAmount = config.getDouble("self-heal", 125.0);
+        this.allyHealAmount = config.getDouble("ally-heal", 75.0);
         this.maxRange = config.getDouble("max-range", 256.0);
         this.stepSize = config.getDouble("step-size", 0.4);
         this.hitExpansion = config.getDouble("hit-expansion", 0.6);
@@ -65,7 +67,8 @@ public class HealingBeam implements Ability {
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Heal", (int) healAmount + " HP"),
+                new AbilityStat("Self Heal", (int) selfHealAmount + " HP"),
+                new AbilityStat("Ally Heal", (int) allyHealAmount + " HP"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s"),
                 new AbilityStat("Range", "Infinite")
         );
@@ -73,7 +76,7 @@ public class HealingBeam implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        healthManager.heal(player, healAmount, getName());
+        healthManager.heal(player, selfHealAmount, getName());
         player.getWorld().spawnParticle(Particle.FIREWORK, player.getLocation().add(0, 1, 0), 20, 0.2, 0.4, 0.2, 0.05);
 
         Location eye = player.getEyeLocation();
@@ -110,7 +113,7 @@ public class HealingBeam implements Ability {
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 10.0f, 1.5f);
 
         for (Player ally : hitAllies) {
-            healthManager.healAlly(player, ally, healAmount, getName());
+            healthManager.healAlly(player, ally, allyHealAmount, getName());
             ally.getWorld().spawnParticle(Particle.HEART, ally.getLocation().add(0, 1.5, 0), 5, 0.3, 0.3, 0.3, 0.1);
             ally.getWorld().playSound(ally.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
         }

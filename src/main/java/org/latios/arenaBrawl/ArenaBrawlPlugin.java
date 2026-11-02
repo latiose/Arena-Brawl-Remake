@@ -98,6 +98,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private KeyManager keyManager;
     private MagicChestManager magicChestManager;
     private MagicChestGUI magicChestGUI;
+    private ArenaChallengerGUI arenaChallengerGUI;
+    private ArenaChallengerManager arenaChallengerManager;
     private HatPhraseListener hatPhraseListener;
     private HatSelectorGUI hatSelectorGUI;
     private CombatUpgradeManager combatUpgradeManager;
@@ -200,6 +202,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager, runeSelectionManager,runeConfigManager,abilityIconRegistry);
         this.magicChestManager = new MagicChestManager(statsManager, hatRegistry, hatSelectionManager, swordSelectionManager);
         this.magicChestGUI = new MagicChestGUI(keyManager, statsManager,clickModeManager);
+        this.arenaChallengerGUI = new ArenaChallengerGUI(keyManager, statsManager);
+        this.arenaChallengerManager = new ArenaChallengerManager(this, arenaChallengerGUI);
         this.zombieEntityManager = new ZombieEntityManager(teamManager, combatService, abilityConfigManager.get("zombieapocalypse"));
         this.skeletonEntityManager = new SkeletonEntityManager(teamManager, combatService, abilityConfigManager.get("necromancy"));
         this.guardianColossusEntityManager = new GuardianColossusEntityManager(teamManager, combatService, debuffManager, this, abilityConfigManager.get("guardiancolossus"));
@@ -361,6 +365,10 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         );
         getServer().getPluginManager().registerEvents(
                 new MagicChestListener(magicChestGUI, keyManager, magicChestManager, statsManager, lobbyScoreboardManager,clickModeManager), this
+        );
+        getServer().getPluginManager().registerEvents(arenaChallengerManager, this);
+        getServer().getPluginManager().registerEvents(
+                new ArenaChallengerListener(arenaChallengerGUI, keyManager, statsManager), this
         );
         com.github.retrooper.packetevents.PacketEvents.getAPI().getEventManager()
                 .registerListener(new AttackSoundBlockListener());

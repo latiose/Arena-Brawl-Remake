@@ -30,4 +30,8 @@ public class AbilityItemKeys {
     public static final NamespacedKey MAGICAL_CHEST_HOLOGRAM = new NamespacedKey(
             ArenaBrawlPlugin.getInstance(), "magical_chest_hologram"
     );
+
+    public static final NamespacedKey ARENA_CHALLENGER_HOLOGRAM = new NamespacedKey(
+            ArenaBrawlPlugin.getInstance(), "arena_challenger_hologram"
+    );
 }

@@ -473,6 +473,7 @@ public class MatchManager {
                 player.sendMessage("§6Draw! Time limit reached.");
                 player.sendMessage("§6#§7--------------------------§6#");
             }
+            statsManager.resetWinStreak(player.getUniqueId());
         }
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {

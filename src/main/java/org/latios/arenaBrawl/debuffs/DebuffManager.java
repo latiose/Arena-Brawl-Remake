@@ -31,9 +31,13 @@ public class DebuffManager implements Listener {
             double strength
     ) {}
 
+    private static final long TENACITY_DURATION_MILLIS = 5_000L;
+    private static final double TENACITY_DURATION_MULTIPLIER = 0.5;
+
     private final Map<UUID, ActiveDebuff> activeDebuffs = new HashMap<>();
     private final Map<UUID, List<ActiveDebuff>> activeAntiHeals = new HashMap<>();
     private final Map<UUID, Double> accumulatedDamage = new HashMap<>();
+    private final Map<UUID, Long> tenacityUntil = new HashMap<>();
     private final List<DebuffListener> listeners = new ArrayList<>();
     private SongOfPowerManager songOfPowerManager;
 
@@ -67,11 +71,24 @@ public class DebuffManager implements Listener {
         }
 
         UUID victimId = victim.getUniqueId();
+        long now = System.currentTimeMillis();
+
+        long effectiveDuration = durationMillis;
+        // Tenacity: after surviving an immobilizing debuff, further immobilizing
+        // debuffs last half as long for 5 seconds. Re-immobilizing resets the timer.
+        // The player is never notified about this.
+        if (type.isImmobilizing()) {
+            if (isTenacious(victimId, now)) {
+                effectiveDuration = Math.round(durationMillis * TENACITY_DURATION_MULTIPLIER);
+            }
+            tenacityUntil.put(victimId, now + TENACITY_DURATION_MILLIS);
+        }
+
         ActiveDebuff debuff = new ActiveDebuff(
                 type,
                 attacker != null ? attacker.getUniqueId() : null,
-                System.currentTimeMillis(),
-                durationMillis,
+                now,
+                effectiveDuration,
                 strength
         );
 
@@ -87,9 +104,9 @@ public class DebuffManager implements Listener {
 
         for (DebuffListener listener : listeners) {
             if (listener instanceof PoisonListener poisonListener) {
-                poisonListener.onAppliedWithAttacker(victim, attacker, type, durationMillis);
+                poisonListener.onAppliedWithAttacker(victim, attacker, type, effectiveDuration);
             } else {
-                listener.onApplied(victim, type, durationMillis, strength);
+                listener.onApplied(victim, type, effectiveDuration, strength);
             }
         }
 
@@ -98,6 +115,17 @@ public class DebuffManager implements Listener {
 
     public boolean tryApply(Player victim, DebuffType type, long durationMillis) {
         return tryApply(null, victim, type, durationMillis);
+    }
+
+    private boolean isTenacious(UUID playerId, long now) {
+        Long until = tenacityUntil.get(playerId);
+        return until != null && now < until;
+    }
+
+
+    public long getActiveDebuffDurationMillis(Player victim) {
+        ActiveDebuff debuff = activeDebuffs.get(victim.getUniqueId());
+        return debuff != null ? debuff.durationMillis() : 0L;
     }
 
     public boolean hasActiveDebuff(Player player) {
@@ -213,6 +241,7 @@ public class DebuffManager implements Listener {
 
         ActiveDebuff debuff = activeDebuffs.remove(player.getUniqueId());
         accumulatedDamage.remove(player.getUniqueId());
+        tenacityUntil.remove(player.getUniqueId());
 
         if (debuff != null) {
             notifyExpired(player, debuff);
@@ -232,6 +261,7 @@ public class DebuffManager implements Listener {
         activeDebuffs.clear();
         activeAntiHeals.clear();
         accumulatedDamage.clear();
+        tenacityUntil.clear();
     }
 
     private void notifyExpired(Player player, ActiveDebuff debuff) {

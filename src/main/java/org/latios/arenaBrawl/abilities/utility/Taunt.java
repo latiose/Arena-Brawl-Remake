@@ -135,11 +135,12 @@ public class Taunt implements Ability {
         final Player taunted = target;
         UUID targetId = taunted.getUniqueId();
         UUID casterId = player.getUniqueId();
-        TauntState state = new TauntState(casterId, System.currentTimeMillis() + durationMs);
-        ACTIVE_TAUNTS.put(targetId, state);
 
         // Root the target for the duration so it cannot walk out of melee range.
-        debuffManager.tryApply(player, taunted, DebuffType.IMMOBILIZE, durationMs);
+        boolean rooted = debuffManager.tryApply(player, taunted, DebuffType.IMMOBILIZE, durationMs);
+        long appliedDurationMs = rooted ? debuffManager.getActiveDebuffDurationMillis(taunted) : durationMs;
+        TauntState state = new TauntState(casterId, System.currentTimeMillis() + appliedDurationMs);
+        ACTIVE_TAUNTS.put(targetId, state);
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_RAVAGER_ROAR, 10.0f, 1.1f);
         player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 10.0f, 0.8f);
