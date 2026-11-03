@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.runes;
 
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -7,6 +8,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
 
 import java.util.Random;
@@ -19,13 +21,15 @@ public class RuneManager {
     private final Random random = new Random();
     private final DebuffManager debuffManager;
     private final SpeedBuffManager speedBuffManager;
+    private final PlayerHealthManager healthManager;
 
-    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager, RuneConfigManager runeConfigManager, SpeedBuffManager speedBuffManager) {
+    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager, RuneConfigManager runeConfigManager, SpeedBuffManager speedBuffManager, PlayerHealthManager healthManager) {
         this.energyManager = energyManager;
         this.selectionManager = selectionManager;
         this.runeConfigManager = runeConfigManager;
         this.debuffManager = debuffManager;
         this.speedBuffManager = speedBuffManager;
+        this.healthManager = healthManager;
     }
 
     /**
@@ -92,10 +96,17 @@ public class RuneManager {
                     do {
                         newSlot = random.nextInt(4);
                     } while (newSlot == currentSlot);
-
+                    attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
                     victim.getInventory().setHeldItemSlot(newSlot);
                     attacker.sendMessage("§eYour §0" + rune.getDisplayName() + " §ewas activated!");
                 }
+                return 1.0;
+            }
+            case HEALING -> {
+                double healAmount = config.getDouble("heal-amount", 20.0);
+                healthManager.heal(attacker, healAmount);
+                attacker.sendMessage("§eYour §a" + rune.getDisplayName() + " §ewas activated!");
+                attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
                 return 1.0;
             }
             default -> {
@@ -108,7 +119,7 @@ public class RuneManager {
     private double getDefaultProcChance(RuneType rune) {
         return switch (rune) {
             case SPEED -> 0.2;
-            case SLOW, ENERGY -> 0.15;
+            case SLOW, ENERGY, HEALING -> 0.15;
             case DAMAGE -> 0.48;
             case CONFUSION -> 0.20;
             case IMMOBILIZE -> 0.01;

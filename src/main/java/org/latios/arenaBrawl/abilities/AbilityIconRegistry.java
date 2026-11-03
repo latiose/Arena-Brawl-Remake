@@ -62,6 +62,7 @@ public class AbilityIconRegistry {
         icons.put("plunge", Material.NETHERITE_BOOTS);
         icons.put("ricochet", Material.AMETHYST_SHARD);
         icons.put("whirlwind", Material.NETHERITE_SWORD);
+        icons.put("guidedpig2000", Material.PORKCHOP);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
@@ -127,6 +128,7 @@ public class AbilityIconRegistry {
         icons.put("vitalsiphon", Material.FERMENTED_SPIDER_EYE);
         icons.put("adrenalinesurge", Material.RED_DYE);
         icons.put("woundrot", Material.ROTTEN_FLESH);
+        icons.put("timewarp", Material.WHITE_WOOL);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);

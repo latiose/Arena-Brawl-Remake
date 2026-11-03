@@ -204,7 +204,6 @@ public class PlayerHealthManager {
 
     public double heal(Player player, double amount, String sourceName) {
         double healedAmount = heal(player, amount);
-        if (healedAmount <= 0.0) return 0.0;
 
         player.sendMessage(MessageUtils.positive() + String.format(
                 "§3Your %s healed you for §a%d §3health!",

@@ -24,12 +24,14 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
 
     private final LivingEntity entity;
     private final Player shooter;
-    private final Vector velocity;
-    private final Vector direction;
     private final double speed;
+    private Vector direction;
+    private Vector velocity;
     private final double damage;
     private final double hitRadius;
     private final double aoeRadius;
+    private final boolean steerTowardsCamera;
+    private final double steerFactor;
 
     private final String abilityName;
     private final TeamManager teamManager;
@@ -58,6 +60,17 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
                                        String abilityName, TeamManager teamManager, CombatService combatService,
                                        Particle impactParticle, int particleCount,
                                        Sound impactSound, float soundVolume, float soundPitch, boolean explosion) {
+        this(entity, shooter, direction, speed, damage, hitRadius, aoeRadius, abilityName,
+                teamManager, combatService, impactParticle, particleCount, impactSound, soundVolume, soundPitch,
+                explosion, false, 0.0);
+    }
+
+    public TrackedLivingProjectileTask(LivingEntity entity, Player shooter, Vector direction, double speed,
+                                       double damage, double hitRadius, double aoeRadius,
+                                       String abilityName, TeamManager teamManager, CombatService combatService,
+                                       Particle impactParticle, int particleCount,
+                                       Sound impactSound, float soundVolume, float soundPitch, boolean explosion,
+                                       boolean steerTowardsCamera, double steerFactor) {
         this.entity = entity;
         this.shooter = shooter;
         this.speed = speed;
@@ -75,6 +88,8 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
         this.soundVolume = soundVolume;
         this.soundPitch = soundPitch;
         this.explosion = explosion;
+        this.steerTowardsCamera = steerTowardsCamera;
+        this.steerFactor = Math.min(1.0, Math.max(0.0, steerFactor));
 
         entity.setCollidable(false);
         entity.setGravity(false);
@@ -91,6 +106,15 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
         BoundingBox body = entity.getBoundingBox();
         Vector center = body.getCenter();
         if (lastCenter == null) lastCenter = center.clone();
+
+        // Guided variants slowly blend toward whatever the shooter is looking at.
+        if (steerTowardsCamera && steerFactor > 0.0 && shooter.isOnline()) {
+            Vector look = shooter.getEyeLocation().getDirection().normalize();
+            if (look.lengthSquared() > 0.0) {
+                direction = direction.multiply(1.0 - steerFactor).add(look.multiply(steerFactor)).normalize();
+                velocity = direction.clone().multiply(speed);
+            }
+        }
 
         double halfSize = Math.max(body.getHeight(), Math.max(body.getWidthX(), body.getWidthZ())) / 2.0;
         Vector start = lastCenter.clone();

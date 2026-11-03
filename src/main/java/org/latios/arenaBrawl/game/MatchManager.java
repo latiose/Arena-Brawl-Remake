@@ -22,6 +22,7 @@ import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.support.Meditation;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.support.Thornheart;
+import org.latios.arenaBrawl.abilities.support.TimeWarp;
 import org.latios.arenaBrawl.abilities.ultimate.Berserk;
 import org.latios.arenaBrawl.abilities.ultimate.BloodMoon;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
@@ -548,6 +549,7 @@ public class MatchManager {
         Rewind.clear(player);
         Intervention.clear(player);
         Meditation.clear(player);
+        TimeWarp.clear(player);
     }
 
     private void clearRemainingEffects(Match match) {

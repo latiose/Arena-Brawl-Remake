@@ -43,6 +43,12 @@ commands:
     description: Toggles block breaking protection on or off
     usage: /toggleblockbreak [on|off]
     permission: arenabrawl.admin.togglebreak
+  spawnhefney:
+    description: Spawns the sand merchant
+    usage: /spawnhefney
+  killhefney:
+    description: Kills all villagers and husks/zombies in your current dimension
+    usage: /killhefney
   hub:
     description: Leaves the game
     usage: /hub

@@ -34,4 +34,12 @@ public class AbilityItemKeys {
     public static final NamespacedKey ARENA_CHALLENGER_HOLOGRAM = new NamespacedKey(
             ArenaBrawlPlugin.getInstance(), "arena_challenger_hologram"
     );
+
+    public static final NamespacedKey HEFNEY_NPC = new NamespacedKey(
+            ArenaBrawlPlugin.getInstance(), "hefney_npc"
+    );
+
+    public static final NamespacedKey HEFNEY_HOLOGRAM = new NamespacedKey(
+            ArenaBrawlPlugin.getInstance(), "hefney_hologram"
+    );
 }

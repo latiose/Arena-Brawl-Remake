@@ -100,6 +100,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private MagicChestGUI magicChestGUI;
     private ArenaChallengerGUI arenaChallengerGUI;
     private ArenaChallengerManager arenaChallengerManager;
+    private HefneyNPCManager hefneyNPCManager;
     private HatPhraseListener hatPhraseListener;
     private HatSelectorGUI hatSelectorGUI;
     private CombatUpgradeManager combatUpgradeManager;
@@ -192,7 +193,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
 
         this.lobbyScoreboardManager = new LobbyScoreboardManager(ratingManager, statsManager);
         this.runeSelectionManager = new RuneSelectionManager(this);
-        this.runeManager = new RuneManager(energyManager, runeSelectionManager,debuffManager,runeConfigManager,speedBuffManager);
+        this.runeManager = new RuneManager(energyManager, runeSelectionManager,debuffManager,runeConfigManager,speedBuffManager,playerHealthManager);
         this.abilitySelectionManager = new AbilitySelectionManager(abilityRegistry, abilityPersistenceManager);
         this.hatSelectionManager = new HatSelectionManager(this, hatRegistry);
         this.hatPhraseListener = new HatPhraseListener(hatSelectionManager);
@@ -204,6 +205,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.magicChestGUI = new MagicChestGUI(keyManager, statsManager,clickModeManager);
         this.arenaChallengerGUI = new ArenaChallengerGUI(keyManager, statsManager);
         this.arenaChallengerManager = new ArenaChallengerManager(this, arenaChallengerGUI);
+        this.hefneyNPCManager = new HefneyNPCManager(this, arenaChallengerGUI);
         this.zombieEntityManager = new ZombieEntityManager(teamManager, combatService, abilityConfigManager.get("zombieapocalypse"));
         this.skeletonEntityManager = new SkeletonEntityManager(teamManager, combatService, abilityConfigManager.get("necromancy"));
         this.guardianColossusEntityManager = new GuardianColossusEntityManager(teamManager, combatService, debuffManager, this, abilityConfigManager.get("guardiancolossus"));
@@ -367,6 +369,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new MagicChestListener(magicChestGUI, keyManager, magicChestManager, statsManager, lobbyScoreboardManager,clickModeManager), this
         );
         getServer().getPluginManager().registerEvents(arenaChallengerManager, this);
+        getServer().getPluginManager().registerEvents(hefneyNPCManager, this);
         getServer().getPluginManager().registerEvents(
                 new ArenaChallengerListener(arenaChallengerGUI, keyManager, statsManager), this
         );
@@ -415,6 +418,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getCommand("hub").setExecutor(new HubCommand(matchManager));
         getCommand("capturestructure").setExecutor(new org.latios.arenaBrawl.abilities.structures.CaptureStructureCommand(this));
         getCommand("addcoins").setExecutor(new AddCoinsCommand(statsManager,lobbyScoreboardManager));
+        getCommand("spawnhefney").setExecutor(new SpawnHefneyCommand(hefneyNPCManager));
+        getCommand("killhefney").setExecutor(new KillHefneyCommand(hefneyNPCManager));
         getCommand("setrating").setExecutor(new SetRatingCommand(ratingManager,lobbyScoreboardManager));
         getCommand("toggleblockbreak").setExecutor(new ToggleBlockBreakCommand());
         for (World world : getServer().getWorlds()) {

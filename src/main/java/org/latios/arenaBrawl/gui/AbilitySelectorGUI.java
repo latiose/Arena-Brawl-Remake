@@ -268,6 +268,7 @@ public class AbilitySelectorGUI {
                 case DAMAGE -> lore.add("§bDamage multiplier: §fx" + num(cfg.getDouble("damage-multiplier", 2.0)));
                 case ENERGY -> lore.add("§bEnergy gained: §f+" + num(cfg.getDouble("energy-amount", 10.0)));
                 case IMMOBILIZE -> lore.add("§bDuration: §f" + secondsSlow(cfg.getLong("duration-ticks", 3000)));
+                case HEALING -> lore.add("§bHealing: §f+" + num(cfg.getDouble("heal-amount", 20.0)));
                 default -> { }
             }
 
@@ -311,13 +312,14 @@ public class AbilitySelectorGUI {
             case DAMAGE -> Material.RED_DYE;
             case CONFUSION -> Material.BLACK_DYE;
             case IMMOBILIZE -> Material.LIME_DYE;
+            case HEALING -> Material.GREEN_DYE;
         };
     }
 
     private double defaultProcChance(RuneType rune) {
         return switch (rune) {
             case SPEED -> 0.2;
-            case SLOW, ENERGY -> 0.15;
+            case SLOW, ENERGY, HEALING -> 0.15;
             case DAMAGE -> 0.48;
             case CONFUSION -> 0.20;
             case IMMOBILIZE -> 0.01;

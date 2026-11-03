@@ -757,6 +757,14 @@ ability-values:
     direct-hit-radius: 1.2
     aoe-radius: 2.5
 
+  guidedpig2000:
+    damage: 265.0
+    energy-cost: 100.0
+    launch-speed: 0.87
+    direct-hit-radius: 1.0
+    aoe-radius: 3.0
+    steer-factor: 0.7
+
   mysticshot:
     damage: 185.0
     energy-cost: 70.0
@@ -1347,6 +1355,11 @@ ability-values:
     duration-ms: 6000
     range: 15.0
 
+  timewarp:
+    cooldown-ms: 30000
+    duration-ms: 6000
+    heal-amount: 300.0
+
   # --- ULTIMATE ---
   shieldwall:
     damage-reduction: 0.70
@@ -1532,6 +1545,9 @@ rune-values:
   immobilize:
     proc-chance: 0.01
     duration-ticks: 3000
+  healing:
+    proc-chance: 0.15
+    heal-amount: 20.0
 
 hats:
   # --- COMMON HATS ---

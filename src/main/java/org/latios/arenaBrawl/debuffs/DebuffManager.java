@@ -74,14 +74,12 @@ public class DebuffManager implements Listener {
         long now = System.currentTimeMillis();
 
         long effectiveDuration = durationMillis;
-        // Tenacity: after surviving an immobilizing debuff, further immobilizing
-        // debuffs last half as long for 5 seconds. Re-immobilizing resets the timer.
-        // The player is never notified about this.
-        if (type.isImmobilizing()) {
-            if (isTenacious(victimId, now)) {
-                effectiveDuration = Math.round(durationMillis * TENACITY_DURATION_MULTIPLIER);
-            }
-            tenacityUntil.put(victimId, now + TENACITY_DURATION_MILLIS);
+        // Tenacity: after an immobilizing debuff ends, further immobilizing
+        // debuffs last half as long for the next 5 seconds. The countdown only
+        // starts once the debuff finishes, so it never expires while the
+        // debuff is still running. The player is never notified about this.
+        if (type.isImmobilizing() && isTenacious(victimId, now)) {
+            effectiveDuration = Math.round(durationMillis * TENACITY_DURATION_MULTIPLIER);
         }
 
         ActiveDebuff debuff = new ActiveDebuff(
@@ -216,9 +214,14 @@ public class DebuffManager implements Listener {
     }
 
     private void clearPrimary(Player player) {
-        ActiveDebuff debuff = activeDebuffs.remove(player.getUniqueId());
-        accumulatedDamage.remove(player.getUniqueId());
+        UUID playerId = player.getUniqueId();
+        ActiveDebuff debuff = activeDebuffs.remove(playerId);
+        accumulatedDamage.remove(playerId);
         if (debuff == null) return;
+
+        if (debuff.type().isImmobilizing()) {
+            tenacityUntil.put(playerId, System.currentTimeMillis() + TENACITY_DURATION_MILLIS);
+        }
 
         notifyExpired(player, debuff);
         List<PotionEffect> effectsSnapshot = new ArrayList<>(player.getActivePotionEffects());
@@ -244,6 +247,11 @@ public class DebuffManager implements Listener {
         tenacityUntil.remove(player.getUniqueId());
 
         if (debuff != null) {
+            if (debuff.type().isImmobilizing()) {
+                tenacityUntil.put(player.getUniqueId(),
+                        System.currentTimeMillis() + TENACITY_DURATION_MILLIS);
+            }
+
             notifyExpired(player, debuff);
             List<PotionEffect> effectsSnapshot = new ArrayList<>(player.getActivePotionEffects());
             for (PotionEffect effect : effectsSnapshot) {

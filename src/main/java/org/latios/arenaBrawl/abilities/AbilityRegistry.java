@@ -55,6 +55,8 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "consume", deps -> new Consume(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.playerHealthManager(), configManager.get("consume")));
         register(AbilitySlot.OFFENSIVE, "dash", deps -> new DashAbility(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("dash")));
         register(AbilitySlot.OFFENSIVE, "rocketchicken", deps -> new RocketChicken(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("rocketchicken")));
+        register(AbilitySlot.OFFENSIVE, "guidedpig2000",
+                deps -> new GuidedPig2000(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("guidedpig2000")));
         register(AbilitySlot.OFFENSIVE, "mysticshot", deps -> new MysticShot(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("mysticshot")));
         register(AbilitySlot.OFFENSIVE, "laywaste", deps -> new LayWaste(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("laywaste")));
         register(AbilitySlot.OFFENSIVE, "particlebeam", deps -> new ParticleBeam(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("particlebeam")));
@@ -220,6 +222,8 @@ public class AbilityRegistry {
                 deps -> new AdrenalineSurge(deps.cooldownManager(), deps.energyManager(), deps.damageVulnerabilityManager(), deps.combatUpgradeManager(), configManager.get("adrenalinesurge")));
         register(AbilitySlot.SUPPORT, "woundrot",
                 deps -> new WoundRot(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("woundrot")));
+        register(AbilitySlot.SUPPORT, "timewarp",
+                deps -> new TimeWarp(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("timewarp")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
