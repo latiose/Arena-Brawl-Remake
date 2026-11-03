@@ -29,6 +29,7 @@ import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.GuardianColossusEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.Intervention;
 import org.latios.arenaBrawl.abilities.ultimate.Rewind;
+import org.latios.arenaBrawl.abilities.ultimate.ThunderArmor;
 import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 
@@ -550,6 +551,7 @@ public class MatchManager {
         Intervention.clear(player);
         Meditation.clear(player);
         TimeWarp.clear(player);
+        ThunderArmor.clear(player);
     }
 
     private void clearRemainingEffects(Match match) {

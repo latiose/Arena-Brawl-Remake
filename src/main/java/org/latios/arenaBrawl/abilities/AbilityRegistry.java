@@ -55,8 +55,6 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "consume", deps -> new Consume(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.playerHealthManager(), configManager.get("consume")));
         register(AbilitySlot.OFFENSIVE, "dash", deps -> new DashAbility(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("dash")));
         register(AbilitySlot.OFFENSIVE, "rocketchicken", deps -> new RocketChicken(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("rocketchicken")));
-        register(AbilitySlot.OFFENSIVE, "guidedpig2000",
-                deps -> new GuidedPig2000(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("guidedpig2000")));
         register(AbilitySlot.OFFENSIVE, "mysticshot", deps -> new MysticShot(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("mysticshot")));
         register(AbilitySlot.OFFENSIVE, "laywaste", deps -> new LayWaste(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("laywaste")));
         register(AbilitySlot.OFFENSIVE, "particlebeam", deps -> new ParticleBeam(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("particlebeam")));
@@ -96,6 +94,12 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "whirlwind",
                 deps -> new Whirlwind(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(),
                         deps.speedBuffManager(), configManager.get("whirlwind")));
+        register(AbilitySlot.OFFENSIVE, "guidedpig2000",
+                deps -> new GuidedPig2000(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("guidedpig2000")));
+        register(AbilitySlot.OFFENSIVE, "enderbreath",
+                deps -> new EnderBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.energyModifierManager(), configManager.get("enderbreath")));
+        register(AbilitySlot.OFFENSIVE, "teleport",
+                deps -> new Teleport(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("teleport")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -224,6 +228,8 @@ public class AbilityRegistry {
                 deps -> new WoundRot(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("woundrot")));
         register(AbilitySlot.SUPPORT, "timewarp",
                 deps -> new TimeWarp(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("timewarp")));
+        register(AbilitySlot.SUPPORT, "absorptionshield",
+                deps -> new AbsorptionShield(deps.cooldownManager(), deps.orbitShieldManager(), deps.combatUpgradeManager(), configManager.get("absorptionshield")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
@@ -274,6 +280,8 @@ public class AbilityRegistry {
                 deps -> new GuardianColossus(deps.cooldownManager(), deps.usageManager(), deps.guardianColossusEntityManager(), configManager.get("guardiancolossus")));
         register(AbilitySlot.ULTIMATE, "reflectdamage",
                 deps -> new ReflectDamage(plugin, deps.cooldownManager(), deps.usageManager(), configManager.get("reflectdamage")));
+        register(AbilitySlot.ULTIMATE, "thunderarmor",
+                deps -> new ThunderArmor(plugin, deps.cooldownManager(), deps.usageManager(), deps.shieldManager(), deps.debuffManager(), configManager.get("thunderarmor")));
 
 
         // --- DEFAULTS ---

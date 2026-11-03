@@ -16,6 +16,7 @@ import org.latios.arenaBrawl.abilities.ReflectStance;
 import org.latios.arenaBrawl.abilities.support.*;
 import org.latios.arenaBrawl.abilities.ultimate.Berserk;
 import org.latios.arenaBrawl.abilities.ultimate.BloodMoon;
+import org.latios.arenaBrawl.abilities.ultimate.ThunderArmor;
 import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
@@ -43,6 +44,7 @@ public class CombatService {
     private final EtherealBodyManager etherealBodyManager;
     private final DamageVulnerabilityManager damageVulnerabilityManager;
     private final SoulLinkManager soulLinkManager;
+    private final EnergyManager energyManager;
     private final List<MeleeHitEffect> meleeHitEffects = new ArrayList<>();
 
     public void registerMeleeHitEffect(MeleeHitEffect effect) {
@@ -52,7 +54,8 @@ public class CombatService {
     public CombatService(PlayerHealthManager healthManager, ShieldManager shieldManager,
                          DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                          DamageBuffManager damageBuffManager, MatchManager matchManager, EtherealBodyManager etherealBodyManager,
-                         DamageVulnerabilityManager damageVulnerabilityManager, SoulLinkManager soulLinkManager) {
+                         DamageVulnerabilityManager damageVulnerabilityManager, SoulLinkManager soulLinkManager,
+                         EnergyManager energyManager) {
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
@@ -62,6 +65,7 @@ public class CombatService {
         this.etherealBodyManager = etherealBodyManager;
         this.damageVulnerabilityManager = damageVulnerabilityManager;
         this.soulLinkManager = soulLinkManager;
+        this.energyManager = energyManager;
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
@@ -125,6 +129,7 @@ public class CombatService {
         applySoulLink(victim, attacker, finalDamage);
         if (melee && attacker != null) {
             Thornheart.onMeleeDamageTaken(victim, attacker, healthManager);
+            ThunderArmor.onMeleeDamageTaken(victim, attacker, debuffManager);
         }
         if (attacker != null) {
             Bloodthirst.onDamageDealt(attacker, victim, finalDamage, healthManager);
@@ -322,6 +327,8 @@ public class CombatService {
         if (type.getHealPerCharge() > 0) {
             healVictim(victim, type.getHealPerCharge(), type.getDisplayName());
         }
+
+        restoreEnergy(victim, type.getEnergyPerCharge(), type.getDisplayName());
 
         if (attacker == null) return;
 
@@ -532,6 +539,14 @@ public class CombatService {
 
     void healVictim(Player victim, double amount, String source) {
         healthManager.heal(victim, amount, source);
+    }
+
+    /** Refunds regeneration energy to a shield holder (used by Absorption Shield and the gamblers roll). */
+    public void restoreEnergy(Player victim, double amount, String source) {
+        if (amount <= 0.0) return;
+
+        energyManager.addEnergy(victim, amount);
+        victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.6f);
     }
 
     void applyGuaranteedRandomDebuff(Player attacker) {

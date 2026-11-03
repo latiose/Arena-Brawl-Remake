@@ -63,6 +63,8 @@ public class AbilityIconRegistry {
         icons.put("ricochet", Material.AMETHYST_SHARD);
         icons.put("whirlwind", Material.NETHERITE_SWORD);
         icons.put("guidedpig2000", Material.PORKCHOP);
+        icons.put("enderbreath", Material.ENDERMITE_SPAWN_EGG);
+        icons.put("teleport", Material.CHORUS_FRUIT);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
@@ -129,6 +131,7 @@ public class AbilityIconRegistry {
         icons.put("adrenalinesurge", Material.RED_DYE);
         icons.put("woundrot", Material.ROTTEN_FLESH);
         icons.put("timewarp", Material.WHITE_WOOL);
+        icons.put("absorptionshield", Material.SHIELD);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);
@@ -153,6 +156,7 @@ public class AbilityIconRegistry {
         icons.put("intervention", Material.ENCHANTED_GOLDEN_APPLE);
         icons.put("soullink", Material.SOUL_LANTERN);
         icons.put("guardiancolossus", Material.IRON_GOLEM_SPAWN_EGG);
+        icons.put("thunderarmor", Material.GOLDEN_CHESTPLATE);
     }
 
     public Material getIcon(AbilitySlot slot, String id) {

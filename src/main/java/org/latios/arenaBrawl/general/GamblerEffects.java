@@ -25,6 +25,8 @@ public final class GamblerEffects {
                 c.reflectDamage(a, v, OrbitShieldType.CACTUS_SHIELD.getDamagePerCharge(), "Gamblers Shield", r));
         register("Knockback", 25, (c, a, v, r) -> c.applyKnockbackEffect(a, v));
         register("Debuff", 25, (c, a, v, r) -> c.applyGuaranteedRandomDebuff(a));
+        register("Energy", 25, (c, a, v, r) ->
+                c.restoreEnergy(v, OrbitShieldType.ABSORPTION_SHIELD.getEnergyPerCharge(), "Gamblers Shield"));
     }
 
     private GamblerEffects() {}

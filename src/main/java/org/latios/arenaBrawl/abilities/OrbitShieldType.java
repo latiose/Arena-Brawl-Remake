@@ -11,35 +11,42 @@ public enum OrbitShieldType {
             "boneshield", "Bone Shield", OrbitShieldVisualType.ITEM_DISPLAY, Material.BONE,
             5, 30.0, false,
             18_000, Sound.ENTITY_SKELETON_STEP, Sound.ENTITY_SKELETON_DEATH, Particle.WHITE_ASH,
-            2, 0, false,false
+            2, 0, 0, false,false
     ),
 
     CACTUS_SHIELD(
             "cactusshield", "Cactus Shield", OrbitShieldVisualType.ITEM_DISPLAY, Material.CACTUS,
             4, 0.0, false,
             18_000, Sound.ENTITY_CHICKEN_AMBIENT, Sound.ENTITY_CHICKEN_DEATH, Particle.WHITE_ASH,
-            2, 50, false,false
+            2, 50, 0,false,false
     ),
 
     SPONGE_SHIELD(
             "spongeshield", "Sponge Shield", OrbitShieldVisualType.ITEM_DISPLAY, Material.SPONGE,
             3, 0.0, false,
             18_000, Sound.BLOCK_WET_SPONGE_PLACE, Sound.BLOCK_WET_SPONGE_BREAK, Particle.DRIPPING_WATER,
-            2, 0, true,false
+            2, 0, 0, true,false
     ),
 
     STAR_SHIELD(
             "starshield", "Star Shield", OrbitShieldVisualType.CHARGED_CREEPER, null,
             3, 50.0, true,
             30_000, Sound.ENTITY_CREEPER_HURT, Sound.ENTITY_CREEPER_DEATH, Particle.END_ROD,
-            3, 0, false,false
+            3, 0, 0, false,false
     ),
 
     GAMBLERS_SHIELD(
             "gamblersshield", "Gamblers Shield", OrbitShieldVisualType.ITEM_DISPLAY, Material.CLOCK,
                     4, 30, false,
                     15_000, Sound.BLOCK_TRIPWIRE_CLICK_ON, Sound.BLOCK_TRIPWIRE_CLICK_OFF, Particle.SMALL_FLAME,
-            2, 0, false,true
+            2, 0, 0, false,true
+    ),
+
+    ABSORPTION_SHIELD(
+            "absorptionshield", "Absorption Shield", OrbitShieldVisualType.ITEM_DISPLAY, Material.GOLD_INGOT,
+            5, 0.0, false,
+            15_000, Sound.ENTITY_SKELETON_CONVERTED_TO_STRAY, Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, Particle.ELECTRIC_SPARK,
+            2, 0, 20.0, false, false
     );
 
     private final String configKey;
@@ -56,12 +63,14 @@ public enum OrbitShieldType {
     private Particle activationParticle;
     private int updateIntervalTicks;
     private double damagePerCharge;
+    private double energyPerCharge;
     private boolean knocksback;
     private boolean isRandom;
     OrbitShieldType(String configKey, String displayName, OrbitShieldVisualType visualType, Material material,
                     int chargeCount, double healPerCharge, boolean rollsDebuffOnBlock,
                     long durationMillis, Sound ambientSound, Sound breakSound, Particle activationParticle,
-                    int updateIntervalTicks, double damagePerCharge, boolean knocksback,boolean isRandom) {
+                    int updateIntervalTicks, double damagePerCharge, double energyPerCharge,
+                    boolean knocksback, boolean isRandom) {
         this.configKey = configKey;
         this.displayName = displayName;
         this.visualType = visualType;
@@ -75,6 +84,7 @@ public enum OrbitShieldType {
         this.activationParticle = activationParticle;
         this.updateIntervalTicks = updateIntervalTicks;
         this.damagePerCharge = damagePerCharge;
+        this.energyPerCharge = energyPerCharge;
         this.knocksback = knocksback;
         this.isRandom = isRandom;
     }
@@ -88,6 +98,7 @@ public enum OrbitShieldType {
             type.chargeCount = config.getInt(path + "charges", type.chargeCount);
             type.healPerCharge = config.getDouble(path + "heal-per-charge", type.healPerCharge);
             type.damagePerCharge = config.getDouble(path + "damage-per-charge", type.damagePerCharge);
+            type.energyPerCharge = config.getDouble(path + "energy-per-charge", type.energyPerCharge);
             type.durationMillis = config.getLong(path + "duration-ms", type.durationMillis);
         }
     }
@@ -105,6 +116,7 @@ public enum OrbitShieldType {
     public Particle getActivationParticle() { return activationParticle; }
     public int getUpdateIntervalTicks() { return updateIntervalTicks; }
     public double getDamagePerCharge() { return damagePerCharge; }
+    public double getEnergyPerCharge() { return energyPerCharge; }
     public boolean doesKnockback() { return knocksback; }public boolean isRandom() { return isRandom; }
 
 }

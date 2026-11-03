@@ -223,7 +223,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.orbitShieldManager.setMatchManager(matchManager);
         this.combatService = new CombatService(
                 playerHealthManager, shieldManager, debuffManager, orbitShieldManager, damageBuffManager, matchManager,etherealBodyManager,
-                damageVulnerabilityManager, soulLinkManager
+                damageVulnerabilityManager, soulLinkManager, energyManager
         );
         this.demolitionService = new StructureDemolitionService(structureManager, teamManager);
         this.broodMotherEntityManager.setCombatService(combatService);
@@ -235,6 +235,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         combatService.registerMeleeHitEffect(new FlameSword(energyManager, energyModifierManager, abilityConfigManager.get("flamesword")));
         combatService.registerMeleeHitEffect(new Grit(cooldownManager,combatUpgradeManager,shieldManager,abilityConfigManager.get("grit")));
         combatService.registerMeleeHitEffect(new ScavengerMeleeEffect(scavengerManager,energyManager,abilityConfigManager.get("scavenger")));
+        combatService.registerMeleeHitEffect(new ThunderArmor(this, cooldownManager, usageManager, shieldManager, debuffManager, abilityConfigManager.get("thunderarmor")));
         debuffManager.registerListener(new PolymorphEffectListener(playerHealthManager));
         debuffManager.registerListener(new StunListener());
         debuffManager.registerListener(new SilenceListener());
