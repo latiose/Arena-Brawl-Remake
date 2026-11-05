@@ -1001,6 +1001,17 @@ ability-values:
     speed-amplifier: 1
     knockback: 0.0
 
+  anvilfall:
+    energy-cost: 100.0
+    max-range: 15.0
+    spawn-height-offset: 10.0
+    impact-radius: 4.0
+    knockback-strength: 3.0
+    direct-hit-radius: 1.5
+    damage: 220.0
+    direct-hit-bonus: 30.0
+    vertical-reach: 15.0
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -1149,6 +1160,14 @@ ability-values:
     duration-ms: 5000
     radius: 6.0
     pull-strength: 0.5
+
+  tauntingglare:
+    cooldown-ms: 30000
+    duration-ms: 8000
+    max-range: 15.0
+    caster-damage-bonus: 0.25
+    ally-damage-reduction: 0.50
+    end-damage-threshold: 100.0
 
   counter:
     cooldown-ms: 22000
@@ -1377,6 +1396,10 @@ ability-values:
     duration-ms: 6000
     heal-amount: 300.0
 
+  sadism:
+    cooldown-ms: 30000
+    window-ms: 3000
+
   # --- ULTIMATE ---
   shieldwall:
     damage-reduction: 0.70
@@ -1550,6 +1573,16 @@ ability-values:
     stun-ms: 1000
     charge-time-ms: 60000
 
+  premonition:
+    charge-time-ms: 60000
+    heal-amount: 600.0
+    duration-ms: 30000
+
+  skillmanipulation:
+    charge-time-ms: 60000
+    duration-ms: 10000
+    discount-percent: 0.50
+
 rune-values:
   speed:
     proc-chance: 0.2
@@ -1572,6 +1605,8 @@ rune-values:
   healing:
     proc-chance: 0.15
     heal-amount: 20.0
+  oneshot:
+    proc-chance: 0.0001
 
 hats:
   # --- COMMON HATS ---

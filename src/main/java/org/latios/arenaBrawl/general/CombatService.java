@@ -18,11 +18,13 @@ import org.latios.arenaBrawl.abilities.ultimate.Berserk;
 import org.latios.arenaBrawl.abilities.ultimate.BloodMoon;
 import org.latios.arenaBrawl.abilities.ultimate.ThunderArmor;
 import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
+import org.latios.arenaBrawl.abilities.utility.TauntingGlare;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.Match;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
+import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -45,6 +47,7 @@ public class CombatService {
     private final DamageVulnerabilityManager damageVulnerabilityManager;
     private final SoulLinkManager soulLinkManager;
     private final EnergyManager energyManager;
+    private final TeamManager teamManager;
     private final List<MeleeHitEffect> meleeHitEffects = new ArrayList<>();
 
     public void registerMeleeHitEffect(MeleeHitEffect effect) {
@@ -55,7 +58,7 @@ public class CombatService {
                          DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                          DamageBuffManager damageBuffManager, MatchManager matchManager, EtherealBodyManager etherealBodyManager,
                          DamageVulnerabilityManager damageVulnerabilityManager, SoulLinkManager soulLinkManager,
-                         EnergyManager energyManager) {
+                         EnergyManager energyManager, TeamManager teamManager) {
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
@@ -66,6 +69,7 @@ public class CombatService {
         this.damageVulnerabilityManager = damageVulnerabilityManager;
         this.soulLinkManager = soulLinkManager;
         this.energyManager = energyManager;
+        this.teamManager = teamManager;
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
@@ -73,7 +77,8 @@ public class CombatService {
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName, Location impactLocation) {
-        if (victim == null || victim.getGameMode() == GameMode.SPECTATOR) {
+        if (victim == null || victim.getGameMode() == GameMode.SPECTATOR
+                || healthManager.isEliminated(victim)) {
             return;
         }
 
@@ -97,7 +102,7 @@ public class CombatService {
 
         ReflectStance.ReflectState stance = ReflectStance.getActiveState(victim);
         if (stance != null) {
-            resolveReflectStance(attacker, victim, adjustedDamage, stance, abilityName);
+            resolveReflectStance(attacker, victim, adjustedDamage, stance, abilityName, false);
             return;
         }
 
@@ -117,6 +122,10 @@ public class CombatService {
         if (vulnerabilityBonus > 0) {
             finalDamage *= (1 + vulnerabilityBonus);
             victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 10, 0.3, 0.5, 0.3, 0.1);
+        }
+
+        if (attacker != null && teamManager != null) {
+            finalDamage *= TauntingGlare.getDamageMultiplier(attacker, victim, teamManager, finalDamage);
         }
 
         if (etherealBodyManager.processIncomingDamage(victim, finalDamage)) {
@@ -166,7 +175,8 @@ public class CombatService {
     }
 
     private void resolveReflectStance(Player source, Player holder, double adjustedDamage,
-                                      ReflectStance.ReflectState stance, String damageSourceName) {
+                                      ReflectStance.ReflectState stance, String damageSourceName,
+                                      boolean freeShieldBlock) {
         String stanceName = stance.sourceName();
 
         double takenDamage = adjustedDamage * (1 - stance.damageReduction());
@@ -216,8 +226,10 @@ public class CombatService {
             if (orbitShieldManager.hasActiveShield(source)) {
                 OrbitShieldType sourceShield = orbitShieldManager.getActiveType(source);
                 if (sourceShield != null) {
-                    orbitShieldManager.consumeCharge(source);
-                    resolveShieldEffect(sourceShield, holder, source, true);
+                    if (!freeShieldBlock) {
+                        orbitShieldManager.consumeCharge(source);
+                        resolveShieldEffect(sourceShield, holder, source, true);
+                    }
 
                     holder.sendMessage(MessageUtils.negative() + String.format(
                             "§3Your %s was blocked by §e%s§3's %s!",
@@ -338,7 +350,7 @@ public class CombatService {
             result.effect().apply(this, attacker, victim, reflected);
         }
 
-        if (type.getDamagePerCharge() > 0) {
+        if (type.getDamagePerCharge() > 0 && !reflected) {
             reflectDamage(attacker, victim, type.getDamagePerCharge(), type.getDisplayName(), reflected);
         }
         if (type.rollsDebuffOnBlock()) {
@@ -391,7 +403,7 @@ public class CombatService {
 
         ReflectStance.ReflectState stance = ReflectStance.getActiveState(victim);
         if (stance != null) {
-            resolveReflectStance(owner, victim, rawDamage * ownerMultiplier, stance, sourceName);
+            resolveReflectStance(owner, victim, rawDamage * ownerMultiplier, stance, sourceName, false);
             return;
         }
 
@@ -401,6 +413,10 @@ public class CombatService {
         double vulnerabilityBonus = damageVulnerabilityManager.getBonusMultiplier(victim);
         if (vulnerabilityBonus > 0) {
             finalDamage *= (1 + vulnerabilityBonus);
+        }
+
+        if (owner != null && teamManager != null) {
+            finalDamage *= TauntingGlare.getDamageMultiplier(owner, victim, teamManager, finalDamage);
         }
 
         if (orbitShieldManager.hasActiveShield(victim)) {
@@ -487,7 +503,7 @@ public class CombatService {
 
         ReflectStance.ReflectState stance = ReflectStance.getActiveState(attacker);
         if (stance != null) {
-            resolveReflectStance(victim, attacker, damageAmount, stance, sourceName);
+            resolveReflectStance(victim, attacker, damageAmount, stance, sourceName, true);
             return;
         }
 

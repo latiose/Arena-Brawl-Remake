@@ -223,7 +223,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.orbitShieldManager.setMatchManager(matchManager);
         this.combatService = new CombatService(
                 playerHealthManager, shieldManager, debuffManager, orbitShieldManager, damageBuffManager, matchManager,etherealBodyManager,
-                damageVulnerabilityManager, soulLinkManager, energyManager
+                damageVulnerabilityManager, soulLinkManager, energyManager, teamManager
         );
         this.demolitionService = new StructureDemolitionService(structureManager, teamManager);
         this.broodMotherEntityManager.setCombatService(combatService);

@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.runes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -109,6 +110,20 @@ public class RuneManager {
                 attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
                 return 1.0;
             }
+            case ONESHOT -> {
+                if (victim != null && !healthManager.isEliminated(victim)) {
+                    for (Player online : Bukkit.getOnlinePlayers()) {
+                        online.playSound(online.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.7f, 1.4f);
+                        online.sendMessage("§4§l" + attacker.getName() + " §4activated the §c"
+                                + rune.getDisplayName() + "§4§l and One Shot §b" + victim.getName() + "§4§l!");
+                    }
+
+                    victim.sendMessage("§4§lYou were One Shot §4by " + attacker.getName() + "!");
+                    victim.getWorld().strikeLightningEffect(victim.getLocation());
+                    healthManager.damage(victim, healthManager.getHealth(victim), attacker);
+                }
+                return 1.0;
+            }
             default -> {
                 return 1.0;
             }
@@ -123,6 +138,7 @@ public class RuneManager {
             case DAMAGE -> 0.48;
             case CONFUSION -> 0.20;
             case IMMOBILIZE -> 0.01;
+            case ONESHOT -> 0.0001; // 0.01%
         };
 
 

@@ -10,6 +10,7 @@ import org.latios.arenaBrawl.abilities.AbilityManager;
 
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
+import org.latios.arenaBrawl.abilities.cost.OffensiveEnergyDiscount;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.ReflectStance;
@@ -28,6 +29,7 @@ import org.latios.arenaBrawl.abilities.ultimate.BloodMoon;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.GuardianColossusEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.Intervention;
+import org.latios.arenaBrawl.abilities.ultimate.Premonition;
 import org.latios.arenaBrawl.abilities.ultimate.Rewind;
 import org.latios.arenaBrawl.abilities.ultimate.ThunderArmor;
 import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
@@ -36,6 +38,7 @@ import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
 import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
 import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
+import org.latios.arenaBrawl.abilities.utility.TauntingGlare;
 import org.latios.arenaBrawl.abilities.utility.Taunt;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
@@ -552,6 +555,10 @@ public class MatchManager {
         Meditation.clear(player);
         TimeWarp.clear(player);
         ThunderArmor.clear(player);
+        TauntingGlare.clear(player);
+        Premonition.clear(player);
+        OffensiveEnergyDiscount.clear(player);
+        healthManager.clearRecentDamageTaken(player);
     }
 
     private void clearRemainingEffects(Match match) {

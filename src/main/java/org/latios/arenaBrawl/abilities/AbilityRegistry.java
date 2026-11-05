@@ -100,6 +100,9 @@ public class AbilityRegistry {
                 deps -> new EnderBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.energyModifierManager(), configManager.get("enderbreath")));
         register(AbilitySlot.OFFENSIVE, "teleport",
                 deps -> new Teleport(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("teleport")));
+        register(AbilitySlot.OFFENSIVE, "anvilfall",
+                deps -> new AnvilFall(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(),
+                        deps.demolitionService(), configManager.get("anvilfall")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -160,6 +163,8 @@ public class AbilityRegistry {
                 deps -> new Cyclone(plugin, deps.cooldownManager(), deps.teamManager(), deps.shieldManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("cyclone")));
         register(AbilitySlot.UTILITY, "gravitywell",
                 deps -> new GravityWell(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("gravitywell")));
+        register(AbilitySlot.UTILITY, "tauntingglare",
+                deps -> new TauntingGlare(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("tauntingglare")));
 
 
         // --- SUPPORT ---
@@ -230,6 +235,8 @@ public class AbilityRegistry {
                 deps -> new TimeWarp(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("timewarp")));
         register(AbilitySlot.SUPPORT, "absorptionshield",
                 deps -> new AbsorptionShield(deps.cooldownManager(), deps.orbitShieldManager(), deps.combatUpgradeManager(), configManager.get("absorptionshield")));
+        register(AbilitySlot.SUPPORT, "sadism",
+                deps -> new Sadism(deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("sadism")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
@@ -282,6 +289,10 @@ public class AbilityRegistry {
                 deps -> new ReflectDamage(plugin, deps.cooldownManager(), deps.usageManager(), configManager.get("reflectdamage")));
         register(AbilitySlot.ULTIMATE, "thunderarmor",
                 deps -> new ThunderArmor(plugin, deps.cooldownManager(), deps.usageManager(), deps.shieldManager(), deps.debuffManager(), configManager.get("thunderarmor")));
+        register(AbilitySlot.ULTIMATE, "premonition",
+                deps -> new Premonition(plugin, deps.cooldownManager(), deps.usageManager(), deps.playerHealthManager(), configManager.get("premonition")));
+        register(AbilitySlot.ULTIMATE, "skillmanipulation",
+                deps -> new SkillManipulation(plugin, deps.cooldownManager(), deps.usageManager(), configManager.get("skillmanipulation")));
 
 
         // --- DEFAULTS ---

@@ -7,7 +7,8 @@ public enum RuneType {
     ENERGY("Rune of Energy"),
     CONFUSION("Rune of Confusion"),
     IMMOBILIZE("Rune of Immobilization"),
-    HEALING("Rune of Healing");
+    HEALING("Rune of Healing"),
+    ONESHOT("Rune of One Shot");
 
 
   private final String displayName;

@@ -37,6 +37,9 @@ public class PlayerHealthManager {
     private final Map<UUID, List<HealReduction>> healReductions = new HashMap<>();
     private record RotMark(UUID casterId, long expiresAt) {}
     private final Map<UUID, RotMark> rotMarks = new HashMap<>();
+    private record DamageTaken(double amount, long timestamp) {}
+    private static final long RECENT_DAMAGE_RETENTION_MS = 30_000L;
+    private final Map<UUID, List<DamageTaken>> recentDamageTaken = new HashMap<>();
 
     private final Set<UUID> eliminated = new HashSet<>();
     private static final long HOLOGRAM_LIFETIME_TICKS = 35;
@@ -242,6 +245,7 @@ public class PlayerHealthManager {
         double updated = Math.max(getHealth(player) - amount, 0);
         double damageDealt = Math.min(amount, getHealth(player));
         currentHealth.put(player.getUniqueId(), updated);
+        recordDamageTaken(player, damageDealt);
         if (attacker != null && damageDealt > 0) {
             damageCallback.accept(new DamageEvent(attacker, player, damageDealt));
         }
@@ -342,6 +346,7 @@ public class PlayerHealthManager {
         double updated = Math.max(getHealth(player) - amount, 0);
         double damageDealt = Math.min(amount, getHealth(player));
         currentHealth.put(player.getUniqueId(), updated);
+        recordDamageTaken(player, damageDealt);
         if (attacker != null && damageDealt > 0) {
             damageCallback.accept(new DamageEvent(attacker, player, damageDealt));
         }
@@ -404,6 +409,35 @@ public class PlayerHealthManager {
     public void clearRegenDisable(Player player) {
         healReductions.remove(player.getUniqueId());
         clearRotMark(player);
+    }
+
+    /** Records damage for recent-damage consumers (see Sadism). */
+    private void recordDamageTaken(Player player, double amount) {
+        if (amount <= 0.0) return;
+
+        long now = System.currentTimeMillis();
+        List<DamageTaken> log = recentDamageTaken.computeIfAbsent(player.getUniqueId(), k -> new java.util.ArrayList<>());
+        log.add(new DamageTaken(amount, now));
+        log.removeIf(entry -> now - entry.timestamp() > RECENT_DAMAGE_RETENTION_MS);
+    }
+
+    /** Sum of all damage taken by the player within the given window (in milliseconds). */
+    public double getRecentDamageTaken(Player player, long windowMillis) {
+        List<DamageTaken> log = recentDamageTaken.get(player.getUniqueId());
+        if (log == null || log.isEmpty()) return 0.0;
+
+        long cutoff = System.currentTimeMillis() - windowMillis;
+        double total = 0.0;
+        for (DamageTaken entry : log) {
+            if (entry.timestamp() >= cutoff) {
+                total += entry.amount();
+            }
+        }
+        return total;
+    }
+
+    public void clearRecentDamageTaken(Player player) {
+        recentDamageTaken.remove(player.getUniqueId());
     }
 
     private void spawnHologram(Player victim, String phrase) {

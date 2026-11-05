@@ -65,6 +65,7 @@ public class AbilityIconRegistry {
         icons.put("guidedpig2000", Material.PORKCHOP);
         icons.put("enderbreath", Material.ENDERMITE_SPAWN_EGG);
         icons.put("teleport", Material.CHORUS_FRUIT);
+        icons.put("anvilfall", Material.ANVIL);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
@@ -96,6 +97,7 @@ public class AbilityIconRegistry {
         icons.put("cyclone", Material.LIGHT_BLUE_DYE);
         icons.put("gravitywell", Material.END_PORTAL_FRAME);
         icons.put("portal", Material.ENDER_PEARL);
+        icons.put("tauntingglare", Material.OBSERVER);
 
         // --- SUPPORT ---
         icons.put("holywater", Material.POTION);
@@ -132,6 +134,7 @@ public class AbilityIconRegistry {
         icons.put("woundrot", Material.ROTTEN_FLESH);
         icons.put("timewarp", Material.WHITE_WOOL);
         icons.put("absorptionshield", Material.SHIELD);
+        icons.put("sadism", Material.GHAST_TEAR);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);
@@ -156,7 +159,10 @@ public class AbilityIconRegistry {
         icons.put("intervention", Material.ENCHANTED_GOLDEN_APPLE);
         icons.put("soullink", Material.SOUL_LANTERN);
         icons.put("guardiancolossus", Material.IRON_GOLEM_SPAWN_EGG);
+        icons.put("reflectdamage", Material.IRON_CHESTPLATE);
         icons.put("thunderarmor", Material.GOLDEN_CHESTPLATE);
+        icons.put("premonition", Material.RECOVERY_COMPASS);
+        icons.put("skillmanipulation", Material.ECHO_SHARD);
     }
 
     public Material getIcon(AbilitySlot slot, String id) {

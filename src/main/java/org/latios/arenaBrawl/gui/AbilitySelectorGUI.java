@@ -154,11 +154,7 @@ public class AbilitySelectorGUI {
                 lore.add("");
             }
 
-            String baseCost = preview.getCost().getBaseCostDescription();
-            if (!baseCost.isEmpty()) {
-                lore.add("§b" + baseCost);
-                lore.add("");
-            }
+
 
             for (String line : wrapText(preview.getDescription(), 40)) {
                 lore.add("§7" + line);
@@ -269,6 +265,7 @@ public class AbilitySelectorGUI {
                 case ENERGY -> lore.add("§bEnergy gained: §f+" + num(cfg.getDouble("energy-amount", 10.0)));
                 case IMMOBILIZE -> lore.add("§bDuration: §f" + secondsSlow(cfg.getLong("duration-ticks", 3000)));
                 case HEALING -> lore.add("§bHealing: §f+" + num(cfg.getDouble("heal-amount", 20.0)));
+                case ONESHOT -> lore.add("§bInstantly kills the enemy");
                 default -> { }
             }
 
@@ -313,6 +310,7 @@ public class AbilitySelectorGUI {
             case CONFUSION -> Material.BLACK_DYE;
             case IMMOBILIZE -> Material.LIME_DYE;
             case HEALING -> Material.GREEN_DYE;
+            case ONESHOT -> Material.WITHER_SKELETON_SKULL;
         };
     }
 
@@ -323,11 +321,17 @@ public class AbilitySelectorGUI {
             case DAMAGE -> 0.48;
             case CONFUSION -> 0.20;
             case IMMOBILIZE -> 0.01;
+            case ONESHOT -> 0.0001;
         };
     }
 
     private String pct(double value) {
-        return num(value * 100) + "%";
+        double percent = value * 100;
+        // Show more precision for very small chances (e.g. 0.01% for the One Shot rune).
+        if (percent > 0 && percent < 1) {
+            return String.format(java.util.Locale.US, "%.4f", percent) + "%";
+        }
+        return num(percent) + "%";
     }
 
     private String seconds(long ticks) {

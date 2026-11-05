@@ -15,14 +15,19 @@ public class EnergyCost implements AbilityCost {
         this.energyAmount = energyAmount;
     }
 
+    /** Cost after any active offensive energy discount (see {@link OffensiveEnergyDiscount}). */
+    private double getEffectiveCost(Player player) {
+        return energyAmount * OffensiveEnergyDiscount.getMultiplier(player);
+    }
+
     @Override
     public boolean canPay(Player player) {
-        return energyManager.hasEnough(player, energyAmount);
+        return energyManager.hasEnough(player, getEffectiveCost(player));
     }
 
     @Override
     public void pay(Player player) {
-        energyManager.consume(player, energyAmount);
+        energyManager.consume(player, getEffectiveCost(player));
     }
 
     @Override
