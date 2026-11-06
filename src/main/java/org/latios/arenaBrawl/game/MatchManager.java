@@ -149,17 +149,25 @@ public class MatchManager {
         Match match = activeMatches.get(player.getUniqueId());
         if (match == null) return;
 
+        boolean testMatch = match.isTest();
+
         UUID attackerId = healthManager.getLastAttacker(player);
         Player killer = attackerId != null ? findParticipant(match, attackerId) : null;
         boolean hasKiller = killer != null && !killer.getUniqueId().equals(player.getUniqueId());
 
+        // Test matches never affect stats.
+        if (!testMatch) {
+            if (hasKiller) {
+                statsManager.addKill(killer.getUniqueId());
+            }
+            statsManager.addDeath(player);
+        }
+
         if (hasKiller) {
-            statsManager.addKill(killer.getUniqueId());
             if (killer.isOnline()) {
                 killer.sendMessage(String.format("§3You killed §c%s§3!", player.getName()));
             }
         }
-        statsManager.addDeath(player);
 
         if (hasKiller) {
             player.sendMessage(String.format("§3You were killed by §c%s§3!", killer.getName()));
@@ -220,9 +228,34 @@ public class MatchManager {
 
         drawVoteManager.reset(match);
 
-        if (winner != null) {
+        // Test matches keep running no matter who got eliminated: they only
+        // end once every participant /hubs or disconnects.
+        if (winner != null && !testMatch) {
             endMatch(match, winner);
+        } else if (testMatch) {
+            tryFinishTestMatch(match);
         }
+    }
+
+    /**
+     * Test matches never end via elimination, draw vote or the time limit.
+     * They only finish once every participant has left the match (/hub) or
+     * disconnected; only then are the arena and effects cleaned up.
+     */
+    private void tryFinishTestMatch(Match match) {
+        if (!match.isTest() || match.isEnded()) return;
+        boolean anyoneStillHere = match.getAllPlayers().stream().anyMatch(Player::isOnline);
+        if (anyoneStillHere) return;
+
+        match.setEnded(true);
+        drawVoteManager.clear(match);
+        clearRemainingEffects(match);
+        for (Player player : match.getAllPlayers()) {
+            // Same per-player cleanup as a normal match end; no-ops (no
+            // teleport/kit) for players who are already disconnected.
+            cleanupPlayer(player);
+        }
+        finishMatch(match);
     }
 
 
@@ -468,7 +501,7 @@ public class MatchManager {
 
     /** Ends the match in a draw due to the 10-minute time limit. No rating changes are applied. */
     public void endMatchAsDraw(Match match) {
-        if (match.isEnded()) return;
+        if (match.isEnded() || match.isTest()) return;
         match.setEnded(true);
         clearRemainingEffects(match);
         drawVoteManager.clear(match);
@@ -589,10 +622,26 @@ public class MatchManager {
         if (match == null) return;
 
         if (!match.isEnded() && player.getGameMode() != GameMode.SPECTATOR) {
-            onPlayerEliminated(player);
+            if (match.isTest()) {
+                // Leaving a test match is not an elimination: no death
+                // message, firework or item drops. The player just stops
+                // counting as alive and returns to the hub.
+                player.setGameMode(GameMode.SPECTATOR);
+                match.eliminate(player);
+                drawVoteManager.reset(match);
+            } else {
+                onPlayerEliminated(player);
+            }
         }
 
         cleanupPlayerHub(player);
+
+        // The leaver is already out of the match, so don't count their session.
+        if (match.isTest() && match.getAllPlayers().stream()
+                .filter(p -> !p.getUniqueId().equals(player.getUniqueId()))
+                .noneMatch(Player::isOnline)) {
+            tryFinishTestMatch(match);
+        }
     }
     public boolean isInMatch(Player player) {
         return activeMatches.containsKey(player.getUniqueId());

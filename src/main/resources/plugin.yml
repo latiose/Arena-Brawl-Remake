@@ -52,7 +52,13 @@ commands:
   hub:
     description: Leaves the game
     usage: /hub
+  forcestart:
+    description: Force-starts a test match that never affects rating or stats
+    usage: "/forcestart [red players] [':' blue players]"
 permissions:
   arenabrawl.admin.queue:
     description: Switches the 2v2 matchmaking system
+    default: op
+  arenabrawl.admin.forcestart:
+    description: Allows starting test matches with /forcestart
     default: op

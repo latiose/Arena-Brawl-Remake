@@ -23,6 +23,7 @@ public class Match {
     private final Set<UUID> eliminated = new HashSet<>();
     private final ArenaMap arenaMap;
     private boolean ended = false;
+    private boolean testMatch = false;
 
     public boolean isEnded() {
         return ended;
@@ -30,6 +31,15 @@ public class Match {
 
     public void setEnded(boolean ended) {
         this.ended = ended;
+    }
+
+    /** Test matches never affect rating/stats and only end when everyone leaves. */
+    public boolean isTest() {
+        return testMatch;
+    }
+
+    public void setTest(boolean testMatch) {
+        this.testMatch = testMatch;
     }
     public Match(MatchType type, Map<Team, List<Player>> teams, ArenaMap arenaMap) {
         this.type = type;

@@ -417,6 +417,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 new ReloadAbilitiesCommand(abilityConfigManager, abilityRegistry, abilitySelectorGUI,hatConfigManager,hatSelectorGUI,runeConfigManager)
         );
         getCommand("hub").setExecutor(new HubCommand(matchManager));
+        getCommand("forcestart").setExecutor(new ForceStartCommand(arenaManager, queueManager));
         getCommand("capturestructure").setExecutor(new org.latios.arenaBrawl.abilities.structures.CaptureStructureCommand(this));
         getCommand("addcoins").setExecutor(new AddCoinsCommand(statsManager,lobbyScoreboardManager));
         getCommand("spawnhefney").setExecutor(new SpawnHefneyCommand(hefneyNPCManager));

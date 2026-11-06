@@ -6,7 +6,7 @@ import org.bukkit.Material;
 public enum CombatUpgradeType {
 
     HEALTH("Max Health", Material.GOLDEN_APPLE, 2000.0,
-            new double[]{2022, 2044, 2066, 2088, 2111, 2133, 2155, 2177, 2200}),
+            new double[]{2044, 2088, 2133, 2177, 2221, 2265, 2309, 2353, 2400}),
 
     ENERGY("Max Energy", Material.GLOWSTONE_DUST, 100.0,
             new double[]{102, 104, 106, 108, 111, 113, 115, 117, 120}),

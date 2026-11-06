@@ -77,6 +77,7 @@ public class Cyclone implements Ability {
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Duration", (durationMs / 1000L) + "s"),
+                new AbilityStat("Stun", (durationMs / 1000L) + "s"),
                 new AbilityStat("Range", (int) range + "m"),
                 new AbilityStat("Immunity", "100% damage"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
@@ -93,6 +94,7 @@ public class Cyclone implements Ability {
         }
 
         shieldManager.applyShield(target, 1.0, durationMs, "Cyclone");
+        debuffManager.tryApply(target, DebuffType.STUN, durationMs);
 
         boolean enemy = teamManager.isEnemy(player, target);
 

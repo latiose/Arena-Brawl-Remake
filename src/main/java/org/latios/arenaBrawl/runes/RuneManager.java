@@ -111,7 +111,7 @@ public class RuneManager {
                 return 1.0;
             }
             case ONESHOT -> {
-                if (victim != null && !healthManager.isEliminated(victim)) {
+                if (victim != null) {
                     for (Player online : Bukkit.getOnlinePlayers()) {
                         online.playSound(online.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.7f, 1.4f);
                         online.sendMessage("§4§l" + attacker.getName() + " §4activated the §c"

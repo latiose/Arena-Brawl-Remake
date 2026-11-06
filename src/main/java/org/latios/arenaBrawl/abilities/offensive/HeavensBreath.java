@@ -69,7 +69,7 @@ public class HeavensBreath extends Breath {
     @Override
     protected void applyHit(Player caster, Player target) {
         if (teamManager.isEnemy(caster, target)) {
-            applyHitEffects(target);
+            applyHitEffects(caster, target);
             combatService.applyAbilityDamage(caster, target, getDamage(), getName());
             applySpike(target);
         } else {
@@ -79,7 +79,7 @@ public class HeavensBreath extends Breath {
     }
 
     @Override
-    protected void applyHitEffects(Player target) {
+    protected void applyHitEffects(Player caster, Player target) {
 
     }
 

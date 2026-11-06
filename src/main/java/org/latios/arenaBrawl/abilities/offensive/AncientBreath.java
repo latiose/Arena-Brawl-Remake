@@ -52,7 +52,7 @@ public class AncientBreath extends Breath {
     }
 
     @Override
-    protected void applyHitEffects(Player target) {
+    protected void applyHitEffects(Player caster, Player target) {
         if (Math.random() < immoChance) {
             debuffManager.tryApply(target, DebuffType.IMMOBILIZE, immoDurationTicks);
         }

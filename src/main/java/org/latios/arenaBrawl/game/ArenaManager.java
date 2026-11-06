@@ -131,6 +131,15 @@ public class ArenaManager {
     }
 
     public void startMatch(MatchType type, List<Player> players) {
+        startMatch(type, players, false);
+    }
+
+    /** Starts a test match: never affects rating/stats and never ends on its own. */
+    public void startTestMatch(MatchType type, List<Player> players) {
+        startMatch(type, players, true);
+    }
+
+    private void startMatch(MatchType type, List<Player> players, boolean test) {
         for (Player player : players) {
             if (matchManager.isInMatch(player)) {
                 matchManager.leaveMatch(player);
@@ -153,7 +162,11 @@ public class ArenaManager {
         for (int i = 0; i < type.getTeamCount(); i++) {
             List<Player> teamPlayers = new ArrayList<>();
             for (int j = 0; j < type.getTeamSize(); j++) {
-                Player player = players.get(i * type.getTeamSize() + j);
+                int index = i * type.getTeamSize() + j;
+                // Partial (e.g. only red) teams are allowed for test matches,
+                // so missing slots are simply left empty instead of erroring.
+                if (index >= players.size()) continue;
+                Player player = players.get(index);
                 teamPlayers.add(player);
                 teamManager.setTeam(player, availableTeams[i]);
             }
@@ -190,6 +203,7 @@ public class ArenaManager {
         }
 
         var match = new Match(type, teams, map);
+        match.setTest(test);
 
         match.getPowerupManager().configureLocations(PowerupType.HEALTH,
                 map.getHealthPowerupLocation() != null ? List.of(map.getHealthPowerupLocation()) : List.of());

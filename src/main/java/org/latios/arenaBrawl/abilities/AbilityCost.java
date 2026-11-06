@@ -15,6 +15,11 @@ public interface AbilityCost {
         return false;
     }
 
+    /** True when the cost is energy-backed, so failures should not read like cooldown waits. */
+    default boolean usesEnergy() {
+        return false;
+    }
+
     default String getBaseCostDescription() {
         return "";
     }

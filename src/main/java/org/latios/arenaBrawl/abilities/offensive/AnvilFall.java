@@ -32,6 +32,7 @@ public class AnvilFall implements Ability {
     private final double spawnHeightOffset;
     private final double impactRadius;
     private final double knockbackStrength;
+    private final double fallVelocity;
     private final double directHitRadius;
     private final double damage;
     private final double directHitBonus;
@@ -51,6 +52,7 @@ public class AnvilFall implements Ability {
         this.spawnHeightOffset = config.getDouble("spawn-height-offset", 6.0);
         this.impactRadius = config.getDouble("impact-radius", 4.0);
         this.knockbackStrength = config.getDouble("knockback-strength", 1.0);
+        this.fallVelocity = config.getDouble("fall-velocity", 1.0);
         this.directHitRadius = config.getDouble("direct-hit-radius", 1.5);
         this.damage = config.getDouble("damage", 220.0);
         this.directHitBonus = config.getDouble("direct-hit-bonus", 30.0);
@@ -113,6 +115,10 @@ public class AnvilFall implements Ability {
             public void run() {
                 if (anvil.isValid() && !anvil.isDead()) {
                     lastLocation = anvil.getLocation();
+
+                    // Twice the vanilla fall speed: pin a constant downward velocity
+                    // every tick.
+                    anvil.setVelocity(new Vector(0, -fallVelocity, 0));
 
                     boolean hitGround = anvil.isOnGround()
                             || lastLocation.getBlock().getType().isSolid()
@@ -199,7 +205,7 @@ public class AnvilFall implements Ability {
             }
 
             Vector knockback = direction.normalize().multiply(knockbackStrength);
-            knockback.setY(1.2);
+            knockback.setY(0.7);
             target.setVelocity(knockback);
 
             boolean directHit = targetLoc.distance(impactLocation) <= directHitRadius;

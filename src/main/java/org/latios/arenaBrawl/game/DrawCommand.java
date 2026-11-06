@@ -33,6 +33,11 @@ public class DrawCommand implements CommandExecutor {
             return true;
         }
 
+        if (match.isTest()) {
+            player.sendMessage("§cDraw votes are disabled in test matches.");
+            return true;
+        }
+
         if (match.isEliminated(player)) {
             player.sendMessage("§cEliminated players cannot vote for a draw.");
             return true;

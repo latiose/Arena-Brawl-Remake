@@ -23,6 +23,7 @@ public class AdrenalineSurge implements Ability {
     private final long durationMs;
     private final double vulnerability;
     private final long cooldownMs;
+    private final double energyRecoverPercent;
 
     private final AbilityCost cost;
     private final EnergyManager energyManager;
@@ -38,6 +39,7 @@ public class AdrenalineSurge implements Ability {
         this.durationMs = config.getLong("duration-ms", 5000L);
         this.vulnerability = config.getDouble("vulnerability-percent", 25.0) / 100.0;
         this.cooldownMs = config.getLong("cooldown-ms", 15000L);
+        this.energyRecoverPercent = config.getDouble("energy-recover-percent", 75.0);
 
         this.cost = new CooldownCost(cooldownManager, "adrenalinesurge", cooldownMs, combatUpgradeManager);
         this.config = config;
@@ -55,14 +57,14 @@ public class AdrenalineSurge implements Ability {
 
     @Override
     public String getDescription() {
-        return "Instantly refills your entire energy bar, but you take " + (int) (vulnerability * 100)
-                + "% extra damage for " + (durationMs / 1000L) + "s.";
+        return "Instantly recovers " + (int) energyRecoverPercent + "% of your energy bar, but you take "
+                + (int) (vulnerability * 100) + "% extra damage for " + (durationMs / 1000L) + "s.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Energy", "Full refill"),
+                new AbilityStat("Energy", "+" + (int) energyRecoverPercent + "% of bar"),
                 new AbilityStat("Vulnerability", "+" + (int) (vulnerability * 100) + "% damage taken"),
                 new AbilityStat("Duration", (durationMs / 1000L) + "s"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
@@ -79,7 +81,8 @@ public class AdrenalineSurge implements Ability {
             return false;
         }
 
-        energyManager.addEnergy(player, missing);
+        double gain = maxEnergy * (energyRecoverPercent / 100.0);
+        energyManager.addEnergy(player, gain);
         damageVulnerabilityManager.applyVulnerability(player, vulnerability, durationMs, "Adrenaline Surge");
 
         Location loc = player.getLocation();

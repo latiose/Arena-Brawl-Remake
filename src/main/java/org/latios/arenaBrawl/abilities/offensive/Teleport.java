@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
@@ -33,7 +34,9 @@ public class Teleport implements Ability {
     public Teleport(EnergyManager energyManager, TeamManager teamManager,
                     CombatService combatService, AbilityConfig config) {
         this.maxDistance = config.getDouble("max-distance", 8.0);
-        this.aoeHalfSize = config.getDouble("aoe-half-size", 4.5);
+        // Half size of a 3x3 grid (1.5) so every block in a 3x3 around the arrival
+        // point is covered.
+        this.aoeHalfSize = config.getDouble("aoe-half-size", 1.5);
         this.damage = config.getDouble("damage", 170.0);
         this.energyCost = config.getDouble("energy-cost", 80.0);
         this.cost = new EnergyCost(energyManager, energyCost);
@@ -63,6 +66,7 @@ public class Teleport implements Ability {
         return List.of(
                 new AbilityStat("Damage", String.valueOf((int) damage)),
                 new AbilityStat("Distance", (int) maxDistance + " blocks"),
+                new AbilityStat("Area", "3x3"),
                 new AbilityStat("Energy Cost", String.valueOf((int) energyCost))
         );
     }
@@ -73,16 +77,11 @@ public class Teleport implements Ability {
         Vector direction = player.getEyeLocation().getDirection();
         direction.normalize();
 
-        Location lastSafe = origin.clone();
-        double traveled = 0;
-        while (traveled < maxDistance) {
-            Location next = lastSafe.clone().add(direction.clone().multiply(STEP_SIZE));
-            if (isBlocked(next) || !isInWorld(next)) {
-                break;
-            }
-            lastSafe = next;
-            traveled += STEP_SIZE;
-        }
+        // Destination is the maximum range along the look direction. If that
+        // point is blocked, walk backwards from it until a free position is
+        // found, so the teleport always happens and always lands as far away
+        // as the look direction allows.
+        Location lastSafe = resolveDestination(player, direction);
 
         lastSafe.setYaw(origin.getYaw());
         lastSafe.setPitch(origin.getPitch());
@@ -90,11 +89,15 @@ public class Teleport implements Ability {
         origin.getWorld().spawnParticle(Particle.PORTAL, origin.clone().add(0, 1, 0), 25, 0.3, 0.6, 0.3, 0.2);
         player.teleport(lastSafe);
         player.setFallDistance(0);
+        // The actual arrival point: the vanilla teleport can adjust the
+        // destination, so damage is computed around where the player really
+        // ended up.
+        Location arrival = player.getLocation();
 
-        damageAround(player, lastSafe);
+        damageAround(player, arrival);
 
-        lastSafe.getWorld().spawnParticle(Particle.PORTAL, lastSafe.clone().add(0, 1, 0), 25, 0.3, 0.6, 0.3, 0.2);
-        lastSafe.getWorld().spawnParticle(Particle.END_ROD, lastSafe.clone().add(0, 1.2, 0), 20, 0.5, 0.4, 0.5, 0.05);
+        arrival.getWorld().spawnParticle(Particle.PORTAL, arrival.clone().add(0, 1, 0), 25, 0.3, 0.6, 0.3, 0.2);
+        arrival.getWorld().spawnParticle(Particle.END_ROD, arrival.clone().add(0, 1.2, 0), 20, 0.5, 0.4, 0.5, 0.05);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10.0f, 1.2f);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 0.8f, 1.6f);
 
@@ -112,7 +115,7 @@ public class Teleport implements Ability {
             Location loc = target.getLocation();
             if (Math.abs(loc.getX() - center.getX()) > aoeHalfSize) continue;
             if (Math.abs(loc.getZ() - center.getZ()) > aoeHalfSize) continue;
-            if (loc.getY() < center.getY() - 1.5 || loc.getY() > center.getY() + 2.5) continue;
+            if (loc.getY() < center.getY() - 2.0 || loc.getY() > center.getY() + 2.0) continue;
 
             combatService.applyAbilityDamage(caster, target, damage, getName(), loc);
             hitAny = true;
@@ -121,6 +124,21 @@ public class Teleport implements Ability {
         if (hitAny) {
             caster.getWorld().playSound(center, Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.5f, 0.9f);
         }
+    }
+
+    private Location resolveDestination(Player player, Vector direction) {
+        Location eye = player.getEyeLocation();
+
+        for (double offset = 0.0; offset <= maxDistance; offset += STEP_SIZE) {
+            Location candidate = eye.clone()
+                    .add(direction.clone().multiply(maxDistance - offset));
+
+            if (!isBlocked(candidate) && isInWorld(candidate)) {
+                return candidate;
+            }
+        }
+
+        return eye.clone().add(direction.clone().multiply(STEP_SIZE));
     }
 
     private boolean isBlocked(Location destination) {

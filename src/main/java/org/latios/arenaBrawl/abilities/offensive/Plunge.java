@@ -39,6 +39,8 @@ public class Plunge implements Ability {
     private final double knockUp;
     private final double minFall;
     private final double diveSpeed;
+    private final double liftHeight;
+    private final double groundLiftEnergy;
     private final int maxTicks;
 
     private final Plugin plugin;
@@ -58,9 +60,13 @@ public class Plunge implements Ability {
         this.knockUp = config.getDouble("knock-up", 0.5);
         this.minFall = config.getDouble("min-fall", 1.0);
         this.diveSpeed = config.getDouble("dive-speed", 1.5);
+        this.liftHeight = config.getDouble("lift-height", 5.0);
+        this.groundLiftEnergy = config.getDouble("ground-lift-energy", 60.0);
         this.maxTicks = config.getInt("max-ticks", 60);
 
-        this.cost = new EnergyCost(energyManager, energyCost);
+        this.cost = new StatefulCost(
+                new EnergyCost(energyManager, groundLiftEnergy),
+                new EnergyCost(energyManager, energyCost));
         this.teamManager = teamManager;
         this.combatService = combatService;
     }
@@ -79,13 +85,24 @@ public class Plunge implements Ability {
     public boolean activate(Player player) {
         UUID id = player.getUniqueId();
         if (plunging.contains(id)) return false;
-        if (player.isOnGround()) return false;
+
+        Location start = player.getLocation().clone();
+
+        if (player.isOnGround()) {
+            // Grounded launch: rise ~5 blocks for free, no dive.
+            double velocity = Math.sqrt(2 * 0.08 * liftHeight);
+            player.setVelocity(new Vector(0, velocity, 0));
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.8f, 1.3f);
+            player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_RIPTIDE_2, 0.7f, 1.8f);
+            player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation(), 10, 0.2, 0.05, 0.2, 0.02);
+            return true;
+        }
+
         if (player.getFallDistance() < minFall && player.getVelocity().getY() > -0.05) {
             return false;
         }
 
         plunging.add(id);
-        Location start = player.getLocation().clone();
         player.setVelocity(new Vector(0, -diveSpeed, 0));
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.8f, 0.7f);
@@ -158,7 +175,8 @@ public class Plunge implements Ability {
     @Override
     public String getDescription() {
         return "While airborne, dive straight down and crash into the ground. "
-                + "The shockwave damages nearby enemies and knocks them up, scaling with the fall height.";
+                + "The shockwave damages nearby enemies and knocks them up, scaling with the fall height. "
+                + "While grounded, rises " + (int) liftHeight + " blocks.";
     }
 
     @Override
@@ -168,7 +186,54 @@ public class Plunge implements Ability {
                 new AbilityStat("Fall bonus", "+" + (int) damagePerBlock + " per block"),
                 new AbilityStat("Max damage", (int) maxDamage + " HP"),
                 new AbilityStat("Radius", (int) radius + " blocks"),
-                new AbilityStat("Energy", (int) energyCost + "")
+                new AbilityStat("Ground lift", (int) liftHeight + " blocks"),
+                new AbilityStat("Energy", "Grounded " + (int) groundLiftEnergy
+                        + " / Air " + (int) energyCost)
         );
+    }
+
+    /**
+     * Cost wrapper: the grounded rise and the aerial dive have separate
+     * energy costs ( OffensiveEnergyDiscount still applies to both).
+     */
+    private static final class StatefulCost implements AbilityCost {
+
+        private final EnergyCost groundCost;
+        private final EnergyCost diveCost;
+
+        private StatefulCost(EnergyCost groundCost, EnergyCost diveCost) {
+            this.groundCost = groundCost;
+            this.diveCost = diveCost;
+        }
+
+        private EnergyCost select(Player player) {
+            return player.isOnGround() ? groundCost : diveCost;
+        }
+
+        @Override
+        public boolean usesEnergy() {
+            return true;
+        }
+
+        @Override
+        public boolean canPay(Player player) {
+            return select(player).canPay(player);
+        }
+
+        @Override
+        public void pay(Player player) {
+            select(player).pay(player);
+        }
+
+        @Override
+        public String describeRemaining(Player player) {
+            return select(player).describeRemaining(player);
+        }
+
+        @Override
+        public String getBaseCostDescription() {
+            return groundCost.getBaseCostDescription() + " grounded / "
+                    + diveCost.getBaseCostDescription() + " airborne";
+        }
     }
 }

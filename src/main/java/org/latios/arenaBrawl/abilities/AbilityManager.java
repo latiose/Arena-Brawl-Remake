@@ -57,7 +57,7 @@ public class AbilityManager {
         AbilityCost cost = ability.getCost();
 
         if (!cost.canPay(player)) {
-            if (cost instanceof EnergyCost) {
+            if (cost instanceof EnergyCost || cost.usesEnergy()) {
                 sendFailMessage(player, "§e" + cost.describeRemaining(player));
             } else if (cost instanceof UltimateCost && cost.isPermanentlyUnavailable(player)) {
                 sendFailMessage(player, "§e" + cost.describeRemaining(player));

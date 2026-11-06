@@ -25,6 +25,7 @@ public class ShockMineTask extends BukkitRunnable {
     private final double triggerRadius;
     private final double blastRadius;
     private final long stunDurationMs;
+    private final int concealTicks;
     private final TeamManager teamManager;
     private final CombatService combatService;
     private final DebuffManager debuffManager;
@@ -34,7 +35,7 @@ public class ShockMineTask extends BukkitRunnable {
     private boolean ended = false;
 
     public ShockMineTask(Player owner, Location location, double damage, double triggerRadius,
-                         double blastRadius, long stunDurationMs,
+                         double blastRadius, long stunDurationMs, int concealTicks,
                          TeamManager teamManager, CombatService combatService, DebuffManager debuffManager,
                          Runnable onEnd) {
         this.owner = owner;
@@ -43,6 +44,7 @@ public class ShockMineTask extends BukkitRunnable {
         this.triggerRadius = triggerRadius;
         this.blastRadius = blastRadius;
         this.stunDurationMs = stunDurationMs;
+        this.concealTicks = Math.max(INTERVAL_TICKS, concealTicks);
         this.teamManager = teamManager;
         this.combatService = combatService;
         this.debuffManager = debuffManager;
@@ -74,12 +76,30 @@ public class ShockMineTask extends BukkitRunnable {
         }
 
         double pulse = 0.4 + 0.3 * Math.sin(ticks * 0.4);
-        location.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, location, 4,
-                pulse / 3, 0.15, pulse / 3, 0.01);
-        location.getWorld().spawnParticle(Particle.END_ROD, location, 1, 0.05, 0.1, 0.05, 0);
 
-        if (ticks % 20 == 0) {
-            location.getWorld().playSound(location, Sound.BLOCK_BEACON_AMBIENT, 0.5f, 1.8f);
+        if (ticks < concealTicks) {
+            // Visible to everyone while arming.
+            location.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, location, 4,
+                    pulse / 3, 0.15, pulse / 3, 0.01);
+            location.getWorld().spawnParticle(Particle.END_ROD, location, 1, 0.05, 0.1, 0.05, 0);
+
+            if (ticks % 20 == 0) {
+                location.getWorld().playSound(location, Sound.BLOCK_BEACON_AMBIENT, 0.5f, 1.8f);
+            }
+        } else {
+            // Armed: hidden from enemies. Still visible to the owner, allies and
+            // spectators, who receive the particles/sounds individually.
+            for (Player viewer : location.getWorld().getPlayers()) {
+                if (teamManager.isEnemy(owner, viewer)) continue;
+
+                viewer.spawnParticle(Particle.ELECTRIC_SPARK, location, 4,
+                        pulse / 3, 0.15, pulse / 3, 0.01);
+                viewer.spawnParticle(Particle.END_ROD, location, 1, 0.05, 0.1, 0.05, 0);
+
+                if (ticks % 20 == 0) {
+                    viewer.playSound(location, Sound.BLOCK_BEACON_AMBIENT, 0.5f, 1.8f);
+                }
+            }
         }
 
         for (Entity nearby : location.getWorld().getNearbyEntities(location, triggerRadius, triggerRadius, triggerRadius)) {

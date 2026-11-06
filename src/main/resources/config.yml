@@ -759,7 +759,7 @@ ability-values:
     energy-cost: 80.0
     damage: 170.0
     max-distance: 6.0
-    aoe-half-size: 1.0
+    aoe-half-size: 1.5
 
   rocketchicken:
     damage: 80.0
@@ -918,6 +918,7 @@ ability-values:
     stun-duration-ms: 1000
     duration-ms: 15000
     max-range: 20.0
+    conceal-delay-ms: 2000
 
   backstabber:
     damage: 90.0
@@ -982,6 +983,8 @@ ability-values:
     min-fall: 1.0
     dive-speed: 1.5
     max-ticks: 60
+    lift-height: 5.0
+    ground-lift-energy: 60.0
 
   ricochet:
     energy-cost: 40.0
@@ -1007,6 +1010,7 @@ ability-values:
     spawn-height-offset: 10.0
     impact-radius: 4.0
     knockback-strength: 3.0
+    fall-velocity: 1.0
     direct-hit-radius: 1.5
     damage: 220.0
     direct-hit-bonus: 30.0
@@ -1123,6 +1127,7 @@ ability-values:
     max-range: 12.0
     duration-ticks: 100
     cooldown-ms: 30000
+    back-dash: 7.0
 
   scavenger:
     cooldown-ms: 40000

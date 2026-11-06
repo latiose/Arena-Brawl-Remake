@@ -25,58 +25,17 @@ public class BarricadeStructure extends PlacedStructure {
         build(center.getBlock().getLocation(), blueprint);
     }
 
-
-    public static boolean canBuild(Location center, StructureBlueprint blueprint) {
-        Location base = center.getBlock().getLocation();
-        List<StructureBlueprint.BlockOffset> offsets = blueprint.getOffsets();
-
-        if (offsets.isEmpty()) return false;
-
-        int minY = Integer.MAX_VALUE;
-        for (StructureBlueprint.BlockOffset offset : offsets) {
-            if (offset.dy() < minY) {
-                minY = offset.dy();
-            }
-        }
-
-        for (StructureBlueprint.BlockOffset offset : offsets) {
-            Block block = base.clone().add(offset.dx(), offset.dy(), offset.dz()).getBlock();
-
-            if (!isReplaceable(block.getType())) {
-                return false;
-            }
-
-            if (offset.dy() == minY) {
-                Block groundBlock = base.clone().add(offset.dx(), offset.dy() - 1, offset.dz()).getBlock();
-                if (isReplaceable(groundBlock.getType()) || !groundBlock.getType().isSolid()) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
     private void build(Location base, StructureBlueprint blueprint) {
         for (StructureBlueprint.BlockOffset offset : blueprint.getOffsets()) {
             Block block = base.clone().add(offset.dx(), offset.dy(), offset.dz()).getBlock();
 
-            if (!isReplaceable(block.getType())) {
-                continue;
-            }
-
+            // No terrain restrictions: every blueprint cell is placed, even over
+            // solid blocks. The original BlockData is always saved so that
+            // remove() restores whatever was there instead of deleting it.
             originalBlockData.put(block, block.getBlockData());
             block.setType(offset.material());
             placedBlocks.add(block);
         }
-    }
-
-    public static boolean isReplaceable(Material material) {
-        return material.isAir()
-                || material == Material.SHORT_GRASS
-                || material == Material.TALL_GRASS
-                || material == Material.SNOW
-                || material.name().endsWith("_CARPET");
     }
 
     public boolean isDestructibleByMelee() {

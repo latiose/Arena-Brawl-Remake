@@ -57,7 +57,7 @@ public class DragonsBreath extends Breath {
     }
 
     @Override
-    protected void applyHitEffects(Player target) {
+    protected void applyHitEffects(Player caster, Player target) {
         if (debuffManager != null) {
             debuffManager.tryApply(target, DebuffType.SLOW, slowDurationTicks);
         }
@@ -65,7 +65,7 @@ public class DragonsBreath extends Breath {
 
     @Override
     public boolean activate(Player player) {
-        player.getWorld().playSound(player.getLocation(), getCastSound(), 10.0f, 1.0f);
+        playCastSound(player);
 
         List<Location> upright = conePoints(player, false);
         List<Location> hitboxPoints = new ArrayList<>(upright);

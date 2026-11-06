@@ -49,7 +49,7 @@ public class EvilBreath extends Breath {
     }
 
     @Override
-    protected void applyHitEffects(Player target) {
+    protected void applyHitEffects(Player caster, Player target) {
         debuffManager.tryApply(target, DebuffType.STUN, stunDurationTicks);
     }
 

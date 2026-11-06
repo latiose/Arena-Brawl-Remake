@@ -9,7 +9,6 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.*;
-import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
@@ -37,7 +36,8 @@ public class Barricade implements Ability {
 
     @Override
     public String getDescription() {
-        return "Builds a climbable stone dome around you with a small gap at the top. Cannot be broken by melee attacks.";
+        return "Builds a climbable stone dome around you with a small gap at the top. Cannot be broken by melee attacks. "
+                + "Places over any terrain; the original blocks are restored when it expires.";
     }
 
     @Override
@@ -59,13 +59,10 @@ public class Barricade implements Ability {
 
     @Override
     public boolean activate(Player player) {
+        // Always builds around the caster: no aiming or target block needed and
+        // no terrain checks that used to reject most placements.
         Location placementLocation = player.getLocation();
         StructureBlueprint blueprint = Blueprints.defaultBarricade();
-
-        if (!BarricadeStructure.canBuild(placementLocation, blueprint)) {
-            player.sendMessage(MessageUtils.noValidBlock());
-            return false;
-        }
 
         BarricadeStructure structure = new BarricadeStructure(player, placementLocation, blueprint, durationMs);
         structureManager.register(structure);

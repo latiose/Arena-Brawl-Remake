@@ -196,19 +196,27 @@ public class PowerupManager {
                 continue;
             }
 
+            // Collect everyone standing in the pickup radius, then pick one at
+            // random: iterating the player collection directly always favoured
+            // the first accounts in it whenever several players camped the spawn.
+            List<Player> candidates = new ArrayList<>();
             for (Player player : players) {
                 if (!player.isOnline()) continue;
                 if (player.getGameMode().equals(GameMode.SPECTATOR)) continue;
                 if (player.getWorld() != state.spawnedAt.getWorld()) continue;
 
                 if (player.getLocation().distance(state.spawnedAt) <= PICKUP_RADIUS) {
-                    pickedUp.put(entry.getKey(), player);
-                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
-                    markPickedUp(state);
-                    despawn(state);
-                    break;
+                    candidates.add(player);
                 }
             }
+
+            if (candidates.isEmpty()) continue;
+
+            Player winner = candidates.get(random.nextInt(candidates.size()));
+            pickedUp.put(entry.getKey(), winner);
+            winner.playSound(winner.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+            markPickedUp(state);
+            despawn(state);
         }
 
         return pickedUp;

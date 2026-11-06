@@ -21,7 +21,8 @@ public class MatchTimerTask extends BukkitRunnable {
         List<Match> matches = new ArrayList<>(matchManager.getActiveMatches());
 
         for (Match match : matches) {
-            if (match.isEnded()) continue;
+            // Test matches only end when everyone /hubs or disconnects.
+            if (match.isEnded() || match.isTest()) continue;
 
             long elapsed = System.currentTimeMillis() - match.getStartedAt();
 

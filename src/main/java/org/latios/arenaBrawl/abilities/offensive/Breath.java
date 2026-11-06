@@ -82,7 +82,7 @@ public abstract class Breath implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        player.getWorld().playSound(player.getLocation(), getCastSound(), 10.0f, 1.0f);
+        playCastSound(player);
 
         Location eye = player.getLocation().add(0, EYE_HEIGHT + (player.isSneaking() ? SNEAK_EYE_OFFSET : 0), 0);
 
@@ -134,7 +134,7 @@ public abstract class Breath implements Ability {
     }
 
     protected void applyHit(Player caster, Player target) {
-        applyHitEffects(target);
+        applyHitEffects(caster, target);
         combatService.applyAbilityDamage(caster, target, getDamage(), getName());
         applySpike(target);
     }
@@ -184,9 +184,22 @@ public abstract class Breath implements Ability {
         return hitPlayers;
     }
 
+    /** Plays the cast breath sound, taking the per-breath pitch into account. */
+    protected void playCastSound(Player player) {
+        player.getWorld().playSound(player.getLocation(), getCastSound(), 10.0f, getCastSoundPitch());
+    }
+
     protected abstract Sound getCastSound();
+
+    /**
+     * Pitch of the cast sound; override to tune it per breath. Defaults to 1.0f.
+     */
+    protected float getCastSoundPitch() {
+        return 1.0f;
+    }
+
     protected abstract double getDamage();
     protected abstract void spawnTrailParticles(Location point);
-    protected abstract void applyHitEffects(Player target);
+    protected abstract void applyHitEffects(Player caster, Player target);
 }
 

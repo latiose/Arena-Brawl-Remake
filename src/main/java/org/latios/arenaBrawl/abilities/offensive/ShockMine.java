@@ -40,6 +40,7 @@ public class ShockMine implements Ability {
     private final double triggerRadius;
     private final double blastRadius;
     private final long stunDurationMs;
+    private final int concealTicks;
     private final double maxRange;
     private final int maxMines;
 
@@ -52,6 +53,7 @@ public class ShockMine implements Ability {
         this.triggerRadius = config.getDouble("trigger-radius", 2.2);
         this.blastRadius = config.getDouble("blast-radius", 3.5);
         this.stunDurationMs = config.getLong("stun-duration-ms", 1500L);
+        this.concealTicks = (int) (config.getLong("conceal-delay-ms", 2000L) / 50L);
         this.maxRange = config.getDouble("max-range", 20.0);
         this.maxMines = Math.max(1, config.getInt("max-mines", 6));
         this.structureManager = structureManager;
@@ -93,7 +95,7 @@ public class ShockMine implements Ability {
         final MineStructure[] structureHolder = new MineStructure[1];
 
         ShockMineTask mine = new ShockMineTask(player, location, damage, triggerRadius, blastRadius, stunDurationMs,
-                 teamManager, combatService, debuffManager, () -> {
+                concealTicks, teamManager, combatService, debuffManager, () -> {
                      activeMines.remove(mineHolder[0]);
                      if (structureHolder[0] != null) {
                          structureManager.unregister(structureHolder[0]);
@@ -120,6 +122,7 @@ public class ShockMine implements Ability {
         return List.of(
                 new AbilityStat("Damage", String.valueOf((int) damage)),
                 new AbilityStat("Stun", (stunDurationMs / 1000.0) + "s"),
+                new AbilityStat("Hidden after", (concealTicks * 50L / 1000L) + "s"),
                 new AbilityStat("Blast Radius", (int) blastRadius + " blocks"),
                 new AbilityStat("Max Active", String.valueOf(maxMines)),
                 new AbilityStat("Energy Cost", String.valueOf((int) energyCost))
