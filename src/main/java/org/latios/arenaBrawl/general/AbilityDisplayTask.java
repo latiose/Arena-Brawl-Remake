@@ -44,7 +44,7 @@ public class AbilityDisplayTask extends BukkitRunnable {
             String readyColorCode = getReadyColorCode(slot);
             Material unavailableMat = (slot.ordinal() == 0)
                     ? AbilityKit.getIcon(player, slot, swordSelectionManager)
-                    : Material.GRAY_DYE;
+                    : getNotReadyMaterial(slot);
             setItem(player, slot, unavailableMat, 1, readyColorCode + ability.getName(), ability);
             return;
         }
@@ -54,7 +54,7 @@ public class AbilityDisplayTask extends BukkitRunnable {
 
             Material cdMaterial = (slot.ordinal() == 0)
                     ? AbilityKit.getIcon(player, slot, swordSelectionManager)
-                    : Material.GRAY_DYE;
+                    : getNotReadyMaterial(slot);
             String readyColorCode = getReadyColorCode(slot);
             String name = (slot.ordinal() == 0)
                     ? readyColorCode + ability.getName()
@@ -71,6 +71,10 @@ public class AbilityDisplayTask extends BukkitRunnable {
         }
     }
 
+
+    private Material getNotReadyMaterial(AbilitySlot slot) {
+        return (slot == AbilitySlot.UTILITY) ? Material.GUNPOWDER : Material.GRAY_DYE;
+    }
 
     private String getReadyColorCode(AbilitySlot slot) {
         return switch (slot) {

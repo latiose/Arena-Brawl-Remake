@@ -176,7 +176,7 @@ public class ArenaManager {
         List<Player> allPlayers = List.copyOf(players);
         AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,
                 energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager,scavengerManager,skeletonEntityManager,
-                shadowCloakManager,soulLinkManager,guardianColossusEntityManager);
+                shadowCloakManager,soulLinkManager,guardianColossusEntityManager,matchManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(false);

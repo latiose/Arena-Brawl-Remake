@@ -16,6 +16,7 @@ import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
 import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
 import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -48,5 +49,6 @@ public record AbilityDependencies(
         SkeletonEntityManager skeletonEntityManager,
         ShadowCloakManager shadowCloakManager,
         SoulLinkManager soulLinkManager,
-        GuardianColossusEntityManager guardianColossusEntityManager
+        GuardianColossusEntityManager guardianColossusEntityManager,
+        MatchManager matchManager
 ) {}

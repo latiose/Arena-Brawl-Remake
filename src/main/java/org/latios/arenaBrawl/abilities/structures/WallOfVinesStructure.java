@@ -14,10 +14,8 @@ import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,7 +26,6 @@ public class WallOfVinesStructure extends PlacedStructure {
     private static final long IMMOBILIZE_DURATION_MILLIS = 2_000;
     private final DebuffManager debuffManager;
 
-    private final Map<Block, BlockData> originalBlockData = new HashMap<>();
     private final List<Block> placedBlocks = new ArrayList<>();
     private final Set<UUID> immobilizedEnemies = new HashSet<>();
     private final TeamManager teamManager;
@@ -55,8 +52,11 @@ public class WallOfVinesStructure extends PlacedStructure {
             if (!isReplaceable(block.getType())) {
                 continue;
             }
+            if (StructureBlockRegistry.isOwnedByOther(block, this)) {
+                continue;
+            }
 
-            originalBlockData.put(block, block.getBlockData());
+            StructureBlockRegistry.claim(block, this);
             block.setType(offset.material());
             placedBlocks.add(block);
         }
@@ -68,8 +68,11 @@ public class WallOfVinesStructure extends PlacedStructure {
             if (!isReplaceable(block.getType())) {
                 continue;
             }
+            if (StructureBlockRegistry.isOwnedByOther(block, this)) {
+                continue;
+            }
 
-            originalBlockData.put(block, block.getBlockData());
+            StructureBlockRegistry.claim(block, this);
             placeVine(block);
             placedBlocks.add(block);
         }
@@ -172,15 +175,10 @@ public class WallOfVinesStructure extends PlacedStructure {
     @Override
     public void remove() {
         for (Block block : placedBlocks) {
-            BlockData original = originalBlockData.get(block);
-            if (original != null) {
-                block.setBlockData(original);
-            } else {
-                block.setType(Material.AIR);
-            }
+            StructureBlockRegistry.release(block, this);
         }
+        StructureBlockRegistry.releaseAll(this);
         placedBlocks.clear();
-        originalBlockData.clear();
     }
 
     public List<Block> getPlacedBlocks() {

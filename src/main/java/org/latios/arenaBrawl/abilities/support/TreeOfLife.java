@@ -93,7 +93,8 @@ public class TreeOfLife implements Ability {
         }
 
         var structure = new TreeOfLifeStructure(
-                player, placementBlock.getLocation(), Blueprints.growthPhases(), teamManager, healthManager
+                player, placementBlock.getLocation(), Blueprints.growthPhases(), teamManager, healthManager,
+                healPerSecond, finalBurstHeal, durationSeconds, radius, hitsToDestroy
         );
         structureManager.register(structure);
         return true;

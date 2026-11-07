@@ -82,7 +82,6 @@ public class MatchManager {
     private final ScavengerManager scavengerManager;
     private final MovementLockManager movementLockManager;
     private final ArmorTierManager armorTierManager;
-    private  SwordSelectionManager swordSelectionManager;
     private final HatSelectionManager hatSelectionManager;
     private final BroodMotherEntityManager broodMotherEntityManager;
     private final Plugin plugin;
@@ -131,7 +130,6 @@ public class MatchManager {
         this.zombieEntityManager = zombieEntityManager;
         this.skeletonEntityManager = skeletonEntityManager;
         this.lifeLeechManager = lifeLeechManage;
-        this.swordSelectionManager = swordSelectionManager;
         this.shadowCloakManager = shadowCloakManager;
         this.soulLinkManager = soulLinkManager;
         this.guardianColossusEntityManager = guardianColossusEntityManager;
@@ -148,6 +146,8 @@ public class MatchManager {
     public void onPlayerEliminated(Player player) {
         Match match = activeMatches.get(player.getUniqueId());
         if (match == null) return;
+
+
 
         boolean testMatch = match.isTest();
 
@@ -400,6 +400,8 @@ public class MatchManager {
     }
 
     public void cleanupPlayerHub(Player player) {
+
+
         activeMatches.remove(player.getUniqueId());
         teamManager.clear(player);
         clearCombatEffects(player);
@@ -528,6 +530,7 @@ public class MatchManager {
         if (task != null) task.cancel();
         match.getPowerupManager().clear();
         broodMotherEntityManager.clearForMatch(match);
+        zombieEntityManager.clearBabiesForMatch(match);
         zombieEntityManager.clearForMatch(match);
         skeletonEntityManager.clearForMatch(match);
         guardianColossusEntityManager.clearForMatch(match);

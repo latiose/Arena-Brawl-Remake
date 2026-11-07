@@ -9,6 +9,7 @@ import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.structures.*;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
@@ -61,6 +62,10 @@ public class Barricade implements Ability {
     public boolean activate(Player player) {
         // Always builds around the caster: no aiming or target block needed and
         // no terrain checks that used to reject most placements.
+        if(!player.isOnGround()){
+            player.sendMessage(MessageUtils.noValidBlock());
+            return false;
+        }
         Location placementLocation = player.getLocation();
         StructureBlueprint blueprint = Blueprints.defaultBarricade();
 

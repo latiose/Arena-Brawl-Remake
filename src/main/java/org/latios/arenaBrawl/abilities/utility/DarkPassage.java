@@ -15,6 +15,7 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -54,7 +55,7 @@ public class DarkPassage implements Ability {
     public boolean activate(Player player) {
         Block targetBlock = player.getTargetBlockExact((int) maxRange);
         if (targetBlock == null) {
-            player.sendMessage("§eTarget location too far or invalid!");
+            player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
 
@@ -110,20 +111,21 @@ public class DarkPassage implements Ability {
      * backwards ray.
      */
     private void dashBackwards(Player owner) {
-        Location eye = owner.getEyeLocation();
-        Vector backward = eye.getDirection().normalize().multiply(-1.0);
+        Vector backward = owner.getLocation().getDirection().setY(0).normalize().multiply(-1.0);
+
+        Location feetLoc = owner.getLocation();
 
         // How far the backwards ray can actually travel: a wall stops it and
         // the dash never clips through blocks.
         double freeDistance = backDashDistance;
-        RayTraceResult hit = owner.getWorld().rayTraceBlocks(eye, backward, backDashDistance);
+        RayTraceResult hit = owner.getWorld().rayTraceBlocks(feetLoc.clone().add(0, 1, 0), backward, backDashDistance);
         if (hit != null) {
-            freeDistance = Math.max(0.0, hit.getHitPosition().distance(eye.toVector()) - 0.5);
+            freeDistance = Math.max(0.0, hit.getHitPosition().distance(feetLoc.toVector()) - 0.5);
         }
 
         Location destination = null;
         for (double d = freeDistance; d >= 0.0; d -= 0.25) {
-            Location candidate = owner.getLocation().add(backward.clone().multiply(d));
+            Location candidate = feetLoc.clone().add(backward.clone().multiply(d));
             if (isSafe(candidate)) {
                 destination = candidate;
                 break;
@@ -142,7 +144,7 @@ public class DarkPassage implements Ability {
         owner.getWorld().playSound(destination, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.9f);
         owner.getWorld().playSound(destination, Sound.PARTICLE_SOUL_ESCAPE, 1.0f, 1.4f);
         owner.getWorld().spawnParticle(Particle.PORTAL, destination.clone().add(0, 1, 0), 30, 0.3, 0.5, 0.3, 0.1);
-        owner.getWorld().spawnParticle(Particle.SOUL, eye.clone().add(0, 1, 0), 10, 0.3, 0.4, 0.3, 0.05);
+        owner.getWorld().spawnParticle(Particle.SOUL, feetLoc.clone().add(0, 1, 0), 10, 0.3, 0.4, 0.3, 0.05);
     }
 
     private boolean isSafe(Location location) {

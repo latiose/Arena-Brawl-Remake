@@ -90,7 +90,11 @@ public class MagicTable implements Ability {
                 player,
                 baseBlock.getLocation(),
                 teamManager,
-                healthManager
+                healthManager,
+                healAmount,
+                radius,
+                hitsToDestroy,
+                delaySeconds * 1000L
         );
         structureManager.register(structure);
         return true;

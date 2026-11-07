@@ -55,8 +55,16 @@ public class EnergyManager {
 
     private void syncVisual(Player player) {
         double current = getEnergy(player);
+        double max = getMaxEnergy(player);
+        double progress = max > 0 ? current / max : 0.0;
+
+        // Keep the bar visually at 99% even when energy is completely full.
+        if (progress >= 1.0) {
+            progress = 0.99;
+        }
+
         player.setLevel((int) current);
-        player.setExp((float) (current / getMaxEnergy(player)));
+        player.setExp((float) Math.max(0.0, Math.min(progress, 1.0)));
     }
 
     public void addEnergy(Player player, double amount) {

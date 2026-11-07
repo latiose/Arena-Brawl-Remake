@@ -1501,6 +1501,14 @@ ability-values:
     zombie-hits-to-kill: 3
     zombie-damage: 20.0
 
+  impregnation:
+    charge-time-millis: 60000
+    max-range: 20
+    gestation-millis: 20000
+    baby-health: 500
+    baby-hits-to-kill: 12
+    baby-damage: 60.0
+
   bloodmoon:
     radius: 8.0
     duration-ms: 8000

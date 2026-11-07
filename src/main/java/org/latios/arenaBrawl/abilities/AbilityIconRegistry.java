@@ -151,6 +151,7 @@ public class AbilityIconRegistry {
         icons.put("ninjadash", Material.STICK);
         icons.put("berserk", Material.BLAZE_ROD);
         icons.put("zombieapocalypse", Material.ZOMBIE_HEAD);
+        icons.put("impregnation", Material.ZOMBIE_SPAWN_EGG);
         icons.put("bloodmoon", Material.REDSTONE);
         icons.put("cataclysm", Material.MAGMA_BLOCK);
         icons.put("timestop", Material.MAP);

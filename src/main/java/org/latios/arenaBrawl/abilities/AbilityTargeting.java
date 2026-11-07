@@ -35,7 +35,7 @@ public class AbilityTargeting {
         Location eye = caster.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
 
-        Vector behindStep = direction.clone().multiply(-0.3 * STEP_SIZE);
+        Vector behindStep = direction.clone().multiply(-0.15 * STEP_SIZE);
         Location behindCursor = eye.clone();
 
         for (double traveled = 0; traveled <= 1.0; traveled += STEP_SIZE) {

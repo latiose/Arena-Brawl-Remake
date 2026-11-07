@@ -2,21 +2,16 @@
 package org.latios.arenaBrawl.abilities.structures;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class BarricadeStructure extends PlacedStructure {
 
     private final long durationMillis;
 
-    private final Map<Block, BlockData> originalBlockData = new HashMap<>();
     private final List<Block> placedBlocks = new ArrayList<>();
 
     public BarricadeStructure(Player owner, Location center, StructureBlueprint blueprint, long durationMillis) {
@@ -30,9 +25,11 @@ public class BarricadeStructure extends PlacedStructure {
             Block block = base.clone().add(offset.dx(), offset.dy(), offset.dz()).getBlock();
 
             // No terrain restrictions: every blueprint cell is placed, even over
-            // solid blocks. The original BlockData is always saved so that
-            // remove() restores whatever was there instead of deleting it.
-            originalBlockData.put(block, block.getBlockData());
+            // solid blocks. Blocks owned by another active structure are left alone
+            // so the two structures never restore each other's stale snapshots.
+            if (StructureBlockRegistry.isOwnedByOther(block, this)) continue;
+
+            StructureBlockRegistry.claim(block, this);
             block.setType(offset.material());
             placedBlocks.add(block);
         }
@@ -50,15 +47,10 @@ public class BarricadeStructure extends PlacedStructure {
     @Override
     public void remove() {
         for (Block block : placedBlocks) {
-            BlockData original = originalBlockData.get(block);
-            if (original != null) {
-                block.setBlockData(original);
-            } else {
-                block.setType(Material.AIR);
-            }
+            StructureBlockRegistry.release(block, this);
         }
+        StructureBlockRegistry.releaseAll(this);
         placedBlocks.clear();
-        originalBlockData.clear();
     }
 
     public List<Block> getPlacedBlocks() {

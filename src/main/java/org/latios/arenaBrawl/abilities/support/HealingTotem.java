@@ -84,7 +84,8 @@ public class HealingTotem implements Ability {
             player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
-        var structure = new HealingTotemStructure(player, baseBlock.getLocation(), teamManager, healthManager);
+        var structure = new HealingTotemStructure(player, baseBlock.getLocation(), teamManager, healthManager,
+                healPerPulse, radius, pulses, hitsToDestroy);
         structureManager.register(structure);
         return true;
     }

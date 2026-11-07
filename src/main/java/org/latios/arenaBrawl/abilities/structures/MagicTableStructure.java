@@ -2,7 +2,6 @@ package org.latios.arenaBrawl.abilities.structures;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Candle;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -16,23 +15,28 @@ import java.util.Set;
 
 public class MagicTableStructure extends PlacedStructure {
 
-    private static final double HEAL_RADIUS = 4.0;
-    private static final double HEAL_AMOUNT = 1000.0;
-    private static final long HEAL_DELAY_MILLIS = 9_000;
-    private static final int MELEE_HITS_TO_DESTROY = 4;
+    private final double healRadius;
+    private final double healAmount;
+    private final long healDelayMillis;
+    private final int meleeHitsToDestroy;
 
     private final List<Block> structureBlocks = new ArrayList<>();
-    private final List<BlockData> originalBlockData = new ArrayList<>();
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
 
     private final long createdAt;
-    private int remainingHits = MELEE_HITS_TO_DESTROY;
+    private int remainingHits;
 
-    public MagicTableStructure(Player owner, Location location, TeamManager teamManager, PlayerHealthManager healthManager) {
+    public MagicTableStructure(Player owner, Location location, TeamManager teamManager, PlayerHealthManager healthManager,
+                               double healAmount, double healRadius, int hitsToDestroy, long healDelayMillis) {
         super(owner, location.getBlock().getLocation());
         this.teamManager = teamManager;
         this.healthManager = healthManager;
+        this.healAmount = healAmount;
+        this.healRadius = healRadius;
+        this.meleeHitsToDestroy = Math.max(1, hitsToDestroy);
+        this.remainingHits = this.meleeHitsToDestroy;
+        this.healDelayMillis = healDelayMillis;
         this.createdAt = System.currentTimeMillis();
         buildStructure(location.getBlock().getLocation());
     }
@@ -40,13 +44,13 @@ public class MagicTableStructure extends PlacedStructure {
     private void buildStructure(Location base) {
         // Bloque inferior: Mesa de Encantamientos
         Block baseBlock = base.clone().add(0, 0, 0).getBlock();
-        originalBlockData.add(baseBlock.getBlockData());
+        StructureBlockRegistry.claim(baseBlock, this);
         baseBlock.setType(Material.ENCHANTING_TABLE);
         structureBlocks.add(baseBlock);
 
         // Bloque superior: Vela encendida
         Block topBlock = base.clone().add(0, 1, 0).getBlock();
-        originalBlockData.add(topBlock.getBlockData());
+        StructureBlockRegistry.claim(topBlock, this);
         topBlock.setType(Material.CANDLE);
         if (topBlock.getBlockData() instanceof Candle candle) {
             candle.setLit(true);
@@ -72,7 +76,7 @@ public class MagicTableStructure extends PlacedStructure {
 
     @Override
     public boolean tick() {
-        if (System.currentTimeMillis() - createdAt < HEAL_DELAY_MILLIS) {
+        if (System.currentTimeMillis() - createdAt < healDelayMillis) {
             return false;
         }
 
@@ -82,14 +86,14 @@ public class MagicTableStructure extends PlacedStructure {
         Set<Player> healed = new HashSet<>();
         Location center = getLocation().clone().add(0.5, 1, 0.5);
 
-        for (Entity nearby : center.getWorld().getNearbyEntities(center, HEAL_RADIUS, HEAL_RADIUS, HEAL_RADIUS)) {
+        for (Entity nearby : center.getWorld().getNearbyEntities(center, healRadius, healRadius, healRadius)) {
             if (nearby instanceof Player candidate
                     && (candidate.equals(owner) || teamManager.isAlly(owner, candidate))
                     && !healed.contains(candidate)) {
                 if (candidate.equals(owner)) {
-                    healthManager.heal(owner, HEAL_AMOUNT, "Magic Table");
+                    healthManager.heal(owner, healAmount, "Magic Table");
                 } else {
-                    healthManager.healAlly(owner, candidate, HEAL_AMOUNT, "Magic Table");
+                    healthManager.healAlly(owner, candidate, healAmount, "Magic Table");
                 }
                 healed.add(candidate);
             }
@@ -107,9 +111,10 @@ public class MagicTableStructure extends PlacedStructure {
 
     @Override
     public void remove() {
-        for (int i = 0; i < structureBlocks.size(); i++) {
-            structureBlocks.get(i).setBlockData(originalBlockData.get(i));
+        for (Block block : structureBlocks) {
+            StructureBlockRegistry.release(block, this);
         }
+        StructureBlockRegistry.releaseAll(this);
         getLocation().getWorld().spawnParticle(Particle.ENCHANT, getLocation().clone().add(0.5, 1, 0.5), 25, 0.3, 0.3, 0.3, 0.5);
     }
 
@@ -123,6 +128,6 @@ public class MagicTableStructure extends PlacedStructure {
     }
 
     public int getHealthPercentage() {
-        return (int) Math.ceil(((double) remainingHits / MELEE_HITS_TO_DESTROY) * 100);
+        return (int) Math.ceil(((double) remainingHits / meleeHitsToDestroy) * 100);
     }
 }

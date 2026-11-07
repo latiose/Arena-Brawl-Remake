@@ -267,6 +267,9 @@ public class AbilityRegistry {
                 deps -> new Berserk(plugin, deps.cooldownManager(), deps.usageManager(), deps.speedBuffManager(), configManager.get("berserk")));
         register(AbilitySlot.ULTIMATE, "zombieapocalypse",
                 deps -> new ZombieApocalypse(deps.cooldownManager(), deps.usageManager(), deps.zombieEntityManager(), deps.teamManager(), configManager.get("zombieapocalypse")));
+        register(AbilitySlot.ULTIMATE, "impregnation",
+                deps -> new Impregnation(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                        deps.matchManager(), deps.zombieEntityManager(), configManager.get("impregnation")));
         register(AbilitySlot.ULTIMATE, "bloodmoon",
                 deps -> new BloodMoon(deps.cooldownManager(), deps.usageManager(), deps.teamManager(), deps.debuffManager(), configManager.get("bloodmoon")));
         register(AbilitySlot.ULTIMATE, "cataclysm",

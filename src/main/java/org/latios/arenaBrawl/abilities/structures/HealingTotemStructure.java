@@ -2,7 +2,6 @@ package org.latios.arenaBrawl.abilities.structures;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
@@ -15,36 +14,45 @@ import java.util.Set;
 
 public class HealingTotemStructure extends PlacedStructure {
 
-    private static final double HEAL_RADIUS = 4.0;
-    private static final double HEAL_AMOUNT = 300.0;
-    private static final int MAX_HEAL_PULSES = 3;
     private static final long HEAL_INTERVAL_MILLIS = 3_000;
-    private static final int MELEE_HITS_TO_DESTROY = 4;
+
+    private final double healRadius;
+    private final double healAmount;
+    private final int maxHealPulses;
+    private final int meleeHitsToDestroy;
 
     private final List<Block> standBlocks = new ArrayList<>();
-    private final List<BlockData> originalBlockData = new ArrayList<>();
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
 
     private int healPulsesUsed = 0;
     private long lastHealAt;
-    private int remainingHits = MELEE_HITS_TO_DESTROY;
+    private int remainingHits;
 
-    public HealingTotemStructure(Player owner, Location location, TeamManager teamManager, PlayerHealthManager healthManager) {
+    public HealingTotemStructure(Player owner, Location location, TeamManager teamManager, PlayerHealthManager healthManager,
+                                 double healAmount, double healRadius, int pulses, int hitsToDestroy) {
         super(owner, location.getBlock().getLocation());
         this.teamManager = teamManager;
         this.healthManager = healthManager;
+        this.healAmount = healAmount;
+        this.healRadius = healRadius;
+        this.maxHealPulses = Math.max(1, pulses);
+        this.meleeHitsToDestroy = Math.max(1, hitsToDestroy);
+        this.remainingHits = this.meleeHitsToDestroy;
         this.lastHealAt = System.currentTimeMillis();
         buildStands(location.getBlock().getLocation());
     }
 
     private void buildStands(Location base) {
-        for (int i = 0; i < 2; i++) {
-            Block block = base.clone().add(0, i, 0).getBlock();
-            originalBlockData.add(block.getBlockData());
-            block.setType(org.bukkit.Material.BREWING_STAND);
-            standBlocks.add(block);
-        }
+        Block baseBlock = base.clone().getBlock();
+        StructureBlockRegistry.claim(baseBlock, this);
+        baseBlock.setType(org.bukkit.Material.BREWING_STAND);
+        standBlocks.add(baseBlock);
+
+        Block topBlock = base.clone().add(0, 1, 0).getBlock();
+        StructureBlockRegistry.claim(topBlock, this);
+        topBlock.setType(org.bukkit.Material.BREWING_STAND);
+        standBlocks.add(topBlock);
     }
 
     public boolean registerHit(Player attacker) {
@@ -67,7 +75,7 @@ public class HealingTotemStructure extends PlacedStructure {
 
     @Override
     public boolean tick() {
-        if (healPulsesUsed >= MAX_HEAL_PULSES) {
+        if (healPulsesUsed >= maxHealPulses) {
             return true;
         }
 
@@ -79,19 +87,19 @@ public class HealingTotemStructure extends PlacedStructure {
         healPulsesUsed++;
 
         Player owner = org.bukkit.Bukkit.getPlayer(getOwnerId());
-        if (owner == null) return healPulsesUsed >= MAX_HEAL_PULSES;
+        if (owner == null) return healPulsesUsed >= maxHealPulses;
 
         Set<Player> healed = new HashSet<>();
         Location center = getLocation().clone().add(0.5, 1, 0.5);
 
-        for (Entity nearby : center.getWorld().getNearbyEntities(center, HEAL_RADIUS, HEAL_RADIUS, HEAL_RADIUS)) {
+        for (Entity nearby : center.getWorld().getNearbyEntities(center, healRadius, healRadius, healRadius)) {
             if (nearby instanceof Player candidate
                     && (candidate.equals(owner) || teamManager.isAlly(owner, candidate))
                     && !healed.contains(candidate)) {
                 if (candidate.equals(owner)) {
-                    healthManager.heal(owner, HEAL_AMOUNT, "Healing Totem");
+                    healthManager.heal(owner, healAmount, "Healing Totem");
                 } else {
-                    healthManager.healAlly(owner, candidate, HEAL_AMOUNT, "Healing Totem");
+                    healthManager.healAlly(owner, candidate, healAmount, "Healing Totem");
                 }
                 healed.add(candidate);
             }
@@ -102,14 +110,15 @@ public class HealingTotemStructure extends PlacedStructure {
             center.getWorld().playSound(center, Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 5f, 1f);
         }
 
-        return healPulsesUsed >= MAX_HEAL_PULSES;
+        return healPulsesUsed >= maxHealPulses;
     }
 
     @Override
     public void remove() {
-        for (int i = 0; i < standBlocks.size(); i++) {
-            standBlocks.get(i).setBlockData(originalBlockData.get(i));
+        for (Block block : standBlocks) {
+            StructureBlockRegistry.release(block, this);
         }
+        StructureBlockRegistry.releaseAll(this);
         getLocation().getWorld().spawnParticle(Particle.FIREWORK, getLocation().clone().add(0.5, 1, 0.5), 15);
     }
 
@@ -123,6 +132,6 @@ public class HealingTotemStructure extends PlacedStructure {
     }
 
     public int getHealthPercentage() {
-        return (int) Math.ceil(((double) remainingHits / MELEE_HITS_TO_DESTROY) * 100);
+        return (int) Math.ceil(((double) remainingHits / meleeHitsToDestroy) * 100);
     }
 }
