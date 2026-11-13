@@ -18,8 +18,10 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
+import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.Collection;
@@ -39,10 +41,11 @@ public class BloodProjectile implements Ability {
     private final double collectRadius;
     private final AbilityCost cost;
     private final PlayerHealthManager healthManager;
+    private final TeamManager teamManager;
     private final AbilityConfig config;
 
     public BloodProjectile(Plugin plugin, CooldownManager cooldownManager, PlayerHealthManager healthManager,
-                           CombatUpgradeManager combatUpgradeManager, AbilityConfig config) {
+                           CombatUpgradeManager combatUpgradeManager, TeamManager teamManager, AbilityConfig config) {
         this.plugin = plugin;
         this.cooldownMs = config.getLong("cooldown-ms", 30000L);
         this.healAmount = config.getDouble("heal-amount", 450.0);
@@ -52,7 +55,7 @@ public class BloodProjectile implements Ability {
         this.maxFlightTicks = config.getInt("max-flight-ticks", 60);
         this.orbLifetimeMs = config.getLong("orb-lifetime-ms", 6000L);
         this.collectRadius = config.getDouble("collect-radius", 2.0);
-
+        this.teamManager = teamManager;
         this.cost = new CooldownCost(cooldownManager, "bloodprojectile", cooldownMs, combatUpgradeManager);
         this.healthManager = healthManager;
         this.config = config;
@@ -168,7 +171,7 @@ public class BloodProjectile implements Ability {
 
     @Override
     public String getDescription() {
-        return "Hurls a blood orb to a random spot near you. Sprint over to reclaim it and heal yourself for a large amount.";
+        return "Hurls a blood orb to a random spot near you. Sprint over to reclaim it and heal yourself for a large amount. Enemies can walk over it to destroy it.";
     }
 
     @Override
@@ -222,6 +225,12 @@ public class BloodProjectile implements Ability {
                 Vector move = step.multiply(1.0 / distance).multiply(projectileSpeed);
                 Location next = current.clone().add(move);
 
+                if (ProjectileInterceptionService.tryIntercept(owner, current, next)) {
+                    removeOrb();
+                    cancel();
+                    return;
+                }
+
                 spawnTrail(current, next);
                 lastLocation = next;
                 if (orb.isValid()) {
@@ -249,9 +258,17 @@ public class BloodProjectile implements Ability {
                 spawnLandingRing(lastLocation);
             }
 
+            double radiusSq = collectRadius * collectRadius;
+
             if (owner.getWorld().equals(lastLocation.getWorld())
-                    && owner.getLocation().distanceSquared(lastLocation) <= collectRadius * collectRadius) {
+                    && owner.getLocation().distanceSquared(lastLocation) <= radiusSq) {
                 collect();
+                cancel();
+                return;
+            }
+
+            if (isEnemyOnOrb(radiusSq)) {
+                destroyByEnemy();
                 cancel();
             }
         }
@@ -324,6 +341,29 @@ public class BloodProjectile implements Ability {
             lastLocation.getWorld().playSound(lastLocation, Sound.BLOCK_FIRE_EXTINGUISH, 0.6f, 1.4f);
         }
 
+
+        private boolean isEnemyOnOrb(double radiusSq) {
+            for (Player other : lastLocation.getWorld().getPlayers()) {
+                if (other.equals(owner)
+                        || other.isDead()
+                        || other.getGameMode() == GameMode.SPECTATOR) {
+                    continue;
+                }
+                if (!teamManager.isEnemy(owner, other)) {
+                    continue;
+                }
+                if (other.getLocation().distanceSquared(lastLocation) <= radiusSq) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void destroyByEnemy() {
+            lastLocation.getWorld().spawnParticle(Particle.DUST, lastLocation.clone().add(0, 0.3, 0), 25, 0.3, 0.3, 0.3,
+                    new Particle.DustOptions(Color.fromRGB(90, 0, 0), 1.2f));
+            lastLocation.getWorld().playSound(lastLocation, Sound.BLOCK_FIRE_EXTINGUISH, 0.8f, 1.2f);
+        }
         private void removeOrb() {
             if (orb.isValid()) orb.remove();
         }

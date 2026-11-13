@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -80,7 +81,15 @@ public class MysticShot implements Ability {
 
             @Override
             public void run() {
-                currentLoc.add(direction.clone().multiply(step));
+                Location previous = currentLoc.clone();
+                Location next = currentLoc.clone().add(direction.clone().multiply(step));
+
+                if (ProjectileInterceptionService.tryIntercept(player, previous, next)) {
+                    cancel();
+                    return;
+                }
+
+                currentLoc = next;
                 distanceTraveled += step;
 
                 currentLoc.getWorld().spawnParticle(Particle.CRIT, currentLoc, 3, 0.05, 0.05, 0.05, 0.01);

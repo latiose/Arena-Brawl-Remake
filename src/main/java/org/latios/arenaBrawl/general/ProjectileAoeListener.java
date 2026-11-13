@@ -13,6 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.general.AbilityItemKeys;
 
@@ -46,6 +47,11 @@ public class ProjectileAoeListener implements Listener {
                 }
 
                 org.bukkit.Location current = projectile.getLocation();
+                if (ProjectileInterceptionService.tryIntercept(shooter, previous, current)) {
+                    projectile.remove();
+                    cancel();
+                    return;
+                }
                 org.bukkit.util.Vector movement = current.toVector().subtract(previous.toVector());
                 double distance = movement.length();
                 if (distance > 0.0) {
@@ -105,7 +111,7 @@ public class ProjectileAoeListener implements Listener {
 
     private void detonate(Projectile projectile, Player shooter, org.bukkit.Location center,
                           Player directTarget) {
-        center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.0f);
+        center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 10.0f, 1.0f);
         center.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, center, 1, 0, 0, 0, 0);
         center.getWorld().spawnParticle(Particle.FLAME, center, 30, 0.45, 0.45, 0.45, 0.08);
         center.getWorld().spawnParticle(Particle.SMOKE, center, 20, 0.35, 0.35, 0.35, 0.04);

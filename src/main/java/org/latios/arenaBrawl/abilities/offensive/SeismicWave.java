@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
@@ -44,8 +45,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class SeismicWave implements Ability {
 
     private static final double START_OFFSET = 1.0;
-    /** How far behind the caster the wave hitbox reaches, so point-blank targets are not skipped. */
-    private static final double POINT_BLANK_MARGIN = 0.75;
+    private static final double POINT_BLANK_MARGIN = 1.25;
     private static final int RISE_TICKS = 2;
     private static final int HOLD_TICKS = 7;
     private static final int SINK_TICKS = 5;
@@ -180,32 +180,35 @@ public class SeismicWave implements Ability {
                 double forwardWindow = speed / 2.0 + 0.6;
                 double lateralWindow = width / 2.0 + 0.4;
 
-                // Sweep the hitbox along the segment travelled since the last tick instead of checking
-                // a single point. This keeps the area between the caster and the wave covered, so
-                // enemies standing right in front (or overlapping) are hit too.
-                Vector start = from.toVector();
-                Vector segment = to.toVector().subtract(start);
-                double segmentLength = segment.length();
-                Vector segmentDir = segmentLength > 1.0E-4
-                        ? segment.clone().multiply(1.0 / segmentLength)
-                        : dir;
+                double dx = to.getX() - from.getX();
+                double dz = to.getZ() - from.getZ();
+                double segmentLength = Math.sqrt(dx * dx + dz * dz);
+
+                double minY = Math.min(from.getY(), to.getY()) - 1.0;
+                double maxY = Math.max(from.getY(), to.getY()) + 2.5;
 
                 for (Player enemy : world.getPlayers()) {
                     if (enemy.isDead() || enemy.getGameMode() == GameMode.SPECTATOR) continue;
                     if (!teamManager.isEnemy(caster, enemy)) continue;
                     if (alreadyHit.contains(enemy.getUniqueId())) continue;
 
-                    Location loc = enemy.getLocation();
-                    Vector rel = loc.toVector().subtract(start);
-                    double forward = rel.dot(segmentDir);
-                    double lateral = rel.dot(perp);
-                    double vertical = loc.getY() - to.getY();
+                    BoundingBox box = enemy.getBoundingBox();
 
-                    if (forward < -POINT_BLANK_MARGIN || forward > segmentLength + forwardWindow) continue;
-                    if (Math.abs(lateral) > lateralWindow) continue;
-                    if (vertical < -1.5 || vertical > 2.5) continue;
+                    if (box.getMaxY() < minY || box.getMinY() > maxY) continue;
+
+                    double relX = box.getCenterX() - from.getX();
+                    double relZ = box.getCenterZ() - from.getZ();
+                    double forward = relX * dir.getX() + relZ * dir.getZ();
+                    double lateral = relX * perp.getX() + relZ * perp.getZ();
+
+                    double half = box.getWidthX() / 2.0;
+
+                    if (forward < -POINT_BLANK_MARGIN - half
+                            || forward > segmentLength + forwardWindow + half) continue;
+                    if (Math.abs(lateral) > lateralWindow + half) continue;
 
                     alreadyHit.add(enemy.getUniqueId());
+                    Location loc = enemy.getLocation();
                     combatService.applyAbilityDamage(caster, enemy, damage, getName(), loc);
 
                     Vector push = dir.clone().multiply(knockbackHorizontal).setY(knockbackVertical);

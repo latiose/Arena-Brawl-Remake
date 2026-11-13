@@ -24,6 +24,11 @@ public class AbilityItemKeys {
     public static final NamespacedKey PROJECTILE_DIRECT_HIT_TARGET = new NamespacedKey(
             ArenaBrawlPlugin.getInstance(), "projectile_direct_hit_target"
     );
+
+    /** Owner UUID for projectiles whose Bukkit shooter is not a player (e.g. skeleton arrows). */
+    public static final NamespacedKey PROJECTILE_OWNER = new NamespacedKey(
+            ArenaBrawlPlugin.getInstance(), "projectile_owner"
+    );
     public static final NamespacedKey ARENA_ENTITY_MARKER = new NamespacedKey(
             ArenaBrawlPlugin.getInstance(), "arena_entity_marker"
     );

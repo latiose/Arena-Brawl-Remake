@@ -96,6 +96,19 @@ public class Blueprints {
         return new StructureBlueprint(offsets);
     }
 
+    public static StructureBlueprint defaultPhaseWall() {
+        List<StructureBlueprint.BlockOffset> offsets = new ArrayList<>();
+
+        // Five blocks wide, three blocks high, one block thick.
+        for (int y = 0; y <= 2; y++) {
+            for (int z = -2; z <= 2; z++) {
+                offsets.add(new StructureBlueprint.BlockOffset(0, y, z, Material.GLASS));
+            }
+        }
+
+        return new StructureBlueprint(offsets);
+    }
+
     public static List<StructureBlueprint> growthPhases() {
         List<StructureBlueprint> phases = new ArrayList<>();
 

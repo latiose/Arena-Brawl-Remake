@@ -35,13 +35,16 @@ public class PortalStructure extends PlacedStructure {
     private final Location portalB;
     private final double radius;
     private final long durationMillis;
+    private final long teleportCooldownMillis;
 
     private final Map<UUID, Integer> lastInside = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> nextTeleportAt = new ConcurrentHashMap<>();
 
     private BukkitTask task;
 
     public PortalStructure(Player owner, Location portalA, Location portalB,
-                           Plugin plugin, TeamManager teamManager, double radius, long durationMillis) {
+                           Plugin plugin, TeamManager teamManager, double radius, long durationMillis,
+                           long teleportCooldownMillis) {
         super(owner, portalA);
         this.portalA = portalA;
         this.portalB = portalB;
@@ -49,6 +52,7 @@ public class PortalStructure extends PlacedStructure {
         this.teamManager = teamManager;
         this.radius = radius;
         this.durationMillis = durationMillis;
+        this.teleportCooldownMillis = teleportCooldownMillis;
     }
 
     public void start() {
@@ -78,10 +82,22 @@ public class PortalStructure extends PlacedStructure {
             int previous = lastInside.getOrDefault(uuid, NONE);
 
             if (current != NONE && current != previous) {
+                long now = System.currentTimeMillis();
+                long readyAt = nextTeleportAt.getOrDefault(uuid, 0L);
+
+                if (now < readyAt) {
+                    // Still recharging: require the player to step out and back in.
+                    lastInside.put(uuid, current);
+                    long secondsLeft = Math.max(1L, (readyAt - now + 999L) / 1000L);
+                    player.sendMessage("§5Portal§7 recharging: §e" + secondsLeft + "s");
+                    continue;
+                }
+
                 Location destination = current == END_A ? portalB : portalA;
                 int nowStandingAt = current == END_A ? END_B : END_A;
 
                 teleport(player, destination);
+                nextTeleportAt.put(uuid, now + teleportCooldownMillis);
                 lastInside.put(uuid, nowStandingAt);
             } else {
                 lastInside.put(uuid, current);
@@ -163,6 +179,7 @@ public class PortalStructure extends PlacedStructure {
         }
 
         lastInside.clear();
+        nextTeleportAt.clear();
     }
 
     @Override

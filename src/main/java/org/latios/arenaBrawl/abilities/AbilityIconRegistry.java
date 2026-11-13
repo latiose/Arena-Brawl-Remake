@@ -76,6 +76,9 @@ public class AbilityIconRegistry {
         icons.put("wallofvines", Material.VINE);
         icons.put("polymorph", Material.WHITE_WOOL);
         icons.put("barricade", Material.COBBLESTONE_WALL);
+        icons.put("phasewall", Material.GLASS_PANE);
+        icons.put("aegisscreen", Material.AMETHYST_CLUSTER);
+        icons.put("cobwebfield", Material.COBWEB);
         icons.put("golemfall", Material.IRON_BLOCK);
         icons.put("bullcharge", Material.LEATHER_HORSE_ARMOR);
         icons.put("corruption", Material.CRYING_OBSIDIAN);

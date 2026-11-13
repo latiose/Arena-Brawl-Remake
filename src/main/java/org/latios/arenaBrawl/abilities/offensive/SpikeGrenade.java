@@ -18,6 +18,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -91,6 +92,11 @@ public class SpikeGrenade implements Ability {
             @Override
             public void run() {
                 double segment = Math.min(grenadeSpeed, maxRange - traveled);
+                Location next = pos.clone().add(direction.clone().multiply(segment));
+                if (ProjectileInterceptionService.tryIntercept(player, pos, next)) {
+                    cancel();
+                    return;
+                }
                 RayTraceResult hit = trace(player, pos, direction, segment, grenadeHitRadius, null);
 
                 double length = hit != null
@@ -180,6 +186,11 @@ public class SpikeGrenade implements Ability {
             @Override
             public void run() {
                 double segment = Math.min(needleSpeed, needleRange - traveled);
+                Location next = pos.clone().add(dir.clone().multiply(segment));
+                if (ProjectileInterceptionService.tryIntercept(caster, pos, next)) {
+                    cancel();
+                    return;
+                }
                 RayTraceResult hit = trace(caster, pos, dir, segment, needleHitRadius, ignored);
 
                 double length = hit != null

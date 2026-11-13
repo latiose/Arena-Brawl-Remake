@@ -25,6 +25,7 @@ public class StructureDemolitionService {
     public PlacedStructure findStructureNear(Location point, double radius) {
         for (PlacedStructure structure : new ArrayList<>(structureManager.getAll())) {
             for (Location hitPoint : structure.getHitLocations()) {
+                if (!isSameWorld(hitPoint, point)) continue;
                 if (hitPoint.distance(point) <= radius) {
                     return structure;
                 }
@@ -38,6 +39,7 @@ public class StructureDemolitionService {
         List<PlacedStructure> found = new ArrayList<>();
         for (PlacedStructure structure : new ArrayList<>(structureManager.getAll())) {
             for (Location hitPoint : structure.getHitLocations()) {
+                if (!isSameWorld(hitPoint, center)) continue;
                 if (hitPoint.distance(center) <= radius) {
                     found.add(structure);
                     break;
@@ -45,6 +47,15 @@ public class StructureDemolitionService {
             }
         }
         return found;
+    }
+
+    /**
+     * Location#distance throws when the two locations belong to different worlds. Matches can
+     * run in separate instance worlds, so a demolition search must ignore structures that
+     * live somewhere else.
+     */
+    private static boolean isSameWorld(Location a, Location b) {
+        return a != null && b != null && a.getWorld() != null && a.getWorld().equals(b.getWorld());
     }
 
     public boolean isBlockPartOfAnyStructure(Block block) {

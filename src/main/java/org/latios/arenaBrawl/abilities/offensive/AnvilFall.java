@@ -16,6 +16,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.abilities.structures.PlacedStructure;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.general.CombatService;
@@ -114,7 +115,14 @@ public class AnvilFall implements Ability {
             @Override
             public void run() {
                 if (anvil.isValid() && !anvil.isDead()) {
-                    lastLocation = anvil.getLocation();
+                    Location current = anvil.getLocation();
+
+                    if (ProjectileInterceptionService.tryIntercept(player, lastLocation, current)) {
+                        anvil.remove();
+                        cancel();
+                        return;
+                    }
+                    lastLocation = current;
 
                     // Twice the vanilla fall speed: pin a constant downward velocity
                     // every tick.

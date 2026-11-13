@@ -17,6 +17,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -116,6 +117,12 @@ public class Mortar implements Ability {
                 Vector step = delta.clone().normalize();
                 World world = position.getWorld();
                 if (world == null) {
+                    cancel();
+                    return;
+                }
+
+                Location next = position.clone().add(delta);
+                if (ProjectileInterceptionService.tryIntercept(player, position, next)) {
                     cancel();
                     return;
                 }

@@ -15,17 +15,21 @@ import java.util.Set;
 /**
  * Admin command that force-starts a test match.
  *
- * <p>Syntax: /forcestart [team1 players] [: team2 players]</p>
+ * <p>Syntax: /forcestart [opponents] or /forcestart [teammates] : [opponents]</p>
  *
  * <ul>
- *     <li>The sender always joins team 1 (red). Arguments before ":" are
- *     extra red members, arguments after ":" are blue members.</li>
  *     <li>/forcestart            -> 1v0 (just the sender)</li>
- *     <li>/forcestart a          -> 2v0 (sender and a on red)</li>
+ *     <li>/forcestart a          -> 1v1 (sender vs a)</li>
+ *     <li>/forcestart a b        -> 1v2 (sender vs a and b)</li>
+ *     <li>/forcestart a :        -> 2v0 (sender and a on red)</li>
  *     <li>/forcestart a : b      -> 2v1</li>
- *     <li>/forcestart a b : c d  -> 2v2</li>
+ *     <li>/forcestart a : b c    -> 2v2</li>
  *     <li>/forcestart : b        -> 1v1</li>
  * </ul>
+ *
+ * <p>Without the ":" separator every listed player is treated as an opponent,
+ * so {@code /forcestart player} starts a 1v1. Teammates go before the
+ * separator.</p>
  *
  * <p>Test matches never affect ratings, coins or stats, never end by
  * elimination, draw vote or time limit, and only finish once every
@@ -34,8 +38,8 @@ import java.util.Set;
 public class ForceStartCommand implements CommandExecutor {
 
     private static final String USAGE =
-            "§cUsage: /forcestart [red players] [: blue players] §7"
-                    + "(sender joins red: /forcestart = 1v0, /forcestart : b = 1v1, /forcestart a : b c = 2v1)";
+            "§cUsage: /forcestart [opponents] §7or §c/forcestart [teammates] : [opponents] §7"
+                    + "(/forcestart a = 1v1, /forcestart a : b = 2v1, /forcestart : a b = 1v2)";
 
     private final ArenaManager arenaManager;
     private final QueueManager queueManager;
@@ -58,56 +62,79 @@ public class ForceStartCommand implements CommandExecutor {
 
         List<String> redNames = new ArrayList<>();
         List<String> blueNames = new ArrayList<>();
-        boolean blueSide = false;
-        for (String arg : args) {
-            if (arg.equals(":")) {
-                if (blueSide) {
-                    sender.sendMessage(USAGE);
-                    return true;
-                }
-                blueSide = true;
-                continue;
+        int separator = -1;
+        for (int i = 0; i < args.length; i++) {
+            if (!args[i].equals(":")) continue;
+            if (separator >= 0) {
+                sender.sendMessage(USAGE);
+                return true;
             }
-            if (blueSide) blueNames.add(arg); else redNames.add(arg);
+            separator = i;
+        }
+
+        if (separator < 0) {
+            // No separator: every listed name is an opponent.
+            blueNames.addAll(List.of(args));
+        } else {
+            redNames.addAll(List.of(args).subList(0, separator));
+            blueNames.addAll(List.of(args).subList(separator + 1, args.length));
         }
 
         List<Player> red = new ArrayList<>();
         red.add(player);
-        if (!resolveNames(sender, "red", redNames, red)) return true;
+        if (!resolveNames(sender, redNames, red)) return true;
 
         List<Player> blue = new ArrayList<>();
-        if (!resolveNames(sender, "blue", blueNames, blue)) return true;
+        if (!resolveNames(sender, blueNames, blue)) return true;
+
+        // Deduplicate while preserving order and never put the sender on blue.
+        red = new ArrayList<>(new LinkedHashSet<>(red));
+        blue = new ArrayList<>(new LinkedHashSet<>(blue));
+        blue.removeIf(candidate -> candidate.getUniqueId().equals(player.getUniqueId()));
+
+        for (Player candidate : blue) {
+            boolean alsoRed = red.stream()
+                    .anyMatch(redPlayer -> redPlayer.getUniqueId().equals(candidate.getUniqueId()));
+            if (alsoRed) {
+                sender.sendMessage("§c" + candidate.getName() + " can't be on both teams.");
+                return true;
+            }
+        }
+
+        if (red.size() > 2 || blue.size() > 2) {
+            sender.sendMessage("§cEach team supports at most 2 players (2v2).");
+            return true;
+        }
+
+        // A 1v1 needs a duel map; partial/larger test matches use the 2v2 layout.
+        MatchType type = red.size() == 1 && blue.size() == 1
+                ? MatchType.DUEL
+                : MatchType.TEAMS;
 
         Set<Player> participants = new LinkedHashSet<>(red);
         participants.addAll(blue);
-        if (participants.size() > 4) {
-            sender.sendMessage("§cA test match fits at most 4 players (2v2).");
-            return true;
-        }
 
         // Don't let matchmaking start a real match around players in a test game.
         for (Player participant : participants) {
             queueManager.leaveQueue(participant);
         }
 
-        arenaManager.startTestMatch(MatchType.TEAMS, List.copyOf(participants));
+        arenaManager.startTestMatch(type, red, blue);
 
         sender.sendMessage(String.format(
-                "§aStarted test match: §e%dv%d§a. It only ends when everyone uses /hub or disconnects.",
+                "§aStarted test match: §c%dv§9%d§a. It only ends when everyone uses /hub or disconnects.",
                 red.size(), blue.size()));
         return true;
     }
 
     /** Appends the online players for each name to the team, or reports who is missing. */
-    private boolean resolveNames(CommandSender sender, String teamName, List<String> names, List<Player> team) {
+    private boolean resolveNames(CommandSender sender, List<String> names, List<Player> team) {
         for (String name : names) {
             Player target = Bukkit.getPlayerExact(name);
             if (target == null) {
                 sender.sendMessage("§cPlayer not found or not online: §e" + name);
                 return false;
             }
-            // Duplicate names resolve to the same player; they are deduped
-            // when building the participant set.
             team.add(target);
         }
         return true;

@@ -123,6 +123,12 @@ public class AbilityRegistry {
                 deps -> new Polymorph(deps.cooldownManager(), deps.teamManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("polymorph")));
         register(AbilitySlot.UTILITY, "barricade",
                 deps -> new Barricade(deps.cooldownManager(), deps.combatUpgradeManager(), deps.structureManager(), configManager.get("barricade")));
+        register(AbilitySlot.UTILITY, "phasewall",
+                deps -> new PhaseWall(deps.cooldownManager(), deps.combatUpgradeManager(), deps.structureManager(), deps.teamManager(), configManager.get("phasewall")));
+        register(AbilitySlot.UTILITY, "aegisscreen",
+                deps -> new AegisScreen(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.structureManager(), deps.teamManager(), configManager.get("aegisscreen")));
+        register(AbilitySlot.UTILITY, "cobwebfield",
+                deps -> new CobwebField(deps.cooldownManager(), deps.combatUpgradeManager(), deps.structureManager(), deps.teamManager(), configManager.get("cobwebfield")));
         register(AbilitySlot.UTILITY, "golemfall",
                 deps -> new GolemFall(plugin, deps.cooldownManager(), deps.combatUpgradeManager(), deps.teamManager(), deps.demolitionService(), configManager.get("golemfall")));
         register(AbilitySlot.UTILITY, "bullcharge",
@@ -218,7 +224,7 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "overcharge",
                 deps -> new Overcharge(deps.energyManager(), deps.playerHealthManager(), configManager.get("overcharge")));
         register(AbilitySlot.SUPPORT, "bloodprojectile",
-                deps -> new BloodProjectile(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("bloodprojectile")));
+                deps -> new BloodProjectile(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), deps.teamManager(),configManager.get("bloodprojectile")));
         register(AbilitySlot.SUPPORT, "momentum",
                 deps -> new Momentum(plugin, deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("momentum")));
         register(AbilitySlot.SUPPORT, "lonewolf",

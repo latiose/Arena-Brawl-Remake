@@ -15,6 +15,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -69,10 +70,19 @@ public class CowThrow implements Ability {
 
         new BukkitRunnable() {
             int ticks = 0;
+            Location lastLocation = spawnLoc.clone();
 
             @Override
             public void run() {
                 ticks++;
+
+                Location cowLoc = cow.getLocation();
+                if (ProjectileInterceptionService.tryIntercept(player, lastLocation, cowLoc)) {
+                    cow.remove();
+                    cancel();
+                    return;
+                }
+                lastLocation = cowLoc.clone();
 
                 if (cow.isDead() || !cow.isValid() || ticks > 100 || cow.isOnGround() || isHittingEnemy(cow, player)) {
                     explodeCow(cow, player);
@@ -80,8 +90,7 @@ public class CowThrow implements Ability {
                     return;
                 }
 
-                Location cowLoc = cow.getLocation();
-               // cowLoc.getWorld().spawnParticle(Particle.EXPLOSION, cowLoc, 1, 0.1, 0.1, 0.1, 0.0);
+                // cowLoc.getWorld().spawnParticle(Particle.EXPLOSION, cowLoc, 1, 0.1, 0.1, 0.1, 0.0);
                 cowLoc.getWorld().spawnParticle(Particle.CLOUD, cowLoc, 3, 0.2, 0.2, 0.2, 0.05);
             }
         }.runTaskTimer(plugin, 1L, 1L);

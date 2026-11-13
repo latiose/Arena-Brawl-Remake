@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.hats.KeyManager;
+import org.latios.arenaBrawl.cosmetics.CosmeticEffectManager;
 import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -22,7 +23,9 @@ public class AbilitySelectionLoadListener implements Listener {
     private final CombatUpgradeManager combatUpgradeManager;
     private final MatchManager matchManager;
     private final SwordSelectionManager swordSelectionManager;
-    public AbilitySelectionLoadListener(AbilitySelectionManager selectionManager, RuneSelectionManager runeManager,HatSelectionManager hatSelectionManager, KeyManager keyManager, CombatUpgradeManager combatUpgradeManager, MatchManager matchManager,SwordSelectionManager swordSelectionManager) {
+    private final CosmeticEffectManager cosmeticEffectManager;
+    public AbilitySelectionLoadListener(AbilitySelectionManager selectionManager, RuneSelectionManager runeManager,HatSelectionManager hatSelectionManager, KeyManager keyManager, CombatUpgradeManager combatUpgradeManager, MatchManager matchManager,SwordSelectionManager swordSelectionManager,
+                                        CosmeticEffectManager cosmeticEffectManager) {
         this.selectionManager = selectionManager;
         this.runeManager = runeManager;
         this.hatSelectionManager = hatSelectionManager;
@@ -30,6 +33,7 @@ public class AbilitySelectionLoadListener implements Listener {
         this.combatUpgradeManager = combatUpgradeManager;
         this.matchManager = matchManager;
       this.swordSelectionManager = swordSelectionManager;
+      this.cosmeticEffectManager = cosmeticEffectManager;
     }
 
 
@@ -41,6 +45,7 @@ public class AbilitySelectionLoadListener implements Listener {
         keyManager.loadForPlayer(event.getPlayer());
         combatUpgradeManager.loadForPlayer(event.getPlayer());
         swordSelectionManager.loadForPlayer(event.getPlayer());
+        cosmeticEffectManager.loadForPlayer(event.getPlayer());
         matchManager.cleanupPlayer(event.getPlayer());
     }
 
@@ -52,5 +57,6 @@ public class AbilitySelectionLoadListener implements Listener {
         keyManager.unloadPlayer(event.getPlayer());
         combatUpgradeManager.unloadPlayer(event.getPlayer());
        swordSelectionManager.unloadPlayer(event.getPlayer());
+       cosmeticEffectManager.unloadPlayer(event.getPlayer());
     }
 }

@@ -74,6 +74,7 @@ public class PrimalRoar implements Ability {
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Shield", (int) (shieldPercent * 100) + "%"),
+                new AbilityStat("Shield duration", (shieldDurationMs / 1000.0) + "s"),
                 new AbilityStat("Silence", (silenceDurationMs / 1000.0) + "s"),
                 new AbilityStat("Radius", (int) radius + "m"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")

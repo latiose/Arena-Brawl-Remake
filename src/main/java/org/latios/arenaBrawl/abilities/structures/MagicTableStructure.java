@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MagicTableStructure extends PlacedStructure {
+public class MagicTableStructure extends PlacedStructure implements DestructibleStructure {
 
     private final double healRadius;
     private final double healAmount;
@@ -129,5 +129,10 @@ public class MagicTableStructure extends PlacedStructure {
 
     public int getHealthPercentage() {
         return (int) Math.ceil(((double) remainingHits / meleeHitsToDestroy) * 100);
+    }
+
+    @Override
+    public String getStructureName() {
+        return "Magic Table";
     }
 }

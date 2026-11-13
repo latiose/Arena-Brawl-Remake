@@ -101,7 +101,7 @@ public class Skittles implements Ability {
         return List.of(
                 new AbilityStat("Red", (int) redHeal + " HP + " + (int) redEnergy + " energy"),
                 new AbilityStat("Blue", (int) blueHeal + " HP, Slowness " + (blueSlowDurationTicks / 1000) + "s"),
-                new AbilityStat("Yellow", (int) yellowHeal + " HP, Speed II " + (yellowSpeedDurationTicks / 20) + "s"),
+                new AbilityStat("Yellow", (int) yellowHeal + " HP, Speed II " + (yellowSpeedDurationTicks / 1000) + "s"),
                 new AbilityStat("Orange", (int) orangeHeal + " HP, +" + (int) (orangeDamageBonus * 100) + "% damage "
                         + (orangeDamageDurationMillis / 1000) + "s"),
                 new AbilityStat("Odds", "25% each")

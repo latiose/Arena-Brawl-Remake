@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -84,6 +85,10 @@ public class ParticleBeam implements Ability {
             Location point = eye.clone().add(direction.clone().multiply(distance));
 
             if (point.getBlock().getType().isSolid()) {
+                break;
+            }
+
+            if (ProjectileInterceptionService.isBlocked(player, point)) {
                 break;
             }
 

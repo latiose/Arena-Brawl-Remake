@@ -13,10 +13,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
+import org.latios.arenaBrawl.general.AbilityItemKeys;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
 
 import java.util.HashMap;
@@ -71,6 +74,14 @@ public class SkeletonArrowListener implements Listener {
 
         EntityCleanupUtils.markAsArenaEntity(arrow);
 
+        UUID ownerId = skeletonEntityManager.getOwner(shooter);
+        if (ownerId != null) {
+            arrow.getPersistentDataContainer().set(
+                    AbilityItemKeys.PROJECTILE_OWNER,
+                    PersistentDataType.STRING,
+                    ownerId.toString()
+            );
+        }
 
         previousPositions.put(
                 arrow.getUniqueId(),
@@ -121,6 +132,13 @@ public class SkeletonArrowListener implements Listener {
 
             Vector currentPosition = currentLocation.toVector();
 
+            Player owner = getOwner(shooter);
+            if (owner != null && ProjectileInterceptionService.tryIntercept(
+                    owner, previousPosition.toLocation(arrow.getWorld()), currentLocation)) {
+                arrow.remove();
+                iterator.remove();
+                continue;
+            }
 
             if (previousPosition.distanceSquared(currentPosition) < 0.000001) {
                 continue;

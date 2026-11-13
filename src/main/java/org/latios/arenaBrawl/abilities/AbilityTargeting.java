@@ -35,7 +35,7 @@ public class AbilityTargeting {
         Location eye = caster.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
 
-        Vector behindStep = direction.clone().multiply(-0.15 * STEP_SIZE);
+        Vector behindStep = direction.clone().multiply(-0.1 * STEP_SIZE);
         Location behindCursor = eye.clone();
 
         for (double traveled = 0; traveled <= 1.0; traveled += STEP_SIZE) {
@@ -105,7 +105,7 @@ public class AbilityTargeting {
     }
 
     private static boolean isInsideHitbox(Player target, Location point) {
-        BoundingBox box = target.getBoundingBox().expand(0.4, 0.4, 0.4);
+        BoundingBox box = target.getBoundingBox().expand(0.55, 0.55, 0.55);
         return box.contains(point.getX(), point.getY(), point.getZ());
     }
 

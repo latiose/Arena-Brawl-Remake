@@ -4,6 +4,7 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,15 +15,21 @@ public record HatDefinition(
         HatRarity rarity,
         List<String> phrases,
         Color leatherColor,
-        UUID playerHeadOwner
+        UUID playerHeadOwner,
+        boolean enchanted,
+        List<Material> animatedMaterials
 ) {
+    public HatDefinition {
+        animatedMaterials = animatedMaterials == null ? List.of() : List.copyOf(animatedMaterials);
+    }
+
     public HatDefinition(String id, String displayName, Material material, HatRarity rarity, List<String> phrases) {
-        this(id, displayName, material, rarity, phrases, null, null);
+        this(id, displayName, material, rarity, phrases, null, null, false, List.of());
     }
 
     public HatDefinition(String id, String displayName, Material material, HatRarity rarity,
                          List<String> phrases, Color leatherColor) {
-        this(id, displayName, material, rarity, phrases, leatherColor, null);
+        this(id, displayName, material, rarity, phrases, leatherColor, null, false, List.of());
     }
 
     public HatDefinition(String id, ConfigurationSection section) {
@@ -33,13 +40,15 @@ public record HatDefinition(
                 parseRarity(section.getString("rarity")),
                 section.getStringList("lore"),
                 parseColor(section.getString("color")),
-                parseUuid(section.getString("texture-uuid"))
+                parseUuid(section.getString("texture-uuid")),
+                section.getBoolean("enchanted", false),
+                parseMaterials(section.getStringList("materials"))
         );
     }
 
     public static HatDefinition playerHead(String id, String displayName, HatRarity rarity,
                                            List<String> phrases, UUID ownerUuid) {
-        return new HatDefinition(id, displayName, Material.PLAYER_HEAD, rarity, phrases, null, ownerUuid);
+        return new HatDefinition(id, displayName, Material.PLAYER_HEAD, rarity, phrases, null, ownerUuid, false, List.of());
     }
 
     // Métodos auxiliares de parsing
@@ -47,6 +56,18 @@ public record HatDefinition(
         if (matName == null) return Material.DIRT;
         Material mat = Material.matchMaterial(matName);
         return mat != null ? mat : Material.DIRT;
+    }
+
+    /** Parses the optional material cycle used by animated hats (e.g. the Disco Hat). */
+    private static List<Material> parseMaterials(List<String> materialNames) {
+        if (materialNames == null || materialNames.isEmpty()) return List.of();
+
+        List<Material> materials = new ArrayList<>();
+        for (String materialName : materialNames) {
+            Material material = Material.matchMaterial(materialName);
+            if (material != null) materials.add(material);
+        }
+        return materials;
     }
 
     private static HatRarity parseRarity(String rarityStr) {

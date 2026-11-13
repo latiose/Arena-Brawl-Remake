@@ -153,5 +153,11 @@ public class ShockMine implements Ability {
         public List<Block> getOccupiedBlocks() {
             return List.of();
         }
+
+        /** The mine has no physical block, so demolition abilities target its center point. */
+        @Override
+        public List<Location> getHitLocations() {
+            return List.of(getLocation());
+        }
     }
 }

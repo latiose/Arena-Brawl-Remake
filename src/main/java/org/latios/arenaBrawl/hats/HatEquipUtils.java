@@ -2,6 +2,8 @@
 package org.latios.arenaBrawl.hats;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -21,7 +23,26 @@ public class HatEquipUtils {
             return;
         }
 
-        ItemStack helmet = new ItemStack(hat.material());
+        applyEquippedHat(player, hat, hat.material());
+    }
+
+    /**
+     * Applies the equipped hat using a specific material. Used by animated hats,
+     * which cycle through several materials while the hat is worn.
+     */
+    public static void applyEquippedHat(Player player, HatSelectionManager hatSelectionManager, Material material) {
+        HatDefinition hat = hatSelectionManager.getEquipped(player);
+
+        if (hat == null) {
+            player.getInventory().setHelmet(null);
+            return;
+        }
+
+        applyEquippedHat(player, hat, material);
+    }
+
+    private static void applyEquippedHat(Player player, HatDefinition hat, Material material) {
+        ItemStack helmet = new ItemStack(material);
         ItemMeta meta = helmet.getItemMeta();
         meta.setDisplayName(hat.rarity().getColor() + hat.displayName());
         meta.setLore(buildPhraseLore(hat));
@@ -31,13 +52,17 @@ public class HatEquipUtils {
                 org.bukkit.inventory.ItemFlag.HIDE_UNBREAKABLE
         );
 
+        if (hat.enchanted()) {
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+        }
+
         if (meta instanceof SkullMeta skullMeta && hat.playerHeadOwner() != null) {
             skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(hat.playerHeadOwner()));
         }
         if (meta instanceof LeatherArmorMeta leatherMeta && hat.leatherColor() != null) {
             leatherMeta.setColor(hat.leatherColor());
         }
-        if (hat.material().name().endsWith("_HELMET")) {
+        if (material.name().endsWith("_HELMET")) {
             meta.setAttributeModifiers(com.google.common.collect.ImmutableMultimap.of());
         }
 

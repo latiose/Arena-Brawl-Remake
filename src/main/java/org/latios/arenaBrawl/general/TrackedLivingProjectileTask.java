@@ -12,6 +12,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.HashSet;
@@ -106,6 +107,13 @@ public class TrackedLivingProjectileTask extends BukkitRunnable {
         BoundingBox body = entity.getBoundingBox();
         Vector center = body.getCenter();
         if (lastCenter == null) lastCenter = center.clone();
+
+        if (ProjectileInterceptionService.tryIntercept(shooter,
+                lastCenter.toLocation(world), center.toLocation(world))) {
+            cancel();
+            entity.remove();
+            return;
+        }
 
         // Guided variants slowly blend toward whatever the shooter is looking at.
         if (steerTowardsCamera && steerFactor > 0.0 && shooter.isOnline()) {

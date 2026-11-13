@@ -10,6 +10,8 @@ import org.latios.arenaBrawl.abilities.AbilityRegistry;
 import org.latios.arenaBrawl.abilities.AbilitySelectionManager;
 import org.latios.arenaBrawl.abilities.AbilitySlot;
 import org.latios.arenaBrawl.hats.HatSelectorGUI;
+import org.latios.arenaBrawl.cosmetics.HitEffectSelectorGUI;
+import org.latios.arenaBrawl.cosmetics.KillEffectSelectorGUI;
 import org.latios.arenaBrawl.cosmetics.SwordSelectorGUI;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
@@ -27,8 +29,11 @@ public class AbilitySelectorListener implements Listener {
     private final HatSelectorGUI hatManager;
     private final CombatUpgradeGUI combatUpgradeGUI;
     private final SwordSelectorGUI swordSelectorGUI;
+    private final HitEffectSelectorGUI hitEffectSelectorGUI;
+    private final KillEffectSelectorGUI killEffectSelectorGUI;
 
-    public AbilitySelectorListener(AbilityRegistry registry, AbilitySelectionManager selectionManager, AbilitySelectorGUI gui, RuneSelectionManager runeManager, HatSelectorGUI hatSelectorGUI, CombatUpgradeGUI combatUpgradeGUI,SwordSelectorGUI swordSelectorGUI) {
+    public AbilitySelectorListener(AbilityRegistry registry, AbilitySelectionManager selectionManager, AbilitySelectorGUI gui, RuneSelectionManager runeManager, HatSelectorGUI hatSelectorGUI, CombatUpgradeGUI combatUpgradeGUI,SwordSelectorGUI swordSelectorGUI,
+                                   HitEffectSelectorGUI hitEffectSelectorGUI, KillEffectSelectorGUI killEffectSelectorGUI) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.gui = gui;
@@ -36,6 +41,8 @@ public class AbilitySelectorListener implements Listener {
         this.hatManager = hatSelectorGUI;
         this.combatUpgradeGUI = combatUpgradeGUI;
         this.swordSelectorGUI = swordSelectorGUI;
+        this.hitEffectSelectorGUI = hitEffectSelectorGUI;
+        this.killEffectSelectorGUI = killEffectSelectorGUI;
     }
 
     @EventHandler
@@ -95,6 +102,14 @@ public class AbilitySelectorListener implements Listener {
             }
             if (rawSlot == AbilitySelectorGUI.SWORDS_SLOT) {
                 swordSelectorGUI.open(player);
+                return;
+            }
+            if (rawSlot == AbilitySelectorGUI.HIT_EFFECTS_SLOT) {
+                hitEffectSelectorGUI.open(player);
+                return;
+            }
+            if (rawSlot == AbilitySelectorGUI.KILL_EFFECTS_SLOT) {
+                killEffectSelectorGUI.open(player);
                 return;
             }
 

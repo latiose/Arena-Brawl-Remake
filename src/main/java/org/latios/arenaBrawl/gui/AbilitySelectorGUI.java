@@ -11,6 +11,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jspecify.annotations.NonNull;
 import org.latios.arenaBrawl.abilities.*;
+import org.latios.arenaBrawl.cosmetics.CosmeticEffectManager;
+import org.latios.arenaBrawl.cosmetics.HitEffectType;
+import org.latios.arenaBrawl.cosmetics.KillEffectType;
 import org.latios.arenaBrawl.runes.RuneConfig;
 import org.latios.arenaBrawl.runes.RuneConfigManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
@@ -32,6 +35,8 @@ public class AbilitySelectorGUI {
     public static final int RUNE_SLOT = 30;
     public static final int UPGRADES_SLOT = 32;
     public static final int SWORDS_SLOT = 34;
+    public static final int HIT_EFFECTS_SLOT = 20;
+    public static final int KILL_EFFECTS_SLOT = 24;
 
     private static final int ABILITY_ROW = 1;
     private static final int RUNE_ROW = 2;
@@ -43,15 +48,17 @@ public class AbilitySelectorGUI {
     private final Map<String, Ability> previewCache = new HashMap<>();
     private final RuneConfigManager runeConfigManager;
     private final AbilityIconRegistry abilityIconRegistry;
+    private final CosmeticEffectManager cosmeticEffectManager;
 
     public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager,
                               RuneSelectionManager runeSelectionManager, RuneConfigManager runeConfig,
-                              AbilityIconRegistry abilityIconRegistry) {
+                              AbilityIconRegistry abilityIconRegistry, CosmeticEffectManager cosmeticEffectManager) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.runeSelectionManager = runeSelectionManager;
         this.runeConfigManager = runeConfig;
         this.abilityIconRegistry = abilityIconRegistry;
+        this.cosmeticEffectManager = cosmeticEffectManager;
     }
 
     public Ability createPreview(AbilitySlot slot, String id) {
@@ -213,6 +220,34 @@ public class AbilitySelectorGUI {
         swordMeta.setLore(List.of("", "§7Click to choose your cosmetic sword"));
         swordItem.setItemMeta(swordMeta);
         inv.setItem(SWORDS_SLOT, swordItem);
+
+        HitEffectType hitEffect = cosmeticEffectManager.getEquippedHitEffect(player);
+        ItemStack hitEffectItem = new ItemStack(Material.FIREWORK_STAR);
+        ItemMeta hitEffectMeta = hitEffectItem.getItemMeta();
+        hitEffectMeta.setDisplayName("§bHit Effects");
+        hitEffectMeta.setLore(List.of(
+                "",
+                "§7Current: §f" + (hitEffect != null ? hitEffect.getDisplayName() : "None"),
+                "",
+                "§7Particles that appear when you land a melee hit",
+                "§eClick to browse hit effects"
+        ));
+        hitEffectItem.setItemMeta(hitEffectMeta);
+        inv.setItem(HIT_EFFECTS_SLOT, hitEffectItem);
+
+        KillEffectType killEffect = cosmeticEffectManager.getEquippedKillEffect(player);
+        ItemStack killEffectItem = new ItemStack(Material.FIRE_CHARGE);
+        ItemMeta killEffectMeta = killEffectItem.getItemMeta();
+        killEffectMeta.setDisplayName("§cKill Effects");
+        killEffectMeta.setLore(List.of(
+                "",
+                "§7Current: §f" + (killEffect != null ? killEffect.getDisplayName() : "None"),
+                "",
+                "§7Effects that play where you kill an enemy",
+                "§eClick to browse kill effects"
+        ));
+        killEffectItem.setItemMeta(killEffectMeta);
+        inv.setItem(KILL_EFFECTS_SLOT, killEffectItem);
 
         player.openInventory(inv);
     }

@@ -28,6 +28,7 @@ public class Portal implements Ability {
 
 
     private final long chargeTimeMillis;
+    private final long teleportCooldownMillis;
     private final double maxTargetDistance;
     private final double portalRadius;
     private final long durationMillis;
@@ -43,6 +44,7 @@ public class Portal implements Ability {
                   TeamManager teamManager, StructureManager structureManager, AbilityConfig config) {
         this.plugin = plugin;
         this.chargeTimeMillis = config.getLong("charge-time-ms", 60000L);
+        this.teleportCooldownMillis = config.getLong("teleport-cooldown-ms", 7000L);
         this.maxTargetDistance = config.getDouble("max-target-distance", 20.0);
         this.portalRadius = config.getDouble("portal-radius", 1.4);
         this.durationMillis = config.getLong("duration-ms", 60000L);
@@ -81,6 +83,7 @@ public class Portal implements Ability {
                 new AbilityStat("Range", (int) maxTargetDistance + "m"),
                 new AbilityStat("Duration", "60s"),
                 new AbilityStat("Target", "Ground block"),
+                new AbilityStat("Teleport Cooldown", (teleportCooldownMillis / 1000L) + "s"),
                 new AbilityStat("Uses", "1 per match")
         );
     }
@@ -123,7 +126,7 @@ public class Portal implements Ability {
             return false;
         }
 
-        PortalStructure portal = new PortalStructure(player, portalA, portalB, plugin, teamManager, portalRadius, durationMillis);
+        PortalStructure portal = new PortalStructure(player, portalA, portalB, plugin, teamManager, portalRadius, durationMillis, teleportCooldownMillis);
         structureManager.register(portal);
         portal.start();
 

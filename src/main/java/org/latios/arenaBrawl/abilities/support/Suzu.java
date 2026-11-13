@@ -14,6 +14,7 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.ShieldManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -77,8 +78,14 @@ public class Suzu implements Ability {
 
             @Override
             public void run() {
+                Location previous = currentLoc.clone();
                 currentLoc.add(direction.clone().multiply(step));
                 distanceTraveled += step;
+
+                if (ProjectileInterceptionService.tryIntercept(player, previous, currentLoc)) {
+                    cancel();
+                    return;
+                }
 
                 currentLoc.getWorld().spawnParticle(Particle.FIREWORK, currentLoc, 1, 0.02, 0.02, 0.02, 0.01);
                 currentLoc.getWorld().spawnParticle(Particle.END_ROD, currentLoc, 1, 0, 0, 0, 0);

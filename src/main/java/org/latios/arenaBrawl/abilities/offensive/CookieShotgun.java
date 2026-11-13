@@ -14,6 +14,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -113,7 +114,13 @@ public class CookieShotgun implements Ability {
                         return;
                     }
 
-                    current.add(spreadDir.clone().multiply(speed));
+                    Location next = current.clone().add(spreadDir.clone().multiply(speed));
+                    if (ProjectileInterceptionService.tryIntercept(player, current, next)) {
+                        cancel();
+                        cookie.remove();
+                        return;
+                    }
+                    current = next;
                     cookie.teleport(current);
 
                     cookie.getWorld().spawnParticle(

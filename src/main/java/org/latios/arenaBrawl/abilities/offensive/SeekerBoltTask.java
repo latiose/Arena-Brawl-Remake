@@ -7,6 +7,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -68,6 +69,10 @@ public class SeekerBoltTask extends BukkitRunnable {
         }
 
         if (!projectile.isValid() || projectile.isDead()) {
+            if (ProjectileInterceptionService.wasIntercepted(projectile.getUniqueId())) {
+                cancel();
+                return;
+            }
             finish(previous);
             return;
         }
@@ -78,6 +83,12 @@ public class SeekerBoltTask extends BukkitRunnable {
         }
 
         Location now = projectile.getLocation();
+
+        if (ProjectileInterceptionService.tryIntercept(shooter, previous, now)) {
+            cancel();
+            projectile.remove();
+            return;
+        }
 
         Vector movement = now.toVector().subtract(previous.toVector());
         double distance = movement.length();

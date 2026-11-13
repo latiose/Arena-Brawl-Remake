@@ -139,7 +139,37 @@ public class ArenaManager {
         startMatch(type, players, true);
     }
 
+    /** Starts a test match with explicitly assigned red and blue teams. */
+    public void startTestMatch(MatchType type, List<Player> red, List<Player> blue) {
+        Map<Team, List<Player>> teams = new LinkedHashMap<>();
+        teams.put(Team.RED, List.copyOf(red));
+        teams.put(Team.BLUE, List.copyOf(blue));
+        startMatch(type, teams, true);
+    }
+
     private void startMatch(MatchType type, List<Player> players, boolean test) {
+        Team[] availableTeams = Team.values();
+        Map<Team, List<Player>> teams = new LinkedHashMap<>();
+        for (int i = 0; i < type.getTeamCount(); i++) {
+            List<Player> teamPlayers = new ArrayList<>();
+            for (int j = 0; j < type.getTeamSize(); j++) {
+                int index = i * type.getTeamSize() + j;
+                // Partial (e.g. only red) teams are allowed for test matches,
+                // so missing slots are simply left empty instead of erroring.
+                if (index >= players.size()) continue;
+                teamPlayers.add(players.get(index));
+            }
+            teams.put(availableTeams[i], teamPlayers);
+        }
+        startMatch(type, teams, test);
+    }
+
+    private void startMatch(MatchType type, Map<Team, List<Player>> teams, boolean test) {
+        List<Player> players = new ArrayList<>();
+        for (List<Player> teamPlayers : teams.values()) {
+            players.addAll(teamPlayers);
+        }
+
         for (Player player : players) {
             if (matchManager.isInMatch(player)) {
                 matchManager.leaveMatch(player);
@@ -157,20 +187,11 @@ public class ArenaManager {
             }
             return;
         }
-        Team[] availableTeams = Team.values();
-        Map<Team, List<Player>> teams = new LinkedHashMap<>();
-        for (int i = 0; i < type.getTeamCount(); i++) {
-            List<Player> teamPlayers = new ArrayList<>();
-            for (int j = 0; j < type.getTeamSize(); j++) {
-                int index = i * type.getTeamSize() + j;
-                // Partial (e.g. only red) teams are allowed for test matches,
-                // so missing slots are simply left empty instead of erroring.
-                if (index >= players.size()) continue;
-                Player player = players.get(index);
-                teamPlayers.add(player);
-                teamManager.setTeam(player, availableTeams[i]);
+
+        for (Map.Entry<Team, List<Player>> entry : teams.entrySet()) {
+            for (Player player : entry.getValue()) {
+                teamManager.setTeam(player, entry.getKey());
             }
-            teams.put(availableTeams[i], teamPlayers);
         }
 
         List<Player> allPlayers = List.copyOf(players);
@@ -219,8 +240,15 @@ public class ArenaManager {
         matchManager.registerMatch(match, task);
 
         List<Location> spawns = map.getSpawns(type);
-        for (int i = 0; i < allPlayers.size(); i++) {
-            allPlayers.get(i).teleport(spawns.get(i));
+        int teamIndex = 0;
+        for (List<Player> teamPlayers : teams.values()) {
+            for (int j = 0; j < teamPlayers.size(); j++) {
+                int spawnIndex = teamIndex * type.getTeamSize() + j;
+                if (spawnIndex < spawns.size()) {
+                    teamPlayers.get(j).teleport(spawns.get(spawnIndex));
+                }
+            }
+            teamIndex++;
         }
         matchManager.announceMatchStart(match);
 

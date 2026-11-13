@@ -21,6 +21,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
@@ -137,6 +138,10 @@ public class BoomerangAxe implements Ability {
 
                 Location from = current.clone();
                 Location next = current.clone().add(direction.clone().multiply(projectileSpeed));
+                if (ProjectileInterceptionService.tryIntercept(player, from, next)) {
+                    cleanup();
+                    return;
+                }
                 if (!returning && next.getBlock().getType().isSolid()) {
                     handleGroundHit(next);
                     return;

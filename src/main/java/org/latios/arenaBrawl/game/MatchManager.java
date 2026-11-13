@@ -41,6 +41,7 @@ import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
 import org.latios.arenaBrawl.abilities.utility.TauntingGlare;
 import org.latios.arenaBrawl.abilities.utility.Taunt;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
+import org.latios.arenaBrawl.cosmetics.CosmeticEffectManager;
 import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
@@ -96,7 +97,7 @@ public class MatchManager {
     private final ShadowCloakManager shadowCloakManager;
     private final SoulLinkManager soulLinkManager;
     private final GuardianColossusEntityManager guardianColossusEntityManager;
-
+    private final CosmeticEffectManager cosmeticEffectManager;
     private static final String SEPARATOR_LINE = "§a§l---------------------------------------------";
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
                         Location lobbySpawn, RatingManager ratingManager, DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
@@ -106,7 +107,7 @@ public class MatchManager {
                         ShadowCloakManager shadowCloakManager, SoulLinkManager soulLinkManager, GuardianColossusEntityManager guardianColossusEntityManager,
                         ShieldManager shieldManager, DamageVulnerabilityManager damageVulnerabilityManager, SpeedBuffManager speedBuffManager,
                         EtherealBodyManager etherealBodyManager, EnergyModifierManager energyModifierManager,
-                        ScavengerManager scavengerManager, MovementLockManager movementLockManager) {
+                        ScavengerManager scavengerManager, MovementLockManager movementLockManager,CosmeticEffectManager cosmeticEffectManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -129,6 +130,7 @@ public class MatchManager {
         this.drawVoteManager = drawVoteManager;
         this.zombieEntityManager = zombieEntityManager;
         this.skeletonEntityManager = skeletonEntityManager;
+        this.cosmeticEffectManager = cosmeticEffectManager;
         this.lifeLeechManager = lifeLeechManage;
         this.shadowCloakManager = shadowCloakManager;
         this.soulLinkManager = soulLinkManager;
@@ -408,6 +410,7 @@ public class MatchManager {
         abilityManager.clearAbilities(player);
         cooldownManager.clearPlayer(player);
         usageManager.resetPlayer(player);
+        orbitShieldManager.clear(player);
         if (!player.isOnline()) return;
 
         player.setGameMode(org.bukkit.GameMode.SURVIVAL);
@@ -571,7 +574,6 @@ public class MatchManager {
         scavengerManager.clear(player);
         etherealBodyManager.clear(player);
         movementLockManager.unlock(player);
-        orbitShieldManager.clear(player);
         songOfPowerManager.clear(player);
         lifeLeechManager.clear(player);
         shadowCloakManager.clear(player);
@@ -634,6 +636,7 @@ public class MatchManager {
                 drawVoteManager.reset(match);
             } else {
                 onPlayerEliminated(player);
+                cosmeticEffectManager.onPlayerEliminated(player);
             }
         }
 

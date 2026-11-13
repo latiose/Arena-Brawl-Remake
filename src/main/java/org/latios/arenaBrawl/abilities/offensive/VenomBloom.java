@@ -16,6 +16,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
@@ -114,6 +115,12 @@ public class VenomBloom implements Ability {
 
                 velocity.setY(velocity.getY() - gravity);
                 double step = velocity.length();
+
+                Location next = current.clone().add(velocity);
+                if (ProjectileInterceptionService.tryIntercept(player, current, next)) {
+                    cancel();
+                    return;
+                }
 
                 RayTraceResult hit = current.getWorld().rayTrace(
                         current,

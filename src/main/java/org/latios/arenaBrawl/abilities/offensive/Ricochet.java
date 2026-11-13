@@ -17,6 +17,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -106,6 +107,12 @@ public class Ricochet implements Ability {
 
                 Vector delta = direction.clone().multiply(speed);
                 double length = delta.length();
+
+                Location next = position.clone().add(delta);
+                if (ProjectileInterceptionService.tryIntercept(player, position, next)) {
+                    cancel();
+                    return;
+                }
 
                 RayTraceResult hit = world.rayTrace(
                         position, direction, length,

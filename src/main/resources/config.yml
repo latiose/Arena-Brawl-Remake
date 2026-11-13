@@ -66,6 +66,30 @@ maps:
     damage-powerups:
       - { x: -2480.476, y: 24.5, z: 697.423 }
       - { x: -2462.592, y: 24.5, z: 697.423 }
+  1v1Exodus:
+    world: "1v1Exodus"
+    spawns:
+      1v1:
+        - { x: -64.472, y: 80, z: 30, yaw: 90, pitch: 0 }
+        - { x: -110.544, y: 80, z: 30, yaw: -90, pitch: 0 }
+      2v2:
+        - { x: -64.472, y: 80, z: 30, yaw: 90, pitch: 0 }
+        - { x: -64.472, y: 80, z: 29, yaw: 90, pitch: 0 }
+        - { x: -110.544, y: 80, z: 30, yaw: -90, pitch: 0 }
+        - { x: -110.544, y: 80, z: 29, yaw: -90, pitch: 0 }
+      1v1v1v1:
+        - { x: -64.472, y: 80, z: 30, yaw: 90, pitch: 0 }
+        - { x: -64.472, y: 80, z: 29, yaw: 90, pitch: 0 }
+        - { x: -110.544, y: 80, z: 30, yaw: -90, pitch: 0 }
+        - { x: -110.544, y: 80, z: 29, yaw: -90, pitch: 0 }
+    red-spawn-1: { x: -64.472, y: 80, z: 30, yaw: 90, pitch: 0 }
+    red-spawn-2: { x: -64.472, y: 80, z: 29, yaw: 90, pitch: 0 }
+    blue-spawn-1: { x: -110.544, y: 80, z: 30, yaw: -90, pitch: 0 }
+    blue-spawn-2: { x: -110.544, y: 80, z: 30, yaw: -90, pitch: 0 }
+    health-powerup: { x: -87.5, y: 82.5, z: 30.5 }
+    damage-powerups:
+      - { x: -87.5, y: 80.5, z: 45.7 }
+      - { x: -87.5, y: 80.5, z: 15.3 }
   Jungle:
     world: "Jungle"
     spawns:
@@ -916,7 +940,6 @@ ability-values:
     trigger-radius: 2.2
     blast-radius: 3.5
     stun-duration-ms: 1000
-    duration-ms: 15000
     max-range: 20.0
     conceal-delay-ms: 2000
 
@@ -1096,6 +1119,26 @@ ability-values:
   barricade:
     cooldown-ms: 30000
     duration-ms: 4000
+
+  phasewall:
+    cooldown-ms: 35000
+    duration-ms: 5000
+    hits-to-destroy: 6
+    max-range: 5.0
+
+  aegisscreen:
+    cooldown-ms: 35000
+    duration-ms: 6000
+    hits-to-destroy: 5
+    distance: 2.0
+    width: 3.0
+    height: 3.0
+
+  cobwebfield:
+    cooldown-ms: 35000
+    duration-ms: 5000
+    hits-to-destroy: 5
+    max-range: 5.0
 
   golemfall:
     max-range: 20.0
@@ -1551,6 +1594,7 @@ ability-values:
 
   portal:
     charge-time-ms: 60000
+    teleport-cooldown-ms: 7000
     max-target-distance: 20.0
     portal-radius: 1.4
     duration-ms: 60000
@@ -1627,6 +1671,7 @@ hats:
     name: "Troll Hat"
     material: "BEDROCK"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "umadbro?"
       - "Trolol!"
@@ -1636,6 +1681,7 @@ hats:
     name: "Hefney Hat"
     material: "SAND"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "Sand in my eyes!"
       - "نزال الساحة"
@@ -1645,6 +1691,7 @@ hats:
     name: "Compliment Hat"
     material: "COMMAND_BLOCK"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "You're amazing!"
       - "I love your style!"
@@ -1654,6 +1701,7 @@ hats:
     name: "Insult Hat"
     material: "OBSIDIAN"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "You suck!"
       - "I'm better!"
@@ -1663,6 +1711,7 @@ hats:
     name: "Robot Hat"
     material: "IRON_HELMET"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "I'll be back."
       - "Get out."
@@ -1672,6 +1721,7 @@ hats:
     name: "Fox Hat"
     material: "ORANGE_WOOL"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "RING A DING DING!"
       - "SAY WHAT?"
@@ -1681,6 +1731,7 @@ hats:
     name: "Mr. Toad Hat"
     material: "GREEN_TERRACOTTA"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "Ribbet."
       - "Croak."
@@ -1690,6 +1741,7 @@ hats:
     name: "Teamplayer Hat"
     material: "LEATHER_HELMET"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "Way to go!"
       - "Good job!"
@@ -1699,6 +1751,7 @@ hats:
     name: "n00b Hat"
     material: "COAL_ORE"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "OMG HAX!"
       - "1v1 me!"
@@ -1708,6 +1761,7 @@ hats:
     name: "Scotland Hat"
     material: "LAPIS_BLOCK"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "Haggis!"
       - "Kilts!"
@@ -1717,6 +1771,7 @@ hats:
     name: "Potty Mouth Hat"
     material: "DIRT"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "#&^$@(!."
       - "!*#&#(!&*."
@@ -1726,6 +1781,7 @@ hats:
     name: "Kim Jong-Il Hat"
     material: "LEATHER_HELMET"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "Why Harro there."
       - "I'm so ronernee."
@@ -1735,6 +1791,7 @@ hats:
     name: "Gold Rush Hat"
     material: "GOLD_BLOCK"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "Budder."
       - "Budder."
@@ -1744,6 +1801,7 @@ hats:
     name: "Spartan Hat"
     material: "CHAINMAIL_HELMET"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "Madness? This is..."
       - "Arena!"
@@ -1753,6 +1811,7 @@ hats:
     name: "Hipster Hat"
     material: "GRASS_BLOCK"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "The underground!"
       - "Starbucks!"
@@ -1762,6 +1821,7 @@ hats:
     name: "Try Hard Hat"
     material: "TURTLE_HELMET"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "FITE ME."
       - "UWOTM8."
@@ -1771,6 +1831,7 @@ hats:
     name: "Librarian Hat"
     material: "BOOKSHELF"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "Shhh!"
       - "Knowledge is power!"
@@ -1780,6 +1841,7 @@ hats:
     name: "Grumpy Cat Hat"
     material: "LEATHER_HELMET"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "I hate games!"
       - "I hate swords!"
@@ -1790,6 +1852,7 @@ hats:
     name: "Detective Hat"
     material: "LEATHER_HELMET"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "Elementary!"
       - "Fetch my diary!"
@@ -1800,6 +1863,7 @@ hats:
     name: "Orange Hoodie Hat"
     material: "LEATHER_HELMET"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "Mmph mmf, mmph?"
       - "Mmmpf mpph."
@@ -1810,6 +1874,7 @@ hats:
     name: "Wizard Hat"
     material: "LEATHER_HELMET"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "Wingardium!"
       - "Protego!"
@@ -1820,6 +1885,7 @@ hats:
     name: "Canada Hat"
     material: "LEATHER_HELMET"
     rarity: "COMMON"
+    enchanted: false
     lore:
       - "I'M SO SORRY."
       - "Syrup?"
@@ -1831,6 +1897,7 @@ hats:
     name: "Doge Hat"
     material: "PLAYER_HEAD"
     rarity: "RARE"
+    enchanted: false
     lore:
       - "such ouch."
       - "very damage."
@@ -1841,6 +1908,7 @@ hats:
     name: "GetMads Hat"
     material: "PLAYER_HEAD"
     rarity: "RARE"
+    enchanted: false
     lore:
       - "#KHAZAKASTANNUMBER1"
       - "vodka client"
@@ -1851,6 +1919,7 @@ hats:
     name: "l33t Hat"
     material: "REDSTONE_ORE"
     rarity: "RARE"
+    enchanted: false
     lore:
       - "GET ON MY LEVEL."
       - "UR WEAK SON."
@@ -1860,6 +1929,7 @@ hats:
     name: "Nukem Hat"
     material: "TNT"
     rarity: "RARE"
+    enchanted: false
     lore:
       - "Out of gum."
       - "Time to kick butt!"
@@ -1869,6 +1939,7 @@ hats:
     name: "BebopVox Hat"
     material: "PLAYER_HEAD"
     rarity: "RARE"
+    enchanted: false
     lore:
       - "Diamonds to you!"
       - "Game on!"
@@ -1879,6 +1950,7 @@ hats:
     name: "Kevinkool Hat"
     material: "PLAYER_HEAD"
     rarity: "RARE"
+    enchanted: false
     lore:
       - "More Fish!"
       - "I'm kool!"
@@ -1889,6 +1961,7 @@ hats:
     name: "Thorlon Hat"
     material: "PLAYER_HEAD"
     rarity: "RARE"
+    enchanted: false
     lore:
       - "I am a god!"
       - "I will smite you!"
@@ -1899,6 +1972,7 @@ hats:
     name: "Cactus Hat"
     material: "CACTUS"
     rarity: "RARE"
+    enchanted: false
     lore:
       - "Spikey!"
       - "Oy-oy!"
@@ -1908,6 +1982,7 @@ hats:
     name: "Space Helmet"
     material: "IRON_BLOCK"
     rarity: "RARE"
+    enchanted: false
     lore:
       - "Ground control?"
       - "Blast-off!"
@@ -1917,6 +1992,7 @@ hats:
     name: "Polar Bear Hat"
     material: "SNOW_BLOCK"
     rarity: "RARE"
+    enchanted: false
     lore:
       - "Ice Ice Baby."
       - "#FROZEN"
@@ -1926,6 +2002,7 @@ hats:
     name: "Anger Hat"
     material: "RED_STAINED_GLASS"
     rarity: "RARE"
+    enchanted: false
     lore:
       - "RAAAAAWR."
       - "So angry!"
@@ -1937,6 +2014,7 @@ hats:
     name: "Helix Hat"
     material: "PLAYER_HEAD"
     rarity: "EPIC"
+    enchanted: false
     lore:
       - "Praise Helix!"
       - "up up"
@@ -1948,6 +2026,7 @@ hats:
     name: "Sweg Hat"
     material: "GOLDEN_HELMET"
     rarity: "EPIC"
+    enchanted: false
     lore:
       - "Sweg."
       - "Swooty."
@@ -1958,6 +2037,7 @@ hats:
     name: "Diamond Helmet"
     material: "DIAMOND_HELMET"
     rarity: "EPIC"
+    enchanted: false
     lore:
       - "See you on the leaderboard!"
       - "What's your rating?"
@@ -1967,6 +2047,7 @@ hats:
     name: "Bee King Hat"
     material: "YELLOW_STAINED_GLASS"
     rarity: "EPIC"
+    enchanted: false
     lore:
       - "Bzzz."
       - "Honey, plz."
@@ -1977,6 +2058,7 @@ hats:
     name: "Edupa Hat"
     material: "PLAYER_HEAD"
     rarity: "EPIC"
+    enchanted: false
     lore:
       - "stop cry stop lie"
       - "learn queue"
@@ -1987,3 +2069,18 @@ hats:
       - "im rune like one saxobeat"
       - "im speak brazil"
     texture-uuid: "747709c7-3449-4480-bfe0-58265d0e6509"
+
+  disco:
+    name: "Disco Hat"
+    material: "RED_STAINED_GLASS"
+    rarity: "EPIC"
+    enchanted: false
+    lore:
+      - "Stayin' alive!"
+      - "Saturday night!"
+      - "Party on!"
+    materials:
+      - "RED_STAINED_GLASS"
+      - "LIME_STAINED_GLASS"
+      - "LIGHT_BLUE_STAINED_GLASS"
+      - "YELLOW_STAINED_GLASS"

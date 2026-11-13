@@ -5,16 +5,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.latios.arenaBrawl.cosmetics.CosmeticEffectManager;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 
 public class MatchDisconnectListener implements Listener {
-
+    private final CosmeticEffectManager cosmeticEffectManager;
     private final MatchManager matchManager;
     private final PlayerHealthManager healthManager;
 
-    public MatchDisconnectListener(MatchManager matchManager, PlayerHealthManager healthManager) {
+    public MatchDisconnectListener(MatchManager matchManager, PlayerHealthManager healthManager,
+                                   CosmeticEffectManager cosmeticEffectManager) {
         this.matchManager = matchManager;
         this.healthManager = healthManager;
+        this.cosmeticEffectManager = cosmeticEffectManager;
     }
 
     @EventHandler
@@ -31,6 +34,7 @@ public class MatchDisconnectListener implements Listener {
         // they would keep counting as alive for the draw vote.
         if (!healthManager.isEliminated(player)) {
             matchManager.onPlayerEliminated(player);
+            cosmeticEffectManager.onPlayerEliminated(player);
         }
     }
 }

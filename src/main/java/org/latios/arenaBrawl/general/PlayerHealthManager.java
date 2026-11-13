@@ -298,6 +298,7 @@ public class PlayerHealthManager {
         if (updated <= 0) {
             eliminated.add(player.getUniqueId());
             eliminationCallback.accept(player);
+            lastAttacker.remove(player.getUniqueId());
         }
     }
 
@@ -399,6 +400,7 @@ public class PlayerHealthManager {
         if (updated <= 0) {
             eliminated.add(player.getUniqueId());
             eliminationCallback.accept(player);
+            lastAttacker.remove(player.getUniqueId());
         }
     }
 

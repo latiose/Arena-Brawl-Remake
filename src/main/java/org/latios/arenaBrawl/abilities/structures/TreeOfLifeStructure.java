@@ -11,7 +11,7 @@ import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.*;
 
-public class TreeOfLifeStructure extends PlacedStructure {
+public class TreeOfLifeStructure extends PlacedStructure implements DestructibleStructure {
 
     private static final long DEFAULT_GROWTH_DURATION_MILLIS = 5_000;
 
@@ -129,6 +129,11 @@ public class TreeOfLifeStructure extends PlacedStructure {
 
     public int getHealthPercentage() {
         return (int) Math.ceil(((double) remainingHits / meleeHitsToDestroy) * 100);
+    }
+
+    @Override
+    public String getStructureName() {
+        return "Tree of Life";
     }
 
     private boolean isReplaceable(org.bukkit.Material material) {

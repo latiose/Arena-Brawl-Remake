@@ -298,6 +298,8 @@ This damage bypasses shields in accordance with the mechanic.
 - `Healing Totem`
 - `Tree of Life`
 - `Barricade`
+- `Phase Wall`
+- `Aegis Screen`
 
 ### Structure Contract
 

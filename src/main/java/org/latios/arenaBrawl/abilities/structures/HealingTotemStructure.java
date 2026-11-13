@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class HealingTotemStructure extends PlacedStructure {
+public class HealingTotemStructure extends PlacedStructure implements DestructibleStructure {
 
     private static final long HEAL_INTERVAL_MILLIS = 3_000;
 
@@ -133,5 +133,10 @@ public class HealingTotemStructure extends PlacedStructure {
 
     public int getHealthPercentage() {
         return (int) Math.ceil(((double) remainingHits / meleeHitsToDestroy) * 100);
+    }
+
+    @Override
+    public String getStructureName() {
+        return "Healing Totem";
     }
 }

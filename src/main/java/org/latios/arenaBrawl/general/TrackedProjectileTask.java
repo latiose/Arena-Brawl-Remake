@@ -13,6 +13,7 @@ import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.offensive.ProjectileImpactEffect;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -84,6 +85,10 @@ public class TrackedProjectileTask extends BukkitRunnable {
         }
 
         if (!projectile.isValid()) {
+            if (ProjectileInterceptionService.wasIntercepted(projectile.getUniqueId())) {
+                cancel();
+                return;
+            }
             explodeAt(lastLocation, null);
             return;
         }
@@ -96,6 +101,13 @@ public class TrackedProjectileTask extends BukkitRunnable {
 
         World world = projectile.getWorld();
         Location now = projectile.getLocation();
+
+        if (ProjectileInterceptionService.tryIntercept(shooter, lastLocation, now)) {
+            cancel();
+            projectile.remove();
+            return;
+        }
+
         Vector velocity = projectile.getVelocity();
         double speed = velocity.length();
 

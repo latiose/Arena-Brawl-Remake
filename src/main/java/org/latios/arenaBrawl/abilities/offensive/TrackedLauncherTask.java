@@ -14,6 +14,7 @@ import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -62,6 +63,12 @@ public class TrackedLauncherTask extends BukkitRunnable {
         armorStand.teleport(nextLoc);
 
         Location projectileCenter = nextLoc.clone().add(0, 1.4, 0);
+
+        if (ProjectileInterceptionService.tryIntercept(shooter, previous, projectileCenter)) {
+            cancel();
+            armorStand.remove();
+            return;
+        }
 
         Player directHit = null;
         Location directImpact = projectileCenter;

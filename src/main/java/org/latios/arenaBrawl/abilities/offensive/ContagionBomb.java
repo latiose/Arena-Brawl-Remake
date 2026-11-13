@@ -19,6 +19,7 @@ import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
@@ -119,6 +120,13 @@ public class ContagionBomb implements Ability {
                 double speed = step.length();
                 Vector travel = step.clone().normalize();
 
+                Location next = current.clone().add(step);
+                if (ProjectileInterceptionService.tryIntercept(player, current, next)) {
+                    bomb.remove();
+                    cancel();
+                    return;
+                }
+
                 // The server can move players very quickly, so use a generous
                 // entity hitbox and extend the sweep by the same radius. This
                 // prevents the bomb from tunnelling past a moving target.
@@ -157,7 +165,7 @@ public class ContagionBomb implements Ability {
                         Particle.FLAME, current, 1, 0.04, 0.04, 0.04, 0.0
                 );
 
-                bomb.teleport(current.clone().add(step));
+                bomb.teleport(next);
 
                 if (++ticks >= maxFlightTicks) {
                     Location last = current.clone();

@@ -7,6 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.latios.arenaBrawl.abilities.structures.ProjectileInterceptionService;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.team.TeamManager;
 
@@ -22,6 +23,7 @@ public class TrackedLauncherSliceTask extends BukkitRunnable {
     private final TeamManager teamManager;
     private final CombatService combatService;
     private int ticksLived = 0;
+    private Location lastLocation;
     private static final double SLICE_AOE_RADIUS = 3;
 
     public TrackedLauncherSliceTask(Item slice, Player shooter, double damage, String abilityName,
@@ -32,6 +34,7 @@ public class TrackedLauncherSliceTask extends BukkitRunnable {
         this.abilityName = abilityName;
         this.teamManager = teamManager;
         this.combatService = combatService;
+        this.lastLocation = slice.getLocation().clone();
     }
 
     @Override
@@ -45,6 +48,13 @@ public class TrackedLauncherSliceTask extends BukkitRunnable {
         }
 
         Location sliceLoc = slice.getLocation();
+
+        if (ProjectileInterceptionService.tryIntercept(shooter, lastLocation, sliceLoc)) {
+            cancel();
+            slice.remove();
+            return;
+        }
+        lastLocation = sliceLoc.clone();
 
         if (slice.isOnGround()) {
             explodeSlice(sliceLoc);
