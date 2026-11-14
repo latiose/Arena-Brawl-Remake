@@ -10,11 +10,13 @@ import org.latios.arenaBrawl.abilities.AbilityManager;
 
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
+import org.latios.arenaBrawl.abilities.cost.AbilityCostReduction;
 import org.latios.arenaBrawl.abilities.cost.OffensiveEnergyDiscount;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.ReflectStance;
 import org.latios.arenaBrawl.abilities.offensive.FlameSword;
+import org.latios.arenaBrawl.abilities.offensive.KingsGuardEntityManager;
 import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
 import org.latios.arenaBrawl.abilities.support.Bloodthirst;
 import org.latios.arenaBrawl.abilities.support.EtherealBodyManager;
@@ -33,6 +35,7 @@ import org.latios.arenaBrawl.abilities.ultimate.Premonition;
 import org.latios.arenaBrawl.abilities.ultimate.Rewind;
 import org.latios.arenaBrawl.abilities.ultimate.ThunderArmor;
 import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
+import org.latios.arenaBrawl.abilities.ultimate.UndyingRage;
 import org.latios.arenaBrawl.abilities.UsageManager;
 
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
@@ -97,6 +100,7 @@ public class MatchManager {
     private final ShadowCloakManager shadowCloakManager;
     private final SoulLinkManager soulLinkManager;
     private final GuardianColossusEntityManager guardianColossusEntityManager;
+    private final KingsGuardEntityManager kingsGuardEntityManager;
     private final CosmeticEffectManager cosmeticEffectManager;
     private static final String SEPARATOR_LINE = "§a§l---------------------------------------------";
     public MatchManager(PlayerHealthManager healthManager, TeamManager teamManager, AbilityManager abilityManager,
@@ -107,7 +111,8 @@ public class MatchManager {
                         ShadowCloakManager shadowCloakManager, SoulLinkManager soulLinkManager, GuardianColossusEntityManager guardianColossusEntityManager,
                         ShieldManager shieldManager, DamageVulnerabilityManager damageVulnerabilityManager, SpeedBuffManager speedBuffManager,
                         EtherealBodyManager etherealBodyManager, EnergyModifierManager energyModifierManager,
-                        ScavengerManager scavengerManager, MovementLockManager movementLockManager,CosmeticEffectManager cosmeticEffectManager) {
+                        ScavengerManager scavengerManager, MovementLockManager movementLockManager,CosmeticEffectManager cosmeticEffectManager,
+                        KingsGuardEntityManager kingsGuardEntityManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -135,6 +140,7 @@ public class MatchManager {
         this.shadowCloakManager = shadowCloakManager;
         this.soulLinkManager = soulLinkManager;
         this.guardianColossusEntityManager = guardianColossusEntityManager;
+        this.kingsGuardEntityManager = kingsGuardEntityManager;
         this.shieldManager = shieldManager;
         this.damageVulnerabilityManager = damageVulnerabilityManager;
         this.speedBuffManager = speedBuffManager;
@@ -246,16 +252,23 @@ public class MatchManager {
      */
     private void tryFinishTestMatch(Match match) {
         if (!match.isTest() || match.isEnded()) return;
-        boolean anyoneStillHere = match.getAllPlayers().stream().anyMatch(Player::isOnline);
+
+        boolean anyoneStillHere = match.getAllPlayers().stream()
+                .anyMatch(player -> activeMatches.get(player.getUniqueId()) == match && player.isOnline());
         if (anyoneStillHere) return;
 
         match.setEnded(true);
         drawVoteManager.clear(match);
         clearRemainingEffects(match);
         for (Player player : match.getAllPlayers()) {
-            // Same per-player cleanup as a normal match end; no-ops (no
-            // teleport/kit) for players who are already disconnected.
-            cleanupPlayer(player);
+            if (!player.isOnline() && activeMatches.get(player.getUniqueId()) == match) {
+                activeMatches.remove(player.getUniqueId());
+            }
+            if (activeMatches.containsKey(player.getUniqueId())) continue;
+            clearSummons(player);
+            if (player.isOnline()) {
+                clearCombatEffects(player);
+            }
         }
         finishMatch(match);
     }
@@ -537,6 +550,7 @@ public class MatchManager {
         zombieEntityManager.clearForMatch(match);
         skeletonEntityManager.clearForMatch(match);
         guardianColossusEntityManager.clearForMatch(match);
+        kingsGuardEntityManager.clearForMatch(match);
 
         if (match.getArenaMap() != null) {
             EntityCleanupUtils.sweepArenaEntities(match.getArenaMap().getWorld());
@@ -581,6 +595,7 @@ public class MatchManager {
 
         // Ability-held per-player state lives in static maps.
         Berserk.clear(player);
+        UndyingRage.clear(player);
         FlameSword.clear(player);
         ReflectStance.clearState(player);
         Taunt.clear(player);
@@ -596,16 +611,19 @@ public class MatchManager {
         TauntingGlare.clear(player);
         Premonition.clear(player);
         OffensiveEnergyDiscount.clear(player);
+        AbilityCostReduction.clear(player);
         healthManager.clearRecentDamageTaken(player);
     }
 
     private void clearRemainingEffects(Match match) {
-        org.bukkit.World matchWorld = match.getArenaMap().getWorld();
-
-        broodMotherEntityManager.clearForWorld(matchWorld);
-        zombieEntityManager.clearForWorld(matchWorld);
-        skeletonEntityManager.clearForWorld(matchWorld);
-        guardianColossusEntityManager.clearForWorld(matchWorld);
+        World matchWorld = match.getArenaMap() != null ? match.getArenaMap().getWorld() : null;
+        if (matchWorld != null) {
+            broodMotherEntityManager.clearForWorld(matchWorld);
+            zombieEntityManager.clearForWorld(matchWorld);
+            skeletonEntityManager.clearForWorld(matchWorld);
+            guardianColossusEntityManager.clearForWorld(matchWorld);
+            kingsGuardEntityManager.clearForWorld(matchWorld);
+        }
 
         for (Player player : match.getAllPlayers()) {
             boolean belongsToMatch = activeMatches.get(player.getUniqueId()) == match;
@@ -620,6 +638,7 @@ public class MatchManager {
         zombieEntityManager.clearForPlayer(player);
         skeletonEntityManager.clearForPlayer(player);
         guardianColossusEntityManager.clearForPlayer(player);
+        kingsGuardEntityManager.clearForPlayer(player);
     }
 
     public void leaveMatch(Player player) {
@@ -633,6 +652,8 @@ public class MatchManager {
                 // counting as alive and returns to the hub.
                 player.setGameMode(GameMode.SPECTATOR);
                 match.eliminate(player);
+                clearSummons(player);
+
                 drawVoteManager.reset(match);
             } else {
                 onPlayerEliminated(player);
@@ -642,12 +663,9 @@ public class MatchManager {
 
         cleanupPlayerHub(player);
 
-        // The leaver is already out of the match, so don't count their session.
-        if (match.isTest() && match.getAllPlayers().stream()
-                .filter(p -> !p.getUniqueId().equals(player.getUniqueId()))
-                .noneMatch(Player::isOnline)) {
-            tryFinishTestMatch(match);
-        }
+        // The leaver is already unregistered, so this finishes the match when
+        // they were the last participant and releases the arena.
+        tryFinishTestMatch(match);
     }
     public boolean isInMatch(Player player) {
         return activeMatches.containsKey(player.getUniqueId());

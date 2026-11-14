@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.abilities;
 
 import org.checkerframework.checker.units.qual.Speed;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
+import org.latios.arenaBrawl.abilities.offensive.KingsGuardEntityManager;
 import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
@@ -50,5 +51,6 @@ public record AbilityDependencies(
         ShadowCloakManager shadowCloakManager,
         SoulLinkManager soulLinkManager,
         GuardianColossusEntityManager guardianColossusEntityManager,
-        MatchManager matchManager
+        MatchManager matchManager,
+        KingsGuardEntityManager kingsGuardManager
 ) {}

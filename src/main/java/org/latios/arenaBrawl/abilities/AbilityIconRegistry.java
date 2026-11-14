@@ -101,6 +101,9 @@ public class AbilityIconRegistry {
         icons.put("gravitywell", Material.END_PORTAL_FRAME);
         icons.put("portal", Material.ENDER_PEARL);
         icons.put("tauntingglare", Material.OBSERVER);
+        icons.put("blackout", Material.SPIDER_EYE);
+        icons.put("frenzy", Material.POTION);
+        icons.put("metallicshove", Material.IRON_BLOCK);
 
         // --- SUPPORT ---
         icons.put("holywater", Material.POTION);
@@ -167,6 +170,9 @@ public class AbilityIconRegistry {
         icons.put("thunderarmor", Material.GOLDEN_CHESTPLATE);
         icons.put("premonition", Material.RECOVERY_COMPASS);
         icons.put("skillmanipulation", Material.ECHO_SHARD);
+        icons.put("kingsguard", Material.GOLDEN_HELMET);
+        icons.put("undyingrage", Material.NETHERITE_SWORD);
+        icons.put("improvement", Material.AMETHYST_SHARD);
     }
 
     public Material getIcon(AbilitySlot slot, String id) {

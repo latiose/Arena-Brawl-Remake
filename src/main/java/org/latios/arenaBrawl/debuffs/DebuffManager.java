@@ -190,6 +190,10 @@ public class DebuffManager implements Listener {
             Location headLoc = player.getLocation().add(0, 2.0, 0);
             player.getWorld().spawnParticle(Particle.ENCHANT, headLoc, 5, 0.3, 0.3, 0.3, 0.5);
             player.getWorld().spawnParticle(Particle.WAX_OFF, headLoc, 1, 0.2, 0.2, 0.2, 0.0);
+        } else if (debuff.type.equals(DebuffType.BLINDNESS)) {
+            Location headLoc = player.getLocation().add(0, 1.8, 0);
+            player.getWorld().spawnParticle(Particle.SQUID_INK, headLoc, 4, 0.3, 0.3, 0.3, 0.01);
+            player.getWorld().spawnParticle(Particle.SMOKE, headLoc, 4, 0.3, 0.3, 0.3, 0.01);
         }
 
         double progress = (double) remaining / debuff.durationMillis();

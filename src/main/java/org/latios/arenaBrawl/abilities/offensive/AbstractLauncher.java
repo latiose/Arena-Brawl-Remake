@@ -57,7 +57,7 @@ public abstract class AbstractLauncher implements Ability {
         Vector velocity = player.getLocation().getDirection().multiply(1.45);
         velocity.setY(velocity.getY());
 
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 1, 1.2f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 10, 1.2f);
 
         new TrackedLauncherTask(stand, velocity, player, getMainDamage(), getSliceDamage(),
                 getAoeRadius(), getName(), getHeadMaterial(), getSliceMaterial(), teamManager, combatService)

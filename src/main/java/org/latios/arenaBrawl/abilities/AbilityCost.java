@@ -7,6 +7,14 @@ public interface AbilityCost {
     void pay(Player player);
     String describeRemaining(Player player);
 
+    default boolean canPay(Player player, AbilitySlot slot) {
+        return canPay(player);
+    }
+
+    default void pay(Player player, AbilitySlot slot) {
+        pay(player);
+    }
+
     default int getRemainingSeconds(Player player) {
         return 0;
     }

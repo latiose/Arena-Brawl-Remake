@@ -2,6 +2,7 @@ package org.latios.arenaBrawl.abilities.cost;
 
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.AbilityCost;
+import org.latios.arenaBrawl.abilities.AbilitySlot;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeType;
@@ -28,8 +29,14 @@ public class CooldownCost implements AbilityCost {
 
     @Override
     public void pay(Player player) {
+        pay(player, null);
+    }
+
+    @Override
+    public void pay(Player player, AbilitySlot slot) {
         double reductionPercent = upgradeManager.getValue(player, CombatUpgradeType.COOLDOWN_REDUCTION);
-        long effectiveCooldown = (long) (baseCooldownMillis * (1 - reductionPercent / 100.0));
+        double categoryMultiplier = slot != null ? AbilityCostReduction.getMultiplier(player, slot) : 1.0;
+        long effectiveCooldown = (long) (baseCooldownMillis * (1 - reductionPercent / 100.0) * categoryMultiplier);
         cooldownManager.setCooldown(player, abilityKey, effectiveCooldown);
     }
 

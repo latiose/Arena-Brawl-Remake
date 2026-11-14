@@ -103,6 +103,9 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "anvilfall",
                 deps -> new AnvilFall(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(),
                         deps.demolitionService(), configManager.get("anvilfall")));
+        register(AbilitySlot.OFFENSIVE, "kingsguard",
+                deps -> new KingsGuard(deps.energyManager(), deps.teamManager(),
+                        deps.kingsGuardManager(), configManager.get("kingsguard")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -171,6 +174,12 @@ public class AbilityRegistry {
                 deps -> new GravityWell(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("gravitywell")));
         register(AbilitySlot.UTILITY, "tauntingglare",
                 deps -> new TauntingGlare(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), configManager.get("tauntingglare")));
+        register(AbilitySlot.UTILITY, "blackout",
+                deps -> new Blackout(deps.cooldownManager(), deps.teamManager(), deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("blackout")));
+        register(AbilitySlot.UTILITY, "frenzy",
+                deps -> new Frenzy(deps.cooldownManager(), deps.teamManager(), deps.debuffManager(), deps.speedBuffManager(), deps.combatUpgradeManager(), configManager.get("frenzy")));
+        register(AbilitySlot.UTILITY, "metallicshove",
+                deps -> new MetallicShove(plugin, deps.cooldownManager(), deps.teamManager(), deps.debuffManager(), deps.speedBuffManager(), deps.combatUpgradeManager(), configManager.get("metallicshove")));
 
 
         // --- SUPPORT ---
@@ -302,6 +311,10 @@ public class AbilityRegistry {
                 deps -> new Premonition(plugin, deps.cooldownManager(), deps.usageManager(), deps.playerHealthManager(), configManager.get("premonition")));
         register(AbilitySlot.ULTIMATE, "skillmanipulation",
                 deps -> new SkillManipulation(plugin, deps.cooldownManager(), deps.usageManager(), configManager.get("skillmanipulation")));
+        register(AbilitySlot.ULTIMATE, "undyingrage",
+                deps -> new UndyingRage(plugin, deps.cooldownManager(), deps.usageManager(), deps.energyManager(), configManager.get("undyingrage")));
+        register(AbilitySlot.ULTIMATE, "improvement",
+                deps -> new Improvement(deps.cooldownManager(), deps.usageManager(), configManager.get("improvement")));
 
 
         // --- DEFAULTS ---

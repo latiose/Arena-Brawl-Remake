@@ -49,7 +49,7 @@ public class AbilityDisplayTask extends BukkitRunnable {
             return;
         }
 
-        if (!cost.canPay(player)) {
+        if (!cost.canPay(player, slot)) {
             int remaining = Math.max(1, cost.getRemainingSeconds(player));
 
             Material cdMaterial = (slot.ordinal() == 0)

@@ -58,7 +58,6 @@ public class Overcharge implements Ability {
         player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 10.0f, 1.6f);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 10.0f, 1.5f);
 
-        player.sendMessage("§bOvercharge §7converted §e" + (int) energyUsed + " §7energy into health!");
         return true;
     }
 
@@ -96,7 +95,7 @@ public class Overcharge implements Ability {
         }
 
         @Override
-        public void pay(Player player) {
+        protected void consume(Player player, double amount) {
             energyManager.consume(player, Math.min(energyManager.getEnergy(player), maxEnergy));
         }
 

@@ -28,4 +28,15 @@ public class EntityCleanupUtils {
             }
         }
     }
+
+    /** Removes leftover dropped items from an arena world once its match is over. */
+    public static void sweepArenaGroundItems(World world) {
+        if (world == null) return;
+
+        for (Entity entity : world.getEntities()) {
+            if (entity instanceof org.bukkit.entity.Item) {
+                entity.remove();
+            }
+        }
+    }
 }

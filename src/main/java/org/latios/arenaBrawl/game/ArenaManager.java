@@ -6,6 +6,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
+import org.latios.arenaBrawl.abilities.offensive.KingsGuardEntityManager;
 import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
 import org.latios.arenaBrawl.abilities.structures.StructureDemolitionService;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
@@ -75,6 +76,7 @@ public class ArenaManager {
     private final ShadowCloakManager shadowCloakManager;
     private final SoulLinkManager soulLinkManager;
     private final GuardianColossusEntityManager guardianColossusEntityManager;
+    private final KingsGuardEntityManager kingsGuardEntityManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
                         UsageManager usageManager, ScoreboardManager scoreboardManager,
@@ -85,7 +87,8 @@ public class ArenaManager {
                         EtherealBodyManager etherealBodyManager, DamageVulnerabilityManager damageVulnerabilityManager,SpeedBuffManager speedBuffManager,ZombieEntityManager zombieEntityManager,
                         ScavengerManager scavengerManager,SkeletonEntityManager skeletonEntityManager,
                         SwordSelectionManager swordSelectionManager, ShadowCloakManager shadowCloakManager,
-                        SoulLinkManager soulLinkManager, GuardianColossusEntityManager guardianColossusEntityManager) {
+                        SoulLinkManager soulLinkManager, GuardianColossusEntityManager guardianColossusEntityManager,
+                        KingsGuardEntityManager kingsGuardEntityManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -124,6 +127,7 @@ public class ArenaManager {
         this.shadowCloakManager = shadowCloakManager;
         this.soulLinkManager = soulLinkManager;
         this.guardianColossusEntityManager = guardianColossusEntityManager;
+        this.kingsGuardEntityManager = kingsGuardEntityManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -197,7 +201,7 @@ public class ArenaManager {
         List<Player> allPlayers = List.copyOf(players);
         AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,
                 energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager,scavengerManager,skeletonEntityManager,
-                shadowCloakManager,soulLinkManager,guardianColossusEntityManager,matchManager);
+                shadowCloakManager,soulLinkManager,guardianColossusEntityManager,matchManager,kingsGuardEntityManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(false);

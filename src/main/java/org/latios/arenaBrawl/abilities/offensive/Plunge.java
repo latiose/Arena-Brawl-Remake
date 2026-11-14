@@ -12,6 +12,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
+import org.latios.arenaBrawl.abilities.AbilitySlot;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.EnergyCost;
@@ -223,6 +224,16 @@ public class Plunge implements Ability {
         @Override
         public void pay(Player player) {
             select(player).pay(player);
+        }
+
+        @Override
+        public boolean canPay(Player player, AbilitySlot slot) {
+            return select(player).canPay(player, slot);
+        }
+
+        @Override
+        public void pay(Player player, AbilitySlot slot) {
+            select(player).pay(player, slot);
         }
 
         @Override

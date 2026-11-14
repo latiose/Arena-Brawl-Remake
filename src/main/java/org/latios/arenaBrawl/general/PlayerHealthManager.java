@@ -15,6 +15,7 @@ import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.ultimate.Intervention;
 import org.latios.arenaBrawl.abilities.ultimate.Rewind;
+import org.latios.arenaBrawl.abilities.ultimate.UndyingRage;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -242,8 +243,9 @@ public class PlayerHealthManager {
             lastAttacker.put(player.getUniqueId(), attacker.getUniqueId());
         }
 
-        double updated = Math.max(getHealth(player) - amount, 0);
-        double damageDealt = Math.min(amount, getHealth(player));
+        double healthFloor = UndyingRage.getHealthFloor(player);
+        double updated = Math.max(getHealth(player) - amount, healthFloor);
+        double damageDealt = Math.max(0.0, Math.min(amount, getHealth(player) - healthFloor));
         currentHealth.put(player.getUniqueId(), updated);
         recordDamageTaken(player, damageDealt);
         if (attacker != null && damageDealt > 0) {
@@ -344,8 +346,9 @@ public class PlayerHealthManager {
             lastAttacker.put(player.getUniqueId(), attacker.getUniqueId());
         }
 
-        double updated = Math.max(getHealth(player) - amount, 0);
-        double damageDealt = Math.min(amount, getHealth(player));
+        double healthFloor = UndyingRage.getHealthFloor(player);
+        double updated = Math.max(getHealth(player) - amount, healthFloor);
+        double damageDealt = Math.max(0.0, Math.min(amount, getHealth(player) - healthFloor));
         currentHealth.put(player.getUniqueId(), updated);
         recordDamageTaken(player, damageDealt);
         if (attacker != null && damageDealt > 0) {

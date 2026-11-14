@@ -111,7 +111,7 @@ public class Tether implements Ability {
                 if (pull.lengthSquared() < 0.01) return;
 
                 pull.normalize().multiply(pullStrength);
-                pull.setY(0.18);
+                pull.setY(0);
                 target.setVelocity(pull);
 
                 debuffManager.tryApply(player, target, DebuffType.SLOW, slowDurationMs, 0.0);

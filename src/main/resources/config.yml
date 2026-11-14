@@ -1039,6 +1039,21 @@ ability-values:
     direct-hit-bonus: 30.0
     vertical-reach: 15.0
 
+  kingsguard:
+    energy-cost: 30.0
+    max-guards: 3
+    max-range: 30.0
+    normal-attack-damage: 50.0
+    first-charge-damage: 100.0
+    repeat-charge-damage: 50.0
+    attack-cooldown-millis: 1000
+    normal-speed-multiplier: 1.0
+    charge-speed-multiplier: 2.5
+    charge-speed-amplifier: 2
+    charge-duration-ms: 1500
+    hits-to-destroy: 3
+    spawn-offset: 1.5
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -1216,6 +1231,27 @@ ability-values:
     caster-damage-bonus: 0.25
     ally-damage-reduction: 0.50
     end-damage-threshold: 100.0
+
+  blackout:
+    cooldown-ms: 30000
+    radius: 12.0
+    blindness-duration-ms: 3000
+
+  frenzy:
+    cooldown-ms: 30000
+    speed-amplifier: 1
+    speed-duration-ms: 3000
+    radius: 5.0
+    slow-duration-ms: 3000
+
+  metallicshove:
+    cooldown-ms: 40000
+    max-distance: 25.0
+    speed-step: 1.0
+    hit-radius: 1.5
+    immobilize-duration-ms: 3000
+    speed-per-hit-ms: 2000
+    speed-amplifier: 1
 
   counter:
     cooldown-ms: 22000
@@ -1639,6 +1675,18 @@ ability-values:
     charge-time-ms: 60000
     duration-ms: 10000
     discount-percent: 0.50
+
+  undyingrage:
+    charge-time-ms: 60000
+    duration-ms: 5000
+    energy-gain: 50.0
+    health-floor: 1.0
+
+  improvement:
+    charge-time-ms: 60000
+    offensive-discount: 0.20
+    utility-discount: 0.20
+    support-discount: 0.20
 
 rune-values:
   speed:

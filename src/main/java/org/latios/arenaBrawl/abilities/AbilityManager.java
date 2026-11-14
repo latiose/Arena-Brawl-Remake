@@ -56,7 +56,7 @@ public class AbilityManager {
         Ability ability = abilities.get(slot);
         AbilityCost cost = ability.getCost();
 
-        if (!cost.canPay(player)) {
+        if (!cost.canPay(player, slot)) {
             if (cost instanceof EnergyCost || cost.usesEnergy()) {
                 sendFailMessage(player, "§e" + cost.describeRemaining(player));
             } else if (cost instanceof UltimateCost && cost.isPermanentlyUnavailable(player)) {
@@ -68,7 +68,7 @@ public class AbilityManager {
         }
 
         if (!ability.activate(player)) return false;
-        cost.pay(player);
+        cost.pay(player, slot);
         return true;
     }
 

@@ -8,7 +8,8 @@ public enum DebuffType {
     SLOW("Slow", false, "#A020F0"),
     POISON("Poison", false, "#00FF00"),
     ANTIHEAL("AntiHeal", false, "#FF0000"),
-    SILENCE("Silence", false, "#00008B");
+    SILENCE("Silence", false, "#00008B"),
+    BLINDNESS("Blindness", false, "#404040");
     private final String displayName;
 
     private final boolean immobilizing;

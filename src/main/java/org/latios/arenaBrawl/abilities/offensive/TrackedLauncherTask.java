@@ -124,8 +124,9 @@ public class TrackedLauncherTask extends BukkitRunnable {
         impactLoc.getWorld().spawnParticle(Particle.ITEM_SLIME, impactLoc, 30, 0.4, 0.4, 0.4, 0.1);
 
         for (Player p : impactLoc.getWorld().getPlayers()) {
-            impactLoc.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1);
-            impactLoc.getWorld().playSound(p.getLocation(), Sound.BLOCK_WOOD_BREAK, 1f, 1.5f);
+            impactLoc.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 10f
+                    , 1);
+            impactLoc.getWorld().playSound(p.getLocation(), Sound.BLOCK_WOOD_BREAK, 10f, 1.5f);
         }
 
 
@@ -142,7 +143,7 @@ public class TrackedLauncherTask extends BukkitRunnable {
             slice.setPickupDelay(Integer.MAX_VALUE);
             slice.setVelocity(new Vector(0, 0.5, 0));
 
-            spawnLoc.getWorld().playSound(spawnLoc, Sound.BLOCK_SLIME_BLOCK_BREAK, 0.8f, 0.8f);
+            spawnLoc.getWorld().playSound(spawnLoc, Sound.BLOCK_SLIME_BLOCK_BREAK, 10f, 0.8f);
 
             new TrackedLauncherSliceTask(slice, shooter, sliceDamage, abilityName, teamManager, combatService)
                     .runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
