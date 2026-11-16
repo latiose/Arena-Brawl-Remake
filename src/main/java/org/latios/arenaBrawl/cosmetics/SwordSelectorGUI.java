@@ -13,6 +13,7 @@ import java.util.List;
 
 public class SwordSelectorGUI {
     public static final int SIZE = 27;
+    public static final int RANDOM_SLOT = 22;
 
     public record SwordSelectorHolder() implements InventoryHolder {
         @Override
@@ -30,7 +31,8 @@ public class SwordSelectorGUI {
     public void open(Player player) {
         Inventory inventory = Bukkit.createInventory(new SwordSelectorHolder(), SIZE, "§bSword Selector");
         SwordType[] swords = SwordType.values();
-        SwordType equipped = selectionManager.getEquipped(player);
+        boolean randomEquipped = selectionManager.isRandom(player);
+        SwordType equipped = randomEquipped ? null : selectionManager.getEquipped(player);
         for (int i = 0; i < swords.length; i++) {
             SwordType sword = swords[i];
             boolean unlocked = selectionManager.isUnlocked(player, sword);
@@ -45,6 +47,28 @@ public class SwordSelectorGUI {
             item.setItemMeta(meta);
             inventory.setItem(10 + i, item);
         }
+        inventory.setItem(RANDOM_SLOT, buildRandomItem(randomEquipped));
         player.openInventory(inventory);
+    }
+
+    private ItemStack buildRandomItem(boolean selected) {
+        ItemStack item = new ItemStack(Material.CLOCK);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName((selected ? "§a✔ " : "§d") + "Random");
+
+        if (selected) {
+            meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 1, true);
+            meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+        }
+
+        meta.setLore(List.of(
+                "",
+                "§7Use a random unlocked sword",
+                "§7each match",
+                "",
+                selected ? "§aCurrently selected" : "§eClick to select"
+        ));
+        item.setItemMeta(meta);
+        return item;
     }
 }

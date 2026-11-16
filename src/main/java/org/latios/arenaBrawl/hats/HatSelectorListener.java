@@ -34,6 +34,14 @@ public class HatSelectorListener implements Listener {
         int totalPages = PaginationUtil.totalPages(hats.size());
         int rawSlot = event.getRawSlot();
 
+        if (rawSlot == HatSelectorGUI.RANDOM_SLOT) {
+            hatSelectionManager.equipRandom(player);
+            player.sendMessage("§aHat set to: §dRandom §7(rolled each match)");
+            HatEquipUtils.applyEquippedHat(player, hatSelectionManager);
+            gui.open(player, holder.page());
+            return;
+        }
+
         if (PaginationUtil.isPrevious(rawSlot, holder.page())) {
             gui.open(player, holder.page() - 1);
             return;

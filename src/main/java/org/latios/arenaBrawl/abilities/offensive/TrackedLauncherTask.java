@@ -1,8 +1,10 @@
 package org.latios.arenaBrawl.abilities.offensive;
 
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.block.BlockFace;
 import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -31,6 +33,10 @@ public class TrackedLauncherTask extends BukkitRunnable {
     private final CombatService combatService;
     private Vector velocity;
     private Location previousCenter;
+    private static final double RESTITUTION = 0.55;
+    private static final double SURFACE_FRICTION = 0.8;
+    private static final double AIR_DRAG = 0.995;
+    private static final double MIN_BOUNCE_SPEED = 0.08;
 
     public TrackedLauncherTask(ArmorStand armorStand, Vector velocity, Player shooter, double mainDamage, double sliceDamage,
                                double aoeRadius, String abilityName, Material headMaterial, Material sliceMaterial,
@@ -57,12 +63,30 @@ public class TrackedLauncherTask extends BukkitRunnable {
             return;
         }
 
+        velocity.multiply(AIR_DRAG);
         velocity.setY(velocity.getY() - 0.025);
         Location previous = previousCenter.clone();
         Location nextLoc = armorStand.getLocation().add(velocity);
-        armorStand.teleport(nextLoc);
-
         Location projectileCenter = nextLoc.clone().add(0, 1.4, 0);
+
+        Vector travel = projectileCenter.toVector().subtract(previous.toVector());
+        if (travel.lengthSquared() > 1.0E-6) {
+            RayTraceResult blockHit = previous.getWorld().rayTraceBlocks(
+                    previous, travel.clone().normalize(), travel.length(),
+                    FluidCollisionMode.NEVER, true);
+
+            if (blockHit != null) {
+                BlockFace face = blockHit.getHitBlockFace();
+                if (face == null || face == BlockFace.UP) {
+                    explode(null, blockHit.getHitPosition().toLocation(armorStand.getWorld()));
+                } else {
+                    bounce(blockHit);
+                }
+                return;
+            }
+        }
+
+        armorStand.teleport(nextLoc);
 
         if (ProjectileInterceptionService.tryIntercept(shooter, previous, projectileCenter)) {
             cancel();
@@ -96,12 +120,30 @@ public class TrackedLauncherTask extends BukkitRunnable {
         previousCenter = projectileCenter.clone();
         if (directHit != null) {
             explode(directHit, directImpact);
-            return;
+        }
+    }
+
+    private void bounce(RayTraceResult hit) {
+        Vector normal = hit.getHitBlockFace().getDirection();
+        double impactSpeed = -velocity.dot(normal);
+
+        Vector normalComponent = normal.clone().multiply(velocity.dot(normal));
+        Vector tangentComponent = velocity.clone().subtract(normalComponent).multiply(SURFACE_FRICTION);
+
+        if (impactSpeed < MIN_BOUNCE_SPEED) {
+            velocity = tangentComponent;
+        } else {
+            velocity = tangentComponent.subtract(normalComponent.multiply(RESTITUTION));
         }
 
-        if (projectileCenter.getBlock().getType().isSolid() && !projectileCenter.getBlock().isPassable()) {
-            explode(null, projectileCenter);
-        }
+        Location center = hit.getHitPosition().toLocation(armorStand.getWorld())
+                .add(normal.clone().multiply(0.1));
+        armorStand.teleport(center.clone().subtract(0, 1.4, 0));
+        previousCenter = center;
+
+        float volume = (float) Math.min(1.0, 0.3 + impactSpeed * 1.5);
+        float pitch = (float) (1.0 + Math.min(0.6, impactSpeed) * 0.5 + (Math.random() - 0.5) * 0.2);
+        center.getWorld().playSound(center, Sound.BLOCK_STONE_HIT, volume, pitch);
     }
 
     private void explode(Player directHitVictim, Location impactLoc) {

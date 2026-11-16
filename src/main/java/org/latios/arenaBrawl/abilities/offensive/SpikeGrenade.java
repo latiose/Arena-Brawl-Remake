@@ -3,6 +3,10 @@ package org.latios.arenaBrawl.abilities.offensive;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.util.BoundingBox;
+import java.util.HashSet;
+import java.util.Set;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -30,6 +34,8 @@ public class SpikeGrenade implements Ability {
     private static final double TRAIL_SPACING = 0.5;
     private static final double SURFACE_OFFSET = 0.3;
     private static final double FLOOR_LIFT = 1.0;
+    private static final double LIFT_STEP = 0.1;
+    private static final double FLOOR_SEARCH = 8.0;
 
     private final double energyCost;
     private final double grenadeDamage;
@@ -62,7 +68,6 @@ public class SpikeGrenade implements Ability {
         this.needleRange = config.getDouble("needle-range", 6.0);
         this.needleSpeed = config.getDouble("needle-speed", 1.0);
         this.needleHitRadius = config.getDouble("needle-hit-radius", 0.3);
-
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
@@ -97,7 +102,7 @@ public class SpikeGrenade implements Ability {
                     cancel();
                     return;
                 }
-                RayTraceResult hit = trace(player, pos, direction, segment, grenadeHitRadius, null);
+                RayTraceResult hit = trace(player, pos, direction, segment, grenadeHitRadius, Set.of());
 
                 double length = hit != null
                         ? Math.min(segment, hit.getHitPosition().distance(pos.toVector()))
@@ -109,14 +114,24 @@ public class SpikeGrenade implements Ability {
                     if (hit.getHitEntity() instanceof Player target) {
                         Location impact = target.getBoundingBox().getCenter().toLocation(world);
                         combatService.applyAbilityDamage(player, target, grenadeDamage, getName(), impact);
-                        explode(player, impact, target, null);
+                        explode(player, impact, target, null, Set.of(target));
                     } else {
                         BlockFace face = hit.getHitBlockFace();
                         Location impact = hit.getHitPosition().toLocation(world);
                         if (face != null) {
                             impact.add(face.getDirection().multiply(SURFACE_OFFSET));
                         }
-                        explode(player, impact, null, face);
+
+                        Set<Player> bridgeVictims = Set.of();
+                        Block block = hit.getHitBlock();
+                        if (face == BlockFace.DOWN && block != null) {
+                            bridgeVictims = findPlayersOnBridge(player, block, hit.getHitPosition());
+                            for (Player victim : bridgeVictims) {
+                                Location victimCenter = victim.getBoundingBox().getCenter().toLocation(world);
+                                combatService.applyAbilityDamage(player, victim, grenadeDamage, getName(), victimCenter);
+                            }
+                        }
+                        explode(player, impact, null, face, bridgeVictims);
                     }
                     cancel();
                     return;
@@ -126,7 +141,7 @@ public class SpikeGrenade implements Ability {
                 traveled += segment;
 
                 if (traveled >= maxRange - 1.0E-6) {
-                    explode(player, pos.clone(), null, null);
+                    explode(player, pos.clone(), null, null, Set.of());
                     cancel();
                 }
             }
@@ -135,7 +150,37 @@ public class SpikeGrenade implements Ability {
         return true;
     }
 
-    private void explode(Player caster, Location center, Player directTarget, BlockFace face) {
+    private Set<Player> findPlayersOnBridge(Player caster, Block bridge, Vector hitPos) {
+        Set<Player> result = new HashSet<>();
+        if (!bridge.getRelative(BlockFace.UP).isPassable()) {
+            return result;
+        }
+        double top = bridge.getBoundingBox().getMaxY();
+        Location probe = hitPos.toLocation(bridge.getWorld());
+
+        for (Entity entity : bridge.getWorld().getNearbyEntities(probe, 2.0, 2.5, 2.0)) {
+            if (!(entity instanceof Player p)
+                    || p.equals(caster)
+                    || p.isDead()
+                    || p.getGameMode() == GameMode.SPECTATOR
+                    || !teamManager.isEnemy(caster, p)) {
+                continue;
+            }
+            BoundingBox box = p.getBoundingBox();
+            boolean onTop = box.getMinY() >= top - 0.05 && box.getMinY() <= top + 0.6;
+            boolean overlapsX = hitPos.getX() >= box.getMinX() - grenadeHitRadius
+                    && hitPos.getX() <= box.getMaxX() + grenadeHitRadius;
+            boolean overlapsZ = hitPos.getZ() >= box.getMinZ() - grenadeHitRadius
+                    && hitPos.getZ() <= box.getMaxZ() + grenadeHitRadius;
+            if (onTop && overlapsX && overlapsZ) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
+    private void explode(Player caster, Location center, Player directTarget, BlockFace face,
+                         Set<Player> ignored) {
         World world = center.getWorld();
         caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_ITEM_BREAK, 10.0f, 0.5f);
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BONE_BLOCK_BREAK, 10.0f, 1.4f);
@@ -162,23 +207,64 @@ public class SpikeGrenade implements Ability {
                 combatService.applyAbilityDamage(caster, directTarget, needleDamage, getName(), center);
             }
         }
-        Location origin = center.clone();
-        if (face == BlockFace.UP) {
-            Location lifted = center.clone().add(0, FLOOR_LIFT, 0);
-            if (lifted.getBlock().isPassable()) {
-                origin = lifted;
-            }
-        }
+        Location origin = resolveNeedleOrigin(center, face);
 
         double angleStep = 2 * Math.PI / needleCount;
         for (int i = 0; i < needleCount; i++) {
             double angle = i * angleStep;
             Vector needleDir = new Vector(Math.cos(angle), 0, Math.sin(angle));
-            launchNeedle(caster, origin.clone(), needleDir, directTarget);
+            launchNeedle(caster, origin.clone(), needleDir, ignored);
         }
     }
 
-    private void launchNeedle(Player caster, Location start, Vector dir, Player ignored) {
+
+
+    /**
+     * Needles travel horizontally at a fixed height, so they have to fan out at
+     * body height instead of at the exact impact point. Otherwise a grenade
+     * that detonates against a bridge above the caster sends the needles along
+     * the bridge underside, too high to hit anyone below it.
+     * <p>
+     * The origin is resolved from the floor under the impact and lifted a full
+     * block to body height. A low ceiling (for example a one-block-high bridge)
+     * makes that full lift impossible, so the climb stops just below the first
+     * solid block; that keeps the needles at the highest point of the gap
+     * instead of dropping them back to the floor.
+     */
+    private Location resolveNeedleOrigin(Location center, BlockFace face) {
+        if (face == null) {
+            return center.clone();
+        }
+
+        Location base = face == BlockFace.UP ? center.clone() : findFloorBelow(center);
+        if (base == null) {
+            return center.clone();
+        }
+
+        Location origin = base.clone();
+        int steps = (int) Math.round(FLOOR_LIFT / LIFT_STEP);
+        for (int i = 1; i <= steps; i++) {
+            Location candidate = base.clone().add(0, i * LIFT_STEP, 0);
+            if (!candidate.getBlock().isPassable()) {
+                break;
+            }
+            origin = candidate;
+        }
+        return origin;
+    }
+
+    private Location findFloorBelow(Location center) {
+        RayTraceResult hit = center.getWorld().rayTraceBlocks(
+                center, new Vector(0, -1, 0), FLOOR_SEARCH,
+                FluidCollisionMode.NEVER, true);
+        if (hit == null || hit.getHitBlockFace() != BlockFace.UP) {
+            return null;
+        }
+        return hit.getHitPosition().toLocation(center.getWorld())
+                .add(0, SURFACE_OFFSET, 0);
+    }
+
+private void launchNeedle(Player caster, Location start, Vector dir, Set<Player> ignored) {
         new BukkitRunnable() {
             private final Location pos = start.clone();
             private double traveled = 0;
@@ -222,21 +308,21 @@ public class SpikeGrenade implements Ability {
     }
 
 
-    private RayTraceResult trace(Player caster, Location from, Vector dir, double length,
-                                 double raySize, Player ignored) {
-        if (length <= 0) return null;
-        return from.getWorld().rayTrace(
-                from, dir, length,
-                FluidCollisionMode.NEVER,
-                true,
-                raySize,
-                entity -> entity instanceof Player p
-                        && p != ignored
-                        && !p.isDead()
-                        && p.getGameMode() != GameMode.SPECTATOR
-                        && teamManager.isEnemy(caster, p)
-        );
-    }
+private RayTraceResult trace(Player caster, Location from, Vector dir, double length,
+                             double raySize, Set<Player> ignored) {
+    if (length <= 0) return null;
+    return from.getWorld().rayTrace(
+            from, dir, length,
+            FluidCollisionMode.NEVER,
+            true,
+            raySize,
+            entity -> entity instanceof Player p
+                    && (ignored == null || !ignored.contains(p))
+                    && !p.isDead()
+                    && p.getGameMode() != GameMode.SPECTATOR
+                    && teamManager.isEnemy(caster, p)
+    );
+}
 
     private void spawnGrenadeTrail(Location from, Vector dir, double length) {
         World world = from.getWorld();

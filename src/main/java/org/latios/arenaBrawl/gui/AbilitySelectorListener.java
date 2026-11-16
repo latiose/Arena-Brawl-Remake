@@ -66,6 +66,13 @@ public class AbilitySelectorListener implements Listener {
             RuneType[] runes = RuneType.values();
             int totalPages = PaginationUtil.totalPages(runes.length);
 
+            if (rawSlot == AbilitySelectorGUI.RANDOM_SLOT) {
+                runeManager.selectRandom(player);
+                player.sendMessage("§aRune set to: §dRandom §7(rolled each match)");
+                player.closeInventory();
+                return;
+            }
+
             if (PaginationUtil.isPrevious(rawSlot, holder.page())) {
                 gui.openRuneMenu(player, holder.page() - 1);
                 return;
@@ -122,6 +129,13 @@ public class AbilitySelectorListener implements Listener {
 
         List<String> ids = new ArrayList<>(registry.getAvailableIds(holder.slot()));
         int totalPages = PaginationUtil.totalPages(ids.size());
+
+        if (rawSlot == AbilitySelectorGUI.RANDOM_SLOT) {
+            selectionManager.select(player, holder.slot(), AbilitySelectionManager.RANDOM_ID);
+            player.sendMessage("§a" + holder.slot().name() + " set to: §dRandom §7(rolled each match)");
+            player.closeInventory();
+            return;
+        }
 
         if (PaginationUtil.isPrevious(rawSlot, holder.page())) {
             gui.openSlotMenu(player, holder.slot(), holder.page() - 1);

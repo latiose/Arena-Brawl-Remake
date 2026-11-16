@@ -18,6 +18,9 @@ import org.latios.arenaBrawl.general.MovementLockManager;
 public class ImmobilizeListener implements Listener {
 
     private static final double FALL_SPEED = -2.0;
+
+    private static final NamespacedKey NO_JUMP_KEY = new NamespacedKey("arenabrawl", "immobilize_nojump");
+
     private final DebuffManager debuffManager;
     private final MovementLockManager movementLockManager;
 
@@ -28,17 +31,16 @@ public class ImmobilizeListener implements Listener {
 
     @EventHandler
     public void onJump(PlayerJumpEvent event) {
-        Player player = event.getPlayer();
-        if (!isCurrentlyImmobilizing(player)) return;
-        event.setCancelled(true);
+        if (isRooted(event.getPlayer())) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        boolean immobilized = isCurrentlyImmobilizing(player) && !movementLockManager.isLocked(player);
 
-        if (!immobilized) {
+        if (!isRooted(player)) {
             removeRoot(player);
             return;
         }
@@ -46,9 +48,11 @@ public class ImmobilizeListener implements Listener {
 
         Location from = event.getFrom();
         Location to = event.getTo();
+        if (to == null) return;
 
         if (isAirborne(player)) {
-            player.setVelocity(new Vector(0, FALL_SPEED, 0));
+            double vy = Math.min(player.getVelocity().getY(), FALL_SPEED);
+            player.setVelocity(new Vector(0, vy, 0));
         }
 
         if (from.getX() != to.getX() || from.getZ() != to.getZ()) {
@@ -62,6 +66,10 @@ public class ImmobilizeListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         removeRoot(event.getPlayer());
+    }
+
+    private boolean isRooted(Player player) {
+        return isCurrentlyImmobilizing(player) && !movementLockManager.isLocked(player);
     }
 
     private boolean isAirborne(Player player) {
@@ -80,8 +88,6 @@ public class ImmobilizeListener implements Listener {
         }
         return false;
     }
-
-    private static final NamespacedKey NO_JUMP_KEY = new NamespacedKey("arenabrawl", "immobilize_nojump");
 
     private void applyRoot(Player player) {
         AttributeInstance jump = player.getAttribute(Attribute.JUMP_STRENGTH);

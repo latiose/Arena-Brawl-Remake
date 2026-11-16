@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
@@ -33,14 +34,16 @@ public class SnowballAbility implements Ability {
     private final DebuffManager debuffManager;
     private final TeamManager teamManager;
     private final CombatService combatService;
-
+    private static final double BASE_SPEED = 2.4;
+    private static final double GRAVITY = 0.01;
+    private static final int GRAVITY_DELAY_TICKS = 10;
     public SnowballAbility(EnergyManager energyManager, TeamManager teamManager,
                            CombatService combatService, DebuffManager debuffManager, AbilityConfig config) {
         this.damage = config.getDouble("damage", 60.0);
         this.energyCost = config.getDouble("energy-cost", 20.0);
         this.slowDurationTicks = config.getLong("slow-duration-ticks", 2000L);
         this.slowChance = config.getDouble("slow-chance", 0.20);
-        this.speedMultiplier = config.getDouble("speed-multiplier", 1.2);
+        this.speedMultiplier = config.getDouble("speed-multiplier", 1);
 
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
@@ -56,13 +59,26 @@ public class SnowballAbility implements Ability {
 
     @Override
     public boolean activate(Player player) {
+        Vector direction = player.getEyeLocation().getDirection();
+        Vector forward = direction.clone().setY(0);
+        if (forward.lengthSquared() > 1.0E-6) {
+            forward.normalize().multiply(0.25);
+        } else {
+            forward.zero();
+        }
+
         Snowball snowball = AbilityProjectileFactory.launchAoe(
                 player, Snowball.class, damage, getName(), 2, speedMultiplier
         );
+        // Spawn inside the player's body so it can hit enemies standing directly in front,
+        // especially when aiming at the ground.
+        snowball.teleport(player.getLocation().add(0, 1.0, 0).add(forward));
+        snowball.setVelocity(direction.multiply(BASE_SPEED * speedMultiplier));
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1.0f, 1.0f);
-        new TrackedProjectileTask(snowball, player, damage, 1, getName(), teamManager, combatService,
+        new TrackedProjectileTask(snowball, player, damage, 2, getName(), teamManager, combatService,
                 debuffManager, DebuffType.SLOW, slowDurationTicks, slowChance, ProjectileImpactEffect.SNOWBALL)
                 .withTrail(Particle.SNOWFLAKE)
+                .withGravity(GRAVITY, GRAVITY_DELAY_TICKS)
                 .runTaskTimer(ArenaBrawlPlugin.getInstance(), 0L, 1L);
         return true;
     }
@@ -84,9 +100,9 @@ public class SnowballAbility implements Ability {
 
     @EventHandler
     public void onHit(ProjectileHitEvent e) {
-        if (e.getEntity().getShooter() instanceof Player shooter
-                && e.getHitEntity() instanceof Player victim
-                && !teamManager.isEnemy(shooter, victim)) {
+        if (e.getEntity() instanceof Snowball
+                && e.getEntity().getShooter() instanceof Player
+                && e.getHitEntity() instanceof Player) {
             e.setCancelled(true);
         }
     }

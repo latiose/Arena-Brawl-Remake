@@ -46,6 +46,13 @@ public class CosmeticEffectListener implements Listener {
             return;
         }
 
+        if (rawSlot == HitEffectSelectorGUI.RANDOM_SLOT) {
+            effectManager.equipRandomHitEffect(player);
+            player.sendMessage("§aHit effect set to: §dRandom §7(rolled each match)");
+            hitEffectGUI.open(player, holder.page());
+            return;
+        }
+
         int index = PaginationUtil.indexOf(rawSlot, holder.page());
         if (index < 0 || index >= effects.length) return;
 
@@ -94,6 +101,13 @@ public class CosmeticEffectListener implements Listener {
         }
         if (PaginationUtil.isNext(rawSlot, holder.page(), totalPages)) {
             killEffectGUI.open(player, holder.page() + 1);
+            return;
+        }
+
+        if (rawSlot == KillEffectSelectorGUI.RANDOM_SLOT) {
+            effectManager.equipRandomKillEffect(player);
+            player.sendMessage("§aKill effect set to: §dRandom §7(rolled each match)");
+            killEffectGUI.open(player, holder.page());
             return;
         }
 

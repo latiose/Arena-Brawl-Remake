@@ -40,6 +40,10 @@ public class TrackedProjectileTask extends BukkitRunnable {
     private final double debuffChance;
     private final ProjectileImpactEffect impactEffect;
 
+    private static final double VANILLA_DRAG = 0.99;
+
+    private double customGravity = -1;
+    private int gravityDelayTicks = 0;
     private Particle trailParticle = null;
     private Location lastLocation;
     private int ticksLived = 0;
@@ -72,6 +76,12 @@ public class TrackedProjectileTask extends BukkitRunnable {
     }
 
 
+    public TrackedProjectileTask withGravity(double gravityPerTick, int delayTicks) {
+        this.customGravity = gravityPerTick;
+        this.gravityDelayTicks = delayTicks;
+        projectile.setGravity(false);
+        return this;
+    }
     public TrackedProjectileTask withTrail(Particle particle) {
         this.trailParticle = particle;
         return this;
@@ -109,21 +119,31 @@ public class TrackedProjectileTask extends BukkitRunnable {
         }
 
         Vector velocity = projectile.getVelocity();
+        if (customGravity >= 0) {
+            velocity.multiply(1.0 / VANILLA_DRAG);
+            if (ticksLived > gravityDelayTicks) {
+                velocity.setY(velocity.getY() - customGravity);
+            }
+            projectile.setVelocity(velocity);
+        }
         double speed = velocity.length();
 
         if (speed > 1.0E-6) {
-            Vector direction = velocity.clone().normalize();
+            Vector sweep = now.toVector().add(velocity).subtract(lastLocation.toVector());
+            double sweepLength = sweep.length();
 
-            RayTraceResult hit = world.rayTrace(
-                    now, direction, speed,
-                    FluidCollisionMode.NEVER, true, HITBOX_EXPAND,
-                    this::isValidTarget);
+            if (sweepLength > 1.0E-6) {
+                RayTraceResult hit = world.rayTrace(
+                        lastLocation, sweep.clone().normalize(), sweepLength,
+                        FluidCollisionMode.NEVER, true, HITBOX_EXPAND,
+                        this::isValidTarget);
 
-            if (hit != null) {
-                Location hitLoc = hit.getHitPosition().toLocation(world);
-                Entity hitEntity = hit.getHitEntity();
-                explodeAt(hitLoc, hitEntity instanceof Player p ? p : null);
-                return;
+                if (hit != null) {
+                    Location hitLoc = hit.getHitPosition().toLocation(world);
+                    Entity hitEntity = hit.getHitEntity();
+                    explodeAt(hitLoc, hitEntity instanceof Player p ? p : null);
+                    return;
+                }
             }
 
             if (trailParticle != null && ticksLived > TRAIL_SKIP_TICKS) {

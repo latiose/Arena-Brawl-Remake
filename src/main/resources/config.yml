@@ -717,12 +717,18 @@ ability-values:
     energy-cost: 30.0
     aoe-radius: 3.0
 
+  mushroomlauncher:
+    main-damage: 240.0
+    slice-damage: 12.0
+    energy-cost: 90.0
+    aoe-radius: 3.0
+
   groundslam:
     energy-cost: 100.0
     damage: 250.0
 
   freezingbreath:
-    energy-cost: 80.0
+    energy-cost: 80
     damage: 220.0
     slow-duration-ticks: 2000
 
@@ -730,6 +736,11 @@ ability-values:
     energy-cost: 100.0
     damage: 210.0
     stun-duration-ticks: 1000
+
+  smokebreath:
+    energy-cost: 100.0
+    damage: 250.0
+    blindness-duration-ticks: 2000
 
   heavensbreath:
     energy-cost: 100.0
@@ -822,6 +833,15 @@ ability-values:
     step-size: 0.4
     hit-expansion: 0.8
 
+  arcchain:
+    damage: 100.0
+    secondary-damage: 70.0
+    tertiary-damage: 45.0
+    energy-cost: 55.0
+    max-range: 22.0
+    chain-radius: 6.0
+    max-jumps: 2
+
   burstfire:
     damage: 55.0
     max-range: 5.0
@@ -843,6 +863,9 @@ ability-values:
     step: 0.5
     needle-count: 6
     needle-range: 6.0
+    needle-speed: 1.0
+    needle-hit-radius: 0.3
+    grenade-speed: 2.0
 
   void:
     damage: 250.0
@@ -911,6 +934,7 @@ ability-values:
     duration-ticks: 120
     particle-interval-ticks: 20
     energy-modifier: 0.8
+    speed-level: 2
 
   boomerangaxe:
     damage: 80.0
@@ -1177,9 +1201,10 @@ ability-values:
 
   rocketgrab:
     cooldown-ms: 30000
-    max-range: 20.0
-    step: 1.5
+    max-range: 24.0
+    step: 1.0
     pull-ticks: 20
+    max-pull-speed: 3.0
 
   darkpassage:
     max-range: 12.0
@@ -1473,7 +1498,7 @@ ability-values:
   woundrot:
     cooldown-ms: 30000
     duration-ms: 6000
-    range: 15.0
+    radius: 10.0
 
   timewarp:
     cooldown-ms: 30000
@@ -1483,6 +1508,12 @@ ability-values:
   sadism:
     cooldown-ms: 30000
     window-ms: 3000
+
+  caffeineshot:
+    heal-amount: 150.0
+    speed-amplifier: 1
+    speed-duration-ms: 3000
+    cooldown-ms: 15000
 
   # --- ULTIMATE ---
   shieldwall:
@@ -1688,6 +1719,33 @@ ability-values:
     utility-discount: 0.20
     support-discount: 0.20
 
+  bloodpact:
+    charge-time-ms: 60000
+    damage-multiplier: 1.25
+    duration-ms: 6000
+
+  encore:
+    max-range: 25.0
+    charge-time-ms: 60000
+    lock-ms: 8000
+
+  treason:
+    max-range: 20.0
+    duration-ms: 4000
+    redirect-percent: 0.50
+    charge-time-ms: 60000
+
+  judgmentlance:
+    max-range: 256.0
+    beam-radius: 1.5
+    damage: 450.0
+    telegraph-ticks: 30
+    burn-radius: 2.5
+    burn-damage: 50.0
+    burn-duration-ticks: 60
+    burn-pulse-ticks: 10
+    charge-time-ms: 60000
+
 rune-values:
   speed:
     proc-chance: 0.2
@@ -1712,6 +1770,13 @@ rune-values:
     heal-amount: 20.0
   oneshot:
     proc-chance: 0.0001
+  thorns:
+    proc-chance: 0.15
+    reflect-percent: 20.0
+  weakness:
+    proc-chance: 0.15
+    duration-ticks: 4000
+    bonus-multiplier: 0.30
 
 hats:
   # --- COMMON HATS ---
@@ -1794,6 +1859,7 @@ hats:
       - "Way to go!"
       - "Good job!"
       - "You're getting there!"
+    color: "#800080"
 
   n00b:
     name: "n00b Hat"
@@ -1834,6 +1900,7 @@ hats:
       - "Why Harro there."
       - "I'm so ronernee."
       - "Cake? Cake!"
+    color: "#FFFF55"
 
   gold_rush:
     name: "Gold Rush Hat"

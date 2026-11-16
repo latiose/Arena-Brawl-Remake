@@ -12,6 +12,9 @@ import java.util.logging.Level;
 
 public class HatSelectionManager {
 
+    /** Persisted marker in hats.yml meaning "wear a random hat each match". */
+    public static final String RANDOM_MARKER = "RANDOM";
+
     private final Plugin plugin;
     private final HatRegistry hatRegistry;
     private final File file;
@@ -19,6 +22,7 @@ public class HatSelectionManager {
 
     private final Map<UUID, Set<String>> unlockedHats = new HashMap<>();
     private final Map<UUID, String> equippedHat = new HashMap<>();
+    private final Map<UUID, Boolean> randomEquipped = new HashMap<>();
 
     public HatSelectionManager(Plugin plugin, HatRegistry hatRegistry) {
         this.plugin = plugin;
@@ -42,8 +46,12 @@ public class HatSelectionManager {
         List<String> unlocked = config.getStringList(id + ".unlocked");
         unlockedHats.put(id, new HashSet<>(unlocked));
 
+        randomEquipped.remove(id);
+        equippedHat.remove(id);
         String equipped = config.getString(id + ".equipped");
-        if (equipped != null) {
+        if (RANDOM_MARKER.equals(equipped)) {
+            randomEquipped.put(id, true);
+        } else if (equipped != null) {
             equippedHat.put(id, equipped);
             player.updateInventory();
         }
@@ -52,6 +60,7 @@ public class HatSelectionManager {
     public void unloadPlayer(Player player) {
         unlockedHats.remove(player.getUniqueId());
         equippedHat.remove(player.getUniqueId());
+        randomEquipped.remove(player.getUniqueId());
     }
 
     public boolean isUnlocked(Player player, String hatId) {
@@ -68,12 +77,26 @@ public class HatSelectionManager {
 
     public void equip(Player player, String hatId) {
         if (!isUnlocked(player, hatId)) return;
+        randomEquipped.remove(player.getUniqueId());
         equippedHat.put(player.getUniqueId(), hatId);
         save(player);
         player.updateInventory();
     }
 
+    /** Selects the special "random" option: a hat is rolled for each match. */
+    public void equipRandom(Player player) {
+        randomEquipped.put(player.getUniqueId(), true);
+        equippedHat.remove(player.getUniqueId());
+        save(player);
+        player.updateInventory();
+    }
+
+    public boolean isRandom(Player player) {
+        return randomEquipped.getOrDefault(player.getUniqueId(), false);
+    }
+
     public void unequip(Player player) {
+        randomEquipped.remove(player.getUniqueId());
         equippedHat.remove(player.getUniqueId());
         save(player);
     }
@@ -87,10 +110,27 @@ public class HatSelectionManager {
         return unlockedHats.getOrDefault(player.getUniqueId(), Set.of());
     }
 
+    /**
+     * Rolls the hat for this match. With "random" selected a (possibly
+     * different) hat from the player's unlocked hats is worn every match.
+     */
+    public void resolveForMatch(Player player) {
+        if (!isRandom(player)) {
+            return;
+        }
+        UUID id = player.getUniqueId();
+        List<String> ids = new ArrayList<>(getUnlockedIds(player));
+        if (ids.isEmpty()) {
+            equippedHat.remove(id);
+            return;
+        }
+        equippedHat.put(id, ids.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(ids.size())));
+    }
+
     private void save(Player player) {
         UUID id = player.getUniqueId();
         config.set(id + ".unlocked", new ArrayList<>(unlockedHats.getOrDefault(id, Set.of())));
-        config.set(id + ".equipped", equippedHat.get(id));
+        config.set(id + ".equipped", isRandom(player) ? RANDOM_MARKER : equippedHat.get(id));
 
         try {
             config.save(file);

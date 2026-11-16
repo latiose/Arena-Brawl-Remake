@@ -78,18 +78,31 @@ public class UndyingRage implements Ability {
 
     @Override
     public String getDescription() {
-        return "Becomes unable to die for 5 seconds, refusing to be reduced below 1 health and instantly gaining 50 energy.";
+        return "Refuse to die for " + seconds(durationMillis) + "seconds. "
+                + "Any hit that would kill you leaves you at " + trim(healthFloor) + " HP instead. "
+                + "Instantly gain " + trim(energyGain) + " energy.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Death Immunity", (durationMillis / 1000) + "s"),
-                new AbilityStat("Health Floor", String.valueOf((int) healthFloor)),
-                new AbilityStat("Energy Gained", String.valueOf((int) energyGain)),
-                new AbilityStat("Charge Time", (chargeTimeMillis / 1000) + "s"),
+                new AbilityStat("Death Immunity", seconds(durationMillis)+" seconds"),
+                new AbilityStat("Health Floor", trim(healthFloor) + " HP"),
+                new AbilityStat("Energy Gained", "+" + trim(energyGain)),
+                new AbilityStat("Charge Time", seconds(chargeTimeMillis)),
                 new AbilityStat("Uses", "1 per match")
         );
+    }
+
+    private static String seconds(long millis) {
+        double value = millis / 1000.0;
+        return trim(value);
+    }
+
+    private static String trim(double value) {
+        return value == Math.floor(value)
+                ? String.valueOf((long) value)
+                : String.format(java.util.Locale.US, "%.1f", value);
     }
 
     @Override

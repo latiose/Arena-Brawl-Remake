@@ -14,6 +14,11 @@ import java.util.logging.Level;
 
 public class AbilityPersistenceManager {
 
+    /** Ability ids that were replaced by another id, so old saved selections still work. */
+    private static final Map<String, String> LEGACY_IDS = Map.of(
+            "cakelauncher", "mushroomlauncher"
+    );
+
     private final Plugin plugin;
     private final File file;
     private final YamlConfiguration config;
@@ -41,7 +46,8 @@ public class AbilityPersistenceManager {
     }
 
     public String load(UUID playerId, AbilitySlot slot) {
-        return config.getString(playerId + "." + slot.name(), null);
+        String id = config.getString(playerId + "." + slot.name(), null);
+        return id != null ? LEGACY_IDS.getOrDefault(id, id) : null;
     }
 
     public Map<AbilitySlot, String> loadAll(UUID playerId) {

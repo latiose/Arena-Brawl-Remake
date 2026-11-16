@@ -21,8 +21,17 @@ public class AbilityProjectileFactory {
     public static <T extends Projectile> T launchAoe(
             Player shooter, Class<T> projectileType, double damage, String abilityName,
             double radius, double speedMultiplier) {
+        return launchAoe(shooter, projectileType, damage, abilityName, radius, speedMultiplier, 0.0);
+    }
+
+    public static <T extends Projectile> T launchAoe(
+            Player shooter, Class<T> projectileType, double damage, String abilityName,
+            double radius, double speedMultiplier, double spawnYOffset) {
 
         T projectile = shooter.launchProjectile(projectileType);
+        if (spawnYOffset != 0.0) {
+            projectile.teleport(projectile.getLocation().add(0, spawnYOffset, 0));
+        }
         Vector direction = shooter.getEyeLocation().getDirection();
 
         if (projectile instanceof Fireball) {

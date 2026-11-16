@@ -8,11 +8,13 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -126,6 +128,8 @@ public class KingsGuardEntityManager extends BaseMinionManager {
             var equipment = zombie.getEquipment();
             if (equipment != null) {
                 equipment.setHelmet(new ItemStack(Material.GOLDEN_HELMET));
+                ItemMeta meta = equipment.getHelmet().getItemMeta();
+                meta.addEnchant(Enchantment.UNBREAKING, 10, true);
                 equipment.setChestplate(new ItemStack(Material.GOLDEN_CHESTPLATE));
                 equipment.setLeggings(new ItemStack(Material.GOLDEN_LEGGINGS));
                 equipment.setBoots(new ItemStack(Material.GOLDEN_BOOTS));
@@ -308,8 +312,16 @@ public class KingsGuardEntityManager extends BaseMinionManager {
         Player owner = ownerId != null ? Bukkit.getPlayer(ownerId) : null;
         if (owner == null || combatService == null) return;
 
-        ChargeOrder order = charges.get(attackerEntity.getUniqueId());
-        double damage = order != null ? order.damage : normalAttackDamage;
+        UUID guardId = attackerEntity.getUniqueId();
+        ChargeOrder order = charges.get(guardId);
+
+        double damage;
+        if (order != null && System.currentTimeMillis() < order.expiresAt) {
+            damage = order.damage;
+        } else {
+            if (order != null) charges.remove(guardId);
+            damage = normalAttackDamage;
+        }
 
         combatService.applyMinionDamage(owner, victim, damage, "King's Guard",
                 victim.getLocation().add(0, victim.getHeight() * 0.5, 0));

@@ -202,7 +202,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
 
         this.lobbyScoreboardManager = new LobbyScoreboardManager(ratingManager, statsManager);
         this.runeSelectionManager = new RuneSelectionManager(this);
-        this.runeManager = new RuneManager(energyManager, runeSelectionManager,debuffManager,runeConfigManager,speedBuffManager,playerHealthManager);
+        this.runeManager = new RuneManager(energyManager, runeSelectionManager,debuffManager,runeConfigManager,speedBuffManager,playerHealthManager,damageVulnerabilityManager,combatService);
         this.abilitySelectionManager = new AbilitySelectionManager(abilityRegistry, abilityPersistenceManager);
         this.hatSelectionManager = new HatSelectionManager(this, hatRegistry);
         this.hatPhraseListener = new HatPhraseListener(hatSelectionManager);
@@ -236,8 +236,9 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.orbitShieldManager.setMatchManager(matchManager);
         this.combatService = new CombatService(
                 playerHealthManager, shieldManager, debuffManager, orbitShieldManager, damageBuffManager, matchManager,etherealBodyManager,
-                damageVulnerabilityManager, soulLinkManager, energyManager, teamManager
+                damageVulnerabilityManager, soulLinkManager, energyManager, teamManager,runeManager
         );
+        runeManager.setCombatService(combatService);
         this.demolitionService = new StructureDemolitionService(structureManager, teamManager);
         this.broodMotherEntityManager.setCombatService(combatService);
         this.zombieEntityManager.setCombatService(combatService);
@@ -246,7 +247,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.kingsGuardManager.setCombatService(combatService);
         combatService.registerMeleeHitEffect(new LifeLeechMeleeEffect(lifeLeechManager, playerHealthManager,abilityConfigManager.get("lifeleech")));
         combatService.registerMeleeHitEffect(new BerserkMeleeEffect());
-        combatService.registerMeleeHitEffect(new FlameSword(energyManager, energyModifierManager, abilityConfigManager.get("flamesword")));
+        combatService.registerMeleeHitEffect(new FlameSword(energyManager, energyModifierManager, speedBuffManager, abilityConfigManager.get("flamesword")));
         combatService.registerMeleeHitEffect(new Grit(cooldownManager,combatUpgradeManager,shieldManager,abilityConfigManager.get("grit")));
         combatService.registerMeleeHitEffect(new ScavengerMeleeEffect(scavengerManager,energyManager,abilityConfigManager.get("scavenger")));
         combatService.registerMeleeHitEffect(new ThunderArmor(this, cooldownManager, usageManager, shieldManager, debuffManager, abilityConfigManager.get("thunderarmor")));
@@ -283,6 +284,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 this, energyManager, playerHealthManager, hungerManager, matchManager, shieldManager,debuffManager,armorTierManager,combatService,orbitShieldManager, hatSelectionManager,combatUpgradeManager,broodMotherEntityManager, arenaMapManager,structureManager,movementLockManager,songOfPowerManager,
                 lifeLeechManager,demolitionService,energyModifierManager,damageBuffManager,etherealBodyManager, damageVulnerabilityManager,speedBuffManager,zombieEntityManager,
                 scavengerManager, skeletonEntityManager, swordSelectionManager,
+                cosmeticEffectManager, runeSelectionManager,
                 shadowCloakManager, soulLinkManager, guardianColossusEntityManager, kingsGuardManager
         );
 

@@ -33,6 +33,9 @@ public class CosmeticEffectManager implements MeleeHitEffect {
         ALREADY_UNLOCKED
     }
 
+    /** Persisted marker in cosmetics.yml meaning "roll a random effect each match". */
+    public static final String RANDOM_MARKER = "RANDOM";
+
     private final Plugin plugin;
     private final StatsManager statsManager;
     private final PlayerHealthManager healthManager;
@@ -43,6 +46,8 @@ public class CosmeticEffectManager implements MeleeHitEffect {
     private final Map<UUID, HitEffectType> equippedHitEffects = new HashMap<>();
     private final Map<UUID, Set<KillEffectType>> unlockedKillEffects = new HashMap<>();
     private final Map<UUID, KillEffectType> equippedKillEffects = new HashMap<>();
+    private final Map<UUID, Boolean> randomHitEquipped = new HashMap<>();
+    private final Map<UUID, Boolean> randomKillEquipped = new HashMap<>();
 
     public CosmeticEffectManager(Plugin plugin, StatsManager statsManager, PlayerHealthManager healthManager) {
         this.plugin = plugin;
@@ -74,7 +79,12 @@ public class CosmeticEffectManager implements MeleeHitEffect {
         }
         unlockedHitEffects.put(id, hitEffects);
 
-        HitEffectType equippedHit = parseHitEffect(config.getString(id + ".hit-effects.equipped"));
+        randomHitEquipped.remove(id);
+        String equippedHitRaw = config.getString(id + ".hit-effects.equipped");
+        HitEffectType equippedHit = RANDOM_MARKER.equals(equippedHitRaw) ? null : parseHitEffect(equippedHitRaw);
+        if (RANDOM_MARKER.equals(equippedHitRaw)) {
+            randomHitEquipped.put(id, true);
+        }
         equippedHitEffects.put(id, equippedHit != null && hitEffects.contains(equippedHit) ? equippedHit : null);
 
         Set<KillEffectType> killEffects = new HashSet<>();
@@ -86,7 +96,12 @@ public class CosmeticEffectManager implements MeleeHitEffect {
         }
         unlockedKillEffects.put(id, killEffects);
 
-        KillEffectType equippedKill = parseKillEffect(config.getString(id + ".kill-effects.equipped"));
+        randomKillEquipped.remove(id);
+        String equippedKillRaw = config.getString(id + ".kill-effects.equipped");
+        KillEffectType equippedKill = RANDOM_MARKER.equals(equippedKillRaw) ? null : parseKillEffect(equippedKillRaw);
+        if (RANDOM_MARKER.equals(equippedKillRaw)) {
+            randomKillEquipped.put(id, true);
+        }
         equippedKillEffects.put(id, equippedKill != null && killEffects.contains(equippedKill) ? equippedKill : null);
     }
 
@@ -96,6 +111,8 @@ public class CosmeticEffectManager implements MeleeHitEffect {
         equippedHitEffects.remove(id);
         unlockedKillEffects.remove(id);
         equippedKillEffects.remove(id);
+        randomHitEquipped.remove(id);
+        randomKillEquipped.remove(id);
     }
 
     /* --------------------------------------------------------------------- */
@@ -132,11 +149,24 @@ public class CosmeticEffectManager implements MeleeHitEffect {
 
     public void equipHitEffect(Player player, HitEffectType type) {
         if (!isHitUnlocked(player, type)) return;
+        randomHitEquipped.remove(player.getUniqueId());
         equippedHitEffects.put(player.getUniqueId(), type);
         save(player);
     }
 
+    /** Selects the special "random" option: a hit effect is rolled for each match. */
+    public void equipRandomHitEffect(Player player) {
+        randomHitEquipped.put(player.getUniqueId(), true);
+        equippedHitEffects.remove(player.getUniqueId());
+        save(player);
+    }
+
+    public boolean isRandomHit(Player player) {
+        return randomHitEquipped.getOrDefault(player.getUniqueId(), false);
+    }
+
     public void unequipHitEffect(Player player) {
+        randomHitEquipped.remove(player.getUniqueId());
         equippedHitEffects.remove(player.getUniqueId());
         save(player);
     }
@@ -175,13 +205,56 @@ public class CosmeticEffectManager implements MeleeHitEffect {
 
     public void equipKillEffect(Player player, KillEffectType type) {
         if (!isKillUnlocked(player, type)) return;
+        randomKillEquipped.remove(player.getUniqueId());
         equippedKillEffects.put(player.getUniqueId(), type);
         save(player);
     }
 
-    public void unequipKillEffect(Player player) {
+    /** Selects the special "random" option: a kill effect is rolled for each match. */
+    public void equipRandomKillEffect(Player player) {
+        randomKillEquipped.put(player.getUniqueId(), true);
         equippedKillEffects.remove(player.getUniqueId());
         save(player);
+    }
+
+    public boolean isRandomKill(Player player) {
+        return randomKillEquipped.getOrDefault(player.getUniqueId(), false);
+    }
+
+    public void unequipKillEffect(Player player) {
+        randomKillEquipped.remove(player.getUniqueId());
+        equippedKillEffects.remove(player.getUniqueId());
+        save(player);
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* Match rolls                                                           */
+    /* --------------------------------------------------------------------- */
+
+    /**
+     * Rolls the equipped hit/kill effects for this match. With "random"
+     * selected a (possibly different) unlocked effect is used every match.
+     */
+    public void resolveForMatch(Player player) {
+        UUID id = player.getUniqueId();
+
+        if (randomHitEquipped.getOrDefault(id, false)) {
+            List<HitEffectType> unlocked = new ArrayList<>(unlockedHitEffects.getOrDefault(id, Set.of()));
+            if (unlocked.isEmpty()) {
+                equippedHitEffects.remove(id);
+            } else {
+                equippedHitEffects.put(id, unlocked.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(unlocked.size())));
+            }
+        }
+
+        if (randomKillEquipped.getOrDefault(id, false)) {
+            List<KillEffectType> unlocked = new ArrayList<>(unlockedKillEffects.getOrDefault(id, Set.of()));
+            if (unlocked.isEmpty()) {
+                equippedKillEffects.remove(id);
+            } else {
+                equippedKillEffects.put(id, unlocked.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(unlocked.size())));
+            }
+        }
     }
 
     /* --------------------------------------------------------------------- */
@@ -256,7 +329,8 @@ public class CosmeticEffectManager implements MeleeHitEffect {
         config.set(id + ".hit-effects.unlocked", new ArrayList<>(hitUnlocked));
 
         HitEffectType equippedHit = equippedHitEffects.get(id);
-        config.set(id + ".hit-effects.equipped", equippedHit != null ? equippedHit.name() : null);
+        config.set(id + ".hit-effects.equipped", isRandomHit(player) ? RANDOM_MARKER
+                : (equippedHit != null ? equippedHit.name() : null));
 
         List<String> killUnlocked = unlockedKillEffects.getOrDefault(id, Set.of())
                 .stream()
@@ -266,7 +340,8 @@ public class CosmeticEffectManager implements MeleeHitEffect {
         config.set(id + ".kill-effects.unlocked", new ArrayList<>(killUnlocked));
 
         KillEffectType equippedKill = equippedKillEffects.get(id);
-        config.set(id + ".kill-effects.equipped", equippedKill != null ? equippedKill.name() : null);
+        config.set(id + ".kill-effects.equipped", isRandomKill(player) ? RANDOM_MARKER
+                : (equippedKill != null ? equippedKill.name() : null));
 
         try {
             config.save(file);

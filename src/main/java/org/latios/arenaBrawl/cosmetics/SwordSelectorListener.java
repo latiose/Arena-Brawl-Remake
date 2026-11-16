@@ -23,6 +23,12 @@ public class SwordSelectorListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) return;
 
         int index = event.getRawSlot() - 10;
+        if (event.getRawSlot() == SwordSelectorGUI.RANDOM_SLOT) {
+            selectionManager.equipRandom(player);
+            player.sendMessage("§aSword set to: §dRandom §7(rolled each match)");
+            gui.open(player);
+            return;
+        }
         SwordType[] swords = SwordType.values();
         if (index < 0 || index >= swords.length) return;
 

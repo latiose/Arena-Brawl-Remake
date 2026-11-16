@@ -1,24 +1,32 @@
 package org.latios.arenaBrawl.runes;
 
 public enum RuneType {
-    SPEED("Rune of Speed"),
-    SLOW("Rune of Slow"),
-    DAMAGE("Rune of Damage"),
-    ENERGY("Rune of Energy"),
-    CONFUSION("Rune of Confusion"),
-    IMMOBILIZE("Rune of Immobilization"),
-    HEALING("Rune of Healing"),
-    ONESHOT("Rune of One Shot");
+    SPEED("Rune of Speed", "§f"),
+    SLOW("Rune of Slow", "§5"),
+    DAMAGE("Rune of Damage", "§c"),
+    ENERGY("Rune of Energy", "§e"),
+    CONFUSION("Rune of Confusion", "§0"),
+    IMMOBILIZE("Rune of Immobilization", "§a"),
+    HEALING("Rune of Healing", "§a"),
+    ONESHOT("Rune of One Shot", "§c"),
+    THORNS("Rune of Thorns", "§4"),
+    WEAKNESS("Rune of Weakness", "§6");
 
 
   private final String displayName;
+  /** Chat color used when the rune activates, also used for match-start announcements. */
+  private final String chatColor;
 
-  RuneType(String displayName) {
+  RuneType(String displayName, String chatColor) {
       this.displayName = displayName;
+      this.chatColor = chatColor;
   }
 
 
   public String getDisplayName() { return displayName; }
+
+  /** Chat color used when this rune activates ("Your ... was activated!"). */
+  public String getChatColor() { return chatColor; }
 
     public String getConfigId() {
         return name().toLowerCase();

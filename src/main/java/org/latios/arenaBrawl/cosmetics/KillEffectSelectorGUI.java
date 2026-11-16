@@ -26,6 +26,7 @@ public class KillEffectSelectorGUI {
     }
 
     private static final int COINS_SLOT = 49;
+    public static final int RANDOM_SLOT = 47;
 
     private final CosmeticEffectManager effectManager;
     private final StatsManager statsManager;
@@ -50,7 +51,7 @@ public class KillEffectSelectorGUI {
                 PaginationUtil.title("§cKill Effects", currentPage, totalPages)
         );
 
-        KillEffectType equipped = effectManager.getEquippedKillEffect(player);
+        KillEffectType equipped = effectManager.isRandomKill(player) ? null : effectManager.getEquippedKillEffect(player);
 
         int start = PaginationUtil.firstIndex(currentPage);
         int end = PaginationUtil.lastIndexExclusive(currentPage, effects.length);
@@ -62,8 +63,30 @@ public class KillEffectSelectorGUI {
 
         PaginationUtil.addNavigation(inventory, currentPage, totalPages);
         inventory.setItem(COINS_SLOT, buildCoinsItem(player));
+        inventory.setItem(RANDOM_SLOT, buildRandomItem(effectManager.isRandomKill(player), "kill effect"));
 
         player.openInventory(inventory);
+    }
+
+    private ItemStack buildRandomItem(boolean selected, String label) {
+        ItemStack item = new ItemStack(Material.CLOCK);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName((selected ? "§a✔ " : "§d") + "Random");
+
+        if (selected) {
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
+
+        meta.setLore(List.of(
+                "",
+                "§7Use a random unlocked " + label,
+                "§7each match",
+                "",
+                selected ? "§aCurrently selected" : "§eClick to select"
+        ));
+        item.setItemMeta(meta);
+        return item;
     }
 
     private ItemStack buildDisplayItem(Player player, KillEffectType effect, KillEffectType equipped) {

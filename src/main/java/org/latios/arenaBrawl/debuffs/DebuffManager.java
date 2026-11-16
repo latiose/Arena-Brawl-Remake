@@ -151,6 +151,23 @@ public class DebuffManager implements Listener {
                 && hasPrimaryDebuff(player);
     }
 
+    /**
+     * Removes the active debuff only if it is one of the given types.
+     * Used by cleanses that must not clear other debuffs.
+     */
+    public boolean clearIfType(Player player, DebuffType... types) {
+        ActiveDebuff debuff = activeDebuffs.get(player.getUniqueId());
+        if (debuff == null) return false;
+
+        for (DebuffType type : types) {
+            if (debuff.type() == type) {
+                clearPrimary(player);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean addAccumulatedDamage(Player player, double amount, double breakThreshold) {
         if (!hasActiveDebuff(player)) return false;
 

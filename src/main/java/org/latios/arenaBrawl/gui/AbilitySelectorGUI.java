@@ -30,6 +30,7 @@ public class AbilitySelectorGUI {
     public static final int ITEMS_PER_PAGE = 45;
     public static final int PREVIOUS_PAGE_SLOT = 48;
     public static final int NEXT_PAGE_SLOT = 50;
+    public static final int RANDOM_SLOT = 49;
 
     public static final int HATS_SLOT = 28;
     public static final int RUNE_SLOT = 30;
@@ -176,7 +177,33 @@ public class AbilitySelectorGUI {
         }
 
         PaginationUtil.addNavigation(inv, currentPage, totalPages);
+        inv.setItem(RANDOM_SLOT, createRandomButton(slot, AbilitySelectionManager.RANDOM_ID.equals(current)));
         player.openInventory(inv);
+    }
+
+    private ItemStack createRandomButton(AbilitySlot slot, boolean selected) {
+        return createRandomButton(slot.name(), "Get a random §f" + slot.name() + "§7 ability", "§7each match", selected);
+    }
+
+    private ItemStack createRandomButton(String categoryName, String line1, String line2, boolean selected) {
+        ItemStack item = new ItemStack(Material.CLOCK);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName((selected ? "§a✔ " : "§d") + "Random");
+
+        if (selected) {
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
+
+        meta.setLore(List.of(
+                "",
+                line1,
+                line2,
+                "",
+                selected ? "§aCurrently selected" : "§eClick to select"
+        ));
+        item.setItemMeta(meta);
+        return item;
     }
 
     public void openMainMenu(Player player) {
@@ -203,7 +230,8 @@ public class AbilitySelectorGUI {
         ItemStack runeItem = new ItemStack(Material.NETHER_STAR);
         ItemMeta runeMeta = runeItem.getItemMeta();
         runeMeta.setDisplayName("§dRune");
-        runeMeta.setLore(List.of("", "§7Current: §f" + currentRune.getDisplayName(), "", "§eClick to change"));
+        runeMeta.setLore(List.of("", "§7Current: §f" + (runeSelectionManager.isRandom(player)
+                ? "§dRandom" : currentRune.getDisplayName()), "", "§eClick to change"));
         runeItem.setItemMeta(runeMeta);
         inv.setItem(RUNE_SLOT, runeItem);
 
@@ -267,13 +295,14 @@ public class AbilitySelectorGUI {
                 PaginationUtil.title("Choose a Rune", currentPage, totalPages));
 
         RuneType current = runeSelectionManager.getSelection(player);
+        boolean randomRune = runeSelectionManager.isRandom(player);
 
         int start = PaginationUtil.firstIndex(currentPage);
         int end = PaginationUtil.lastIndexExclusive(currentPage, runes.length);
 
         for (int i = start; i < end; i++) {
             RuneType rune = runes[i];
-            boolean selected = rune == current;
+            boolean selected = !randomRune && rune == current;
 
             RuneConfig cfg = runeConfigManager.get(rune.getConfigId());
 
@@ -301,6 +330,11 @@ public class AbilitySelectorGUI {
                 case IMMOBILIZE -> lore.add("§bDuration: §f" + secondsSlow(cfg.getLong("duration-ticks", 3000)));
                 case HEALING -> lore.add("§bHealing: §f+" + num(cfg.getDouble("heal-amount", 20.0)));
                 case ONESHOT -> lore.add("§bInstantly kills the enemy");
+                case THORNS -> lore.add("§bReflect: §f" + (cfg.getDouble("reflect-percent", 20.0)) + "% of melee damage");
+                case WEAKNESS -> {
+                    lore.add("§bBonus damage: §f+" + (cfg.getDouble("bonus-multiplier", 0.30) * 100.0) + "%");
+                    lore.add("§bDuration: §f" + secondsSlow(cfg.getLong("duration-ticks", 4000)));
+                }
                 default -> { }
             }
 
@@ -313,6 +347,9 @@ public class AbilitySelectorGUI {
         }
 
         PaginationUtil.addNavigation(inv, currentPage, totalPages);
+        inv.setItem(RANDOM_SLOT, createRandomButton("Rune",
+                "§7Get a random §fRune",
+                "§7each match", randomRune));
         player.openInventory(inv);
     }
 
@@ -346,13 +383,15 @@ public class AbilitySelectorGUI {
             case IMMOBILIZE -> Material.LIME_DYE;
             case HEALING -> Material.GREEN_DYE;
             case ONESHOT -> Material.WITHER_SKELETON_SKULL;
+            case THORNS -> Material.CACTUS;
+            case WEAKNESS -> Material.GHAST_TEAR;
         };
     }
 
     private double defaultProcChance(RuneType rune) {
         return switch (rune) {
             case SPEED -> 0.2;
-            case SLOW, ENERGY, HEALING -> 0.15;
+            case SLOW, ENERGY, HEALING, THORNS, WEAKNESS -> 0.15;
             case DAMAGE -> 0.48;
             case CONFUSION -> 0.20;
             case IMMOBILIZE -> 0.01;

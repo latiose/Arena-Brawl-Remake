@@ -25,9 +25,11 @@ public class AbilityIconRegistry {
         icons.put("snowball", Material.SNOWBALL);
         icons.put("melonlauncher", Material.MELON_SLICE);
         icons.put("pumpkinlauncher", Material.CARVED_PUMPKIN);
+        icons.put("mushroomlauncher", Material.RED_MUSHROOM_BLOCK);
         icons.put("groundslam", Material.ANVIL);
         icons.put("freezingbreath", Material.BLUE_ICE);
         icons.put("evilbreath", Material.WITHER_ROSE);
+        icons.put("smokebreath", Material.CAMPFIRE);
         icons.put("heavensbreath", Material.GLOWSTONE_DUST);
         icons.put("dragonsbreath", Material.DRAGON_BREATH);
         icons.put("ancientbreath", Material.NETHERITE_SCRAP);
@@ -39,6 +41,7 @@ public class AbilityIconRegistry {
         icons.put("mysticshot", Material.ARROW);
         icons.put("laywaste", Material.TNT);
         icons.put("particlebeam", Material.END_ROD);
+        icons.put("arcchain", Material.LIGHTNING_ROD);
         icons.put("burstfire", Material.CROSSBOW);
         icons.put("cookieshotgun", Material.COOKIE);
         icons.put("spikegrenade", Material.POINTED_DRIPSTONE);
@@ -173,6 +176,11 @@ public class AbilityIconRegistry {
         icons.put("kingsguard", Material.GOLDEN_HELMET);
         icons.put("undyingrage", Material.NETHERITE_SWORD);
         icons.put("improvement", Material.AMETHYST_SHARD);
+        icons.put("bloodpact", Material.REDSTONE);
+        icons.put("encore", Material.JUKEBOX);
+        icons.put("treason", Material.RED_BANNER);
+        icons.put("judgmentlance", Material.PRISMARINE_SHARD);
+        icons.put("caffeineshot", Material.SUGAR);
     }
 
     public Material getIcon(AbilitySlot slot, String id) {

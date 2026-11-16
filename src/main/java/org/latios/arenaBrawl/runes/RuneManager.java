@@ -8,9 +8,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
-import org.latios.arenaBrawl.general.EnergyManager;
-import org.latios.arenaBrawl.general.PlayerHealthManager;
-import org.latios.arenaBrawl.general.SpeedBuffManager;
+import org.latios.arenaBrawl.general.*;
 
 import java.util.Random;
 
@@ -23,14 +21,18 @@ public class RuneManager {
     private final DebuffManager debuffManager;
     private final SpeedBuffManager speedBuffManager;
     private final PlayerHealthManager healthManager;
-
-    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager, RuneConfigManager runeConfigManager, SpeedBuffManager speedBuffManager, PlayerHealthManager healthManager) {
+    private final DamageVulnerabilityManager damageVulnerabilityManager;
+    private CombatService combatService;
+    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager, RuneConfigManager runeConfigManager, SpeedBuffManager speedBuffManager, PlayerHealthManager healthManager, DamageVulnerabilityManager damageVulnerabilityManager,
+                       CombatService combatService) {
+        this.combatService = combatService;
         this.energyManager = energyManager;
         this.selectionManager = selectionManager;
         this.runeConfigManager = runeConfigManager;
         this.debuffManager = debuffManager;
         this.speedBuffManager = speedBuffManager;
         this.healthManager = healthManager;
+        this.damageVulnerabilityManager = damageVulnerabilityManager;
     }
 
     /**
@@ -39,6 +41,10 @@ public class RuneManager {
      */
     public double tryProc(Player attacker, Player victim) {
         RuneType equipped = selectionManager.getSelection(attacker);
+        // Rune of Thorns only reacts to being hit, it never procs on attack.
+        if (equipped == RuneType.THORNS) {
+            return 1.0;
+        }
         RuneConfig config = runeConfigManager.get(equipped.getConfigId());
 
         double procChance = config.getDouble("proc-chance", getDefaultProcChance(equipped));
@@ -86,7 +92,7 @@ public class RuneManager {
                 long durationMillis = config.getLong("duration-ticks", 3000);
                 debuffManager.tryApply(victim, DebuffType.IMMOBILIZE, durationMillis);
                 attacker.sendMessage("§eYour §a" + rune.getDisplayName() + " §ewas activated!");
-                attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 0.5f);
+                attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
                 return 1.0;
             }
             case CONFUSION -> {
@@ -110,6 +116,14 @@ public class RuneManager {
                 attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
                 return 1.0;
             }
+            case WEAKNESS -> {
+                long durationMillis = config.getLong("duration-ticks", 4000);
+                double bonusMultiplier = config.getDouble("bonus-multiplier", 0.30);
+                damageVulnerabilityManager.applyVulnerability(victim, bonusMultiplier, durationMillis, rune.getDisplayName());
+                attacker.sendMessage("§eYour §6" + rune.getDisplayName() + " §ewas activated!");
+                attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
+                return 1.0;
+            }
             case ONESHOT -> {
                 if (victim != null) {
                     for (Player online : Bukkit.getOnlinePlayers()) {
@@ -130,11 +144,36 @@ public class RuneManager {
         }
     }
 
+    /**
+     * Rolls the victim's Rune of Thorns when they take melee damage and
+     * reflects a percentage of that damage back to the attacker.
+     */
+    public void onMeleeDamageTaken(Player victim, Player attacker, double damageTaken) {
+        if (attacker == null || victim == null || attacker.equals(victim) || damageTaken <= 0) return;
+
+        RuneType equipped = selectionManager.getSelection(victim);
+        if (equipped != RuneType.THORNS) return;
+
+        RuneConfig config = runeConfigManager.get(equipped.getConfigId());
+        double procChance = config.getDouble("proc-chance", getDefaultProcChance(equipped));
+        if (random.nextDouble() >= procChance) return;
+
+        double reflectPercent = config.getDouble("reflect-percent", 20.0);
+        double reflected = damageTaken * (reflectPercent / 100.0);
+        if (reflected <= 0) return;
+
+
+        combatService.applyAbilityDamage(victim, attacker, reflected, "Rune of Thorns", attacker.getLocation());
+        victim.sendMessage("§eYour §4" + equipped.getDisplayName() + " §ewas activated!");
+        victim.playSound(victim.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
+
+    }
+
 
     private double getDefaultProcChance(RuneType rune) {
         return switch (rune) {
             case SPEED -> 0.2;
-            case SLOW, ENERGY, HEALING -> 0.15;
+            case SLOW, ENERGY, HEALING, THORNS, WEAKNESS -> 0.15;
             case DAMAGE -> 0.48;
             case CONFUSION -> 0.20;
             case IMMOBILIZE -> 0.01;
@@ -145,4 +184,7 @@ public class RuneManager {
     }
 
 
+    public void setCombatService(CombatService combatService) {
+        this.combatService = combatService;
+    }
 }

@@ -15,6 +15,7 @@ import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.MeleeHitEffect;
 import org.latios.arenaBrawl.general.MessageUtils;
+import org.latios.arenaBrawl.general.SpeedBuffManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FlameSword implements Ability, MeleeHitEffect {
     private static final Map<UUID, Long> ACTIVE_UNTIL = new ConcurrentHashMap<>();
     private static final Map<UUID, BukkitRunnable> TASKS = new ConcurrentHashMap<>();
+    /** Source id used for the speed buff, so it can be removed selectively. */
+    private static final String SPEED_SOURCE = "flame_sword";
+    /** Shared with the melee-hit-effect instance, which is constructed separately. */
+    private static SpeedBuffManager speedBuffs;
+    private static int speedLevel = 2;
     private final double damageMultiplier;
     private final double energyCost;
     private final long durationTicks;
@@ -36,12 +42,15 @@ public class FlameSword implements Ability, MeleeHitEffect {
     private final Map<UUID, BukkitRunnable> tasks = new HashMap<>();
     private final EnergyModifierManager energyManager;
     private final double energyModifier;
-    public FlameSword(EnergyManager energyManager, EnergyModifierManager energyModifierManager, AbilityConfig config) {
+    public FlameSword(EnergyManager energyManager, EnergyModifierManager energyModifierManager,
+                      SpeedBuffManager speedBuffManager, AbilityConfig config) {
         this.damageMultiplier = config.getDouble("damage-multiplier", 4.0);
         this.energyCost = config.getDouble("energy-cost", 100.0);
         this.durationTicks = config.getLong("duration-ticks", 120L);
         this.particleIntervalTicks = config.getLong("particle-interval-ticks", 20L);
         this.energyModifier = config.getDouble("energy-modifier", 0.8);
+        this.speedLevel = config.getInt("speed-level", 2);
+        speedBuffs = speedBuffManager;
         this.cost = new EnergyCost(energyManager, energyCost);
         this.config = config;
         this.energyManager = energyModifierManager;
@@ -55,12 +64,25 @@ public class FlameSword implements Ability, MeleeHitEffect {
 
     @Override
     public String getDescription() {
-        return "Engulfs your weapon in flames for " + (durationTicks * 0.05) + " seconds. "
+        String description = "Engulfs your weapon in flames for " + (durationTicks * 0.05) + " seconds. "
                 + "Your melee attacks deal " + trim(damageMultiplier) + "x damage.";
+        if (speedLevel >= 1) {
+            description += " Grants Speed " + roman(speedLevel) + " while active.";
+        }
+        return description;
     }
 
     @Override
     public List<AbilityStat> getStats() {
+        if (speedLevel >= 1) {
+            return List.of(
+                    new AbilityStat("Damage Multiplier", trim(damageMultiplier) + "x"),
+                    new AbilityStat("Energy Modifier", trim(energyModifier) + "x"),
+                    new AbilityStat("Energy Cost", String.valueOf((int) energyCost)),
+                    new AbilityStat("Duration", (durationTicks * 0.05) + "s"),
+                    new AbilityStat("Speed Level", roman(speedLevel))
+            );
+        }
         return List.of(
                 new AbilityStat("Damage Multiplier", trim(damageMultiplier) + "x"),
                 new AbilityStat("Energy Modifier", trim(energyModifier) + "x"),
@@ -75,6 +97,9 @@ public class FlameSword implements Ability, MeleeHitEffect {
         stop(id);
         ACTIVE_UNTIL.put(id, System.currentTimeMillis() + durationTicks * 50L);
         energyManager.addModifier(player, "flame_sword", energyModifier, durationTicks * 50L);
+        if (speedLevel >= 1) {
+            speedBuffs.applyBuff(player, speedLevel - 1, durationTicks * 50L, SPEED_SOURCE);
+        }
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_FIRECHARGE_USE, 10.0f, 0.7f);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 10.0f, 0.8f);
         player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0, 1, 0), 40, 0.5, 0.8, 0.5, 0.08);
@@ -157,9 +182,26 @@ public class FlameSword implements Ability, MeleeHitEffect {
         if (task != null) {
             try { task.cancel(); } catch (IllegalStateException ignored) {}
         }
+        if (speedLevel >= 1 && speedBuffs != null) {
+            Player player = org.bukkit.Bukkit.getPlayer(id);
+            if (player != null) {
+                speedBuffs.removeBuff(player, SPEED_SOURCE);
+            }
+        }
     }
 
     private static String trim(double v) {
         return v == Math.floor(v) ? String.valueOf((int) v) : String.valueOf(v);
+    }
+
+    private static String roman(int value) {
+        return switch (value) {
+            case 1 -> "I";
+            case 2 -> "II";
+            case 3 -> "III";
+            case 4 -> "IV";
+            case 5 -> "V";
+            default -> String.valueOf(value);
+        };
     }
 }

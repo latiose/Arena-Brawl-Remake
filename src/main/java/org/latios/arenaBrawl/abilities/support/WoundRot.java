@@ -10,7 +10,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
-import org.latios.arenaBrawl.abilities.AbilityTargeting;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
@@ -19,6 +18,7 @@ import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class WoundRot implements Ability {
 
-    private final double range;
+    private final double radius;
     private final long durationMs;
     private final long cooldownMs;
 
@@ -45,7 +45,7 @@ public class WoundRot implements Ability {
         this.teamManager = teamManager;
         this.playerHealthManager = playerHealthManager;
 
-        this.range = config.getDouble("range", 15.0);
+        this.radius = config.getDouble("radius", 10.0);
         this.durationMs = config.getLong("duration-ms", 6000L);
         this.cooldownMs = config.getLong("cooldown-ms", 30000L);
 
@@ -65,7 +65,7 @@ public class WoundRot implements Ability {
 
     @Override
     public String getDescription() {
-        return "Marks the enemy you are looking at: for " + (durationMs / 1000L)
+        return "Rots every enemy within " + (int) radius + " blocks: for " + (durationMs / 1000L)
                 + "s, every heal they receive turns into the same amount of damage.";
     }
 
@@ -74,45 +74,57 @@ public class WoundRot implements Ability {
         return List.of(
                 new AbilityStat("Effect", "Heals damage instead"),
                 new AbilityStat("Duration", (durationMs / 1000L) + "s"),
-                new AbilityStat("Range", (int) range + "m"),
+                new AbilityStat("Radius", (int) radius + "m"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
 
     @Override
     public boolean activate(Player player) {
-        Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, range);
+        Location center = player.getLocation().clone();
 
-        if (target == null) {
+        List<Player> targets = new ArrayList<>();
+        for (Player enemy : center.getWorld().getPlayers()) {
+            if (enemy.equals(player) || enemy.isDead()) continue;
+            if (enemy.getGameMode() == org.bukkit.GameMode.SPECTATOR) continue;
+            if (!teamManager.isEnemy(player, enemy)) continue;
+            if (enemy.getLocation().distanceSquared(center) > radius * radius) continue;
+            targets.add(enemy);
+        }
+
+        if (targets.isEmpty()) {
             player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
-        target.sendMessage(MessageUtils.negative() + "§3You are rotted! Any healing you receive will damage you instead!");
-        playerHealthManager.markRot(target, player, durationMs);
-        long myExpiry = playerHealthManager.getRotMarkExpiry(target);
 
-        Location loc = target.getLocation();
-        target.getWorld().playSound(loc, Sound.BLOCK_SCULK_SPREAD, 2.0f, 0.6f);
-        target.getWorld().spawnParticle(Particle.ASH, loc.clone().add(0, 1, 0), 50, 0.4, 0.8, 0.4, 0.02);
-        target.getWorld().spawnParticle(Particle.DUST, loc.clone().add(0, 1, 0), 30, 0.3, 0.7, 0.3, 0.02,
-                new Particle.DustOptions(Color.fromRGB(40, 80, 40), 1.4f));
+        player.getWorld().playSound(center, Sound.BLOCK_SCULK_SPREAD, 2.0f, 0.6f);
 
+        for (Player target : targets) {
+            target.sendMessage(MessageUtils.negative() + "§3You are rotted! Any healing you receive will damage you instead!");
+            playerHealthManager.markRot(target, player, durationMs);
+            long myExpiry = playerHealthManager.getRotMarkExpiry(target);
 
+            Location loc = target.getLocation();
+            target.getWorld().playSound(loc, Sound.BLOCK_SCULK_SPREAD, 2.0f, 0.6f);
+            target.getWorld().spawnParticle(Particle.ASH, loc.clone().add(0, 1, 0), 50, 0.4, 0.8, 0.4, 0.02);
+            target.getWorld().spawnParticle(Particle.DUST, loc.clone().add(0, 1, 0), 30, 0.3, 0.7, 0.3, 0.02,
+                    new Particle.DustOptions(Color.fromRGB(40, 80, 40), 1.4f));
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!target.isOnline()) return;
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (!target.isOnline()) return;
 
-                Long expiry = playerHealthManager.getRotMarkExpiry(target);
-                if (expiry != null && expiry != myExpiry) return;
+                    Long expiry = playerHealthManager.getRotMarkExpiry(target);
+                    if (expiry != null && expiry != myExpiry) return;
 
-                playerHealthManager.clearRotMark(target);
-                target.sendMessage(MessageUtils.positive() + "§3The rot in your wounds has burned out!");
-                target.getWorld().spawnParticle(Particle.COMPOSTER,
-                        target.getLocation().add(0, 1, 0), 25, 0.3, 0.6, 0.3, 0.0);
-            }
-        }.runTaskLater(plugin, durationMs / 50L);
+                    playerHealthManager.clearRotMark(target);
+                    target.sendMessage(MessageUtils.positive() + "§3The rot in your wounds has burned out!");
+                    target.getWorld().spawnParticle(Particle.COMPOSTER,
+                            target.getLocation().add(0, 1, 0), 25, 0.3, 0.6, 0.3, 0.0);
+                }
+            }.runTaskLater(plugin, durationMs / 50L);
+        }
 
         return true;
     }

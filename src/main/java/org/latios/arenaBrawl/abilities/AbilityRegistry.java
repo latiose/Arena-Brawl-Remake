@@ -36,12 +36,16 @@ public class AbilityRegistry {
                 deps -> new MelonLauncher(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("melonlauncher")));
         register(AbilitySlot.OFFENSIVE, "pumpkinlauncher",
                 deps -> new PumpkinLauncher(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("pumpkinlauncher")));
+        register(AbilitySlot.OFFENSIVE, "mushroomlauncher",
+                deps -> new MushroomLauncher(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("mushroomlauncher")));
         register(AbilitySlot.OFFENSIVE, "groundslam",
                 deps -> new GroundSlam(deps.teamManager(), deps.energyManager(), deps.combatService(), configManager.get("groundslam")));
         register(AbilitySlot.OFFENSIVE, "freezingbreath",
                 deps -> new FreezingBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("freezingbreath")));
         register(AbilitySlot.OFFENSIVE, "evilbreath",
                 deps -> new EvilBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("evilbreath")));
+        register(AbilitySlot.OFFENSIVE, "smokebreath",
+                deps -> new SmokeBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("smokebreath")));
         register(AbilitySlot.OFFENSIVE, "heavensbreath",
                 deps -> new HeavensBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.playerHealthManager(), configManager.get("heavensbreath")));
         register(AbilitySlot.OFFENSIVE, "dragonsbreath",
@@ -58,6 +62,7 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "mysticshot", deps -> new MysticShot(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("mysticshot")));
         register(AbilitySlot.OFFENSIVE, "laywaste", deps -> new LayWaste(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("laywaste")));
         register(AbilitySlot.OFFENSIVE, "particlebeam", deps -> new ParticleBeam(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("particlebeam")));
+        register(AbilitySlot.OFFENSIVE, "arcchain", deps -> new ArcChain(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("arcchain")));
         register(AbilitySlot.OFFENSIVE, "burstfire", deps -> new BurstFire(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("burstfire")));
         register(AbilitySlot.OFFENSIVE, "cookieshotgun", deps -> new CookieShotgun(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("cookieshotgun")));
         register(AbilitySlot.OFFENSIVE, "spikegrenade", deps -> new SpikeGrenade(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("spikegrenade")));
@@ -68,7 +73,7 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "venombloom", deps -> new VenomBloom(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("venombloom")));
         register(AbilitySlot.OFFENSIVE, "icespear", deps -> new IceSpear(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("icespear")));
         register(AbilitySlot.OFFENSIVE, "soulcannon", deps -> new SoulCannon(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("soulcannon")));
-        register(AbilitySlot.OFFENSIVE, "flamesword", deps -> new FlameSword(deps.energyManager(), deps.energyModifierManager(), configManager.get("flamesword")));
+        register(AbilitySlot.OFFENSIVE, "flamesword", deps -> new FlameSword(deps.energyManager(), deps.energyModifierManager(), deps.speedBuffManager(), configManager.get("flamesword")));
         register(AbilitySlot.OFFENSIVE, "boomerangaxe",
                 deps -> new BoomerangAxe(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("boomerangaxe")));
         register(AbilitySlot.OFFENSIVE, "seekerbolt",
@@ -252,6 +257,9 @@ public class AbilityRegistry {
                 deps -> new AbsorptionShield(deps.cooldownManager(), deps.orbitShieldManager(), deps.combatUpgradeManager(), configManager.get("absorptionshield")));
         register(AbilitySlot.SUPPORT, "sadism",
                 deps -> new Sadism(deps.cooldownManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("sadism")));
+        register(AbilitySlot.SUPPORT, "caffeineshot",
+                deps -> new CaffeineShot(deps.cooldownManager(), deps.combatUpgradeManager(), deps.teamManager(),
+                        deps.playerHealthManager(), deps.debuffManager(), deps.speedBuffManager(), configManager.get("caffeineshot")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
@@ -315,6 +323,17 @@ public class AbilityRegistry {
                 deps -> new UndyingRage(plugin, deps.cooldownManager(), deps.usageManager(), deps.energyManager(), configManager.get("undyingrage")));
         register(AbilitySlot.ULTIMATE, "improvement",
                 deps -> new Improvement(deps.cooldownManager(), deps.usageManager(), configManager.get("improvement")));
+        register(AbilitySlot.ULTIMATE, "bloodpact",
+                deps -> new BloodPact(deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                        deps.playerHealthManager(), deps.damageBuffManager(), configManager.get("bloodpact")));
+        register(AbilitySlot.ULTIMATE, "encore",
+                deps -> new Encore(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(), configManager.get("encore")));
+        register(AbilitySlot.ULTIMATE, "treason",
+                deps -> new Treason(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                        deps.debuffManager(), configManager.get("treason")));
+        register(AbilitySlot.ULTIMATE, "judgmentlance",
+                deps -> new JudgmentLance(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                        deps.combatService(), configManager.get("judgmentlance")));
 
 
         // --- DEFAULTS ---

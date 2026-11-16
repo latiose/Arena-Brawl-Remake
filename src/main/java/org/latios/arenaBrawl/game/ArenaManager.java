@@ -22,6 +22,7 @@ import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
 import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
 import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
+import org.latios.arenaBrawl.cosmetics.CosmeticEffectManager;
 import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.general.*;
@@ -29,6 +30,8 @@ import org.latios.arenaBrawl.hats.HatEquipUtils;
 import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import org.latios.arenaBrawl.powerups.PowerupType;
+import org.latios.arenaBrawl.runes.RuneSelectionManager;
+import org.latios.arenaBrawl.runes.RuneType;
 import org.latios.arenaBrawl.team.Team;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -73,6 +76,8 @@ public class ArenaManager {
     private final ScavengerManager scavengerManager;
     private final SkeletonEntityManager skeletonEntityManager;
     private final SwordSelectionManager swordSelectionManager;
+    private final CosmeticEffectManager cosmeticEffectManager;
+    private final RuneSelectionManager runeSelectionManager;
     private final ShadowCloakManager shadowCloakManager;
     private final SoulLinkManager soulLinkManager;
     private final GuardianColossusEntityManager guardianColossusEntityManager;
@@ -86,7 +91,8 @@ public class ArenaManager {
                         LifeLeechManager lifeLeechManager, StructureDemolitionService demolitionService,EnergyModifierManager energyModifierManager, DamageBuffManager damageBuffManager,
                         EtherealBodyManager etherealBodyManager, DamageVulnerabilityManager damageVulnerabilityManager,SpeedBuffManager speedBuffManager,ZombieEntityManager zombieEntityManager,
                         ScavengerManager scavengerManager,SkeletonEntityManager skeletonEntityManager,
-                        SwordSelectionManager swordSelectionManager, ShadowCloakManager shadowCloakManager,
+                        SwordSelectionManager swordSelectionManager, CosmeticEffectManager cosmeticEffectManager,
+                        RuneSelectionManager runeSelectionManager, ShadowCloakManager shadowCloakManager,
                         SoulLinkManager soulLinkManager, GuardianColossusEntityManager guardianColossusEntityManager,
                         KingsGuardEntityManager kingsGuardEntityManager) {
         this.teamManager = teamManager;
@@ -124,6 +130,8 @@ public class ArenaManager {
         this.scavengerManager = scavengerManager;
         this.skeletonEntityManager = skeletonEntityManager;
         this.swordSelectionManager = swordSelectionManager;
+        this.cosmeticEffectManager = cosmeticEffectManager;
+        this.runeSelectionManager = runeSelectionManager;
         this.shadowCloakManager = shadowCloakManager;
         this.soulLinkManager = soulLinkManager;
         this.guardianColossusEntityManager = guardianColossusEntityManager;
@@ -211,11 +219,30 @@ public class ArenaManager {
             energyManager.reset(player);
             hungerManager.reset(player);
 
+            // Roll random cosmetics for this match before anything is applied.
+            hatSelectionManager.resolveForMatch(player);
+            swordSelectionManager.resolveForMatch(player);
+            cosmeticEffectManager.resolveForMatch(player);
+
+            boolean randomRune = runeSelectionManager.isRandom(player);
+            RuneType rolledRune = runeSelectionManager.resolveForMatch(player);
+
             for (AbilitySlot slot : AbilitySlot.values()) {
-                String abilityId = selectionManager.getSelection(player, slot);
+                boolean randomRoll = selectionManager.isRandom(player, slot);
+                String abilityId = selectionManager.resolveSelection(player, slot);
                 Ability ability = abilityRegistry.create(slot, abilityId, deps);
                 abilityManager.setAbility(player, slot, ability);
                 ability.onMatchStart(player);
+
+                if (randomRoll) {
+                    Ability rolled = abilityRegistry.get(abilityId);
+                    String displayName = (rolled != null) ? rolled.getName() : abilityId;
+                    player.sendMessage("§e✦ Random " + slot.name() + ": " + slot.getChatColor() + displayName);
+                }
+            }
+
+            if (randomRune) {
+                player.sendMessage("§e✦ Random Rune: " + rolledRune.getChatColor() + rolledRune.getDisplayName());
             }
 
             AbilityKit.giveDefaultKit(player, abilityManager, swordSelectionManager);

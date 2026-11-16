@@ -18,12 +18,14 @@ import org.latios.arenaBrawl.abilities.ultimate.Berserk;
 import org.latios.arenaBrawl.abilities.ultimate.BloodMoon;
 import org.latios.arenaBrawl.abilities.ultimate.ThunderArmor;
 import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
+import org.latios.arenaBrawl.abilities.ultimate.Treason;
 import org.latios.arenaBrawl.abilities.utility.TauntingGlare;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.Match;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
+import org.latios.arenaBrawl.runes.RuneManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.*;
@@ -48,6 +50,7 @@ public class CombatService {
     private final SoulLinkManager soulLinkManager;
     private final EnergyManager energyManager;
     private final TeamManager teamManager;
+    private final RuneManager runeManager;
     private final List<MeleeHitEffect> meleeHitEffects = new ArrayList<>();
 
     public void registerMeleeHitEffect(MeleeHitEffect effect) {
@@ -58,7 +61,7 @@ public class CombatService {
                          DebuffManager debuffManager, OrbitShieldManager orbitShieldManager,
                          DamageBuffManager damageBuffManager, MatchManager matchManager, EtherealBodyManager etherealBodyManager,
                          DamageVulnerabilityManager damageVulnerabilityManager, SoulLinkManager soulLinkManager,
-                         EnergyManager energyManager, TeamManager teamManager) {
+                         EnergyManager energyManager, TeamManager teamManager, RuneManager runeManager) {
         this.healthManager = healthManager;
         this.shieldManager = shieldManager;
         this.debuffManager = debuffManager;
@@ -70,6 +73,7 @@ public class CombatService {
         this.soulLinkManager = soulLinkManager;
         this.energyManager = energyManager;
         this.teamManager = teamManager;
+        this.runeManager = runeManager;
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName) {
@@ -77,6 +81,15 @@ public class CombatService {
     }
 
     public void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName, Location impactLocation) {
+        applyAbilityDamage(attacker, victim, rawDamage, abilityName, impactLocation, false);
+    }
+
+    public void applyAbilityDamageSilent(Player attacker, Player victim, double rawDamage, String abilityName) {
+        applyAbilityDamage(attacker, victim, rawDamage, abilityName, null, true);
+    }
+
+    private void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName,
+                                    Location impactLocation, boolean silent) {
         if (victim == null || victim.getGameMode() == GameMode.SPECTATOR
                 || healthManager.isEliminated(victim)) {
             return;
@@ -133,12 +146,14 @@ public class CombatService {
         }
 
         finalDamage = applyLifeBond(victim, attacker, finalDamage);
+        finalDamage = Treason.redirectDamage(attacker, victim, finalDamage, teamManager, this);
 
         healthManager.damage(victim, finalDamage, attacker);
         applySoulLink(victim, attacker, finalDamage);
         if (melee && attacker != null) {
             Thornheart.onMeleeDamageTaken(victim, attacker, healthManager);
             ThunderArmor.onMeleeDamageTaken(victim, attacker, debuffManager);
+            runeManager.onMeleeDamageTaken(victim, attacker, finalDamage);
         }
         if (attacker != null) {
             Bloodthirst.onDamageDealt(attacker, victim, finalDamage, healthManager);
@@ -155,7 +170,7 @@ public class CombatService {
 
         applyPolymorphDamage(victim, finalDamage);
 
-        if (!melee) {
+        if (!melee && !silent) {
             int roundedDamage = (int) Math.round(finalDamage);
 
             if (attacker != null) {
@@ -433,6 +448,7 @@ public class CombatService {
         }
 
         finalDamage = applyLifeBond(victim, owner, finalDamage);
+        finalDamage = Treason.redirectDamage(owner, victim, finalDamage, teamManager, this);
         int roundedDamage = (int) Math.round(finalDamage);
 
         healthManager.damageSilent(victim, finalDamage, owner);

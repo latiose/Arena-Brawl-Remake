@@ -14,12 +14,17 @@ import java.util.logging.Level;
 
 public class RuneSelectionManager {
 
+    /** Persisted marker in runes.yml meaning "roll a random rune each match". */
+    public static final String RANDOM_MARKER = "RANDOM";
+
     private static final RuneType DEFAULT_RUNE = RuneType.DAMAGE;
 
     private final Plugin plugin;
     private final File file;
     private final YamlConfiguration config;
     private final Map<UUID, RuneType> selections = new HashMap<>();
+    private final Map<UUID, Boolean> randomSelections = new HashMap<>();
+    private final Map<UUID, RuneType> matchRolls = new HashMap<>();
 
     public RuneSelectionManager(Plugin plugin) {
         this.plugin = plugin;
@@ -38,28 +43,74 @@ public class RuneSelectionManager {
     }
 
     public void loadForPlayer(Player player) {
-        String saved = config.getString(player.getUniqueId().toString());
-        if (saved != null) {
-            try {
-                selections.put(player.getUniqueId(), RuneType.valueOf(saved));
-            } catch (IllegalArgumentException ignored) {
-                // stored value no longer matches an existing rune, fall back to default
-            }
+        UUID id = player.getUniqueId();
+        randomSelections.remove(id);
+        matchRolls.remove(id);
+
+        String saved = config.getString(id.toString());
+        if (saved == null) {
+            return;
+        }
+        if (RANDOM_MARKER.equals(saved)) {
+            randomSelections.put(id, true);
+            return;
+        }
+        try {
+            selections.put(id, RuneType.valueOf(saved));
+        } catch (IllegalArgumentException ignored) {
+            // stored value no longer matches an existing rune, fall back to default
         }
     }
 
     public void select(Player player, RuneType rune) {
         selections.put(player.getUniqueId(), rune);
+        randomSelections.remove(player.getUniqueId());
         config.set(player.getUniqueId().toString(), rune.name());
         save();
     }
 
+    /** Selects the special "random" option: a rune is rolled for each match. */
+    public void selectRandom(Player player) {
+        selections.remove(player.getUniqueId());
+        randomSelections.put(player.getUniqueId(), true);
+        config.set(player.getUniqueId().toString(), RANDOM_MARKER);
+        save();
+    }
+
+    public boolean isRandom(Player player) {
+        return randomSelections.getOrDefault(player.getUniqueId(), false);
+    }
+
     public RuneType getSelection(Player player) {
+        // During a match the rolled rune is used for procs.
+        RuneType roll = matchRolls.get(player.getUniqueId());
+        if (roll != null) {
+            return roll;
+        }
+        if (isRandom(player)) {
+            return DEFAULT_RUNE;
+        }
         return selections.getOrDefault(player.getUniqueId(), DEFAULT_RUNE);
+    }
+
+    /**
+     * Rolls the rune for this match. With "random" selected this yields a
+     * (possibly different) rune every match; otherwise the saved rune.
+     */
+    public RuneType resolveForMatch(Player player) {
+        if (!isRandom(player)) {
+            return getSelection(player);
+        }
+        RuneType[] runes = RuneType.values();
+        RuneType rolled = runes[java.util.concurrent.ThreadLocalRandom.current().nextInt(runes.length)];
+        matchRolls.put(player.getUniqueId(), rolled);
+        return rolled;
     }
 
     public void unloadPlayer(Player player) {
         selections.remove(player.getUniqueId());
+        randomSelections.remove(player.getUniqueId());
+        matchRolls.remove(player.getUniqueId());
     }
 
     private void save() {

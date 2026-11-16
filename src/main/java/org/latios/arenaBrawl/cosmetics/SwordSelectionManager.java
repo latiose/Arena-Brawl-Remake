@@ -10,11 +10,15 @@ import java.util.*;
 import java.util.logging.Level;
 
 public class SwordSelectionManager {
+    /** Persisted marker in swords.yml meaning "use a random sword each match". */
+    public static final String RANDOM_MARKER = "RANDOM";
+
     private final Plugin plugin;
     private final File file;
     private final YamlConfiguration config;
     private final Map<UUID, Set<SwordType>> unlocked = new HashMap<>();
     private final Map<UUID, SwordType> equipped = new HashMap<>();
+    private final Map<UUID, Boolean> randomEquipped = new HashMap<>();
 
     public SwordSelectionManager(Plugin plugin) {
         this.plugin = plugin;
@@ -44,18 +48,25 @@ public class SwordSelectionManager {
         unlocked.put(id, types);
 
         String equippedName = config.getString(id + ".equipped");
-        SwordType selected = parse(equippedName);
-        if (selected == null || !types.contains(selected)) {
-            selected = SwordType.IRON;
-            changed = true;
+        if (RANDOM_MARKER.equals(equippedName)) {
+            randomEquipped.put(id, true);
+            equipped.put(id, SwordType.IRON);
+        } else {
+            randomEquipped.remove(id);
+            SwordType selected = parse(equippedName);
+            if (selected == null || !types.contains(selected)) {
+                selected = SwordType.IRON;
+                changed = true;
+            }
+            equipped.put(id, selected);
         }
-        equipped.put(id, selected);
         if (changed) save(player);
     }
 
     public void unloadPlayer(Player player) {
         unlocked.remove(player.getUniqueId());
         equipped.remove(player.getUniqueId());
+        randomEquipped.remove(player.getUniqueId());
     }
 
     public boolean isUnlocked(Player player, SwordType sword) {
@@ -70,13 +81,41 @@ public class SwordSelectionManager {
 
     public void equip(Player player, SwordType sword) {
         if (!isUnlocked(player, sword)) return;
+        randomEquipped.remove(player.getUniqueId());
         equipped.put(player.getUniqueId(), sword);
         save(player);
         player.updateInventory();
     }
 
+    /** Selects the special "random" option: a sword is rolled for each match. */
+    public void equipRandom(Player player) {
+        randomEquipped.put(player.getUniqueId(), true);
+        save(player);
+        player.updateInventory();
+    }
+
+    public boolean isRandom(Player player) {
+        return randomEquipped.getOrDefault(player.getUniqueId(), false);
+    }
+
     public SwordType getEquipped(Player player) {
         return equipped.getOrDefault(player.getUniqueId(), SwordType.IRON);
+    }
+
+    /**
+     * Rolls the sword for this match. With "random" selected a (possibly
+     * different) sword from the player's unlocked swords is used every match.
+     */
+    public void resolveForMatch(Player player) {
+        if (!isRandom(player)) {
+            return;
+        }
+        UUID id = player.getUniqueId();
+        List<SwordType> unlockedList = new ArrayList<>(unlocked.getOrDefault(id, Set.of()));
+        if (unlockedList.isEmpty()) {
+            return;
+        }
+        equipped.put(id, unlockedList.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(unlockedList.size())));
     }
 
     private SwordType parse(String value) {
@@ -92,7 +131,7 @@ public class SwordSelectionManager {
         UUID id = player.getUniqueId();
         List<String> values = unlocked.getOrDefault(id, Set.of()).stream().map(Enum::name).sorted().toList();
         config.set(id + ".unlocked", values);
-        config.set(id + ".equipped", getEquipped(player).name());
+        config.set(id + ".equipped", isRandom(player) ? RANDOM_MARKER : getEquipped(player).name());
         try {
             config.save(file);
         } catch (IOException e) {

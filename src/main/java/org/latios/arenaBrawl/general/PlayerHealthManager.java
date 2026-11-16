@@ -220,11 +220,19 @@ public class PlayerHealthManager {
         if (eliminated.contains(target.getUniqueId())) return;
 
         double healedAmount = heal(target, amount, false);
-        if (healedAmount <= 0.0) return;
+       // if (healedAmount <= 0.0) return;
 
         healingCallback.accept(new HealingEvent(healer, target, healedAmount));
         int roundedHeal = (int) Math.round(healedAmount);
 
+
+        if(healer.equals(target)){
+            healer.sendMessage(MessageUtils.positive() + String.format(
+                    "§3Your %s healed you for §a%d §3health!",
+                    sourceName, (int) Math.round(healedAmount)
+            ));
+        }
+        else {
         healer.sendMessage(MessageUtils.positive() + String.format(
                 "§3Your %s healed %s §3for §a%d §3health!",
                 sourceName, target.getName(), roundedHeal
@@ -234,7 +242,8 @@ public class PlayerHealthManager {
                 "§3%s§3's %s healed you for §a%d §3health!",
                 healer.getName(), sourceName, roundedHeal
         ));
-    }
+    }}
+
 
     public void damage(Player player, double amount, Player attacker) {
         if (eliminated.contains(player.getUniqueId())) return;

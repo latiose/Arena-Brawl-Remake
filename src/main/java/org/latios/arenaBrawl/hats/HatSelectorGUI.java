@@ -17,6 +17,8 @@ import java.util.List;
 
 public class HatSelectorGUI {
 
+    public static final int RANDOM_SLOT = 49;
+
     public record HatSelectorHolder(int page) implements InventoryHolder {
         @Override
         public @NonNull Inventory getInventory() {
@@ -54,7 +56,7 @@ public class HatSelectorGUI {
                 PaginationUtil.INVENTORY_SIZE,
                 PaginationUtil.title("§dHat Selector", currentPage, totalPages));
 
-        HatDefinition equipped = hatSelectionManager.getEquipped(player);
+        HatDefinition equipped = hatSelectionManager.isRandom(player) ? null : hatSelectionManager.getEquipped(player);
 
         int start = PaginationUtil.firstIndex(currentPage);
         int end = PaginationUtil.lastIndexExclusive(currentPage, hats.size());
@@ -68,7 +70,29 @@ public class HatSelectorGUI {
         }
 
         PaginationUtil.addNavigation(inv, currentPage, totalPages);
+        inv.setItem(RANDOM_SLOT, buildRandomItem(hatSelectionManager.isRandom(player)));
         player.openInventory(inv);
+    }
+
+    private ItemStack buildRandomItem(boolean selected) {
+        ItemStack item = new ItemStack(Material.CLOCK);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName((selected ? "§a✔ " : "§d") + "Random");
+
+        if (selected) {
+            meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 1, true);
+            meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+        }
+
+        meta.setLore(List.of(
+                "",
+                "§7Wear a random unlocked hat",
+                "§7each match",
+                "",
+                selected ? "§aCurrently selected" : "§eClick to select"
+        ));
+        item.setItemMeta(meta);
+        return item;
     }
 
     private ItemStack buildDisplayItem(HatDefinition hat, boolean unlocked, boolean isEquipped) {
