@@ -90,7 +90,7 @@ public class Sanctuary implements Ability {
 
         // Grant immunity once to the caster and every ally currently inside the dome.
         shieldManager.applyShield(player, 1.0, durationMs, "Sanctuary");
-        player.sendMessage("§bSanctuary§3 protects you!");
+        player.sendMessage("§3A Sanctuary protects you!");
 
         for (Entity nearby : center.getWorld().getNearbyEntities(center, radius, radius + 1.0, radius)) {
             if (!(nearby instanceof Player ally)) continue;

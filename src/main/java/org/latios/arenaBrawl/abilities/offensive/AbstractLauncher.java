@@ -27,14 +27,16 @@ public abstract class AbstractLauncher implements Ability {
     protected final double sliceDamage;
     protected final double energyCost;
     protected final double aoeRadius;
+    protected final double speed;
 
     public AbstractLauncher(EnergyManager energyManager, TeamManager teamManager, CombatService combatService,
                             AbilityConfig config, double defaultMainDamage, double defaultSliceDamage,
-                            double defaultEnergyCost, double defaultAoeRadius) {
+                            double defaultEnergyCost, double defaultAoeRadius, double defaultSpeed) {
         this.mainDamage = config.getDouble("main-damage", defaultMainDamage);
         this.sliceDamage = config.getDouble("slice-damage", defaultSliceDamage);
         this.energyCost = config.getDouble("energy-cost", defaultEnergyCost);
         this.aoeRadius = config.getDouble("aoe-radius", defaultAoeRadius);
+        this.speed = Math.max(0.1, config.getDouble("speed", defaultSpeed));
         this.cost = new EnergyCost(energyManager, this.energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
@@ -54,7 +56,7 @@ public abstract class AbstractLauncher implements Ability {
             s.getEquipment().setHelmet(new ItemStack(getHeadMaterial()));
         });
 
-        Vector velocity = player.getLocation().getDirection().multiply(1.45);
+        Vector velocity = player.getLocation().getDirection().multiply(speed);
         velocity.setY(velocity.getY());
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 10, 1.2f);
@@ -72,6 +74,7 @@ public abstract class AbstractLauncher implements Ability {
                 new AbilityStat("Main Damage", String.valueOf((int) getMainDamage())),
                 new AbilityStat("Slice Damage", String.valueOf((int) getSliceDamage())),
                 new AbilityStat("Explosion Radius", String.valueOf((int) getAoeRadius())),
+                new AbilityStat("Speed", formatSpeed(speed)),
                 new AbilityStat("Slices", "3"),
                 new AbilityStat("Energy Cost", cost.getBaseCostDescription())
         );
@@ -82,4 +85,10 @@ public abstract class AbstractLauncher implements Ability {
     protected double getAoeRadius() { return aoeRadius; }
     protected abstract Material getHeadMaterial();
     protected abstract Material getSliceMaterial();
+
+    private static String formatSpeed(double value) {
+        return value == Math.rint(value)
+                ? String.valueOf((long) value)
+                : String.format(java.util.Locale.US, "%.2f", value);
+    }
 }

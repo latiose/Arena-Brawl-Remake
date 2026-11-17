@@ -63,7 +63,8 @@ public class HatSelectorListener implements Listener {
 
         HatDefinition currentlyEquipped = hatSelectionManager.getEquipped(player);
 
-        if (currentlyEquipped != null && currentlyEquipped.id().equals(clicked.id())) {
+        if (!hatSelectionManager.isRandom(player)
+                && currentlyEquipped != null && currentlyEquipped.id().equals(clicked.id())) {
             hatSelectionManager.unequip(player);
             player.sendMessage("§eYou unequipped " + clicked.displayName() + ".");
         } else {

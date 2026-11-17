@@ -589,6 +589,8 @@ public class MatchManager {
         etherealBodyManager.clear(player);
         movementLockManager.unlock(player);
         songOfPowerManager.clear(player);
+        HungerImmunity.clear(player);
+        HungerSuppression.clear(player);
         lifeLeechManager.clear(player);
         shadowCloakManager.clear(player);
         soulLinkManager.clear(player);

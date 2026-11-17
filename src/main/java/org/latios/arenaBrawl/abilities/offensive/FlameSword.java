@@ -36,6 +36,7 @@ public class FlameSword implements Ability, MeleeHitEffect {
     private final double energyCost;
     private final long durationTicks;
     private final long particleIntervalTicks;
+    private final int particleCount;
     private final AbilityConfig config;
     private final AbilityCost cost;
     private final Map<UUID, Long> activeUntil = new HashMap<>();
@@ -47,7 +48,8 @@ public class FlameSword implements Ability, MeleeHitEffect {
         this.damageMultiplier = config.getDouble("damage-multiplier", 4.0);
         this.energyCost = config.getDouble("energy-cost", 100.0);
         this.durationTicks = config.getLong("duration-ticks", 120L);
-        this.particleIntervalTicks = config.getLong("particle-interval-ticks", 20L);
+        this.particleIntervalTicks = Math.max(1L, config.getLong("particle-interval-ticks", 20L));
+        this.particleCount = Math.max(0, config.getInt("particle-count", 3));
         this.energyModifier = config.getDouble("energy-modifier", 0.8);
         this.speedLevel = config.getInt("speed-level", 2);
         speedBuffs = speedBuffManager;
@@ -119,9 +121,9 @@ public class FlameSword implements Ability, MeleeHitEffect {
                     return;
                 }
 
-                if (ticks % particleIntervalTicks == 0) {
+                if (particleCount > 0 && ticks % particleIntervalTicks == 0) {
                     player.getWorld().spawnParticle(Particle.LAVA, player.getLocation().add(0, 1, 0),
-                            8, 0.6, 0.7, 0.6, 0.0);
+                            particleCount, 0.6, 0.7, 0.6, 0.0);
                 }
             }
         };

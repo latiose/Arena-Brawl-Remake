@@ -124,6 +124,29 @@ public class RuneManager {
                 attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
                 return 1.0;
             }
+            case HUNGER -> {
+                long durationMillis = config.getLong("duration-ms", 5000L);
+                HungerImmunity.apply(attacker, durationMillis);
+                attacker.setFoodLevel(HungerManager.MAX_HUNGER);
+                attacker.sendMessage("§eYour §6" + rune.getDisplayName() + " §ewas activated!");
+                attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
+                return 1.0;
+            }
+            case STARVATION -> {
+                int hungerBars = config.getInt("hunger-bars", 3);
+                long noRegenMillis = config.getLong("no-regen-ms", 5000L);
+                if (victim != null) {
+                    // Song of Power applies HungerImmunity, so this single check covers both buffs.
+                    boolean immune = HungerImmunity.isActive(victim);
+                    if (!immune && hungerBars > 0) {
+                        // Removes the bars and blocks regeneration so the loss isn't undone next tick.
+                        HungerSuppression.starve(victim, hungerBars, noRegenMillis);
+                    }
+                    attacker.sendMessage("§eYour §8" + rune.getDisplayName() + " §ewas activated!");
+                    attacker.playSound(attacker.getLocation(), Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.0f);
+                }
+                return 1.0;
+            }
             case ONESHOT -> {
                 if (victim != null) {
                     for (Player online : Bukkit.getOnlinePlayers()) {
@@ -173,7 +196,7 @@ public class RuneManager {
     private double getDefaultProcChance(RuneType rune) {
         return switch (rune) {
             case SPEED -> 0.2;
-            case SLOW, ENERGY, HEALING, THORNS, WEAKNESS -> 0.15;
+            case SLOW, ENERGY, HEALING, THORNS, WEAKNESS, HUNGER, STARVATION -> 0.15;
             case DAMAGE -> 0.48;
             case CONFUSION -> 0.20;
             case IMMOBILIZE -> 0.01;

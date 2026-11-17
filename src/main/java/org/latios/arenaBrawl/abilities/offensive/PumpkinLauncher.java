@@ -12,9 +12,10 @@ public class PumpkinLauncher extends AbstractLauncher {
     private static final double DEFAULT_SLICE_DAMAGE = 5.0;
     private static final double DEFAULT_ENERGY_COST = 30.0;
     private static final double DEFAULT_AOE_RADIUS = 3.0;
+    private static final double DEFAULT_SPEED = 1.45;
 
     public PumpkinLauncher(EnergyManager energyManager, TeamManager teamManager, CombatService combatService, AbilityConfig config) {
-        super(energyManager, teamManager, combatService, config, DEFAULT_DAMAGE, DEFAULT_SLICE_DAMAGE, DEFAULT_ENERGY_COST, DEFAULT_AOE_RADIUS);
+        super(energyManager, teamManager, combatService, config, DEFAULT_DAMAGE, DEFAULT_SLICE_DAMAGE, DEFAULT_ENERGY_COST, DEFAULT_AOE_RADIUS, DEFAULT_SPEED);
     }
 
     @Override

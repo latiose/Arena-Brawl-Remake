@@ -335,6 +335,14 @@ public class AbilitySelectorGUI {
                     lore.add("§bBonus damage: §f+" + (cfg.getDouble("bonus-multiplier", 0.30) * 100.0) + "%");
                     lore.add("§bDuration: §f" + secondsSlow(cfg.getLong("duration-ticks", 4000)));
                 }
+                case HUNGER -> {
+                    lore.add("§bNo hunger loss: §f" + secondsSlow(cfg.getLong("duration-ms", 5000)));
+                    lore.add("§bRefills your hunger");
+                }
+                case STARVATION -> {
+                    lore.add("§bHunger removed: §f" + cfg.getInt("hunger-bars", 3) + " bars");
+                    lore.add("§bNo hunger regen: §f" + secondsSlow(cfg.getLong("no-regen-ms", 5000)));
+                }
                 default -> { }
             }
 
@@ -385,13 +393,15 @@ public class AbilitySelectorGUI {
             case ONESHOT -> Material.WITHER_SKELETON_SKULL;
             case THORNS -> Material.CACTUS;
             case WEAKNESS -> Material.GHAST_TEAR;
+            case HUNGER -> Material.COOKED_BEEF;
+            case STARVATION -> Material.ROTTEN_FLESH;
         };
     }
 
     private double defaultProcChance(RuneType rune) {
         return switch (rune) {
             case SPEED -> 0.2;
-            case SLOW, ENERGY, HEALING, THORNS, WEAKNESS -> 0.15;
+            case SLOW, ENERGY, HEALING, THORNS, WEAKNESS, HUNGER, STARVATION -> 0.15;
             case DAMAGE -> 0.48;
             case CONFUSION -> 0.20;
             case IMMOBILIZE -> 0.01;

@@ -4,7 +4,6 @@ import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.block.BlockFace;
 import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -33,10 +32,7 @@ public class TrackedLauncherTask extends BukkitRunnable {
     private final CombatService combatService;
     private Vector velocity;
     private Location previousCenter;
-    private static final double RESTITUTION = 0.55;
-    private static final double SURFACE_FRICTION = 0.8;
     private static final double AIR_DRAG = 0.995;
-    private static final double MIN_BOUNCE_SPEED = 0.08;
 
     public TrackedLauncherTask(ArmorStand armorStand, Vector velocity, Player shooter, double mainDamage, double sliceDamage,
                                double aoeRadius, String abilityName, Material headMaterial, Material sliceMaterial,
@@ -76,12 +72,7 @@ public class TrackedLauncherTask extends BukkitRunnable {
                     FluidCollisionMode.NEVER, true);
 
             if (blockHit != null) {
-                BlockFace face = blockHit.getHitBlockFace();
-                if (face == null || face == BlockFace.UP) {
-                    explode(null, blockHit.getHitPosition().toLocation(armorStand.getWorld()));
-                } else {
-                    bounce(blockHit);
-                }
+                explode(null, blockHit.getHitPosition().toLocation(armorStand.getWorld()));
                 return;
             }
         }
@@ -121,29 +112,6 @@ public class TrackedLauncherTask extends BukkitRunnable {
         if (directHit != null) {
             explode(directHit, directImpact);
         }
-    }
-
-    private void bounce(RayTraceResult hit) {
-        Vector normal = hit.getHitBlockFace().getDirection();
-        double impactSpeed = -velocity.dot(normal);
-
-        Vector normalComponent = normal.clone().multiply(velocity.dot(normal));
-        Vector tangentComponent = velocity.clone().subtract(normalComponent).multiply(SURFACE_FRICTION);
-
-        if (impactSpeed < MIN_BOUNCE_SPEED) {
-            velocity = tangentComponent;
-        } else {
-            velocity = tangentComponent.subtract(normalComponent.multiply(RESTITUTION));
-        }
-
-        Location center = hit.getHitPosition().toLocation(armorStand.getWorld())
-                .add(normal.clone().multiply(0.1));
-        armorStand.teleport(center.clone().subtract(0, 1.4, 0));
-        previousCenter = center;
-
-        float volume = (float) Math.min(1.0, 0.3 + impactSpeed * 1.5);
-        float pitch = (float) (1.0 + Math.min(0.6, impactSpeed) * 0.5 + (Math.random() - 0.5) * 0.2);
-        center.getWorld().playSound(center, Sound.BLOCK_STONE_HIT, volume, pitch);
     }
 
     private void explode(Player directHitVictim, Location impactLoc) {

@@ -15,6 +15,8 @@ import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
 import org.latios.arenaBrawl.abilities.cost.EnergyModifierManager;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
+import org.latios.arenaBrawl.general.HungerImmunity;
+import org.latios.arenaBrawl.general.HungerManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -89,6 +91,8 @@ public class SongOfPower implements Ability {
 
         for (Player target : affected) {
             songOfPowerManager.applyBuff(target, durationMillis);
+            target.setFoodLevel(HungerManager.MAX_HUNGER);
+            HungerImmunity.apply(target, durationMillis);
             debuffManager.clear(target);
             energyModifierManager.addModifier(target, "song_of_power", energyMultiplier, durationMillis);
         }

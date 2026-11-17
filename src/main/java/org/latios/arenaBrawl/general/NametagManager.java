@@ -15,7 +15,11 @@ import java.util.List;
 
 public class NametagManager {
 
-    private static final String[] TEAM_SLOTS = {"nt_slot0", "nt_slot1", "nt_slot2"};
+    private static final String[] TEAM_SLOTS = {
+            "nt_slot0", "nt_slot1", "nt_slot2"
+    };
+
+    private static final String SELF_TEAM = "nt_self";
 
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
@@ -25,7 +29,9 @@ public class NametagManager {
         this.healthManager = healthManager;
     }
 
-    /** Updates every viewer's relative nametag colors + health suffix for the other 3 players in the match. */
+    /**
+     * Updates every viewer's relative nametag colors + health suffix.
+     */
     public void update(Match match) {
         List<Player> all = match.getAllPlayers();
 
@@ -33,15 +39,39 @@ public class NametagManager {
             Scoreboard board = match.getIndividualScoreboards().get(viewer);
             if (board == null) continue;
 
-            List<Player> others = all.stream().filter(p -> !p.equals(viewer)).toList();
+            Team selfTeam = board.getTeam(SELF_TEAM);
+
+            if (selfTeam == null) {
+                selfTeam = board.registerNewTeam(SELF_TEAM);
+            }
+
+            selfTeam.setColor(ChatColor.GREEN);
+
+            for (String entry : new ArrayList<>(selfTeam.getEntries())) {
+                selfTeam.removeEntry(entry);
+            }
+
+            selfTeam.addEntry(viewer.getName());
+
+            int selfHp = (int) healthManager.getHealth(viewer);
+
+            selfTeam.suffix(
+                    Component.text(" ", NamedTextColor.WHITE)
+                            .append(Component.text(selfHp + " ❤", NamedTextColor.GREEN))
+            );
+
+            List<Player> others = all.stream()
+                    .filter(p -> !p.equals(viewer))
+                    .toList();
 
             for (int i = 0; i < TEAM_SLOTS.length; i++) {
                 Team team = board.getTeam(TEAM_SLOTS[i]);
+
                 if (team == null) {
                     team = board.registerNewTeam(TEAM_SLOTS[i]);
                 }
 
-                if (i >= others.size()) continue; // fewer than 3 other players, e.g. mid-cleanup
+                if (i >= others.size()) continue;
 
                 Player target = others.get(i);
                 boolean ally = teamManager.isAlly(viewer, target);
@@ -51,13 +81,17 @@ public class NametagManager {
                 for (String entry : new ArrayList<>(team.getEntries())) {
                     team.removeEntry(entry);
                 }
+
                 team.addEntry(target.getName());
 
                 int hp = (int) healthManager.getHealth(target);
-                //team.suffix(Component.text(" §f- " + (ally ? "§a" : "§c") + hp + " ❤"));
+
                 team.suffix(
                         Component.text(" ", NamedTextColor.WHITE)
-                                .append(Component.text(hp + " ❤", ally ? NamedTextColor.GREEN : NamedTextColor.RED))
+                                .append(Component.text(
+                                        hp + " ❤",
+                                        ally ? NamedTextColor.GREEN : NamedTextColor.RED
+                                ))
                 );
             }
         }

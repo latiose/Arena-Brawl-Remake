@@ -63,17 +63,23 @@ public class RuneSelectionManager {
     }
 
     public void select(Player player, RuneType rune) {
-        selections.put(player.getUniqueId(), rune);
-        randomSelections.remove(player.getUniqueId());
-        config.set(player.getUniqueId().toString(), rune.name());
+        UUID id = player.getUniqueId();
+        selections.put(id, rune);
+        randomSelections.remove(id);
+        // Drop any roll from a previous match so it cannot override the new choice.
+        matchRolls.remove(id);
+        config.set(id.toString(), rune.name());
         save();
     }
 
     /** Selects the special "random" option: a rune is rolled for each match. */
     public void selectRandom(Player player) {
-        selections.remove(player.getUniqueId());
-        randomSelections.put(player.getUniqueId(), true);
-        config.set(player.getUniqueId().toString(), RANDOM_MARKER);
+        UUID id = player.getUniqueId();
+        selections.remove(id);
+        randomSelections.put(id, true);
+        // Drop any roll from a previous match so the next match rolls a fresh rune.
+        matchRolls.remove(id);
+        config.set(id.toString(), RANDOM_MARKER);
         save();
     }
 
@@ -99,6 +105,8 @@ public class RuneSelectionManager {
      */
     public RuneType resolveForMatch(Player player) {
         if (!isRandom(player)) {
+            // A non-random player must never keep a roll from an earlier random match.
+            matchRolls.remove(player.getUniqueId());
             return getSelection(player);
         }
         RuneType[] runes = RuneType.values();

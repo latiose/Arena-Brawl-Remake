@@ -8,13 +8,13 @@ public class HungerManager {
     public static final int LOSS_WHILE_SPRINTING = 2;
     public static final int REGEN_WHILE_IDLE = 6;
 
-    public void tick(Player player, boolean immuneToHungerLoss) {
+    public void tick(Player player, boolean immuneToHungerLoss, boolean blockRegen) {
         int current = player.getFoodLevel();
         int updated;
 
         if (player.isSprinting() && !immuneToHungerLoss) {
             updated = Math.max(0, current - LOSS_WHILE_SPRINTING);
-        } else if (!player.isSprinting()) {
+        } else if (!player.isSprinting() && !blockRegen) {
             updated = Math.min(MAX_HUNGER, current + REGEN_WHILE_IDLE);
         } else {
             updated = current;

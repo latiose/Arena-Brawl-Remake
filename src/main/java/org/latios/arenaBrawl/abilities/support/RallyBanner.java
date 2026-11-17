@@ -1,11 +1,10 @@
 package org.latios.arenaBrawl.abilities.support;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.Ability;
@@ -21,8 +20,6 @@ import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
-
-import static org.latios.arenaBrawl.general.EntityCleanupUtils.markAsArenaEntity;
 
 public class RallyBanner implements Ability {
 
@@ -80,21 +77,17 @@ public class RallyBanner implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        Location bannerLocation = findGroundLocation(player);
-        BlockDisplay banner = player.getWorld().spawn(
-                bannerLocation.clone().add(0.5, 0.0, 0.5),
-                BlockDisplay.class,
-                display -> {
-                    display.setBlock(Material.WHITE_BANNER.createBlockData());
-                    display.setViewRange((float) radius + 16.0f);
-                }
-        );
+        ItemStack previousHelmet = player.getInventory().getHelmet();
+        ItemStack savedHelmet = previousHelmet == null ? null : previousHelmet.clone();
+        ItemStack banner = createBanner();
+
+        // The banner is worn as a helmet so it follows the caster around.
+        player.getInventory().setHelmet(banner.clone());
 
         applyBuffs(player);
-        markAsArenaEntity(banner);
         player.getWorld().spawnParticle(
                 Particle.HAPPY_VILLAGER,
-                bannerLocation.clone().add(0.5, 1.0, 0.5),
+                player.getLocation().add(0.0, 2.2, 0.0),
                 35,
                 1.0,
                 1.0,
@@ -102,44 +95,65 @@ public class RallyBanner implements Ability {
                 0.1
         );
         player.getWorld().playSound(
-                bannerLocation,
+                player.getLocation(),
                 Sound.BLOCK_BELL_USE,
                 1.0f,
                 1.0f
         );
 
+        long durationTicks = Math.max(1L, (duration + 49L) / 50L);
+
         new BukkitRunnable() {
-            private long elapsed;
+            private long ticks;
 
             @Override
             public void run() {
-                if (elapsed >= duration || banner.isDead()) {
-                    banner.remove();
+                if (!player.isOnline() || player.isDead() || ticks >= durationTicks) {
+                    restoreHelmet(player, savedHelmet);
                     cancel();
                     return;
                 }
 
-                healAllies(player, bannerLocation);
-                elapsed += 1000L;
+                // Animated hats (or another plugin) may replace the helmet while
+                // the banner is active; keep it equipped for the whole duration.
+                if (!isRallyBanner(player.getInventory().getHelmet())) {
+                    player.getInventory().setHelmet(banner.clone());
+                }
+
+                if (ticks % 20L == 0L) {
+                    healAllies(player);
+                    player.getWorld().spawnParticle(
+                            Particle.HAPPY_VILLAGER,
+                            player.getLocation().add(0.0, 2.2, 0.0),
+                            5,
+                            0.2,
+                            0.4,
+                            0.2,
+                            0.0
+                    );
+                }
+
+                ticks++;
             }
-        }.runTaskTimer(plugin, 0L, 20L);
+        }.runTaskTimer(plugin, 0L, 1L);
 
         return true;
     }
 
-    private Location findGroundLocation(Player player) {
-        Location playerLocation = player.getLocation();
-        int x = playerLocation.getBlockX();
-        int z = playerLocation.getBlockZ();
-        int startY = playerLocation.getBlockY() - 1;
+    private ItemStack createBanner() {
+        return new ItemStack(Material.WHITE_BANNER);
+    }
 
-        for (int y = startY; y >= player.getWorld().getMinHeight(); y--) {
-            if (player.getWorld().getBlockAt(x, y, z).getType().isSolid()) {
-                return new Location(player.getWorld(), x, y + 1, z);
-            }
+    private boolean isRallyBanner(ItemStack item) {
+        return item != null && item.getType() == Material.WHITE_BANNER;
+    }
+
+    private void restoreHelmet(Player player, ItemStack previousHelmet) {
+        if (!player.isOnline() || !isRallyBanner(player.getInventory().getHelmet())) {
+            return;
         }
-
-        return playerLocation.getBlock().getLocation();
+        player.getInventory().setHelmet(previousHelmet);
+        player.updateInventory();
     }
 
     private void applyBuffs(Player player) {
@@ -153,10 +167,9 @@ public class RallyBanner implements Ability {
         }
     }
 
-    private void healAllies(Player player, Location bannerLocation) {
+    private void healAllies(Player player) {
         for (Player ally : player.getWorld().getPlayers()) {
-            if (!isNearbyAlly(player, ally)
-                    || ally.getLocation().distanceSquared(bannerLocation) > radius * radius) {
+            if (!isNearbyAlly(player, ally)) {
                 continue;
             }
 

@@ -136,8 +136,6 @@ public class Portal implements Ability {
         portalA.getWorld().spawnParticle(Particle.PORTAL, portalA.clone().add(0, 1.0, 0), 40, 0.4, 0.8, 0.4, 0.5);
         portalB.getWorld().spawnParticle(Particle.PORTAL, portalB.clone().add(0, 1.0, 0), 40, 0.4, 0.8, 0.4, 0.5);
 
-        player.sendMessage("§5Portal§3 opened! Walk into either end to travel.");
-
         return true;
     }
 }

@@ -710,18 +710,21 @@ ability-values:
     slice-damage: 10.0
     energy-cost: 60.0
     aoe-radius: 3.0
+    speed: 1.45
 
   pumpkinlauncher:
     main-damage: 70.0
     slice-damage: 5.0
     energy-cost: 30.0
     aoe-radius: 3.0
+    speed: 1.45
 
   mushroomlauncher:
     main-damage: 240.0
     slice-damage: 12.0
     energy-cost: 90.0
     aoe-radius: 3.0
+    speed: 1.45
 
   groundslam:
     energy-cost: 100.0
@@ -933,6 +936,7 @@ ability-values:
     energy-cost: 100.0
     duration-ticks: 120
     particle-interval-ticks: 20
+    particle-count: 3
     energy-modifier: 0.8
     speed-level: 2
 
@@ -1723,6 +1727,7 @@ ability-values:
     charge-time-ms: 60000
     damage-multiplier: 1.25
     duration-ms: 6000
+    health-reduction-percent: 10.0
 
   encore:
     max-range: 25.0
@@ -1777,6 +1782,13 @@ rune-values:
     proc-chance: 0.15
     duration-ticks: 4000
     bonus-multiplier: 0.30
+  hunger:
+    proc-chance: 0.15
+    duration-ms: 5000
+  starvation:
+    proc-chance: 0.15
+    hunger-bars: 3
+    no-regen-ms: 5000
 
 hats:
   # --- COMMON HATS ---

@@ -410,7 +410,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new BaseSpeedTask(speedBuffManager).runTaskTimer(this, 0L, 10L);
         new StructureTickTask(structureManager).runTaskTimer(this, 0L, 20L);
         new EnergyRegenTask(energyManager,matchManager,energyModifierManager).runTaskTimer(this, 20L, 5L);
-        new HungerTask(hungerManager,matchManager,songOfPowerManager).runTaskTimer(this, 20L, 20L);
+        new HungerTask(hungerManager,matchManager).runTaskTimer(this, 20L, 20L);
         new AbilityDisplayTask(abilityManager, swordSelectionManager, shadowCloakManager).runTaskTimer(this, 0L, 2L);
         new DebuffTickTask(debuffManager).runTaskTimer(this, 0L, 2L);
         new PolymorphHealTask(debuffManager, playerHealthManager).runTaskTimer(this, 20L, 20L);

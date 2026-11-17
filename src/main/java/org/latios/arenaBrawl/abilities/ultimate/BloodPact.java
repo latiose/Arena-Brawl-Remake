@@ -30,6 +30,7 @@ public class BloodPact implements Ability {
     private final long chargeTimeMillis;
     private final double damageMultiplier;
     private final long durationMillis;
+    private final double healthReductionPercent;
 
     private final AbilityCost cost;
     private final CooldownManager cooldownManager;
@@ -43,6 +44,8 @@ public class BloodPact implements Ability {
         this.chargeTimeMillis = config.getLong("charge-time-ms", 60000L);
         this.damageMultiplier = config.getDouble("damage-multiplier", 1.25);
         this.durationMillis = config.getLong("duration-ms", 6000L);
+        this.healthReductionPercent = Math.max(0.0, Math.min(100.0,
+                config.getDouble("health-reduction-percent", 10.0)));
 
         this.cost = new UltimateCost(cooldownManager, usageManager, "bloodpact");
         this.cooldownManager = cooldownManager;
@@ -68,15 +71,16 @@ public class BloodPact implements Ability {
 
     @Override
     public String getDescription() {
-        return "Blood ritual: you and your ally pool your health so both end up at the average, "
-                + "then both deal " + trimPercent((damageMultiplier - 1.0) * 100.0)
+        return "Blood ritual: you and your ally pool your health so both end up at the average minus "
+                + trimPercent(healthReductionPercent) + "%, then both deal "
+                + trimPercent((damageMultiplier - 1.0) * 100.0)
                 + "% more damage for " + (durationMillis / 1000.0) + "s.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Effect", "Share health + damage buff"),
+                new AbilityStat("Effect", "Share health (-" + trimPercent(healthReductionPercent) + "%) + damage buff"),
                 new AbilityStat("Damage Bonus", "+" + trimPercent((damageMultiplier - 1.0) * 100.0) + "%"),
                 new AbilityStat("Duration", (durationMillis / 1000.0) + "s"),
                 new AbilityStat("Charge", (chargeTimeMillis / 1000L) + "s"),
@@ -92,6 +96,8 @@ public class BloodPact implements Ability {
             double casterHealth = playerHealthManager.getHealth(player);
             double allyHealth = playerHealthManager.getHealth(ally);
             double average = (casterHealth + allyHealth) / 2.0;
+            // The ritual consumes a percentage of the pooled health.
+            double targetHealth = average * (1.0 - healthReductionPercent / 100.0);
 
             Location ritualCenter = player.getLocation().clone().add(0, 1, 0);
             ritualCenter.getWorld().playSound(ritualCenter, Sound.BLOCK_BEACON_POWER_SELECT, 2.0f, 0.7f);
@@ -101,18 +107,19 @@ public class BloodPact implements Ability {
 
             for (Player member : List.of(player, ally)) {
                 double current = playerHealthManager.getHealth(member);
-                double delta = average - current;
+                double delta = targetHealth - current;
 
                 if (delta > 0) {
                     playerHealthManager.heal(member, delta, getName());
-                    member.sendMessage("§eYour §4" + getName() + " §egives you §c+" + (int) Math.round(delta)
-                            + " §eHP from your ally's blood!");
+                    member.sendMessage("§eYour §4" + getName() + " §erestores §c+" + (int) Math.round(delta)
+                            + " §eHP, leaving you at §c" + (int) Math.round(targetHealth) + " §eHP!");
                 } else if (delta < 0) {
                     playerHealthManager.damageSilent(member, -delta, null);
-                    member.sendMessage("§eYour §4" + getName() + " §etakes §c" + (int) Math.round(-delta)
-                            + " §eHP and gives it to your ally!");
+                    member.sendMessage("§eYour §4" + getName() + " §econsumes §c" + (int) Math.round(-delta)
+                            + " §eHP, leaving you at §c" + (int) Math.round(targetHealth) + " §eHP!");
                 } else {
-                    member.sendMessage("§eYour §4" + getName() + " §ebalances your health with your ally's!");
+                    member.sendMessage("§eYour §4" + getName() + " §eleaves your health at §c"
+                            + (int) Math.round(targetHealth) + " §eHP!");
                 }
 
                 damageBuffManager.applyBuff(member, damageMultiplier, durationMillis, getName());
@@ -122,8 +129,8 @@ public class BloodPact implements Ability {
                         new Particle.DustOptions(Color.fromRGB(170, 0, 0), 1.5f));
             }
 
-            ally.sendMessage("§e§l" + player.getName() + " §eshared your blood! You now both have "
-                    + (int) Math.round(average) + " HP!");
+            ally.sendMessage("§e§l" + player.getName() + " §eperformed the blood pact! You now both have "
+                    + (int) Math.round(targetHealth) + " HP!");
         } else {
             // No ally present: the pact only empowers the caster.
             player.sendMessage("§eNo ally present - the" + getName() + " §estrengthens only you!");

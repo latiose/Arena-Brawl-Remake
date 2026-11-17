@@ -10,7 +10,9 @@ public enum RuneType {
     HEALING("Rune of Healing", "§a"),
     ONESHOT("Rune of One Shot", "§c"),
     THORNS("Rune of Thorns", "§4"),
-    WEAKNESS("Rune of Weakness", "§6");
+    WEAKNESS("Rune of Weakness", "§6"),
+    HUNGER("Rune of Hunger", "§6"),
+    STARVATION("Rune of Starvation", "§8");
 
 
   private final String displayName;

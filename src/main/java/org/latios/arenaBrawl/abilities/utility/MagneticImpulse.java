@@ -74,7 +74,7 @@ public class MagneticImpulse implements Ability {
 
         Set<Player> targets = new HashSet<>();
         for (Entity entity : casterLoc.getWorld().getNearbyEntities(casterLoc, radius, radius, radius)) {
-            if (entity instanceof Player victim && !victim.equals(player)) {
+            if (entity instanceof Player victim && !victim.equals(player) && !victim.isDead() && !victim.getGameMode().equals(org.bukkit.GameMode.SPECTATOR)) {
                 targets.add(victim);
             }
         }

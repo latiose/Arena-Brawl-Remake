@@ -2,6 +2,7 @@ package org.latios.arenaBrawl.hats;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -31,6 +32,10 @@ public class HatAnimationTask extends BukkitRunnable {
 
             ItemStack helmet = player.getInventory().getHelmet();
             Material current = helmet != null ? helmet.getType() : null;
+
+            // Rally Banner temporarily wears a banner in the helmet slot; do not
+            // let an animated hat replace it while the ability is active.
+            if (current != null && Tag.BANNERS.isTagged(current)) continue;
 
             int index = current != null ? materials.indexOf(current) : -1;
             Material next = materials.get((index + 1) % materials.size());
