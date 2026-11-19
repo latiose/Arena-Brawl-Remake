@@ -16,6 +16,7 @@ import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.GuardianColossusEntityManager;
+import org.latios.arenaBrawl.abilities.ultimate.InfernalGhastEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
 import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
@@ -81,6 +82,7 @@ public class ArenaManager {
     private final ShadowCloakManager shadowCloakManager;
     private final SoulLinkManager soulLinkManager;
     private final GuardianColossusEntityManager guardianColossusEntityManager;
+    private final InfernalGhastEntityManager infernalGhastEntityManager;
     private final KingsGuardEntityManager kingsGuardEntityManager;
     public ArenaManager(TeamManager teamManager, AbilityManager abilityManager, AbilityRegistry abilityRegistry,
                         AbilitySelectionManager selectionManager, CooldownManager cooldownManager,
@@ -94,6 +96,7 @@ public class ArenaManager {
                         SwordSelectionManager swordSelectionManager, CosmeticEffectManager cosmeticEffectManager,
                         RuneSelectionManager runeSelectionManager, ShadowCloakManager shadowCloakManager,
                         SoulLinkManager soulLinkManager, GuardianColossusEntityManager guardianColossusEntityManager,
+                        InfernalGhastEntityManager infernalGhastEntityManager,
                         KingsGuardEntityManager kingsGuardEntityManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -135,6 +138,7 @@ public class ArenaManager {
         this.shadowCloakManager = shadowCloakManager;
         this.soulLinkManager = soulLinkManager;
         this.guardianColossusEntityManager = guardianColossusEntityManager;
+        this.infernalGhastEntityManager = infernalGhastEntityManager;
         this.kingsGuardEntityManager = kingsGuardEntityManager;
     }
 
@@ -209,7 +213,8 @@ public class ArenaManager {
         List<Player> allPlayers = List.copyOf(players);
         AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,
                 energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager,scavengerManager,skeletonEntityManager,
-                shadowCloakManager,soulLinkManager,guardianColossusEntityManager,matchManager,kingsGuardEntityManager);
+                shadowCloakManager,soulLinkManager,guardianColossusEntityManager,matchManager,kingsGuardEntityManager,
+                infernalGhastEntityManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(false);

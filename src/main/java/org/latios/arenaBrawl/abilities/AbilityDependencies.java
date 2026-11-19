@@ -12,6 +12,7 @@ import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.GuardianColossusEntityManager;
+import org.latios.arenaBrawl.abilities.ultimate.InfernalGhastEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
 import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
@@ -52,5 +53,6 @@ public record AbilityDependencies(
         SoulLinkManager soulLinkManager,
         GuardianColossusEntityManager guardianColossusEntityManager,
         MatchManager matchManager,
-        KingsGuardEntityManager kingsGuardManager
+        KingsGuardEntityManager kingsGuardManager,
+        InfernalGhastEntityManager infernalGhastEntityManager
 ) {}

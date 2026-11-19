@@ -23,6 +23,8 @@ import org.latios.arenaBrawl.abilities.support.EtherealBodyManager;
 import org.latios.arenaBrawl.abilities.support.LifeBond;
 import org.latios.arenaBrawl.abilities.support.LifeLeechManager;
 import org.latios.arenaBrawl.abilities.support.Meditation;
+import org.latios.arenaBrawl.abilities.support.Momentum;
+import org.latios.arenaBrawl.abilities.support.RallyBanner;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
 import org.latios.arenaBrawl.abilities.support.Thornheart;
 import org.latios.arenaBrawl.abilities.support.TimeWarp;
@@ -30,6 +32,7 @@ import org.latios.arenaBrawl.abilities.ultimate.Berserk;
 import org.latios.arenaBrawl.abilities.ultimate.BloodMoon;
 import org.latios.arenaBrawl.abilities.ultimate.BroodMotherEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.GuardianColossusEntityManager;
+import org.latios.arenaBrawl.abilities.ultimate.InfernalGhastEntityManager;
 import org.latios.arenaBrawl.abilities.ultimate.Intervention;
 import org.latios.arenaBrawl.abilities.ultimate.Premonition;
 import org.latios.arenaBrawl.abilities.ultimate.Rewind;
@@ -41,6 +44,7 @@ import org.latios.arenaBrawl.abilities.UsageManager;
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
 import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
 import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
+import org.latios.arenaBrawl.abilities.utility.SugarRush;
 import org.latios.arenaBrawl.abilities.utility.TauntingGlare;
 import org.latios.arenaBrawl.abilities.utility.Taunt;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
@@ -100,6 +104,7 @@ public class MatchManager {
     private final ShadowCloakManager shadowCloakManager;
     private final SoulLinkManager soulLinkManager;
     private final GuardianColossusEntityManager guardianColossusEntityManager;
+    private final InfernalGhastEntityManager infernalGhastEntityManager;
     private final KingsGuardEntityManager kingsGuardEntityManager;
     private final CosmeticEffectManager cosmeticEffectManager;
     private static final String SEPARATOR_LINE = "§a§l---------------------------------------------";
@@ -112,7 +117,8 @@ public class MatchManager {
                         ShieldManager shieldManager, DamageVulnerabilityManager damageVulnerabilityManager, SpeedBuffManager speedBuffManager,
                         EtherealBodyManager etherealBodyManager, EnergyModifierManager energyModifierManager,
                         ScavengerManager scavengerManager, MovementLockManager movementLockManager,CosmeticEffectManager cosmeticEffectManager,
-                        KingsGuardEntityManager kingsGuardEntityManager) {
+                        KingsGuardEntityManager kingsGuardEntityManager,
+                        InfernalGhastEntityManager infernalGhastEntityManager) {
         this.healthManager = healthManager;
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
@@ -140,6 +146,7 @@ public class MatchManager {
         this.shadowCloakManager = shadowCloakManager;
         this.soulLinkManager = soulLinkManager;
         this.guardianColossusEntityManager = guardianColossusEntityManager;
+        this.infernalGhastEntityManager = infernalGhastEntityManager;
         this.kingsGuardEntityManager = kingsGuardEntityManager;
         this.shieldManager = shieldManager;
         this.damageVulnerabilityManager = damageVulnerabilityManager;
@@ -232,6 +239,13 @@ public class MatchManager {
         debuffManager.clear(player);
         shadowCloakManager.clear(player);
         soulLinkManager.clear(player);
+        // A dead player must not keep the banner (or its buffs) as a spectator.
+        RallyBanner.clear(player);
+        RallyBanner.clearReceivedBuffs(player, damageBuffManager, speedBuffManager);
+        Momentum.clear(player);
+        SugarRush.clear(player);
+        Berserk.clear(player);
+        lifeLeechManager.clear(player);
         Team winner = match.eliminate(player);
 
         drawVoteManager.reset(match);
@@ -550,6 +564,7 @@ public class MatchManager {
         zombieEntityManager.clearForMatch(match);
         skeletonEntityManager.clearForMatch(match);
         guardianColossusEntityManager.clearForMatch(match);
+        infernalGhastEntityManager.clearForMatch(match);
         kingsGuardEntityManager.clearForMatch(match);
 
         if (match.getArenaMap() != null) {
@@ -608,10 +623,13 @@ public class MatchManager {
         Rewind.clear(player);
         Intervention.clear(player);
         Meditation.clear(player);
+        Momentum.clear(player);
+        SugarRush.clear(player);
         TimeWarp.clear(player);
         ThunderArmor.clear(player);
         TauntingGlare.clear(player);
         Premonition.clear(player);
+        RallyBanner.clear(player);
         OffensiveEnergyDiscount.clear(player);
         AbilityCostReduction.clear(player);
         healthManager.clearRecentDamageTaken(player);
@@ -624,6 +642,7 @@ public class MatchManager {
             zombieEntityManager.clearForWorld(matchWorld);
             skeletonEntityManager.clearForWorld(matchWorld);
             guardianColossusEntityManager.clearForWorld(matchWorld);
+            infernalGhastEntityManager.clearForWorld(matchWorld);
             kingsGuardEntityManager.clearForWorld(matchWorld);
         }
 
@@ -640,6 +659,7 @@ public class MatchManager {
         zombieEntityManager.clearForPlayer(player);
         skeletonEntityManager.clearForPlayer(player);
         guardianColossusEntityManager.clearForPlayer(player);
+        infernalGhastEntityManager.clearForPlayer(player);
         kingsGuardEntityManager.clearForPlayer(player);
     }
 

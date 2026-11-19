@@ -3,6 +3,7 @@ package org.latios.arenaBrawl.abilities.ultimate;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -17,16 +18,28 @@ import org.latios.arenaBrawl.powerups.DamageBuffManager;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Berserk implements Ability {
 
+    private static final String SPEED_SOURCE = "berserk";
+
     public static final Set<UUID> BERSERK_ACTIVE_PLAYERS = new HashSet<>();
 
-    /** Drops the melee rage state (doubled melee damage) for a player. */
+    /** Speed manager per active berserk, so the boost can be revoked without touching other speed buffs. */
+    private static final Map<UUID, SpeedBuffManager> SPEED_MANAGERS = new ConcurrentHashMap<>();
+
+    /** Drops the melee rage state (doubled melee damage), its speed boost and visuals for a player. */
     public static void clear(Player player) {
         BERSERK_ACTIVE_PLAYERS.remove(player.getUniqueId());
+
+        SpeedBuffManager speed = SPEED_MANAGERS.remove(player.getUniqueId());
+        if (speed != null) {
+            speed.removeBuff(player, SPEED_SOURCE);
+        }
     }
 
     private final long durationMillis;
@@ -71,7 +84,8 @@ public class Berserk implements Ability {
     public boolean activate(Player player) {
         UUID uuid = player.getUniqueId();
 
-        speedBuffManager.applyBuff(player, speedAmplifier, durationMillis);
+        speedBuffManager.applyBuff(player, speedAmplifier, durationMillis, SPEED_SOURCE);
+        SPEED_MANAGERS.put(uuid, speedBuffManager);
 
         BERSERK_ACTIVE_PLAYERS.add(uuid);
 
@@ -87,10 +101,12 @@ public class Berserk implements Ability {
             public void run() {
                 boolean expiredNaturally = secondsElapsed >= maxSeconds;
                 if (!player.isOnline() || player.isDead()
+                        || player.getGameMode() == GameMode.SPECTATOR
                         || !BERSERK_ACTIVE_PLAYERS.contains(uuid)
                         || expiredNaturally) {
-                    BERSERK_ACTIVE_PLAYERS.remove(uuid);
-                    if (expiredNaturally && player.isOnline()) {
+                    clear(player);
+                    if (expiredNaturally && player.isOnline() && !player.isDead()
+                            && player.getGameMode() != GameMode.SPECTATOR) {
                         Component expireMessage = Component.text("Your ", NamedTextColor.YELLOW)
                                 .append(Component.text("BERSERK", NamedTextColor.RED, TextDecoration.BOLD))
                                 .append(Component.text(" has expired!", NamedTextColor.YELLOW));

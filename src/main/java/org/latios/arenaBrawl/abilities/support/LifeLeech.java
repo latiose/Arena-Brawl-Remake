@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities.support;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -75,7 +76,10 @@ public class LifeLeech implements Ability {
 
             @Override
             public void run() {
-                if (!player.isOnline() || !lifeLeechManager.isActive(player) || ticksElapsed >= durationTicks) {
+                if (!player.isOnline() || player.isDead()
+                        || player.getGameMode() == GameMode.SPECTATOR
+                        || !lifeLeechManager.isActive(player)
+                        || ticksElapsed >= durationTicks) {
                     cancel();
                     return;
                 }

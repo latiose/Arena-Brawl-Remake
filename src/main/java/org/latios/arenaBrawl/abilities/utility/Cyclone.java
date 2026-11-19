@@ -31,6 +31,8 @@ import java.util.List;
  */
 public class Cyclone implements Ability {
 
+    private static final String SHIELD_TITLE = "Cyclone";
+
     private final double range;
     private final long durationMs;
     private final long cooldownMs;
@@ -93,8 +95,18 @@ public class Cyclone implements Ability {
             return false;
         }
 
-        shieldManager.applyShield(target, 1.0, durationMs, "Cyclone");
-        debuffManager.tryApply(target, DebuffType.STUN, durationMs);
+        // The stun is what keeps the victim inside the vortex, so the immunity
+        // shield only makes sense while it lasts. If the stun cannot be applied
+        // (Song of Power, an existing debuff, a spectator...) there is nothing
+        // to protect and the ability must not be paid for.
+        if (!debuffManager.tryApply(target, DebuffType.STUN, durationMs)) {
+            return false;
+        }
+
+        // Tenacity may shorten the stun; the shield must never outlive it.
+        long shieldDuration = Math.max(1L, Math.min(durationMs,
+                debuffManager.getActiveDebuffDurationMillis(target)));
+        shieldManager.applyShield(target, 1.0, shieldDuration, SHIELD_TITLE);
 
         boolean enemy = teamManager.isEnemy(player, target);
 
@@ -115,7 +127,16 @@ public class Cyclone implements Ability {
             public void run() {
                 ticksElapsed += 2;
 
-                if (ticksElapsed >= durationMs / 50L || !target.isOnline() || target.isDead()) {
+                // The stun can end before durationMs (tenacity halves it, Holy
+                // Water or another cleanse removes it, it can be replaced), so
+                // both the shield and the vortex follow the stun itself instead
+                // of a fixed timer.
+                boolean stunActive = target.isOnline()
+                        && !target.isDead()
+                        && debuffManager.hasDebuff(target, DebuffType.STUN);
+
+                if (!stunActive || ticksElapsed >= durationMs / 50L) {
+                    shieldManager.removeByTitle(target, SHIELD_TITLE);
                     cancel();
                     return;
                 }

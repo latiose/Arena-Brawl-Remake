@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities.support;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -16,7 +17,10 @@ import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Individualistic self-sustain. Regenerates health while the caster keeps moving; standing still
@@ -26,6 +30,8 @@ public class Momentum implements Ability {
 
     private static final long CHECK_INTERVAL_TICKS = 2L;
     private static final double MOVEMENT_EPSILON_SQ = 0.0004; // ~0.02 blocks
+
+    private static final Map<UUID, BukkitRunnable> ACTIVE = new HashMap<>();
 
     private final long cooldownMs;
     private final long durationMs;
@@ -75,21 +81,51 @@ public class Momentum implements Ability {
         );
     }
 
+    /**
+     * Cancels a running Momentum. Called when the match ends, the player dies,
+     * leaves to the hub or disconnects, so the healing never bleeds into the
+     * lobby or the next match.
+     */
+    public static void clear(Player player) {
+        stop(player, null);
+    }
+
+    private static void stop(Player player, String message) {
+        BukkitRunnable task = ACTIVE.remove(player.getUniqueId());
+        if (task == null) return;
+
+        task.cancel();
+        if (player.isOnline()) {
+            if (message != null) {
+                player.sendMessage(message);
+            }
+            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.7f, 1.3f);
+        }
+    }
+
     @Override
     public boolean activate(Player player) {
+        if (player.isDead() || player.getGameMode() == GameMode.SPECTATOR) {
+            return false;
+        }
+
+        stop(player, null);
+
         long maxTicks = durationMs / 50L;
 
         player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 10.0f, 1.5f);
 
-        new BukkitRunnable() {
+        BukkitRunnable task = new BukkitRunnable() {
             long elapsedTicks = 0;
             Location lastPosition = player.getLocation().clone();
             long lastMoveAt = System.currentTimeMillis();
 
             @Override
             public void run() {
-                if (!player.isOnline() || player.isDead() || elapsedTicks >= maxTicks) {
-                    cancel();
+                if (!player.isOnline() || player.isDead()
+                        || player.getGameMode() == GameMode.SPECTATOR
+                        || elapsedTicks >= maxTicks) {
+                    clear(player);
                     return;
                 }
 
@@ -101,9 +137,7 @@ public class Momentum implements Ability {
                 }
 
                 if (System.currentTimeMillis() - lastMoveAt >= stationaryBreakMs) {
-                    player.sendMessage(MessageUtils.negative() + "§3Your Momentum ended because you stopped moving.");
-                    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.7f, 1.3f);
-                    cancel();
+                    stop(player, MessageUtils.negative() + "§3Your Momentum ended because you stopped moving.");
                     return;
                 }
 
@@ -116,7 +150,10 @@ public class Momentum implements Ability {
 
                 elapsedTicks += CHECK_INTERVAL_TICKS;
             }
-        }.runTaskTimer(plugin, 0L, CHECK_INTERVAL_TICKS);
+        };
+
+        ACTIVE.put(player.getUniqueId(), task);
+        task.runTaskTimer(plugin, 0L, CHECK_INTERVAL_TICKS);
 
         return true;
     }

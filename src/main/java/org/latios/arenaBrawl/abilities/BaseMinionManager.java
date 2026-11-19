@@ -25,6 +25,11 @@ public abstract class BaseMinionManager {
     protected final Map<UUID, Long> lastAttackAt = new HashMap<>();
     protected final Map<UUID, LivingEntity> activeEntities = new HashMap<>();
 
+    /** Snapshot of the minions currently controlled by this manager. */
+    public Collection<LivingEntity> getActiveEntities() {
+        return new ArrayList<>(activeEntities.values());
+    }
+
     protected final TeamManager teamManager;
     protected CombatService combatService;
     private final long teleportTimeoutMillis;

@@ -334,6 +334,9 @@ public class AbilityRegistry {
         register(AbilitySlot.ULTIMATE, "judgmentlance",
                 deps -> new JudgmentLance(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
                         deps.combatService(), configManager.get("judgmentlance")));
+        register(AbilitySlot.ULTIMATE, "infernalghast",
+                deps -> new InfernalGhast(deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                        deps.infernalGhastEntityManager(), configManager.get("infernalghast")));
 
 
         // --- DEFAULTS ---

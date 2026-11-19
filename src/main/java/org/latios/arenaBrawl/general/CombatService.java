@@ -405,7 +405,22 @@ public class CombatService {
     }
 
     public void applyMinionDamage(Player owner, Player victim, double rawDamage, String sourceName, Location impactLocation) {
-        if (victim == null || victim.getGameMode() == GameMode.SPECTATOR) {
+        applyMinionDamage(owner, victim, rawDamage, sourceName, impactLocation, true);
+    }
+
+    /**
+     * Minion damage that cannot be reflected back by Counter, Reflect Damage or
+     * similar stances. Used by projectiles that must always hit their intended
+     * target, such as the Infernal Ghast fireballs.
+     */
+    public void applyUnreflectableMinionDamage(Player owner, Player victim, double rawDamage,
+                                               String sourceName, Location impactLocation) {
+        applyMinionDamage(owner, victim, rawDamage, sourceName, impactLocation, false);
+    }
+
+    private void applyMinionDamage(Player owner, Player victim, double rawDamage, String sourceName,
+                                   Location impactLocation, boolean reflectable) {
+        if (victim == null || victim.getGameMode() == GameMode.SPECTATOR || owner == null) {
             return;
         }
 
@@ -416,10 +431,12 @@ public class CombatService {
             ownerMultiplier *= 2.0;
         }
 
-        ReflectStance.ReflectState stance = ReflectStance.getActiveState(victim);
-        if (stance != null) {
-            resolveReflectStance(owner, victim, rawDamage * ownerMultiplier, stance, sourceName, false);
-            return;
+        if (reflectable) {
+            ReflectStance.ReflectState stance = ReflectStance.getActiveState(victim);
+            if (stance != null) {
+                resolveReflectStance(owner, victim, rawDamage * ownerMultiplier, stance, sourceName, false);
+                return;
+            }
         }
 
         double reduction = shieldManager.getDamageReduction(victim);

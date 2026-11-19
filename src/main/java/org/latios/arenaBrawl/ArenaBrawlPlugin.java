@@ -133,6 +133,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private ShadowCloakManager shadowCloakManager;
     private SoulLinkManager soulLinkManager;
     private GuardianColossusEntityManager guardianColossusEntityManager;
+    private InfernalGhastEntityManager infernalGhastEntityManager;
     private KingsGuardEntityManager kingsGuardManager;
     private AbilityIconRegistry abilityIconRegistry;
     @Override
@@ -220,6 +221,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.zombieEntityManager = new ZombieEntityManager(teamManager, combatService, abilityConfigManager.get("zombieapocalypse"));
         this.skeletonEntityManager = new SkeletonEntityManager(teamManager, combatService, abilityConfigManager.get("necromancy"));
         this.guardianColossusEntityManager = new GuardianColossusEntityManager(teamManager, combatService, debuffManager, this, abilityConfigManager.get("guardiancolossus"));
+        this.infernalGhastEntityManager = new InfernalGhastEntityManager(teamManager, combatService, abilityConfigManager.get("infernalghast"));
         this.kingsGuardManager = new KingsGuardEntityManager(this, teamManager, combatService, abilityConfigManager.get("kingsguard"));
         this.broodMotherEntityManager = new BroodMotherEntityManager(debuffManager, teamManager, combatService, abilityConfigManager.get("broodmother"));
         this.matchManager = new MatchManager(
@@ -228,7 +230,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 shadowCloakManager, soulLinkManager, guardianColossusEntityManager,
                 shieldManager, damageVulnerabilityManager, speedBuffManager,
                 etherealBodyManager, energyModifierManager, scavengerManager, movementLockManager,cosmeticEffectManager,
-                kingsGuardManager
+                kingsGuardManager, infernalGhastEntityManager
         );
         playerHealthManager.setDamageCallback(matchManager::recordDamage);
         playerHealthManager.setHealingCallback(matchManager::recordHealing);
@@ -244,6 +246,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.zombieEntityManager.setCombatService(combatService);
         this.skeletonEntityManager.setCombatService(combatService);
         this.guardianColossusEntityManager.setCombatService(combatService);
+        this.infernalGhastEntityManager.setCombatService(combatService);
         this.kingsGuardManager.setCombatService(combatService);
         combatService.registerMeleeHitEffect(new LifeLeechMeleeEffect(lifeLeechManager, playerHealthManager,abilityConfigManager.get("lifeleech")));
         combatService.registerMeleeHitEffect(new BerserkMeleeEffect());
@@ -285,7 +288,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 lifeLeechManager,demolitionService,energyModifierManager,damageBuffManager,etherealBodyManager, damageVulnerabilityManager,speedBuffManager,zombieEntityManager,
                 scavengerManager, skeletonEntityManager, swordSelectionManager,
                 cosmeticEffectManager, runeSelectionManager,
-                shadowCloakManager, soulLinkManager, guardianColossusEntityManager, kingsGuardManager
+                shadowCloakManager, soulLinkManager, guardianColossusEntityManager,
+                infernalGhastEntityManager, kingsGuardManager
         );
 
         this.queueManager = new QueueManager(this, partyManager, ratingManager, arenaManager, arenaMapManager);
@@ -305,6 +309,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new ZombieHitListener(zombieEntityManager,cooldownManager), this);
         getServer().getPluginManager().registerEvents(new SkeletonHitListener(skeletonEntityManager,cooldownManager), this);
         getServer().getPluginManager().registerEvents(new GuardianColossusHitListener(guardianColossusEntityManager,cooldownManager), this);
+        getServer().getPluginManager().registerEvents(new InfernalGhastListener(infernalGhastEntityManager), this);
         getServer().getPluginManager().registerEvents(new KingsGuardHitListener(kingsGuardManager,cooldownManager), this);
         getServer().getPluginManager().registerEvents(new KingsGuardTargetListener(kingsGuardManager), this);
         getServer().getPluginManager().registerEvents(shadowCloakManager, this);
@@ -322,7 +327,8 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 cooldownManager, teamManager, usageManager, energyManager, shieldManager,
                 debuffManager, playerHealthManager, combatService, orbitShieldManager, combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,energyModifierManager,damageBuffManager,
                etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager,scavengerManager,skeletonEntityManager,
-               shadowCloakManager,soulLinkManager,guardianColossusEntityManager,matchManager,kingsGuardManager);
+               shadowCloakManager,soulLinkManager,guardianColossusEntityManager,matchManager,kingsGuardManager,
+               infernalGhastEntityManager);
         abilityRegistry.setPreviewDependencies(abilityDependencies);
         abilitySelectorGUI.setPreviewDependencies(abilityDependencies);
 
@@ -426,6 +432,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new ZombieAI(zombieEntityManager).runTaskTimer(this, 0L, 4L);
         new SkeletonAI(skeletonEntityManager).runTaskTimer(this, 0L, 4L);
         new GuardianColossusAI(guardianColossusEntityManager).runTaskTimer(this, 0L, 4L);
+        new InfernalGhastAI(infernalGhastEntityManager).runTaskTimer(this, 0L, 1L);
         new LeaderboardRefreshTask(leaderboardSignManager).runTaskTimer(this, 20L, 20L * 60 * 5);
         new LeaderboardRotationTask(leaderboardSignManager).runTaskTimer(this, 20L * 6, 20L * 2);
         new DamageBuffParticleTask(damageBuffManager, shadowCloakManager).runTaskTimer(this, 0L, 20L);
@@ -491,6 +498,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         shadowCloakManager.clearAll();
         soulLinkManager.clearAll();
         guardianColossusEntityManager.clearAll();
+        infernalGhastEntityManager.clearAll();
         kingsGuardManager.clearAll();
         getLogger().info("ArenaBrawl off.");
         debuffManager.clearAll();

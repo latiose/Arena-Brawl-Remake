@@ -180,6 +180,7 @@ public class AbilityIconRegistry {
         icons.put("encore", Material.JUKEBOX);
         icons.put("treason", Material.RED_BANNER);
         icons.put("judgmentlance", Material.PRISMARINE_SHARD);
+        icons.put("infernalghast", Material.GHAST_SPAWN_EGG);
         icons.put("caffeineshot", Material.SUGAR);
     }
 

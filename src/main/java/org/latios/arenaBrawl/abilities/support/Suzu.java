@@ -26,6 +26,7 @@ public class Suzu implements Ability {
 
     private final long cooldownMs;
     private final double healAmount;
+    private final double allyHealAmount;
     private final long invulnerabilityDurationMs;
     private final double radius;
     private final double maxRange;
@@ -44,6 +45,7 @@ public class Suzu implements Ability {
         this.plugin = plugin;
         this.cooldownMs = config.getLong("cooldown-ms", 30000L);
         this.healAmount = config.getDouble("heal-amount", 175.0);
+        this.allyHealAmount = config.getDouble("ally-heal-amount", 150.0);
         this.invulnerabilityDurationMs = config.getLong("invulnerability-duration-ms", 1000L);
         this.radius = config.getDouble("radius", 3.0);
         this.maxRange = config.getDouble("max-range", 12.0);
@@ -131,7 +133,7 @@ public class Suzu implements Ability {
                 if (ally.equals(caster)) {
                     healthManager.heal(caster, healAmount, getName());
                 } else {
-                    healthManager.healAlly(caster, ally, healAmount, getName());
+                    healthManager.healAlly(caster, ally, allyHealAmount, getName());
                 }
                 ally.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, ally.getLocation().add(0, 1.0, 0), 10, 0.3, 0.5, 0.3, 0);
 
@@ -142,13 +144,16 @@ public class Suzu implements Ability {
 
     @Override
     public String getDescription() {
-        return "Throws a cleansing charm that heals and grants 1 second of invulnerability to all allies in range.";
+        return "Throws a cleansing charm that heals you for " + (int) healAmount + " HP and allies for "
+                + (int) allyHealAmount + " HP, granting " + (invulnerabilityDurationMs / 1000.0)
+                + "s of invulnerability to everyone in range.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
-                new AbilityStat("Heal", (int) healAmount + " HP"),
+                new AbilityStat("Self Heal", (int) healAmount + " HP"),
+                new AbilityStat("Ally Heal", (int) allyHealAmount + " HP"),
                 new AbilityStat("Invulnerability", (invulnerabilityDurationMs / 1000.0) + "s"),
                 new AbilityStat("Radius", (int) radius + "m"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")

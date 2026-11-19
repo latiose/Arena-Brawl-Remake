@@ -12,14 +12,14 @@ public record ProjectileImpactEffect(
 ) {
 
     public static final ProjectileImpactEffect DEFAULT = new ProjectileImpactEffect(
-            Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.0f, Particle.EXPLOSION, 1
+            Sound.ENTITY_GENERIC_EXPLODE, 10f, 1.0f, Particle.EXPLOSION, 1
     );
 
     public static final ProjectileImpactEffect SNOWBALL = new ProjectileImpactEffect(
-            Sound.BLOCK_SNOW_BREAK, 1.0f, 1.2f, Particle.SNOWFLAKE, 15
+            Sound.BLOCK_SNOW_BREAK, 10.0f, 1.2f, Particle.SNOWFLAKE, 15
     );
 
     public static final ProjectileImpactEffect FIREBALL = new ProjectileImpactEffect(
-            Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 0.8f, 1.0f, Particle.EXPLOSION, 1
+            Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 10f, 1.0f, Particle.EXPLOSION, 1
     );
 }

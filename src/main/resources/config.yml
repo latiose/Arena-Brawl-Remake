@@ -1385,6 +1385,7 @@ ability-values:
   suzu:
     cooldown-ms: 30000
     heal-amount: 175.0
+    ally-heal-amount: 150.0
     invulnerability-duration-ms: 1000
     radius: 3.0
     max-range: 12.0
@@ -1688,6 +1689,18 @@ ability-values:
     teleport-timeout-millis: 60000
     attack-cooldown-millis: 1000
 
+  infernalghast:
+    charge-time-millis: 60000
+    max-range: 48
+    fireball-damage: 50.0
+    aoe-radius: 2.5
+    spawn-height: 18.0
+    hover-height: 6.0
+    move-speed: 0.5
+    teleport-distance: 30.0
+    teleport-timeout-millis: 999999999
+    attack-cooldown-millis: 1000
+
   reflectdamage:
     duration-ms: 9000
     reflect-percent: 0.50
@@ -1743,7 +1756,7 @@ ability-values:
   judgmentlance:
     max-range: 256.0
     beam-radius: 1.5
-    damage: 450.0
+    damage: 450
     telegraph-ticks: 30
     burn-radius: 2.5
     burn-damage: 50.0
@@ -1809,7 +1822,7 @@ hats:
     enchanted: false
     lore:
       - "Sand in my eyes!"
-      - "نزال الساحة"
+      - "فE�E�افEافE�E�احة"
       - "I ride a camel everywhere!"
 
   compliment:

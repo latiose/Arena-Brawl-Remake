@@ -74,7 +74,7 @@ public class SnowballAbility implements Ability {
         // especially when aiming at the ground.
         snowball.teleport(player.getLocation().add(0, 1.0, 0).add(forward));
         snowball.setVelocity(direction.multiply(BASE_SPEED * speedMultiplier));
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 10.0f, 1.0f);
         new TrackedProjectileTask(snowball, player, damage, 2, getName(), teamManager, combatService,
                 debuffManager, DebuffType.SLOW, slowDurationTicks, slowChance, ProjectileImpactEffect.SNOWBALL)
                 .withTrail(Particle.SNOWFLAKE)
