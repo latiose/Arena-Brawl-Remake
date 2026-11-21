@@ -156,4 +156,59 @@ public class Blueprints {
         return phases;
     }
 
+    public static List<StructureBlueprint> doomShroomPhases() {
+        List<StructureBlueprint> phases = new ArrayList<>();
+
+        // Phase 0: short stem.
+        List<StructureBlueprint.BlockOffset> phase0 = new ArrayList<>();
+        phase0.add(new StructureBlueprint.BlockOffset(0, 0, 0, Material.MUSHROOM_STEM));
+        phase0.add(new StructureBlueprint.BlockOffset(0, 1, 0, Material.MUSHROOM_STEM));
+        phases.add(new StructureBlueprint(phase0));
+
+        // Phase 1: taller stem and the first cap block.
+        List<StructureBlueprint.BlockOffset> phase1 = new ArrayList<>(phase0);
+        phase1.add(new StructureBlueprint.BlockOffset(0, 2, 0, Material.MUSHROOM_STEM));
+        phase1.add(new StructureBlueprint.BlockOffset(0, 3, 0, Material.RED_MUSHROOM_BLOCK));
+        phases.add(new StructureBlueprint(phase1));
+
+        // Phase 2: cap cross.
+        List<StructureBlueprint.BlockOffset> phase2 = new ArrayList<>(phase1);
+        phase2.add(new StructureBlueprint.BlockOffset(1, 3, 0, Material.RED_MUSHROOM_BLOCK));
+        phase2.add(new StructureBlueprint.BlockOffset(-1, 3, 0, Material.RED_MUSHROOM_BLOCK));
+        phase2.add(new StructureBlueprint.BlockOffset(0, 3, 1, Material.RED_MUSHROOM_BLOCK));
+        phase2.add(new StructureBlueprint.BlockOffset(0, 3, -1, Material.RED_MUSHROOM_BLOCK));
+        phases.add(new StructureBlueprint(phase2));
+
+        // Phase 3: fill the cap corners.
+        List<StructureBlueprint.BlockOffset> phase3 = new ArrayList<>(phase2);
+        phase3.add(new StructureBlueprint.BlockOffset(1, 3, 1, Material.BROWN_MUSHROOM_BLOCK));
+        phase3.add(new StructureBlueprint.BlockOffset(-1, 3, 1, Material.BROWN_MUSHROOM_BLOCK));
+        phase3.add(new StructureBlueprint.BlockOffset(1, 3, -1, Material.BROWN_MUSHROOM_BLOCK));
+        phase3.add(new StructureBlueprint.BlockOffset(-1, 3, -1, Material.BROWN_MUSHROOM_BLOCK));
+        phases.add(new StructureBlueprint(phase3));
+
+        // Phase 4: second cap layer with a glowing top.
+        List<StructureBlueprint.BlockOffset> phase4 = new ArrayList<>(phase3);
+        phase4.add(new StructureBlueprint.BlockOffset(0, 4, 0, Material.SHROOMLIGHT));
+        phase4.add(new StructureBlueprint.BlockOffset(1, 4, 0, Material.RED_MUSHROOM_BLOCK));
+        phase4.add(new StructureBlueprint.BlockOffset(-1, 4, 0, Material.RED_MUSHROOM_BLOCK));
+        phase4.add(new StructureBlueprint.BlockOffset(0, 4, 1, Material.RED_MUSHROOM_BLOCK));
+        phase4.add(new StructureBlueprint.BlockOffset(0, 4, -1, Material.RED_MUSHROOM_BLOCK));
+        phases.add(new StructureBlueprint(phase4));
+
+        // Phase 5: full cap, wider rim and filled top.
+        List<StructureBlueprint.BlockOffset> phase5 = new ArrayList<>(phase4);
+        phase5.add(new StructureBlueprint.BlockOffset(2, 3, 0, Material.RED_MUSHROOM_BLOCK));
+        phase5.add(new StructureBlueprint.BlockOffset(-2, 3, 0, Material.RED_MUSHROOM_BLOCK));
+        phase5.add(new StructureBlueprint.BlockOffset(0, 3, 2, Material.RED_MUSHROOM_BLOCK));
+        phase5.add(new StructureBlueprint.BlockOffset(0, 3, -2, Material.RED_MUSHROOM_BLOCK));
+        phase5.add(new StructureBlueprint.BlockOffset(1, 4, 1, Material.BROWN_MUSHROOM_BLOCK));
+        phase5.add(new StructureBlueprint.BlockOffset(-1, 4, 1, Material.BROWN_MUSHROOM_BLOCK));
+        phase5.add(new StructureBlueprint.BlockOffset(1, 4, -1, Material.BROWN_MUSHROOM_BLOCK));
+        phase5.add(new StructureBlueprint.BlockOffset(-1, 4, -1, Material.BROWN_MUSHROOM_BLOCK));
+        phases.add(new StructureBlueprint(phase5));
+
+        return phases;
+    }
+
 }

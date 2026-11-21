@@ -99,6 +99,15 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "whirlwind",
                 deps -> new Whirlwind(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(),
                         deps.speedBuffManager(), configManager.get("whirlwind")));
+        register(AbilitySlot.OFFENSIVE, "boombastic",
+                deps -> new Boombastic(deps.energyManager(), deps.teamManager(), deps.combatService(),
+                        deps.speedBuffManager(), configManager.get("boombastic")));
+        register(AbilitySlot.OFFENSIVE, "cull",
+                deps -> new Cull(deps.energyManager(), deps.teamManager(), deps.combatService(),
+                        deps.playerHealthManager(), configManager.get("cull")));
+        register(AbilitySlot.OFFENSIVE, "sentry",
+                deps -> new Sentry(deps.energyManager(), deps.teamManager(), deps.combatService(),
+                        deps.structureManager(), configManager.get("sentry")));
         register(AbilitySlot.OFFENSIVE, "guidedpig2000",
                 deps -> new GuidedPig2000(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("guidedpig2000")));
         register(AbilitySlot.OFFENSIVE, "enderbreath",
@@ -121,6 +130,10 @@ public class AbilityRegistry {
                 deps -> new SparkBolt(deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), deps.energyModifierManager(), configManager.get("sparkbolt")));
         register(AbilitySlot.UTILITY, "sugarrush",
                 deps -> new SugarRush(deps.cooldownManager(), deps.combatUpgradeManager(), deps.debuffManager(), configManager.get("sugarrush"),deps.speedBuffManager()));
+        register(AbilitySlot.UTILITY, "sleepdart",
+                deps -> new SleepDart(plugin, deps.cooldownManager(), deps.combatUpgradeManager(),
+                        deps.teamManager(), deps.debuffManager(), deps.playerHealthManager(),
+                        configManager.get("sleepdart")));
         register(AbilitySlot.UTILITY, "swap",
                 deps -> new Swap(deps.cooldownManager(), deps.combatUpgradeManager(), configManager.get("swap")));
         register(AbilitySlot.UTILITY, "violentleap",
@@ -214,6 +227,13 @@ public class AbilityRegistry {
                 deps -> new HealingRain(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.combatUpgradeManager(), configManager.get("healingrain")));
         register(AbilitySlot.SUPPORT, "suzu",
                 deps -> new Suzu(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(), deps.shieldManager(), deps.combatUpgradeManager(), configManager.get("suzu")));
+        register(AbilitySlot.SUPPORT, "blackshield",
+                deps -> new BlackShield(deps.cooldownManager(), deps.combatUpgradeManager(), deps.teamManager(),
+                        deps.shieldManager(), deps.debuffManager(), deps.playerHealthManager(),
+                        configManager.get("blackshield")));
+        register(AbilitySlot.SUPPORT, "bloodoffering",
+                deps -> new BloodOffering(deps.cooldownManager(), deps.combatUpgradeManager(), deps.teamManager(),
+                        deps.playerHealthManager(), configManager.get("bloodoffering")));
         register(AbilitySlot.SUPPORT, "discordorb",
                 deps -> new DiscordOrb(plugin, deps.cooldownManager(), deps.teamManager(), deps.combatUpgradeManager(), deps.damageVulnerabilityManager(), configManager.get("discordorb")));
         register(AbilitySlot.SUPPORT, "healingbeam",
@@ -337,6 +357,12 @@ public class AbilityRegistry {
         register(AbilitySlot.ULTIMATE, "infernalghast",
                 deps -> new InfernalGhast(deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
                         deps.infernalGhastEntityManager(), configManager.get("infernalghast")));
+        register(AbilitySlot.ULTIMATE, "doomshroom",
+                deps -> new DoomShroom(deps.cooldownManager(), deps.usageManager(), deps.structureManager(),
+                        deps.teamManager(), deps.combatService(), configManager.get("doomshroom")));
+        register(AbilitySlot.ULTIMATE, "tempest",
+                deps -> new Tempest(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                        deps.combatService(), configManager.get("tempest")));
 
 
         // --- DEFAULTS ---

@@ -64,6 +64,7 @@ public class AbilityTriggerListener implements Listener {
 
         if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)
                 || debuffManager.hasDebuff(player, DebuffType.STUN)
+                || debuffManager.hasDebuff(player, DebuffType.SLEEP)
                 || debuffManager.hasDebuff(player, DebuffType.SILENCE)) {
 
             if (!(currentAbility instanceof HolyWater)

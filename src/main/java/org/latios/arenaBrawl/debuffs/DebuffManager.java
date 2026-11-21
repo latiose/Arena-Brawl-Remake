@@ -38,6 +38,7 @@ public class DebuffManager implements Listener {
     private final Map<UUID, List<ActiveDebuff>> activeAntiHeals = new HashMap<>();
     private final Map<UUID, Double> accumulatedDamage = new HashMap<>();
     private final Map<UUID, Long> tenacityUntil = new HashMap<>();
+    private final Map<UUID, Long> debuffImmunityUntil = new HashMap<>();
     private final List<DebuffListener> listeners = new ArrayList<>();
     private SongOfPowerManager songOfPowerManager;
 
@@ -64,6 +65,9 @@ public class DebuffManager implements Listener {
             return false;
         }
         if(victim.getGameMode() == GameMode.SPECTATOR) {
+            return false;
+        }
+        if (hasDebuffImmunity(victim)) {
             return false;
         }
         if (type != DebuffType.ANTIHEAL && hasPrimaryDebuff(victim)) {
@@ -140,6 +144,27 @@ public class DebuffManager implements Listener {
                 && System.currentTimeMillis() - debuff.startedAt() < debuff.durationMillis();
     }
 
+    /** Grants temporary immunity to every debuff type except anti-heal. */
+    public void grantDebuffImmunity(Player player, long durationMillis) {
+        if (player == null || durationMillis <= 0L) return;
+        debuffImmunityUntil.put(player.getUniqueId(), System.currentTimeMillis() + durationMillis);
+    }
+
+    public boolean hasDebuffImmunity(Player player) {
+        Long until = debuffImmunityUntil.get(player.getUniqueId());
+        if (until == null) return false;
+
+        if (System.currentTimeMillis() >= until) {
+            debuffImmunityUntil.remove(player.getUniqueId());
+            return false;
+        }
+        return true;
+    }
+
+    public void clearDebuffImmunity(Player player) {
+        debuffImmunityUntil.remove(player.getUniqueId());
+    }
+
     public boolean hasDebuff(Player player, DebuffType type) {
         if (type == DebuffType.ANTIHEAL) {
             return activeAntiHeals.getOrDefault(player.getUniqueId(), List.of()).stream()
@@ -198,6 +223,10 @@ public class DebuffManager implements Listener {
             player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, bodyLoc, 2, 0.3, 0.5, 0.3, 0.05);
         } else if (debuff.type.equals(DebuffType.STUN) || debuff.type.equals(DebuffType.POLYMORPH)) {
             player.getWorld().spawnParticle(Particle.WHITE_ASH, bodyLoc, 10, 0.2, 0.2, 0.2, 0.01);
+        } else if (debuff.type.equals(DebuffType.SLEEP)) {
+            Location headLoc = player.getLocation().add(0, 1.9, 0);
+            player.getWorld().spawnParticle(Particle.CLOUD, headLoc, 2, 0.15, 0.05, 0.15, 0.005);
+            player.getWorld().spawnParticle(Particle.ENCHANT, headLoc, 3, 0.3, 0.25, 0.3, 0.15);
         } else if (debuff.type.equals(DebuffType.POISON)) {
             player.getWorld().spawnParticle(Particle.ITEM_SLIME, bodyLoc, 2, 0.2, 0.2, 0.2, 0.01);
         } else if (debuff.type.equals(DebuffType.ANTIHEAL)) {
@@ -266,6 +295,7 @@ public class DebuffManager implements Listener {
         ActiveDebuff debuff = activeDebuffs.remove(player.getUniqueId());
         accumulatedDamage.remove(player.getUniqueId());
         tenacityUntil.remove(player.getUniqueId());
+        debuffImmunityUntil.remove(player.getUniqueId());
 
         if (debuff != null) {
             if (debuff.type().isImmobilizing()) {
@@ -291,6 +321,7 @@ public class DebuffManager implements Listener {
         activeAntiHeals.clear();
         accumulatedDamage.clear();
         tenacityUntil.clear();
+        debuffImmunityUntil.clear();
     }
 
     private void notifyExpired(Player player, ActiveDebuff debuff) {

@@ -68,6 +68,7 @@ public class LobbyJoinListener implements Listener {
         abilityManager.clearAbilities(player);
 
         player.setGameMode(GameMode.SURVIVAL);
+        player.setCollidable(false);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         player.setFoodLevel(20);
         player.setLevel(0);

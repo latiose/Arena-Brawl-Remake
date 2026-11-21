@@ -216,8 +216,8 @@ public class PlayerHealthManager {
         return healedAmount;
     }
 
-    public void healAlly(Player healer, Player target, double amount, String sourceName) {
-        if (eliminated.contains(target.getUniqueId())) return;
+    public double healAlly(Player healer, Player target, double amount, String sourceName) {
+        if (eliminated.contains(target.getUniqueId())) return amount;
 
         double healedAmount = heal(target, amount, false);
        // if (healedAmount <= 0.0) return;
@@ -242,8 +242,9 @@ public class PlayerHealthManager {
                 "§3%s§3's %s healed you for §a%d §3health!",
                 healer.getName(), sourceName, roundedHeal
         ));
-    }}
-
+    }
+        return amount;
+    }
 
     public void damage(Player player, double amount, Player attacker) {
         if (eliminated.contains(player.getUniqueId())) return;

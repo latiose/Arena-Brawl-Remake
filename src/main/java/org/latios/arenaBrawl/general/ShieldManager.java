@@ -4,6 +4,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -15,7 +18,8 @@ import java.util.UUID;
 
 public class ShieldManager {
 
-    public record ActiveShield(double reductionPercent, long startedAt, long durationMillis, String title) {
+    public record ActiveShield(double reductionPercent, long startedAt, long durationMillis, String title,
+                               boolean notifyOnExpire, boolean pulsingParticles) {
         public boolean isExpired() {
             return System.currentTimeMillis() - startedAt >= durationMillis;
         }
@@ -26,10 +30,31 @@ public class ShieldManager {
     }
 
     private final Map<UUID, List<ActiveShield>> activeShields = new HashMap<>();
+    private final Map<UUID, Long> lastParticleAt = new HashMap<>();
 
     public void applyShield(Player player, double reductionPercent, long durationMillis, String title) {
+        applyShield(player, reductionPercent, durationMillis, title, true, false);
+    }
+
+    /** Applies a shield that does not send an expiry message in chat. */
+    public void applySilentShield(Player player, double reductionPercent, long durationMillis, String title) {
+        applyShield(player, reductionPercent, durationMillis, title, false, false);
+    }
+
+    /** Applies a silent shield that emits a particle pulse every second while it lasts. */
+    public void applySilentPulsingShield(Player player, double reductionPercent, long durationMillis, String title) {
+        applyShield(player, reductionPercent, durationMillis, title, false, true);
+    }
+
+    private void applyShield(Player player, double reductionPercent, long durationMillis, String title,
+                             boolean notifyOnExpire, boolean pulsingParticles) {
+        if (pulsingParticles) {
+            lastParticleAt.putIfAbsent(player.getUniqueId(), System.currentTimeMillis());
+        }
+
         activeShields.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>())
-                .add(new ActiveShield(reductionPercent, System.currentTimeMillis(), durationMillis, title));
+                .add(new ActiveShield(reductionPercent, System.currentTimeMillis(), durationMillis, title,
+                        notifyOnExpire, pulsingParticles));
     }
     public void tick() {
         if (activeShields.isEmpty()) return;
@@ -52,6 +77,7 @@ public class ShieldManager {
                 shields.removeAll(expiredShields);
                 if (player != null && player.isOnline()) {
                     for (ActiveShield expired : expiredShields) {
+                        if (!expired.notifyOnExpire()) continue;
                         Component expireMessage = Component.text("Your ", NamedTextColor.YELLOW)
                                 .append(Component.text(expired.title().toUpperCase(), NamedTextColor.AQUA, TextDecoration.BOLD))
                                 .append(Component.text(" has expired!", NamedTextColor.YELLOW));
@@ -62,7 +88,29 @@ public class ShieldManager {
 
             if (shields.isEmpty()) {
                 mapIterator.remove();
+                lastParticleAt.remove(entry.getKey());
                 continue;
+            }
+
+            boolean hasPulsingShield = false;
+            for (ActiveShield shield : shields) {
+                if (shield.pulsingParticles()) {
+                    hasPulsingShield = true;
+                    break;
+                }
+            }
+
+            if (hasPulsingShield) {
+                long now = System.currentTimeMillis();
+                Long lastPulse = lastParticleAt.get(entry.getKey());
+                if (lastPulse == null || now - lastPulse >= 1000L) {
+                    lastParticleAt.put(entry.getKey(), now);
+                    if (player != null && player.isOnline()) {
+                        spawnShieldPulse(player);
+                    }
+                }
+            } else {
+                lastParticleAt.remove(entry.getKey());
             }
 
             if (player != null && player.isOnline()) {
@@ -137,11 +185,32 @@ public class ShieldManager {
         shields.removeIf(shield -> shield.title().equals(title));
         if (shields.isEmpty()) {
             activeShields.remove(player.getUniqueId());
+            lastParticleAt.remove(player.getUniqueId());
         }
     }
 
     public void clear(Player player) {
         activeShields.remove(player.getUniqueId());
+        lastParticleAt.remove(player.getUniqueId());
+    }
+
+    /** Dark particle ring emitted once per second by pulsing shields. */
+    private void spawnShieldPulse(Player player) {
+        Location center = player.getLocation().add(0, 1.0, 0);
+        World world = center.getWorld();
+        if (world == null) return;
+
+        for (int i = 0; i < 12; i++) {
+            double angle = (Math.PI * 2.0 / 12) * i;
+            Location point = center.clone().add(Math.cos(angle) * 0.8, 0, Math.sin(angle) * 0.8);
+
+            world.spawnParticle(Particle.SQUID_INK, point, 1, 0.05, 0.1, 0.05, 0.0);
+            if (i % 3 == 0) {
+                world.spawnParticle(Particle.SMOKE, point, 1, 0.05, 0.2, 0.05, 0.01);
+            }
+        }
+
+        world.spawnParticle(Particle.SOUL, center, 4, 0.35, 0.5, 0.35, 0.01);
     }
 
     public boolean hasShield(Player player) {

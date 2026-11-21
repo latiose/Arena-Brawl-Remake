@@ -63,9 +63,7 @@ public class SparkBolt implements Ability {
         for (Player target : targets) {
             energyModifierManager.addModifier(target, "spark_bolt", 0.5, durationMillis);
             target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1, 0), 15);
-            player.sendMessage(MessageUtils.positive() + "§3Your Spark Bolt hit §3" + target.getName()
-                    + " §3and halved their energy regen!");
-            target.sendMessage(MessageUtils.negative() + "§3You were hit by §a" + player.getName()
+            target.sendMessage(MessageUtils.negative() + "§3You were hit by §3" + player.getName()
                     + "§3's Spark Bolt! Energy regen halved for " + (durationMillis / 1000L) + "s.");
         }
 

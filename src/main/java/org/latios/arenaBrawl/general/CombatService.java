@@ -84,9 +84,6 @@ public class CombatService {
         applyAbilityDamage(attacker, victim, rawDamage, abilityName, impactLocation, false);
     }
 
-    public void applyAbilityDamageSilent(Player attacker, Player victim, double rawDamage, String abilityName) {
-        applyAbilityDamage(attacker, victim, rawDamage, abilityName, null, true);
-    }
 
     private void applyAbilityDamage(Player attacker, Player victim, double rawDamage, String abilityName,
                                     Location impactLocation, boolean silent) {
@@ -246,10 +243,6 @@ public class CombatService {
                         resolveShieldEffect(sourceShield, holder, source, true);
                     }
 
-                    holder.sendMessage(MessageUtils.negative() + String.format(
-                            "§3Your %s was blocked by §e%s§3's %s!",
-                            stanceName, source.getName(), sourceShield.getDisplayName()
-                    ));
                     return;
                 }
             }

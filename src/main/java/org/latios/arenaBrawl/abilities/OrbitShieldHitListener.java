@@ -74,7 +74,8 @@ public class OrbitShieldHitListener implements Listener {
 
         if (teamManager.isAlly(attacker, owner)) return true;
 
-        if (debuffManager.hasDebuff(attacker, DebuffType.STUN)) {
+        if (debuffManager.hasDebuff(attacker, DebuffType.STUN)
+                || debuffManager.hasDebuff(attacker, DebuffType.SLEEP)) {
             return true;
         }
 

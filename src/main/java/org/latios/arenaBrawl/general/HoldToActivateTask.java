@@ -79,6 +79,7 @@ public class HoldToActivateTask extends BukkitRunnable {
 
             if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)
                     || debuffManager.hasDebuff(player, DebuffType.STUN)
+                    || debuffManager.hasDebuff(player, DebuffType.SLEEP)
                     || debuffManager.hasDebuff(player, DebuffType.SILENCE)) {
                 pendingClicks.remove(uuid);
                 continue;

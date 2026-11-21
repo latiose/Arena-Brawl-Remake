@@ -1055,6 +1055,31 @@ ability-values:
     speed-amplifier: 1
     knockback: 0.0
 
+  boombastic:
+    energy-cost: 50.0
+    speed-amplifier: 1
+    speed-duration-ticks: 100
+    fuse-ticks: 100
+    damage: 180.0
+    radius: 4.0
+
+  cull:
+    energy-cost: 50.0
+    damage: 150.0
+    execute-threshold: 0.30
+    execute-bonus: 250.0
+    max-range: 20.0
+    hitbox-radius: 0.8
+
+  sentry:
+    energy-cost: 55.0
+    damage: 22.0
+    range: 12.0
+    fire-interval-ticks: 10
+    lifetime-seconds: 8
+    hits-to-destroy: 3
+    max-placement-range: 10.0
+
   anvilfall:
     energy-cost: 100.0
     max-range: 15.0
@@ -1135,6 +1160,12 @@ ability-values:
     speed-amplifier: 2
     speed-duration-ticks: 80
     slow-duration-ms: 3000
+
+  sleepdart:
+    cooldown-ms: 20000
+    sleep-duration-ms: 3000
+    max-range: 20.0
+    step: 0.9
 
   swap:
     cooldown-ms: 30000
@@ -1353,6 +1384,24 @@ ability-values:
     hits-to-destroy: 8
     max-placement-range: 5.0
 
+  doomshroom:
+    charge-time-millis: 60000
+    damage-per-second: 30.0
+    damage-interval-ticks: 10
+    final-burst-damage: 300.0
+    duration-seconds: 6
+    growth-seconds: 3
+    radius: 6.0
+    hits-to-destroy: 8
+    max-placement-range: 6.0
+
+  tempest:
+    charge-time-millis: 60000
+    duration-seconds: 8
+    radius: 7.0
+    damage-per-second: 40.0
+    final-burst-damage: 250.0
+
   songofpower:
     duration-millis: 7000
     radius: 6.0
@@ -1390,6 +1439,20 @@ ability-values:
     radius: 3.0
     max-range: 12.0
     step: 0.6
+
+  blackshield:
+    cooldown-ms: 30000
+    damage-reduction: 0.50
+    duration-ms: 4000
+    debuff-immunity-ms: 4000
+    heal-amount: 100.0
+    max-range: 12.0
+
+  bloodoffering:
+    cooldown-ms: 25000
+    heal-amount: 450.0
+    self-cost: 250.0
+    max-range: 12.0
 
   discordorb:
     cooldown-ms: 30000

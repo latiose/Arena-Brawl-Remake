@@ -73,8 +73,9 @@ public class CombatListener implements Listener {
         if (!matchManager.isInMatch(attacker) || !matchManager.isInMatch(victim)) return;
         if (attacker.equals(victim) || teamManager.isAlly(attacker, victim)) return;
         if(victim.getGameMode() == GameMode.SPECTATOR) return;
-        if (debuffManager.hasDebuff(attacker, DebuffType.STUN)) {
-            return; // stunned players cannot deal damage of any kind
+        if (debuffManager.hasDebuff(attacker, DebuffType.STUN)
+                || debuffManager.hasDebuff(attacker, DebuffType.SLEEP)) {
+            return; // stunned or sleeping players cannot deal damage of any kind
         }
         if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
                 || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) {

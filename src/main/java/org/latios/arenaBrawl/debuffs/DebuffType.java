@@ -4,6 +4,7 @@ package org.latios.arenaBrawl.debuffs;
 public enum DebuffType {
     IMMOBILIZE("Immobilize", true, "#00FF00"),
     STUN("Stun", true, "#FFFFFF"),
+    SLEEP("Sleep", true, "#8FA8FF"),
     POLYMORPH("Polymorph", true, "#FFFF00"),
     SLOW("Slow", false, "#A020F0"),
     POISON("Poison", false, "#00FF00"),

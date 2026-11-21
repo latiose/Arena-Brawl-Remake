@@ -16,6 +16,7 @@ import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.OrbitShieldManager;
 import org.latios.arenaBrawl.abilities.ReflectStance;
 import org.latios.arenaBrawl.abilities.offensive.FlameSword;
+import org.latios.arenaBrawl.abilities.offensive.Boombastic;
 import org.latios.arenaBrawl.abilities.offensive.KingsGuardEntityManager;
 import org.latios.arenaBrawl.abilities.offensive.SkeletonEntityManager;
 import org.latios.arenaBrawl.abilities.support.Bloodthirst;
@@ -38,12 +39,14 @@ import org.latios.arenaBrawl.abilities.ultimate.Premonition;
 import org.latios.arenaBrawl.abilities.ultimate.Rewind;
 import org.latios.arenaBrawl.abilities.ultimate.ThunderArmor;
 import org.latios.arenaBrawl.abilities.ultimate.SoulLinkManager;
+import org.latios.arenaBrawl.abilities.ultimate.Tempest;
 import org.latios.arenaBrawl.abilities.ultimate.UndyingRage;
 import org.latios.arenaBrawl.abilities.UsageManager;
 
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
 import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
 import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
+import org.latios.arenaBrawl.abilities.utility.SleepDart;
 import org.latios.arenaBrawl.abilities.utility.SugarRush;
 import org.latios.arenaBrawl.abilities.utility.TauntingGlare;
 import org.latios.arenaBrawl.abilities.utility.Taunt;
@@ -244,6 +247,9 @@ public class MatchManager {
         RallyBanner.clearReceivedBuffs(player, damageBuffManager, speedBuffManager);
         Momentum.clear(player);
         SugarRush.clear(player);
+        Boombastic.clear(player);
+        Tempest.clear(player);
+        SleepDart.clear(player);
         Berserk.clear(player);
         lifeLeechManager.clear(player);
         Team winner = match.eliminate(player);
@@ -440,6 +446,7 @@ public class MatchManager {
         orbitShieldManager.clear(player);
         if (!player.isOnline()) return;
 
+        player.setCollidable(false);
         player.setGameMode(org.bukkit.GameMode.SURVIVAL);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         player.setFoodLevel(20);
@@ -625,6 +632,9 @@ public class MatchManager {
         Meditation.clear(player);
         Momentum.clear(player);
         SugarRush.clear(player);
+        Boombastic.clear(player);
+        Tempest.clear(player);
+        SleepDart.clear(player);
         TimeWarp.clear(player);
         ThunderArmor.clear(player);
         TauntingGlare.clear(player);

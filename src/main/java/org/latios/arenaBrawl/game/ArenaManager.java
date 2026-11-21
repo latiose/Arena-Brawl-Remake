@@ -217,7 +217,7 @@ public class ArenaManager {
                 infernalGhastEntityManager);
 
         for (Player player : allPlayers) {
-            player.setCollidable(false);
+            player.setCollidable(true);
             playerHealthManager.setMaxHealth(player, combatUpgradeManager.getValue(player, CombatUpgradeType.HEALTH));
             energyManager.setMaxEnergyOverride(player,combatUpgradeManager.getValue(player, CombatUpgradeType.ENERGY));
             usageManager.resetPlayer(player);
@@ -269,8 +269,6 @@ public class ArenaManager {
 
         match.setIndividualScoreboards(scoreboardManager.createIndividualScoreboards(match));
         scoreboardManager.updateHealthDisplay(match);
-
-        CollisionUtils.disableCollisionForGroup(match.getAllPlayers());
 
         var task = new MatchScoreboardTask(match, scoreboardManager).runTaskTimer(plugin, 0L, 10L);
         matchManager.registerMatch(match, task);

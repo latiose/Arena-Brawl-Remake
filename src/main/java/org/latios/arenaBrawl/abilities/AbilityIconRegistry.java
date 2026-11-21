@@ -65,6 +65,9 @@ public class AbilityIconRegistry {
         icons.put("plunge", Material.NETHERITE_BOOTS);
         icons.put("ricochet", Material.AMETHYST_SHARD);
         icons.put("whirlwind", Material.NETHERITE_SWORD);
+        icons.put("boombastic", Material.TNT);
+        icons.put("cull", Material.NETHERITE_HOE);
+        icons.put("sentry", Material.TARGET);
         icons.put("guidedpig2000", Material.PORKCHOP);
         icons.put("enderbreath", Material.ENDERMITE_SPAWN_EGG);
         icons.put("teleport", Material.CHORUS_FRUIT);
@@ -74,6 +77,7 @@ public class AbilityIconRegistry {
         icons.put("salmonform", Material.SALMON);
         icons.put("sparkbolt", Material.GLOW_INK_SAC);
         icons.put("sugarrush", Material.SUGAR);
+        icons.put("sleepdart", Material.TIPPED_ARROW);
         icons.put("swap", Material.ENDER_EYE);
         icons.put("violentleap", Material.RABBIT_FOOT);
         icons.put("wallofvines", Material.VINE);
@@ -117,11 +121,15 @@ public class AbilityIconRegistry {
         icons.put("lifebond", Material.LEAD);
         icons.put("healingtotem", Material.BREWING_STAND);
         icons.put("treeoflife", Material.OAK_SAPLING);
+        icons.put("doomshroom", Material.RED_MUSHROOM_BLOCK);
+        icons.put("tempest", Material.LIGHTNING_ROD);
         icons.put("songofpower", Material.NOTE_BLOCK);
         icons.put("lifeleech", Material.REDSTONE);
         icons.put("etheralbody", Material.PHANTOM_MEMBRANE);
         icons.put("healingrain", Material.WATER_BUCKET);
         icons.put("suzu", Material.BELL);
+        icons.put("blackshield", Material.BLACK_STAINED_GLASS);
+        icons.put("bloodoffering", Material.CRIMSON_FUNGUS);
         icons.put("discordorb", Material.SHULKER_SHELL);
         icons.put("healingbeam", Material.BEACON);
         icons.put("berserkerrage", Material.REDSTONE_BLOCK);

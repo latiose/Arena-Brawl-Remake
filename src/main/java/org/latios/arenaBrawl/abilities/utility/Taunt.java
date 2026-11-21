@@ -190,7 +190,8 @@ public class Taunt implements Ability {
     private boolean canForcedAttack(Player attacker, Player victim) {
         if (attacker.isDead() || victim.isDead()) return false;
         if (attacker.getGameMode() == GameMode.SPECTATOR || victim.getGameMode() == GameMode.SPECTATOR) return false;
-        if (debuffManager.hasDebuff(attacker, DebuffType.STUN)) return false;
+        if (debuffManager.hasDebuff(attacker, DebuffType.STUN)
+                || debuffManager.hasDebuff(attacker, DebuffType.SLEEP)) return false;
         if (cooldownManager.isOnCooldown(attacker, "melee_hit")) return false;
 
         double rangeSq = meleeRange * meleeRange;
