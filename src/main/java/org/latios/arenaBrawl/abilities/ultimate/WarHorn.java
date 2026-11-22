@@ -86,6 +86,7 @@ public class WarHorn implements Ability {
                 new AbilityStat("Speed", "Speed " + toRoman(speedAmplifier + 1)),
                 new AbilityStat("Radius", (int) radius + "m"),
                 new AbilityStat("Duration", (durationMs / 1000L) + "s"),
+                new AbilityStat("Healing", (healAmount) + "HP"),
                 new AbilityStat("Uses", "1 per match")
         );
     }

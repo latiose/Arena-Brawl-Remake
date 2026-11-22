@@ -774,6 +774,18 @@ ability-values:
     damage: 150.0
     tick-damage: 25.0
 
+  flowerbreath:
+    energy-cost: 80.0
+    damage: 180.0
+    trigger-radius: 1.3
+    flower-lifetime-ms: 10000
+    blue-slow-duration-ms: 2000
+    red-fire-duration-ms: 2000
+    red-fire-tick-damage: 15.0
+    red-fire-interval-ms: 500
+    yellow-energy-drain: 10.0
+    withered-blind-duration-ms: 1000
+
   lightningstrike:
     energy-cost: 70.0
     damage: 165.0
@@ -1452,7 +1464,7 @@ ability-values:
     cooldown-ms: 25000
     heal-amount: 450.0
     self-cost: 250.0
-    max-range: 12.0
+    max-range: 12
 
   discordorb:
     cooldown-ms: 30000
@@ -1582,6 +1594,12 @@ ability-values:
     speed-amplifier: 1
     speed-duration-ms: 3000
     cooldown-ms: 15000
+
+  soulboundhealing:
+    cooldown-ms: 30000
+    duration-ms: 5000
+    divide-by: 2.0
+    multiply-by: 3.0
 
   # --- ULTIMATE ---
   shieldwall:

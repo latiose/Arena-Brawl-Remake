@@ -34,6 +34,7 @@ public class AbilityIconRegistry {
         icons.put("dragonsbreath", Material.DRAGON_BREATH);
         icons.put("ancientbreath", Material.NETHERITE_SCRAP);
         icons.put("flamebreath", Material.BLAZE_POWDER);
+        icons.put("flowerbreath", Material.POPPY);
         icons.put("lightningstrike", Material.TRIDENT);
         icons.put("consume", Material.ROTTEN_FLESH);
         icons.put("dash", Material.FEATHER);
@@ -152,6 +153,7 @@ public class AbilityIconRegistry {
         icons.put("timewarp", Material.WHITE_WOOL);
         icons.put("absorptionshield", Material.SHIELD);
         icons.put("sadism", Material.GHAST_TEAR);
+        icons.put("soulboundhealing", Material.HEART_OF_THE_SEA);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);

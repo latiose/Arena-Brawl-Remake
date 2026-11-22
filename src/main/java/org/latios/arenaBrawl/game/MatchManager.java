@@ -27,6 +27,7 @@ import org.latios.arenaBrawl.abilities.support.Meditation;
 import org.latios.arenaBrawl.abilities.support.Momentum;
 import org.latios.arenaBrawl.abilities.support.RallyBanner;
 import org.latios.arenaBrawl.abilities.support.SongOfPowerManager;
+import org.latios.arenaBrawl.abilities.support.SoulboundHealing;
 import org.latios.arenaBrawl.abilities.support.Thornheart;
 import org.latios.arenaBrawl.abilities.support.TimeWarp;
 import org.latios.arenaBrawl.abilities.ultimate.Berserk;
@@ -635,6 +636,7 @@ public class MatchManager {
         Boombastic.clear(player);
         Tempest.clear(player);
         SleepDart.clear(player);
+        SoulboundHealing.clear(player);
         TimeWarp.clear(player);
         ThunderArmor.clear(player);
         TauntingGlare.clear(player);

@@ -54,6 +54,11 @@ public class AbilityRegistry {
                 deps -> new AncientBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("ancientbreath")));
         register(AbilitySlot.OFFENSIVE, "flamebreath",
                 deps -> new FlameBreath(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("flamebreath")));
+        register(AbilitySlot.OFFENSIVE, "flowerbreath",
+                deps -> new FlowerBreath(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(),
+                        deps.debuffManager(), deps.structureManager(), configManager.get("flowerbreath")));
+        register(AbilitySlot.OFFENSIVE, "enderbreath",
+                deps -> new EnderBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.energyModifierManager(), configManager.get("enderbreath")));
         register(AbilitySlot.OFFENSIVE, "lightningstrike",
                 deps -> new LightningStrike(deps.teamManager(), deps.energyManager(), deps.combatService(), deps.debuffManager(), configManager.get("lightningstrike")));
         register(AbilitySlot.OFFENSIVE, "consume", deps -> new Consume(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.playerHealthManager(), configManager.get("consume")));
@@ -110,8 +115,6 @@ public class AbilityRegistry {
                         deps.structureManager(), configManager.get("sentry")));
         register(AbilitySlot.OFFENSIVE, "guidedpig2000",
                 deps -> new GuidedPig2000(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("guidedpig2000")));
-        register(AbilitySlot.OFFENSIVE, "enderbreath",
-                deps -> new EnderBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.energyModifierManager(), configManager.get("enderbreath")));
         register(AbilitySlot.OFFENSIVE, "teleport",
                 deps -> new Teleport(deps.energyManager(), deps.teamManager(), deps.combatService(), configManager.get("teleport")));
         register(AbilitySlot.OFFENSIVE, "anvilfall",
@@ -280,6 +283,9 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "caffeineshot",
                 deps -> new CaffeineShot(deps.cooldownManager(), deps.combatUpgradeManager(), deps.teamManager(),
                         deps.playerHealthManager(), deps.debuffManager(), deps.speedBuffManager(), configManager.get("caffeineshot")));
+        register(AbilitySlot.SUPPORT, "soulboundhealing",
+                deps -> new SoulboundHealing(plugin, deps.cooldownManager(), deps.playerHealthManager(),
+                        deps.combatUpgradeManager(), configManager.get("soulboundhealing")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Grants a short burst of speed, then detonates the caster for area damage.
@@ -30,29 +31,43 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Boombastic implements Ability {
 
-    /** Identifies the speed buff so only Boombastic's own boost is removed. */
-    private static final String SPEED_SOURCE = "boombastic";
-
     /**
      * The pending detonation is scheduled outside the ability instance, so it
      * must be tracked globally to be cancellable on death / match end.
      */
-    public record ActiveBomb(Object token, BukkitTask task, SpeedBuffManager speed) {
+    public record ActiveBomb(Object token, BukkitTask task, SpeedBuffManager speed, String speedSource) {
     }
 
-    public static final Map<UUID, ActiveBomb> ACTIVE = new ConcurrentHashMap<>();
+    public static final Map<UUID, List<ActiveBomb>> ACTIVE = new ConcurrentHashMap<>();
 
+    private static ActiveBomb find(UUID playerId, Object token) {
+        List<ActiveBomb> bombs = ACTIVE.get(playerId);
+        if (bombs == null) return null;
+        for (ActiveBomb bomb : bombs) {
+            if (bomb.token() == token) return bomb;
+        }
+        return null;
+    }
+
+    private static void unregister(UUID playerId, ActiveBomb bomb) {
+        ACTIVE.computeIfPresent(playerId, (id, bombs) -> {
+            bombs.remove(bomb);
+            return bombs.isEmpty() ? null : bombs;
+        });
+    }
     /**
      * Cancels the pending explosion and the speed boost. Called on death, match
      * end, /hub and disconnect so the blast never lands in the lobby or the
      * next match.
      */
     public static void clear(Player player) {
-        ActiveBomb active = ACTIVE.remove(player.getUniqueId());
-        if (active == null) return;
+        List<ActiveBomb> bombs = ACTIVE.remove(player.getUniqueId());
+        if (bombs == null) return;
 
-        active.task().cancel();
-        active.speed().removeBuff(player, SPEED_SOURCE);
+        for (ActiveBomb bomb : bombs) {
+            bomb.task().cancel();
+            bomb.speed().removeBuff(player, bomb.speedSource());
+        }
     }
 
     private static final int TICK_STEP = 4;
@@ -96,26 +111,25 @@ public class Boombastic implements Ability {
 
     @Override
     public boolean activate(Player player) {
-        // Re-using the ability resets the fuse instead of stacking blasts.
-        clear(player);
+        UUID playerId = player.getUniqueId();
 
-        speedBuffManager.applyBuff(player, speedAmplifier, speedDurationTicks * 50L, SPEED_SOURCE);
+        Object token = new Object();
+        String speedSource = "boombastic:" + UUID.randomUUID();
+
+        speedBuffManager.applyBuff(player, speedAmplifier, speedDurationTicks * 50L, speedSource);
 
         Location start = player.getLocation().add(0, 1, 0);
         start.getWorld().playSound(start, Sound.ENTITY_TNT_PRIMED, 1.2f, 1.4f);
         start.getWorld().spawnParticle(Particle.SMOKE, start, 15, 0.35, 0.4, 0.35, 0.02);
         start.getWorld().spawnParticle(Particle.FLAME, start, 6, 0.3, 0.3, 0.3, 0.02);
 
-        UUID playerId = player.getUniqueId();
-        Object token = new Object();
-
         BukkitTask fuse = new BukkitRunnable() {
             int elapsedTicks = 0;
 
             @Override
             public void run() {
-                ActiveBomb active = ACTIVE.get(playerId);
-                if (active == null || active.token() != token) {
+                ActiveBomb self = find(playerId, token);
+                if (self == null) {
                     cancel();
                     return;
                 }
@@ -125,21 +139,20 @@ public class Boombastic implements Ability {
                 if (!player.isOnline() || player.isDead()
                         || player.getGameMode() == GameMode.SPECTATOR
                         || !config.getMatchManager().isInMatch(player)) {
-                    clear(player);
+                    clear(player); // cancels every bomb of this player
                     return;
                 }
 
                 Location feet = player.getLocation().add(0, 1, 0);
 
                 if (elapsedTicks >= speedDurationTicks) {
-                    ACTIVE.remove(playerId);
+                    unregister(playerId, self);
                     cancel();
-                    speedBuffManager.removeBuff(player, SPEED_SOURCE);
+                    speedBuffManager.removeBuff(player, speedSource);
                     detonate(player);
                     return;
                 }
 
-                // Fuse trail: intensifies right before the blast.
                 boolean aboutToBlow = speedDurationTicks - elapsedTicks <= 20;
                 feet.getWorld().spawnParticle(Particle.SMOKE, feet, aboutToBlow ? 8 : 3,
                         0.25, 0.3, 0.25, 0.01);
@@ -152,7 +165,8 @@ public class Boombastic implements Ability {
             }
         }.runTaskTimer(ArenaBrawlPlugin.getInstance(), TICK_STEP, TICK_STEP);
 
-        ACTIVE.put(playerId, new ActiveBomb(token, fuse, speedBuffManager));
+        ACTIVE.computeIfAbsent(playerId, id -> new CopyOnWriteArrayList<>())
+                .add(new ActiveBomb(token, fuse, speedBuffManager, speedSource));
 
         return true;
     }

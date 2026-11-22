@@ -52,7 +52,7 @@ public class Polymorph implements Ability {
         debuffManager.tryApply(player, target, DebuffType.POLYMORPH, durationMillis);
 
         target.getWorld().spawnParticle(Particle.POOF, target.getLocation(), 25);
-        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_SHEEP_AMBIENT, 1.0f, 1.0f);
+        target.getWorld().playSound(target.getLocation(), Sound.ENTITY_SHEEP_AMBIENT, 10.0f, 1.0f);
         player.sendMessage("§eYour polymorph ability turned " + target.getName() + " into a sheep!");
         target.sendMessage("§e" + player.getName() + "'s polymorph ability turned you into a sheep!");
 
