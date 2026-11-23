@@ -1,12 +1,16 @@
 package org.latios.arenaBrawl.abilities.ultimate;
 
 import org.bukkit.Color;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
@@ -103,10 +107,19 @@ public class ReflectDamage implements Ability, ReflectStance {
 
             @Override
             public void run() {
+                boolean expiredNaturally = System.currentTimeMillis() >= state.expiresAt();
                 ReflectStance.ReflectState current = ReflectStance.getActiveState(player);
-                if (current != state || !player.isOnline() || player.isDead()) {
+                boolean eliminated = !player.isOnline() || player.isDead()
+                        || player.getGameMode() == GameMode.SPECTATOR;
+                if (current != state || eliminated) {
                     if (current == state) {
                         ReflectStance.clearState(player);
+                    }
+                    if (expiredNaturally && !eliminated) {
+                        Component expireMessage = Component.text("Your ", NamedTextColor.YELLOW)
+                                .append(Component.text("REFLECT DAMAGE", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD))
+                                .append(Component.text(" has expired!", NamedTextColor.YELLOW));
+                        player.sendMessage(expireMessage);
                     }
                     cancel();
                     return;

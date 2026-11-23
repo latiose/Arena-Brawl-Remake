@@ -240,6 +240,10 @@ public class MatchManager {
         }
 
         player.setGameMode(GameMode.SPECTATOR);
+        // A dead player must not keep any active ability buffs, shields or
+        // particle effects while spectating. Clear them before the targeted
+        // cleanup below so every effect task detects the reset and cancels.
+        clearCombatEffects(player);
         debuffManager.clear(player);
         shadowCloakManager.clear(player);
         soulLinkManager.clear(player);

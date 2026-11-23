@@ -1,6 +1,5 @@
 package org.latios.arenaBrawl.runes;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -8,8 +7,10 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
+import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.*;
 
+import java.util.List;
 import java.util.Random;
 
 public class RuneManager {
@@ -23,6 +24,7 @@ public class RuneManager {
     private final PlayerHealthManager healthManager;
     private final DamageVulnerabilityManager damageVulnerabilityManager;
     private CombatService combatService;
+    private MatchManager matchManager;
     public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager, RuneConfigManager runeConfigManager, SpeedBuffManager speedBuffManager, PlayerHealthManager healthManager, DamageVulnerabilityManager damageVulnerabilityManager,
                        CombatService combatService) {
         this.combatService = combatService;
@@ -149,7 +151,9 @@ public class RuneManager {
             }
             case ONESHOT -> {
                 if (victim != null) {
-                    for (Player online : Bukkit.getOnlinePlayers()) {
+                    List<Player> matchPlayers = getMatchPlayers(attacker);
+                    for (Player online : matchPlayers) {
+                        if (!online.isOnline()) continue;
                         online.playSound(online.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.7f, 1.4f);
                         online.sendMessage("§4§l" + attacker.getName() + " §4activated the §c"
                                 + rune.getDisplayName() + "§4§l and One Shot §b" + victim.getName() + "§4§l!");
@@ -209,5 +213,24 @@ public class RuneManager {
 
     public void setCombatService(CombatService combatService) {
         this.combatService = combatService;
+    }
+
+    public void setMatchManager(MatchManager matchManager) {
+        this.matchManager = matchManager;
+    }
+
+    /**
+     * Only the players inside the attacker's match should hear or see rune
+     * effects. Falls back to just the attacker when the attacker is not in
+     * a match (e.g. during lobby testing), never to every player online.
+     */
+    private List<Player> getMatchPlayers(Player attacker) {
+        if (matchManager != null) {
+            List<Player> players = matchManager.getMatchPlayers(attacker);
+            if (!players.isEmpty()) {
+                return players;
+            }
+        }
+        return List.of(attacker);
     }
 }

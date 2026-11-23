@@ -46,6 +46,7 @@ public class ZombieEntityManager extends BaseMinionManager {
 
         for (int i = 0; i < count; i++) {
             Zombie zombie = spawnLoc.getWorld().spawn(spawnLoc, Zombie.class, z -> {
+                z.setAdult();
                 z.setCustomNameVisible(false);
                 z.setRemoveWhenFarAway(false);
                 z.setAI(true);
@@ -77,6 +78,7 @@ public class ZombieEntityManager extends BaseMinionManager {
                                  int hitsToKill, double damage) {
         Zombie zombie = spawnLoc.getWorld().spawn(spawnLoc, Zombie.class, z -> {
             z.setBaby(true);
+            EntityCleanupUtils.markAllowedBabyZombie(z);
             z.setCustomNameVisible(false);
             z.setRemoveWhenFarAway(false);
             z.setAI(true);

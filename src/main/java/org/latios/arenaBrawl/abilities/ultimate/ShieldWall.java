@@ -1,6 +1,7 @@
 package org.latios.arenaBrawl.abilities.ultimate;
 
 import org.bukkit.Location;
+import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -62,7 +63,10 @@ public class ShieldWall implements Ability {
 
             @Override
             public void run() {
-                if (!player.isOnline() || secondsElapsed >= maxSeconds || !shieldManager.hasShield(player)) {
+                if (!player.isOnline() || player.isDead()
+                        || player.getGameMode() == GameMode.SPECTATOR
+                        || secondsElapsed >= maxSeconds
+                        || !shieldManager.hasShield(player)) {
                     cancel();
                     return;
                 }

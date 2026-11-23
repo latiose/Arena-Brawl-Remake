@@ -235,6 +235,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         playerHealthManager.setDamageCallback(matchManager::recordDamage);
         playerHealthManager.setHealingCallback(matchManager::recordHealing);
         this.abilityConfigManager.setMatchManager(matchManager);
+        this.runeManager.setMatchManager(matchManager);
         this.orbitShieldManager.setMatchManager(matchManager);
         this.combatService = new CombatService(
                 playerHealthManager, shieldManager, debuffManager, orbitShieldManager, damageBuffManager, matchManager,etherealBodyManager,

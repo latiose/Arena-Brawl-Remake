@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities.support;
 
+import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -80,7 +81,8 @@ public class SecondWind implements Ability {
 
             @Override
             public void run() {
-                if (done >= pulses || !player.isOnline() || player.isDead()) {
+                if (done >= pulses || !player.isOnline() || player.isDead()
+                        || player.getGameMode() == GameMode.SPECTATOR) {
                     cancel();
                     return;
                 }

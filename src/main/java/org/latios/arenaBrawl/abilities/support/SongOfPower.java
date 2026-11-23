@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities.support;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -108,7 +109,9 @@ public class SongOfPower implements Ability {
 
             @Override
             public void run() {
-                if (!caster.isOnline() || ticksElapsed >= durationTicks) {
+                if (!caster.isOnline() || caster.isDead()
+                        || caster.getGameMode() == GameMode.SPECTATOR
+                        || ticksElapsed >= durationTicks) {
                     cancel();
                     return;
                 }

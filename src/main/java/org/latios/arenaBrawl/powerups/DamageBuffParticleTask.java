@@ -2,6 +2,7 @@
 package org.latios.arenaBrawl.powerups;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -25,6 +26,7 @@ public class DamageBuffParticleTask extends BukkitRunnable {
     @Override
     public void run() {
         for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isDead() || player.getGameMode() == GameMode.SPECTATOR) continue;
             if (damageBuffManager.getMultiplier(player) <= 1.0) continue; // no active buff, skip
 
             if (shadowCloakManager != null && shadowCloakManager.isActive(player)) continue;

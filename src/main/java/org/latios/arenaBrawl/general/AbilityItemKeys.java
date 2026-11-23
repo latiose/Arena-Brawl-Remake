@@ -32,6 +32,10 @@ public class AbilityItemKeys {
     public static final NamespacedKey ARENA_ENTITY_MARKER = new NamespacedKey(
             ArenaBrawlPlugin.getInstance(), "arena_entity_marker"
     );
+    /** Marks a spawned zombie that is intentionally a baby (e.g. Impregnation). */
+    public static final NamespacedKey ALLOW_BABY_ZOMBIE = new NamespacedKey(
+            ArenaBrawlPlugin.getInstance(), "allow_baby_zombie"
+    );
     public static final NamespacedKey MAGICAL_CHEST_HOLOGRAM = new NamespacedKey(
             ArenaBrawlPlugin.getInstance(), "magical_chest_hologram"
     );
