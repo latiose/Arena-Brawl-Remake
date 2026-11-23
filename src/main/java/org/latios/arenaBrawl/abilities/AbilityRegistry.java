@@ -123,6 +123,15 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "kingsguard",
                 deps -> new KingsGuard(deps.energyManager(), deps.teamManager(),
                         deps.kingsGuardManager(), configManager.get("kingsguard")));
+        register(AbilitySlot.OFFENSIVE, "arcanesiphon",
+                deps -> new ArcaneSiphon(deps.energyManager(), deps.teamManager(),
+                        deps.combatService(), configManager.get("arcanesiphon")));
+        register(AbilitySlot.OFFENSIVE, "disruptor",
+                deps -> new Disruptor(plugin, deps.energyManager(), deps.teamManager(),
+                        deps.combatService(), deps.debuffManager(), configManager.get("disruptor")));
+        register(AbilitySlot.OFFENSIVE, "shackle",
+                deps -> new Shackle(plugin, deps.energyManager(), deps.teamManager(),
+                        deps.combatService(), deps.debuffManager(), configManager.get("shackle")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -286,6 +295,12 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "soulboundhealing",
                 deps -> new SoulboundHealing(plugin, deps.cooldownManager(), deps.playerHealthManager(),
                         deps.combatUpgradeManager(), configManager.get("soulboundhealing")));
+        register(AbilitySlot.SUPPORT, "blessing",
+                deps -> new Blessing(plugin, deps.cooldownManager(), deps.playerHealthManager(),
+                        deps.combatUpgradeManager(), configManager.get("blessing")));
+        register(AbilitySlot.SUPPORT, "tide",
+                deps -> new Tide(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(),
+                        deps.combatUpgradeManager(), configManager.get("tide")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",

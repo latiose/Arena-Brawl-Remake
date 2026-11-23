@@ -1119,6 +1119,32 @@ ability-values:
     hits-to-destroy: 3
     spawn-offset: 1.5
 
+  arcanesiphon:
+    energy-cost: 50.0
+    damage: 40.0
+    max-drain: 45.0
+    damage-per-energy: 2.0
+    max-range: 18.0
+
+  disruptor:
+    energy-cost: 60.0
+    damage: 70.0
+    silence-duration-ms: 1500
+    radius: 3.5
+    max-range: 18.0
+    travel-ticks: 8
+    arm-ms: 500
+
+  shackle:
+    energy-cost: 45.0
+    initial-damage: 40.0
+    damage: 180.0
+    max-range: 20.0
+    duration-ms: 3500
+    break-distance: 3.0
+    immobilize-duration-ms: 1200
+    tick-interval-ticks: 4
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -1600,6 +1626,22 @@ ability-values:
     duration-ms: 5000
     divide-by: 2.0
     multiply-by: 3.0
+
+  blessing:
+    cooldown-ms: 30000
+    instant-heal: 120.0
+    delayed-heal: 380.0
+    damaged-heal: 60.0
+    delay-ms: 4000
+
+  tide:
+    cooldown-ms: 32000
+    self-heal: 120.0
+    ally-heal: 140.0
+    pulse-heal: 70.0
+    pulses: 3
+    pulse-interval-ms: 600
+    ally-radius: 12.0
 
   # --- ULTIMATE ---
   shieldwall:

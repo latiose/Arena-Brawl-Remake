@@ -73,6 +73,9 @@ public class AbilityIconRegistry {
         icons.put("enderbreath", Material.ENDERMITE_SPAWN_EGG);
         icons.put("teleport", Material.CHORUS_FRUIT);
         icons.put("anvilfall", Material.ANVIL);
+        icons.put("arcanesiphon", Material.LAPIS_LAZULI);
+        icons.put("disruptor", Material.SCULK_SENSOR);
+        icons.put("shackle", Material.IRON_CHAIN);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
@@ -154,6 +157,8 @@ public class AbilityIconRegistry {
         icons.put("absorptionshield", Material.SHIELD);
         icons.put("sadism", Material.GHAST_TEAR);
         icons.put("soulboundhealing", Material.HEART_OF_THE_SEA);
+        icons.put("blessing", Material.SUNFLOWER);
+        icons.put("tide", Material.PRISMARINE_CRYSTALS);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);
