@@ -44,6 +44,8 @@ public class AbilityRegistry {
                 deps -> new FreezingBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("freezingbreath")));
         register(AbilitySlot.OFFENSIVE, "evilbreath",
                 deps -> new EvilBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("evilbreath")));
+        register(AbilitySlot.OFFENSIVE, "feralscream",
+                deps -> new FeralScream(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("feralscream")));
         register(AbilitySlot.OFFENSIVE, "smokebreath",
                 deps -> new SmokeBreath(deps.energyManager(), deps.teamManager(), deps.combatService(), deps.debuffManager(), configManager.get("smokebreath")));
         register(AbilitySlot.OFFENSIVE, "heavensbreath",
@@ -132,6 +134,9 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "shackle",
                 deps -> new Shackle(plugin, deps.energyManager(), deps.teamManager(),
                         deps.combatService(), deps.debuffManager(), configManager.get("shackle")));
+        register(AbilitySlot.OFFENSIVE, "cosmicbinding",
+                deps -> new CosmicBinding(plugin, deps.energyManager(), deps.teamManager(),
+                        deps.combatService(), deps.debuffManager(), configManager.get("cosmicbinding")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -301,6 +306,10 @@ public class AbilityRegistry {
         register(AbilitySlot.SUPPORT, "tide",
                 deps -> new Tide(plugin, deps.cooldownManager(), deps.teamManager(), deps.playerHealthManager(),
                         deps.combatUpgradeManager(), configManager.get("tide")));
+        register(AbilitySlot.SUPPORT, "caretakershrine",
+                deps -> new CaretakerShrine(plugin, deps.cooldownManager(), deps.teamManager(),
+                        deps.playerHealthManager(), deps.speedBuffManager(), deps.combatUpgradeManager(),
+                        configManager.get("caretakershrine")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
@@ -384,6 +393,9 @@ public class AbilityRegistry {
         register(AbilitySlot.ULTIMATE, "tempest",
                 deps -> new Tempest(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
                         deps.combatService(), configManager.get("tempest")));
+        register(AbilitySlot.ULTIMATE, "glacialstorm",
+                deps -> new GlacialStorm(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                        deps.combatService(), deps.debuffManager(), configManager.get("glacialstorm")));
 
 
         // --- DEFAULTS ---

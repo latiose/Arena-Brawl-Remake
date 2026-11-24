@@ -29,6 +29,7 @@ public class AbilityIconRegistry {
         icons.put("groundslam", Material.ANVIL);
         icons.put("freezingbreath", Material.BLUE_ICE);
         icons.put("evilbreath", Material.WITHER_ROSE);
+        icons.put("feralscream", Material.SCULK_CATALYST);
         icons.put("smokebreath", Material.CAMPFIRE);
         icons.put("heavensbreath", Material.GLOWSTONE_DUST);
         icons.put("dragonsbreath", Material.DRAGON_BREATH);
@@ -76,6 +77,7 @@ public class AbilityIconRegistry {
         icons.put("arcanesiphon", Material.LAPIS_LAZULI);
         icons.put("disruptor", Material.SCULK_SENSOR);
         icons.put("shackle", Material.IRON_CHAIN);
+        icons.put("cosmicbinding", Material.SPYGLASS);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
@@ -159,6 +161,7 @@ public class AbilityIconRegistry {
         icons.put("soulboundhealing", Material.HEART_OF_THE_SEA);
         icons.put("blessing", Material.SUNFLOWER);
         icons.put("tide", Material.PRISMARINE_CRYSTALS);
+        icons.put("caretakershrine", Material.GLOW_BERRIES);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);
@@ -195,6 +198,7 @@ public class AbilityIconRegistry {
         icons.put("encore", Material.JUKEBOX);
         icons.put("treason", Material.RED_BANNER);
         icons.put("judgmentlance", Material.PRISMARINE_SHARD);
+        icons.put("glacialstorm", Material.BLUE_ICE);
         icons.put("infernalghast", Material.GHAST_SPAWN_EGG);
         icons.put("caffeineshot", Material.SUGAR);
     }
