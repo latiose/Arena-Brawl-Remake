@@ -1393,6 +1393,16 @@ ability-values:
     melee-range: 3.5
     attack-interval-ms: 500
 
+  phantomundertow:
+    cooldown-ms: 18000
+    dash-speed: 1.2
+    dash-duration-ms: 250
+    return-delay-ms: 1000
+    phantom-speed: 1.0
+    hit-radius: 1.5
+    stun-duration-ms: 800
+    return-timeout-ms: 3000
+
   # --- SUPPORT ---
   holywater:
     cooldown-ms: 30000
@@ -1684,6 +1694,13 @@ ability-values:
     max-heal: 300.0
     speed-amplifier: 1
     speed-duration-ms: 3000
+
+  safeguard:
+    cooldown-ms: 12000
+    heal-amount: 150.0
+    self-heal: 75.0
+    max-range: 12.0
+    stop-distance: 1.2
 
   # --- ULTIMATE ---
   shieldwall:

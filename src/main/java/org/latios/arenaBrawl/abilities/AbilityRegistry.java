@@ -221,6 +221,9 @@ public class AbilityRegistry {
                 deps -> new Frenzy(deps.cooldownManager(), deps.teamManager(), deps.debuffManager(), deps.speedBuffManager(), deps.combatUpgradeManager(), configManager.get("frenzy")));
         register(AbilitySlot.UTILITY, "metallicshove",
                 deps -> new MetallicShove(plugin, deps.cooldownManager(), deps.teamManager(), deps.debuffManager(), deps.speedBuffManager(), deps.combatUpgradeManager(), configManager.get("metallicshove")));
+        register(AbilitySlot.UTILITY, "phantomundertow",
+                deps -> new PhantomUndertow(plugin, deps.cooldownManager(), deps.teamManager(),
+                        deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("phantomundertow")));
 
 
         // --- SUPPORT ---
@@ -316,6 +319,10 @@ public class AbilityRegistry {
                 deps -> new CaretakerShrine(plugin, deps.cooldownManager(), deps.teamManager(),
                         deps.playerHealthManager(), deps.speedBuffManager(), deps.combatUpgradeManager(),
                         configManager.get("caretakershrine")));
+        register(AbilitySlot.SUPPORT, "safeguard",
+                deps -> new Safeguard(deps.cooldownManager(), deps.teamManager(),
+                        deps.playerHealthManager(), deps.combatUpgradeManager(),
+                        configManager.get("safeguard")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",
