@@ -19,8 +19,9 @@ import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
 
-public class CosmicBinding implements Ability {
 
+public class CosmicBinding implements Ability {
+    private static final double WALL_GRACE = 3.0;
     private final Plugin plugin;
     private final double energyCost;
     private final double damage;
@@ -71,6 +72,7 @@ public class CosmicBinding implements Ability {
         new BukkitRunnable() {
             final Location current = player.getEyeLocation().clone();
             double traveled = 0;
+            double hitAt = -1;
             Player firstTarget = null;
 
             @Override
@@ -82,45 +84,45 @@ public class CosmicBinding implements Ability {
                 }
 
                 RayTraceResult entityHit = current.getWorld().rayTrace(
-                        current,
-                        direction,
-                        projectileSpeed,
-                        FluidCollisionMode.NEVER,
-                        true,
-                        hitRadius,
+                        current, direction, projectileSpeed, FluidCollisionMode.NEVER, true, hitRadius,
                         entity -> entity instanceof Player candidate
                                 && !candidate.equals(player)
                                 && !candidate.equals(firstTarget)
                                 && !candidate.isDead()
                                 && candidate.getGameMode() != GameMode.SPECTATOR
-                                && teamManager.isEnemy(player, candidate)
-                );
+                                && teamManager.isEnemy(player, candidate));
                 RayTraceResult blockHit = current.getWorld().rayTraceBlocks(
                         current, direction, projectileSpeed, FluidCollisionMode.NEVER, true);
 
                 double entityDistance = entityHit != null
-                        ? entityHit.getHitPosition().distance(current.toVector())
-                        : Double.MAX_VALUE;
+                        ? entityHit.getHitPosition().distance(current.toVector()) : Double.MAX_VALUE;
                 double blockDistance = blockHit != null
-                        ? blockHit.getHitPosition().distance(current.toVector())
-                        : Double.MAX_VALUE;
+                        ? blockHit.getHitPosition().distance(current.toVector()) : Double.MAX_VALUE;
 
-                if (entityHit != null && entityDistance <= blockDistance) {
-                    Player target = (Player) entityHit.getHitEntity();
-                    if (target != null) {
-                        hit(player, target, current);
-                        if (firstTarget == null) {
-                            firstTarget = target;
-                            debuffManager.tryApply(player, target, DebuffType.SLOW, slowDurationMs);
-                        }  else {
+                if (entityHit != null && entityDistance <= blockDistance
+                        && entityHit.getHitEntity() instanceof Player target) {
+
+                    hit(player, target, current);
+
+                    if (firstTarget == null) {
+                        firstTarget = target;
+                        hitAt = traveled + entityDistance;
+                        debuffManager.tryApply(player, target, DebuffType.SLOW, slowDurationMs);
+
+                        if (blockHit != null && (blockDistance - entityDistance) <= WALL_GRACE) {
                             stun(player, firstTarget);
-                            stun(player, target);
                             cancel();
                             return;
                         }
+                    } else {
+                        stun(player, firstTarget);
+                        stun(player, target);
+                        cancel();
+                        return;
                     }
                 } else if (blockHit != null) {
-                    if (firstTarget != null && firstTarget.isOnline() && !firstTarget.isDead()) {
+                    if (firstTarget != null && firstTarget.isOnline() && !firstTarget.isDead()
+                            && (traveled + blockDistance - hitAt) <= WALL_GRACE) {
                         stun(player, firstTarget);
                         current.getWorld().spawnParticle(Particle.FIREWORK, current, 12, 0.15, 0.15, 0.15, 0.05);
                     }
@@ -132,9 +134,7 @@ public class CosmicBinding implements Ability {
                 traveled += projectileSpeed;
                 drawTrail(current);
 
-                if (traveled >= maxRange) {
-                    cancel();
-                }
+                if (traveled >= maxRange) cancel();
             }
         }.runTaskTimer(plugin, 0L, 1L);
 

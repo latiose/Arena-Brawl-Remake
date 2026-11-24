@@ -137,6 +137,12 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "cosmicbinding",
                 deps -> new CosmicBinding(plugin, deps.energyManager(), deps.teamManager(),
                         deps.combatService(), deps.debuffManager(), configManager.get("cosmicbinding")));
+        register(AbilitySlot.OFFENSIVE, "phasedive",
+                deps -> new PhaseDive(plugin,deps.energyManager(), deps.teamManager(),
+                        deps.combatService(), configManager.get("phasedive")));
+        register(AbilitySlot.OFFENSIVE, "rampage",
+                deps -> new Rampage(deps.energyManager(), deps.teamManager(),
+                        deps.combatService(), configManager.get("rampage")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",

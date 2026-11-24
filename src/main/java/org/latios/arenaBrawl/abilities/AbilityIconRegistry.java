@@ -78,6 +78,8 @@ public class AbilityIconRegistry {
         icons.put("disruptor", Material.SCULK_SENSOR);
         icons.put("shackle", Material.IRON_CHAIN);
         icons.put("cosmicbinding", Material.SPYGLASS);
+        icons.put("phasedive", Material.COMPASS);
+        icons.put("rampage", Material.SADDLE);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);

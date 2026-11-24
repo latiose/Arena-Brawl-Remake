@@ -1159,6 +1159,23 @@ ability-values:
     slow-duration-ms: 1000
     stun-duration-ms: 1300
 
+  phasedive:
+    energy-cost: 40.0
+    damage: 150.0
+    first-dash-distance: 3.5
+    target-range: 12.0
+    prime-window-ms: 4000
+    stop-distance: 1.2
+
+  rampage:
+    energy-cost: 40.0
+    damage: 120.0
+    radius: 4.5
+    vertical-radius: 3.0
+    reduction-per-hit-percent: 20.0
+    max-reduction-percent: 60.0
+    reduction-duration-ms: 6000
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
