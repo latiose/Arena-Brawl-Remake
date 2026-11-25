@@ -1184,6 +1184,17 @@ ability-values:
     speed-duration-ms: 3000
     max-range: 18.0
 
+  duskbringer:
+    energy-cost: 50.0
+    damage: 90.0
+    range: 20.0
+    speed: 0.9
+    hit-radius: 1.6
+    trail-duration-ms: 5000
+    trail-radius: 2.0
+    speed-amplifier: 0
+    speed-buff-ms: 600
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000

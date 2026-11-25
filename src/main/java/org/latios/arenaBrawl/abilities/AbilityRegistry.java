@@ -146,6 +146,9 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "seismicshard",
                 deps -> new SeismicShard(deps.energyManager(), deps.teamManager(), deps.combatService(),
                         deps.debuffManager(), deps.speedBuffManager(), configManager.get("seismicshard")));
+        register(AbilitySlot.OFFENSIVE, "duskbringer",
+                deps -> new Duskbringer(plugin, deps.energyManager(), deps.teamManager(), deps.combatService(),
+                        deps.speedBuffManager(), configManager.get("duskbringer")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",

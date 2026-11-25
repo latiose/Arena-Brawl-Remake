@@ -81,6 +81,7 @@ public class AbilityIconRegistry {
         icons.put("phasedive", Material.COMPASS);
         icons.put("rampage", Material.SADDLE);
         icons.put("seismicshard", Material.STONE);
+        icons.put("duskbringer", Material.SOUL_SAND);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
