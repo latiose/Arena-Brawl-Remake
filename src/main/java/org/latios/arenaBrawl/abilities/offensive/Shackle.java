@@ -18,6 +18,7 @@ import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 
 import java.util.List;
@@ -73,6 +74,7 @@ public class Shackle implements Ability {
     public boolean activate(Player player) {
         Player target = AbilityTargeting.findEnemyAlongRay(player, teamManager, maxRange);
         if (target == null) {
+            player.sendMessage(MessageUtils.noValidPlayer());
             return false;
         }
 

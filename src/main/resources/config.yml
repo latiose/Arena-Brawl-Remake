@@ -1176,6 +1176,14 @@ ability-values:
     max-reduction-percent: 60.0
     reduction-duration-ms: 6000
 
+  seismicshard:
+    energy-cost: 45.0
+    damage: 80.0
+    slow-duration-ms: 3000
+    speed-amplifier: 1
+    speed-duration-ms: 3000
+    max-range: 18.0
+
   # --- UTILITY ---
   shadowstep:
     cooldown-ms: 30000
@@ -1414,6 +1422,14 @@ ability-values:
     cooldown-ms: 26000
     duration-ms: 4000
     radius: 8.0
+
+  glacialpath:
+    cooldown-ms: 22000
+    duration-ms: 5000
+    speed: 0.4
+    max-distance: 50.0
+    immobilize-radius: 4.0
+    immobilize-duration-ms: 1500
 
   # --- SUPPORT ---
   holywater:
@@ -1974,6 +1990,14 @@ ability-values:
     damage-per-tick: 20.0
     tick-interval-ticks: 5
     slow-duration-ms: 400
+
+  unstoppableforce:
+    charge-time-millis: 60000
+    max-range: 22.0
+    impact-radius: 5.0
+    damage: 350.0
+    stun-duration-ms: 1500
+    dash-ticks: 5
 
 rune-values:
   speed:

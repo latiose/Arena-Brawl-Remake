@@ -143,6 +143,9 @@ public class AbilityRegistry {
         register(AbilitySlot.OFFENSIVE, "rampage",
                 deps -> new Rampage(deps.energyManager(), deps.teamManager(),
                         deps.combatService(), configManager.get("rampage")));
+        register(AbilitySlot.OFFENSIVE, "seismicshard",
+                deps -> new SeismicShard(deps.energyManager(), deps.teamManager(), deps.combatService(),
+                        deps.debuffManager(), deps.speedBuffManager(), configManager.get("seismicshard")));
 
         // --- UTILITY ---
         register(AbilitySlot.UTILITY, "shadowstep",
@@ -231,6 +234,9 @@ public class AbilityRegistry {
         register(AbilitySlot.UTILITY, "purify",
                 deps -> new Purify(plugin, deps.cooldownManager(), deps.teamManager(),
                         deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("purify")));
+        register(AbilitySlot.UTILITY, "glacialpath",
+                deps -> new GlacialPath(plugin, deps.cooldownManager(), deps.teamManager(),
+                        deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("glacialpath")));
 
 
         // --- SUPPORT ---
@@ -420,6 +426,9 @@ public class AbilityRegistry {
         register(AbilitySlot.ULTIMATE, "glacialstorm",
                 deps -> new GlacialStorm(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
                         deps.combatService(), deps.debuffManager(), configManager.get("glacialstorm")));
+        register(AbilitySlot.ULTIMATE, "unstoppableforce",
+                deps -> new UnstoppableForce(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                        deps.combatService(), deps.debuffManager(), configManager.get("unstoppableforce")));
 
 
         // --- DEFAULTS ---

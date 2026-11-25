@@ -80,6 +80,7 @@ public class AbilityIconRegistry {
         icons.put("cosmicbinding", Material.SPYGLASS);
         icons.put("phasedive", Material.COMPASS);
         icons.put("rampage", Material.SADDLE);
+        icons.put("seismicshard", Material.STONE);
         // --- UTILITY ---
         icons.put("shadowstep", Material.ENDER_PEARL);
         icons.put("salmonform", Material.SALMON);
@@ -122,6 +123,7 @@ public class AbilityIconRegistry {
         icons.put("phantomundertow", Material.SOUL_TORCH);
         icons.put("lightningrush", Material.FIREWORK_STAR);
         icons.put("purify", Material.MILK_BUCKET);
+        icons.put("glacialpath", Material.POWDER_SNOW_BUCKET);
 
         // --- SUPPORT ---
         icons.put("holywater", Material.POTION);
@@ -206,6 +208,7 @@ public class AbilityIconRegistry {
         icons.put("treason", Material.RED_BANNER);
         icons.put("judgmentlance", Material.PRISMARINE_SHARD);
         icons.put("glacialstorm", Material.BLUE_ICE);
+        icons.put("unstoppableforce", Material.DRIPSTONE_BLOCK);
         icons.put("infernalghast", Material.GHAST_SPAWN_EGG);
         icons.put("caffeineshot", Material.SUGAR);
     }
