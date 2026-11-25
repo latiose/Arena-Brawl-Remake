@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -55,7 +56,7 @@ public class ShieldWall implements Ability {
         shieldManager.applyShield(player, damageReduction, durationMillis, "Shield Wall");
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 10.0f, 1.0f);
 
-        spawnWaterRings(player);
+        spawnAuraCylinder(player);
 
         new BukkitRunnable() {
             int secondsElapsed = 0;
@@ -86,14 +87,15 @@ public class ShieldWall implements Ability {
         return true;
     }
 
-    private void spawnWaterRings(Player player) {
+    private void spawnAuraCylinder(Player player) {
         Location loc = player.getLocation();
-        int circleCount = 25;
-        int pointsPerCircle = 20;
-        double radius = 1.3;
+        World world = loc.getWorld();
+        int circleCount = 12;
+        int pointsPerCircle = 24;
+        double radius = 1.0;
 
-        double minHeight = 0.2;
-        double maxHeight = 2.2;
+        double minHeight = 0.1;
+        double maxHeight = 2.1;
         double heightStep = (maxHeight - minHeight) / (circleCount - 1);
 
         for (int i = 0; i < circleCount; i++) {
@@ -101,11 +103,8 @@ public class ShieldWall implements Ability {
 
             for (int j = 0; j < pointsPerCircle; j++) {
                 double angle = (2 * Math.PI / pointsPerCircle) * j;
-                double x = Math.cos(angle) * radius;
-                double z = Math.sin(angle) * radius;
-
-                Location particleLoc = loc.clone().add(x, yOffset, z);
-                player.getWorld().spawnParticle(Particle.DRIPPING_WATER, particleLoc, 1, 0, 0, 0, 0);
+                Location p = loc.clone().add(Math.cos(angle) * radius, yOffset, Math.sin(angle) * radius);
+                world.spawnParticle(Particle.DRIPPING_WATER, p, 1, 0, 0, 0, 0);
             }
         }
     }

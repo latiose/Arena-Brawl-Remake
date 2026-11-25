@@ -5,7 +5,6 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.latios.arenaBrawl.team.TeamManager;
@@ -16,10 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * A solid glass wall that only the owner's team can cross. Enemies collide with the blocks
- * normally; allies are "phased" to the other side when they walk into the wall while facing it.
- */
 public class PhaseWallStructure extends PlacedStructure implements DestructibleStructure {
 
     private static final double PHASE_DISTANCE = 1.15;
@@ -32,16 +27,17 @@ public class PhaseWallStructure extends PlacedStructure implements DestructibleS
 
     private final List<Block> placedBlocks = new ArrayList<>();
     private final Map<UUID, Long> lastPhaseAt = new HashMap<>();
+    private final List<WallPlane> walls = new ArrayList<>();
 
-    private final Vector normal;
-    private final Vector widthAxis;
-    private final Location planeCenter;
-    private final double halfWidth;
+    private final Location center;
     private final double height;
 
     private int remainingHits;
+    private int tickCounter;
 
-    public PhaseWallStructure(Player owner, Location base, StructureBlueprint blueprint, BlockFace facing,
+    private record WallPlane(Vector normal, Vector widthAxis, Location center, double halfWidth) {}
+
+    public PhaseWallStructure(Player owner, Location base, StructureBlueprint blueprint,
                               TeamManager teamManager, long durationMillis, int hitsToDestroy) {
         super(owner, base.getBlock().getLocation());
         this.teamManager = teamManager;
@@ -49,29 +45,50 @@ public class PhaseWallStructure extends PlacedStructure implements DestructibleS
         this.meleeHitsToDestroy = Math.max(1, hitsToDestroy);
         this.remainingHits = this.meleeHitsToDestroy;
 
-        this.normal = normalFor(facing);
-        this.widthAxis = new Vector(normal.getZ(), 0, -normal.getX()).normalize();
-
-        int maxX = 0;
-        int maxZ = 0;
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int minZ = Integer.MAX_VALUE;
+        int maxZ = Integer.MIN_VALUE;
         int maxY = 0;
+
         for (StructureBlueprint.BlockOffset offset : blueprint.getOffsets()) {
-            maxX = Math.max(maxX, Math.abs(offset.dx()));
-            maxZ = Math.max(maxZ, Math.abs(offset.dz()));
+            minX = Math.min(minX, offset.dx());
+            maxX = Math.max(maxX, offset.dx());
+            minZ = Math.min(minZ, offset.dz());
+            maxZ = Math.max(maxZ, offset.dz());
             maxY = Math.max(maxY, offset.dy());
         }
 
-        this.halfWidth = Math.max(maxX, maxZ) + 0.5;
+        Location origin = base.getBlock().getLocation();
         this.height = maxY + 1;
-        this.planeCenter = base.getBlock().getLocation().add(0.5, height / 2.0, 0.5);
 
-        build(base.getBlock().getLocation(), facing, blueprint);
+        double centerX = origin.getBlockX() + (minX + maxX + 1) / 2.0;
+        double centerZ = origin.getBlockZ() + (minZ + maxZ + 1) / 2.0;
+        double centerY = origin.getBlockY() + height / 2.0;
+        this.center = new Location(origin.getWorld(), centerX, centerY, centerZ);
+
+        double halfWidthX = (maxX - minX + 1) / 2.0;
+        double halfWidthZ = (maxZ - minZ + 1) / 2.0;
+
+        walls.add(new WallPlane(new Vector(-1, 0, 0), new Vector(0, 0, 1),
+                new Location(origin.getWorld(), origin.getBlockX() + minX + 0.5, centerY, centerZ),
+                halfWidthZ));
+        walls.add(new WallPlane(new Vector(1, 0, 0), new Vector(0, 0, 1),
+                new Location(origin.getWorld(), origin.getBlockX() + maxX + 0.5, centerY, centerZ),
+                halfWidthZ));
+        walls.add(new WallPlane(new Vector(0, 0, -1), new Vector(1, 0, 0),
+                new Location(origin.getWorld(), centerX, centerY, origin.getBlockZ() + minZ + 0.5),
+                halfWidthX));
+        walls.add(new WallPlane(new Vector(0, 0, 1), new Vector(1, 0, 0),
+                new Location(origin.getWorld(), centerX, centerY, origin.getBlockZ() + maxZ + 0.5),
+                halfWidthX));
+
+        build(origin, blueprint);
     }
 
-    private void build(Location base, BlockFace facing, StructureBlueprint blueprint) {
+    private void build(Location origin, StructureBlueprint blueprint) {
         for (StructureBlueprint.BlockOffset offset : blueprint.getOffsets()) {
-            int[] rotated = rotateOffset(offset.dx(), offset.dz(), facing);
-            Block block = base.clone().add(rotated[0], offset.dy(), rotated[1]).getBlock();
+            Block block = origin.clone().add(offset.dx(), offset.dy(), offset.dz()).getBlock();
 
             if (!isReplaceable(block.getType())) continue;
             if (StructureBlockRegistry.isOwnedByOther(block, this)) continue;
@@ -82,10 +99,6 @@ public class PhaseWallStructure extends PlacedStructure implements DestructibleS
         }
     }
 
-    /**
-     * Returns the destination on the other side of the wall when an ally walks into it,
-     * or {@code null} when the movement should be left untouched.
-     */
     public Location resolvePhase(Player player, Location from, Location to) {
         Player owner = getOwner();
         if (owner == null) return null;
@@ -96,31 +109,47 @@ public class PhaseWallStructure extends PlacedStructure implements DestructibleS
             return null;
         }
 
-        Vector delta = to.toVector().subtract(planeCenter.toVector());
-        double distanceToPlane = delta.dot(normal);
-        double lateral = delta.dot(widthAxis);
-        double vertical = delta.getY();
+        WallPlane target = null;
+        double targetSigned = 0;
+        double targetAbs = Double.MAX_VALUE;
 
-        if (Math.abs(distanceToPlane) > PHASE_DISTANCE) return null;
-        if (Math.abs(lateral) > halfWidth + 0.35) return null;
-        if (vertical < -height / 2.0 - 0.6 || vertical > height / 2.0 + 0.6) return null;
+        for (WallPlane wall : walls) {
+            Vector delta = to.toVector().subtract(wall.center().toVector());
+            double signed = delta.dot(wall.normal());
+            if (Math.abs(signed) > PHASE_DISTANCE) continue;
 
-        double side = distanceToPlane >= 0 ? 1 : -1;
+            double lateral = delta.dot(wall.widthAxis());
+            if (Math.abs(lateral) > wall.halfWidth()) continue;
+
+            double vertical = delta.getY();
+            if (vertical < -height / 2.0 - 0.6 || vertical > height / 2.0 + 0.6) continue;
+
+            double abs = Math.abs(signed);
+            if (abs < targetAbs) {
+                targetAbs = abs;
+                targetSigned = signed;
+                target = wall;
+            }
+        }
+
+        if (target == null) return null;
+
+        double side = targetSigned >= 0 ? 1 : -1;
 
         Vector movement = to.toVector().subtract(from.toVector());
-        boolean movingTowardWall = movement.dot(normal) * side < -0.001;
+        boolean movingTowardWall = movement.dot(target.normal()) * side < -0.001;
 
         Vector look = player.getEyeLocation().getDirection();
         look.setY(0);
         if (look.lengthSquared() < 1.0E-6) return null;
         look.normalize();
-        boolean lookingTowardWall = look.dot(normal) * side < -0.2;
+        boolean lookingTowardWall = look.dot(target.normal()) * side < -0.2;
 
         if (!movingTowardWall && !lookingTowardWall) return null;
 
-        // Mirror the current position across the wall plane and push slightly past the blocks.
-        double destinationDistance = -distanceToPlane - side * PHASE_CLEARANCE;
-        Vector destination = to.toVector().add(normal.clone().multiply(destinationDistance - distanceToPlane));
+        double destinationDistance = -targetSigned - side * PHASE_CLEARANCE;
+        Vector destination = to.toVector().add(
+                target.normal().clone().multiply(destinationDistance - targetSigned));
 
         Location arrival = destination.toLocation(player.getWorld());
         arrival.setYaw(to.getYaw());
@@ -131,8 +160,10 @@ public class PhaseWallStructure extends PlacedStructure implements DestructibleS
         lastPhaseAt.put(player.getUniqueId(), now);
         player.setFallDistance(0f);
 
-        arrival.getWorld().spawnParticle(Particle.PORTAL, arrival.clone().add(0, 1, 0), 20, 0.25, 0.5, 0.25, 0.15);
-        arrival.getWorld().spawnParticle(Particle.END_ROD, arrival.clone().add(0, 1, 0), 6, 0.15, 0.3, 0.15, 0.02);
+        arrival.getWorld().spawnParticle(Particle.PORTAL, arrival.clone().add(0, 1, 0),
+                20, 0.25, 0.5, 0.25, 0.15);
+        arrival.getWorld().spawnParticle(Particle.END_ROD, arrival.clone().add(0, 1, 0),
+                6, 0.15, 0.3, 0.15, 0.02);
         arrival.getWorld().playSound(arrival, Sound.ENTITY_ENDERMAN_TELEPORT, 0.7f, 1.5f);
 
         return arrival;
@@ -142,25 +173,6 @@ public class PhaseWallStructure extends PlacedStructure implements DestructibleS
         Block feet = location.getBlock();
         Block head = location.clone().add(0, 1, 0).getBlock();
         return feet.isPassable() && head.isPassable();
-    }
-
-    private static Vector normalFor(BlockFace facing) {
-        return switch (facing) {
-            case NORTH -> new Vector(0, 0, -1);
-            case EAST -> new Vector(1, 0, 0);
-            case WEST -> new Vector(-1, 0, 0);
-            default -> new Vector(0, 0, 1);
-        };
-    }
-
-    private int[] rotateOffset(int dx, int dz, BlockFace facing) {
-        return switch (facing) {
-            case SOUTH -> new int[]{dz, dx};
-            case NORTH -> new int[]{-dz, -dx};
-            case EAST -> new int[]{dx, -dz};
-            case WEST -> new int[]{-dx, dz};
-            default -> new int[]{dx, dz};
-        };
     }
 
     private boolean isReplaceable(Material material) {
@@ -177,9 +189,14 @@ public class PhaseWallStructure extends PlacedStructure implements DestructibleS
             return true;
         }
 
-        for (Block block : placedBlocks) {
-            Location center = block.getLocation().add(0.5, 0.5, 0.5);
-            block.getWorld().spawnParticle(Particle.END_ROD, center, 1, 0.15, 0.2, 0.15, 0.0);
+        tickCounter++;
+
+        for (int i = 0; i < placedBlocks.size(); i++) {
+            if ((i + tickCounter) % 4 != 0) continue;
+
+            Block block = placedBlocks.get(i);
+            Location blockCenter = block.getLocation().add(0.5, 0.5, 0.5);
+            block.getWorld().spawnParticle(Particle.END_ROD, blockCenter, 1, 0.15, 0.2, 0.15, 0.0);
         }
 
         return false;
@@ -193,11 +210,11 @@ public class PhaseWallStructure extends PlacedStructure implements DestructibleS
         StructureBlockRegistry.releaseAll(this);
         placedBlocks.clear();
         lastPhaseAt.clear();
+        walls.clear();
 
-        if (getLocation().getWorld() != null) {
-            getLocation().getWorld().spawnParticle(Particle.POOF,
-                    getLocation().clone().add(0.5, height / 2.0, 0.5), 20, 0.5, height / 2.0, 0.5, 0.02);
-            getLocation().getWorld().playSound(getLocation(), Sound.BLOCK_GLASS_BREAK, 0.8f, 1.4f);
+        if (center.getWorld() != null) {
+            center.getWorld().spawnParticle(Particle.POOF, center, 40, 1.2, height / 2.0, 1.2, 0.02);
+            center.getWorld().playSound(center, Sound.BLOCK_GLASS_BREAK, 1.0f, 1.4f);
         }
     }
 
@@ -206,8 +223,8 @@ public class PhaseWallStructure extends PlacedStructure implements DestructibleS
         if (!canHit(attacker)) return false;
 
         remainingHits--;
-        getLocation().getWorld().spawnParticle(Particle.CRIT, getLocation().clone().add(0.5, 1.5, 0.5), 10);
-        getLocation().getWorld().playSound(getLocation(), Sound.BLOCK_GLASS_HIT, 1f, 1f);
+        center.getWorld().spawnParticle(Particle.CRIT, center, 16, 0.8, 0.8, 0.8, 0.05);
+        center.getWorld().playSound(center, Sound.BLOCK_GLASS_HIT, 1f, 1f);
 
         return remainingHits <= 0;
     }

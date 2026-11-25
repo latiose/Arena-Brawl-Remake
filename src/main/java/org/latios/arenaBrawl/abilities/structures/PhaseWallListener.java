@@ -6,8 +6,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 /**
- * Lets allies walk through a {@link PhaseWallStructure} by mirroring their movement to the other
- * side of the wall. Enemies are stopped by the solid blocks and never reach this listener.
+ * Lets allies phase through the walls of a {@link PhaseWallStructure} by mirroring their movement
+ * to the other side. Enemies are stopped by the solid blocks and ignored by the structure.
  */
 public class PhaseWallListener implements Listener {
 

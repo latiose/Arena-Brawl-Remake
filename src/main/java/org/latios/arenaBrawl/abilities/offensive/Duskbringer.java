@@ -20,10 +20,7 @@ import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.team.TeamManager;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class Duskbringer implements Ability {
 
@@ -40,7 +37,7 @@ public class Duskbringer implements Ability {
     private final double trailRadius;
     private final int speedAmplifier;
     private final long speedBuffMs;
-
+    private final Map<UUID, Set<BukkitRunnable>> activeTasks = new HashMap<>();
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
@@ -89,18 +86,14 @@ public class Duskbringer implements Ability {
         final Location start = player.getLocation().clone();
         final Vector aim = direction.clone();
         final double pathLength = computePathLength(start, aim);
-
-        if (trailTask != null) {
-            trailTask.cancel();
-            trailTask = null;
-        }
+        final UUID casterId = player.getUniqueId();
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ILLUSIONER_CAST_SPELL, 1.0f, 0.7f);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, 0.8f);
 
         final long trailTicks = Math.max(1L, trailDurationMs / 50L);
 
-        trailTask = new BukkitRunnable() {
+        BukkitRunnable task = new BukkitRunnable() {
             double bladeDistance = 0;
             long ticks = 0;
             final Set<UUID> hit = new HashSet<>();
@@ -109,8 +102,7 @@ public class Duskbringer implements Ability {
             public void run() {
                 if (ticks >= trailTicks || !player.isOnline() || player.isDead()
                         || player.getGameMode() == GameMode.SPECTATOR) {
-                    trailTask = null;
-                    cancel();
+                    finish(casterId, this);
                     return;
                 }
 
@@ -130,9 +122,20 @@ public class Duskbringer implements Ability {
                 }
             }
         };
-        trailTask.runTaskTimer(plugin, 0L, 1L);
+
+        activeTasks.computeIfAbsent(casterId, k -> new HashSet<>()).add(task);
+        task.runTaskTimer(plugin, 0L, 1L);
 
         return true;
+    }
+
+    private void finish(UUID id, BukkitRunnable task) {
+        task.cancel();
+        Set<BukkitRunnable> set = activeTasks.get(id);
+        if (set != null) {
+            set.remove(task);
+            if (set.isEmpty()) activeTasks.remove(id);
+        }
     }
 
     private double computePathLength(Location start, Vector direction) {

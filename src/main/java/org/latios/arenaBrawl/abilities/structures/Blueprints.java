@@ -96,13 +96,15 @@ public class Blueprints {
         return new StructureBlueprint(offsets);
     }
 
-    public static StructureBlueprint defaultPhaseWall() {
+    public static StructureBlueprint defaultPhaseCage() {
         List<StructureBlueprint.BlockOffset> offsets = new ArrayList<>();
 
-        // Five blocks wide, three blocks high, one block thick.
         for (int y = 0; y <= 2; y++) {
-            for (int z = -2; z <= 2; z++) {
-                offsets.add(new StructureBlueprint.BlockOffset(0, y, z, Material.GLASS));
+            for (int x = -2; x <= 2; x++) {
+                for (int z = -2; z <= 2; z++) {
+                    if (Math.abs(x) != 2 && Math.abs(z) != 2) continue;
+                    offsets.add(new StructureBlueprint.BlockOffset(x, y, z, Material.GLASS));
+                }
             }
         }
 

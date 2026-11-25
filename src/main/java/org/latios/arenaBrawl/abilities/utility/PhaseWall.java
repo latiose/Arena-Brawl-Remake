@@ -15,7 +15,6 @@ import org.latios.arenaBrawl.abilities.structures.PhaseWallStructure;
 import org.latios.arenaBrawl.abilities.structures.StructureBlueprint;
 import org.latios.arenaBrawl.abilities.structures.StructureManager;
 import org.latios.arenaBrawl.abilities.structures.StructureUtils;
-import org.latios.arenaBrawl.abilities.structures.WallOfVinesStructure;
 import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
@@ -23,8 +22,8 @@ import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 import java.util.List;
 
 /**
- * Builds a temporary wall that only allies can cross. Enemies collide with the wall, while
- * allies phase to the other side when they walk into it.
+ * Summons a temporary cage that only allies can cross. Enemies inside are trapped by the solid
+ * walls, while allies phase through any of the four sides.
  */
 public class PhaseWall implements Ability {
 
@@ -42,7 +41,7 @@ public class PhaseWall implements Ability {
         this.cooldownMs = config.getLong("cooldown-ms", 35000L);
         this.durationMs = config.getLong("duration-ms", 5000L);
         this.hitsToDestroy = config.getInt("hits-to-destroy", 6);
-        this.maxRange = config.getDouble("max-range", 5.0);
+        this.maxRange = config.getDouble("max-range", 15.0);
 
         this.cost = new CooldownCost(cooldownManager, "phasewall", cooldownMs, upgradeManager);
         this.structureManager = structureManager;
@@ -61,16 +60,17 @@ public class PhaseWall implements Ability {
 
     @Override
     public String getDescription() {
-        return "Builds a wall that only your team can walk through. Enemies collide with it, "
-                + "but allies phase to the other side. Can be destroyed with melee attacks.";
+        return "Summons a cage of spectral glass at a targeted location. Allies can phase through "
+                + "its walls, while enemies are trapped inside and must break it with melee attacks.";
     }
 
     @Override
     public List<AbilityStat> getStats() {
         return List.of(
                 new AbilityStat("Duration", (durationMs / 1000L) + "s"),
-                new AbilityStat("Size", "5x3 blocks"),
+                new AbilityStat("Size", "5x5x3 cage"),
                 new AbilityStat("Melee hits to destroy", String.valueOf(hitsToDestroy)),
+                new AbilityStat("Range", (int) maxRange + " blocks"),
                 new AbilityStat("Cooldown", (cooldownMs / 1000L) + "s")
         );
     }
@@ -85,15 +85,14 @@ public class PhaseWall implements Ability {
         }
 
         Location placementLocation = targetBlock.getRelative(BlockFace.UP).getLocation();
-        StructureBlueprint blueprint = Blueprints.defaultPhaseWall();
-        BlockFace facing = WallOfVinesStructure.getPlayerFacing(player);
+        StructureBlueprint blueprint = Blueprints.defaultPhaseCage();
 
-        if (!StructureUtils.isSpaceClearForBlueprint(placementLocation, facing, blueprint)) {
+        if (!StructureUtils.isSpaceClearForCage(placementLocation, blueprint)) {
             player.sendMessage(MessageUtils.noValidBlock());
             return false;
         }
 
-        PhaseWallStructure structure = new PhaseWallStructure(player, placementLocation, blueprint, facing,
+        PhaseWallStructure structure = new PhaseWallStructure(player, placementLocation, blueprint,
                 teamManager, durationMs, hitsToDestroy);
         structureManager.register(structure);
 

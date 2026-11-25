@@ -1286,7 +1286,7 @@ ability-values:
     cooldown-ms: 35000
     duration-ms: 5000
     hits-to-destroy: 6
-    max-range: 5.0
+    max-range: 15.0
 
   aegisscreen:
     cooldown-ms: 35000

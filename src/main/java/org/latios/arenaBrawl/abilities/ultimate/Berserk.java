@@ -7,6 +7,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -90,8 +91,7 @@ public class Berserk implements Ability {
         BERSERK_ACTIVE_PLAYERS.add(uuid);
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 10.0f, 0.8f);
-        spawnFlameRings(player);
-        spawnLavaRing(player);
+        spawnAuraCylinder(player);
 
         new BukkitRunnable() {
             int secondsElapsed = 0;
@@ -116,7 +116,6 @@ public class Berserk implements Ability {
                     return;
                 }
 
-                spawnLavaRing(player);
                 secondsElapsed++;
             }
         }.runTaskTimer(plugin, 0L, 20L);
@@ -124,18 +123,28 @@ public class Berserk implements Ability {
         return true;
     }
 
-    private void spawnLavaRing(Player player) {
+    private void spawnAuraCylinder(Player player) {
         Location loc = player.getLocation();
-        int points = 20;
+        World world = loc.getWorld();
+        int circleCount = 12;
+        int pointsPerCircle = 24;
         double radius = 1.0;
 
-        for (int i = 0; i < points; i++) {
-            double angle = (2 * Math.PI / points) * i;
-            double x = Math.cos(angle) * radius;
-            double z = Math.sin(angle) * radius;
+        double minHeight = 0.1;
+        double maxHeight = 2.1;
+        double heightStep = (maxHeight - minHeight) / (circleCount - 1);
 
-            Location particleLoc = loc.clone().add(x, 0.2, z);
-            player.getWorld().spawnParticle(Particle.LAVA, particleLoc, 3, 0, 0, 0, 0);
+        for (int i = 0; i < circleCount; i++) {
+            double yOffset = minHeight + (i * heightStep);
+
+            for (int j = 0; j < pointsPerCircle; j++) {
+                double angle = (2 * Math.PI / pointsPerCircle) * j;
+                Location p = loc.clone().add(Math.cos(angle) * radius, yOffset, Math.sin(angle) * radius);
+                world.spawnParticle(Particle.FLAME, p, 1, 0, 0, 0, 0);
+                if (j % 4 == 0) {
+                    world.spawnParticle(Particle.LAVA, p, 1, 0, 0, 0, 0);
+                }
+            }
         }
     }
 
@@ -153,29 +162,5 @@ public class Berserk implements Ability {
                 new AbilityStat("Charge Time", (chargeTimeMillis / 1000) + "s"),
                 new AbilityStat("Uses", "1 per match")
         );
-    }
-
-    private void spawnFlameRings(Player player) {
-        Location loc = player.getLocation();
-        int circleCount = 8;
-        int pointsPerCircle = 15;
-        double radius = 1.3;
-
-        double minHeight = 0.2;
-        double maxHeight = 2.2;
-        double heightStep = (maxHeight - minHeight) / (circleCount - 1);
-
-        for (int i = 0; i < circleCount; i++) {
-            double yOffset = minHeight + (i * heightStep);
-
-            for (int j = 0; j < pointsPerCircle; j++) {
-                double angle = (2 * Math.PI / pointsPerCircle) * j;
-                double x = Math.cos(angle) * radius;
-                double z = Math.sin(angle) * radius;
-
-                Location particleLoc = loc.clone().add(x, yOffset, z);
-                player.getWorld().spawnParticle(Particle.FLAME, particleLoc, 1, 0, 0, 0, 0);
-            }
-        }
     }
 }
