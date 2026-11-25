@@ -120,6 +120,8 @@ public class AbilityIconRegistry {
         icons.put("frenzy", Material.POTION);
         icons.put("metallicshove", Material.IRON_BLOCK);
         icons.put("phantomundertow", Material.SOUL_TORCH);
+        icons.put("lightningrush", Material.FIREWORK_STAR);
+        icons.put("purify", Material.MILK_BUCKET);
 
         // --- SUPPORT ---
         icons.put("holywater", Material.POTION);
@@ -166,6 +168,7 @@ public class AbilityIconRegistry {
         icons.put("tide", Material.PRISMARINE_CRYSTALS);
         icons.put("caretakershrine", Material.GLOW_BERRIES);
         icons.put("safeguard", Material.FEATHER);
+        icons.put("laststand", Material.NETHERITE_CHESTPLATE);
 
         // --- ULTIMATE ---
         icons.put("shieldwall", Material.SHIELD);

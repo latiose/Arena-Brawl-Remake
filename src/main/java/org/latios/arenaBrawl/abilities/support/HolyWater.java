@@ -10,6 +10,7 @@ import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.latios.arenaBrawl.abilities.Ability;
+import org.latios.arenaBrawl.abilities.UsableWhileDisabled;
 import org.latios.arenaBrawl.abilities.AbilityCost;
 import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
@@ -22,7 +23,7 @@ import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
 import java.util.List;
 
-public class HolyWater implements Ability {
+public class HolyWater implements Ability, UsableWhileDisabled {
 
     private final long cooldownMs;
     private final double selfHeal;

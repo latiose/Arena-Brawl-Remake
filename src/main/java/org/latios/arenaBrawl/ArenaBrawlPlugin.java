@@ -94,6 +94,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
     private CombatService combatService;
     private OrbitShieldManager orbitShieldManager;
     private DamageBuffManager damageBuffManager;
+    private PowerupPreferenceManager powerupPreferenceManager;
     private LobbyScoreboardManager lobbyScoreboardManager;
     private StatsManager statsManager;
     private NametagManager nametagManager;
@@ -195,6 +196,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.armorTierManager = new ArmorTierManager(ratingManager);
         this.swordSelectionManager = new SwordSelectionManager(this);
         this.abilityPersistenceManager = new AbilityPersistenceManager(this);
+        this.powerupPreferenceManager = new PowerupPreferenceManager(this);
         this.keyManager = new KeyManager(this, statsManager);
         this.nametagManager = new NametagManager(teamManager, playerHealthManager);
         this.leaderboardSignManager = new LeaderboardSignManager(ratingManager, abilityPersistenceManager, abilityRegistry);
@@ -212,7 +214,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         this.swordSelectorGUI = new SwordSelectorGUI(swordSelectionManager);
         this.hitEffectSelectorGUI = new HitEffectSelectorGUI(cosmeticEffectManager, statsManager);
         this.killEffectSelectorGUI = new KillEffectSelectorGUI(cosmeticEffectManager, statsManager);
-        this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager, runeSelectionManager,runeConfigManager,abilityIconRegistry,cosmeticEffectManager);
+        this.abilitySelectorGUI = new AbilitySelectorGUI(abilityRegistry, abilitySelectionManager, runeSelectionManager,runeConfigManager,abilityIconRegistry,cosmeticEffectManager,powerupPreferenceManager);
         this.magicChestManager = new MagicChestManager(statsManager, hatRegistry, hatSelectionManager, swordSelectionManager);
         this.magicChestGUI = new MagicChestGUI(keyManager, statsManager,clickModeManager);
         this.arenaChallengerGUI = new ArenaChallengerGUI(keyManager, statsManager);
@@ -342,7 +344,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                         combatService, cooldownManager, matchManager, orbitShieldManager, runeManager,hatPhraseListener,combatUpgradeManager), this
         );
         getServer().getPluginManager().registerEvents(
-                new AbilitySelectionLoadListener(abilitySelectionManager,runeSelectionManager,hatSelectionManager,keyManager,combatUpgradeManager,matchManager,swordSelectionManager,cosmeticEffectManager), this
+                new AbilitySelectionLoadListener(abilitySelectionManager,runeSelectionManager,hatSelectionManager,keyManager,combatUpgradeManager,matchManager,swordSelectionManager,cosmeticEffectManager,powerupPreferenceManager), this
         );
         getServer().getPluginManager().registerEvents(
                 new NaturalRegenListener(), this
@@ -391,7 +393,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new QueueGUIListener(queueManager, queueGUI), this);
         getServer().getPluginManager().registerEvents(new QueueSignListener(queueManager, matchManager), this);
         getServer().getPluginManager().registerEvents(
-                new AbilitySelectorListener(abilityRegistry, abilitySelectionManager, abilitySelectorGUI, runeSelectionManager,hatSelectorGUI,combatUpgradeGUI,swordSelectorGUI,hitEffectSelectorGUI,killEffectSelectorGUI), this
+                new AbilitySelectorListener(abilityRegistry, abilitySelectionManager, abilitySelectorGUI, runeSelectionManager,hatSelectorGUI,combatUpgradeGUI,swordSelectorGUI,hitEffectSelectorGUI,killEffectSelectorGUI,powerupPreferenceManager), this
         );
         getServer().getPluginManager().registerEvents(
                 new SwordSelectorListener(swordSelectorGUI, swordSelectionManager), this
@@ -424,7 +426,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
         new OrbitShieldOrbitTask(orbitShieldManager).runTaskTimer(this, 0L, 1L);
         new OrbitShieldSoundTask(orbitShieldManager).runTaskTimer(this, 0L, 20L);
         Bukkit.getScheduler().runTaskTimer(this, () -> {shieldManager.tick();;}, 0L, 1L);
-        new PowerupTask(matchManager, playerHealthManager, damageBuffManager).runTaskTimer(this, 20L, 0L);
+        new PowerupTask(matchManager, playerHealthManager, damageBuffManager, energyModifierManager).runTaskTimer(this, 20L, 0L);
         new PowerupRotationTask(matchManager).runTaskTimer(this, 0L, 2L);
         new MatchTimerTask(matchManager).runTaskTimer(this, 20L, 20L);
         new NametagUpdateTask(matchManager, nametagManager).runTaskTimer(this, 0L, 4L);
@@ -477,6 +479,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
             runeSelectionManager.loadForPlayer(online);
             swordSelectionManager.loadForPlayer(online);
             cosmeticEffectManager.loadForPlayer(online);
+            powerupPreferenceManager.loadForPlayer(online);
         }
         structureManager.clearAll();
         getLogger().info("ArenaBrawl on.");
@@ -523,6 +526,10 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
 
     public EnergyManager getEnergyManager() {
         return energyManager;
+    }
+
+    public PowerupPreferenceManager getPowerupPreferenceManager() {
+        return powerupPreferenceManager;
     }
 
 }

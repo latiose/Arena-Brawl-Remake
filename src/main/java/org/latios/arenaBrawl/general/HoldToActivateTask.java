@@ -6,6 +6,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.latios.arenaBrawl.abilities.Ability;
 import org.latios.arenaBrawl.abilities.AbilityManager;
 import org.latios.arenaBrawl.abilities.AbilitySlot;
+import org.latios.arenaBrawl.abilities.UsableWhileDisabled;
 import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.MatchManager;
@@ -77,22 +78,23 @@ public class HoldToActivateTask extends BukkitRunnable {
                 continue;
             }
 
-            if (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)
+            Ability ability = abilityManager.getAbility(player, AbilitySlot.OFFENSIVE);
+            if (ability == null) {
+                pendingClicks.remove(uuid);
+                continue;
+            }
+
+            if (!(ability instanceof UsableWhileDisabled)
+                    && (debuffManager.hasDebuff(player, DebuffType.POLYMORPH)
                     || debuffManager.hasDebuff(player, DebuffType.STUN)
                     || debuffManager.hasDebuff(player, DebuffType.SLEEP)
-                    || debuffManager.hasDebuff(player, DebuffType.SILENCE)) {
+                    || debuffManager.hasDebuff(player, DebuffType.SILENCE))) {
                 pendingClicks.remove(uuid);
                 continue;
             }
 
             long interval = isHold ? HOLD_INTERVAL_TICKS : CLICK_INTERVAL_TICKS;
             if (currentTick - lastActivation.getOrDefault(uuid, Long.MIN_VALUE / 2) < interval) {
-                continue;
-            }
-
-            Ability ability = abilityManager.getAbility(player, AbilitySlot.OFFENSIVE);
-            if (ability == null) {
-                pendingClicks.remove(uuid);
                 continue;
             }
 

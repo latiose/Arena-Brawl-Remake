@@ -30,6 +30,21 @@ public class EnergyModifierManager {
                 .put(id, new ModifierEntry(multiplier, durationMillis));
     }
 
+    /** Whether the given modifier is currently active (not expired). */
+    public boolean hasModifier(Player player, String id) {
+        Map<String, ModifierEntry> map = activeModifiers.get(player.getUniqueId());
+        if (map == null) return false;
+
+        ModifierEntry entry = map.get(id);
+        if (entry == null) return false;
+
+        if (entry.isExpired()) {
+            map.remove(id);
+            return false;
+        }
+        return true;
+    }
+
     public double getTotalMultiplier(Player player) {
         Map<String, ModifierEntry> map = activeModifiers.get(player.getUniqueId());
         if (map == null || map.isEmpty()) return 1.0;

@@ -14,6 +14,7 @@ import org.latios.arenaBrawl.abilities.*;
 import org.latios.arenaBrawl.cosmetics.CosmeticEffectManager;
 import org.latios.arenaBrawl.cosmetics.HitEffectType;
 import org.latios.arenaBrawl.cosmetics.KillEffectType;
+import org.latios.arenaBrawl.powerups.PowerupPreferenceManager;
 import org.latios.arenaBrawl.runes.RuneConfig;
 import org.latios.arenaBrawl.runes.RuneConfigManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
@@ -37,6 +38,7 @@ public class AbilitySelectorGUI {
     public static final int UPGRADES_SLOT = 32;
     public static final int SWORDS_SLOT = 34;
     public static final int HIT_EFFECTS_SLOT = 20;
+    public static final int POWERUP_SLOT = 22;
     public static final int KILL_EFFECTS_SLOT = 24;
 
     private static final int ABILITY_ROW = 1;
@@ -50,16 +52,19 @@ public class AbilitySelectorGUI {
     private final RuneConfigManager runeConfigManager;
     private final AbilityIconRegistry abilityIconRegistry;
     private final CosmeticEffectManager cosmeticEffectManager;
+    private final PowerupPreferenceManager powerupPreferenceManager;
 
     public AbilitySelectorGUI(AbilityRegistry registry, AbilitySelectionManager selectionManager,
                               RuneSelectionManager runeSelectionManager, RuneConfigManager runeConfig,
-                              AbilityIconRegistry abilityIconRegistry, CosmeticEffectManager cosmeticEffectManager) {
+                              AbilityIconRegistry abilityIconRegistry, CosmeticEffectManager cosmeticEffectManager,
+                              PowerupPreferenceManager powerupPreferenceManager) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.runeSelectionManager = runeSelectionManager;
         this.runeConfigManager = runeConfig;
         this.abilityIconRegistry = abilityIconRegistry;
         this.cosmeticEffectManager = cosmeticEffectManager;
+        this.powerupPreferenceManager = powerupPreferenceManager;
     }
 
     public Ability createPreview(AbilitySlot slot, String id) {
@@ -276,6 +281,26 @@ public class AbilitySelectorGUI {
         ));
         killEffectItem.setItemMeta(killEffectMeta);
         inv.setItem(KILL_EFFECTS_SLOT, killEffectItem);
+
+        boolean energyPowerup = powerupPreferenceManager.usesEnergyPowerup(player);
+        ItemStack powerupItem = new ItemStack(
+                energyPowerup ? Material.DIAMOND_BLOCK : Material.REDSTONE_BLOCK);
+        ItemMeta powerupMeta = powerupItem.getItemMeta();
+        powerupMeta.setDisplayName(energyPowerup ? "§bEnergy Powerup" : "§cDamage Powerup");
+        powerupMeta.setLore(List.of(
+                "",
+                "§7Current: " + (energyPowerup ? "§bEnergy Powerup" : "§cDamage Powerup"),
+                "",
+                "§7Swap the damage powerup for an",
+                "§7energy powerup that grants §bx1.5 energy",
+                "§7for the same duration as the damage powerup.",
+                "",
+                "§7This choice only affects you.",
+                "",
+                "§eClick to switch"
+        ));
+        powerupItem.setItemMeta(powerupMeta);
+        inv.setItem(POWERUP_SLOT, powerupItem);
 
         player.openInventory(inv);
     }

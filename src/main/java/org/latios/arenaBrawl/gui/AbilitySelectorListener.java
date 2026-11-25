@@ -13,6 +13,7 @@ import org.latios.arenaBrawl.hats.HatSelectorGUI;
 import org.latios.arenaBrawl.cosmetics.HitEffectSelectorGUI;
 import org.latios.arenaBrawl.cosmetics.KillEffectSelectorGUI;
 import org.latios.arenaBrawl.cosmetics.SwordSelectorGUI;
+import org.latios.arenaBrawl.powerups.PowerupPreferenceManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeGUI;
@@ -31,9 +32,11 @@ public class AbilitySelectorListener implements Listener {
     private final SwordSelectorGUI swordSelectorGUI;
     private final HitEffectSelectorGUI hitEffectSelectorGUI;
     private final KillEffectSelectorGUI killEffectSelectorGUI;
+    private final PowerupPreferenceManager powerupPreferenceManager;
 
     public AbilitySelectorListener(AbilityRegistry registry, AbilitySelectionManager selectionManager, AbilitySelectorGUI gui, RuneSelectionManager runeManager, HatSelectorGUI hatSelectorGUI, CombatUpgradeGUI combatUpgradeGUI,SwordSelectorGUI swordSelectorGUI,
-                                   HitEffectSelectorGUI hitEffectSelectorGUI, KillEffectSelectorGUI killEffectSelectorGUI) {
+                                   HitEffectSelectorGUI hitEffectSelectorGUI, KillEffectSelectorGUI killEffectSelectorGUI,
+                                   PowerupPreferenceManager powerupPreferenceManager) {
         this.registry = registry;
         this.selectionManager = selectionManager;
         this.gui = gui;
@@ -43,6 +46,7 @@ public class AbilitySelectorListener implements Listener {
         this.swordSelectorGUI = swordSelectorGUI;
         this.hitEffectSelectorGUI = hitEffectSelectorGUI;
         this.killEffectSelectorGUI = killEffectSelectorGUI;
+        this.powerupPreferenceManager = powerupPreferenceManager;
     }
 
     @EventHandler
@@ -117,6 +121,14 @@ public class AbilitySelectorListener implements Listener {
             }
             if (rawSlot == AbilitySelectorGUI.KILL_EFFECTS_SLOT) {
                 killEffectSelectorGUI.open(player);
+                return;
+            }
+            if (rawSlot == AbilitySelectorGUI.POWERUP_SLOT) {
+                boolean energy = powerupPreferenceManager.toggle(player);
+                player.sendMessage(energy
+                        ? "§bPowerup set to: §b§lENERGY §7(x1.5 energy)"
+                        : "§cPowerup set to: §c§lDAMAGE §7(x1.5 damage)");
+                gui.openMainMenu(player);
                 return;
             }
 

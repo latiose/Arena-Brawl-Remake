@@ -1403,6 +1403,18 @@ ability-values:
     stun-duration-ms: 800
     return-timeout-ms: 3000
 
+  lightningrush:
+    cooldown-ms: 18000
+    duration-ms: 3000
+    speed-amplifier: 2
+    hit-radius: 1.6
+    stun-duration-ms: 1000
+
+  purify:
+    cooldown-ms: 26000
+    duration-ms: 4000
+    radius: 8.0
+
   # --- SUPPORT ---
   holywater:
     cooldown-ms: 30000
@@ -1701,6 +1713,14 @@ ability-values:
     self-heal: 75.0
     max-range: 12.0
     stop-distance: 1.2
+
+  laststand:
+    cooldown-ms: 24000
+    duration-ms: 6000
+    damage-reduction: 0.30
+    heal-per-second-per-enemy: 25.0
+    radius: 8.0
+    tick-interval-ms: 1000
 
   # --- ULTIMATE ---
   shieldwall:

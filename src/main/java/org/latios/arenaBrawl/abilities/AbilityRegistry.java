@@ -224,6 +224,13 @@ public class AbilityRegistry {
         register(AbilitySlot.UTILITY, "phantomundertow",
                 deps -> new PhantomUndertow(plugin, deps.cooldownManager(), deps.teamManager(),
                         deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("phantomundertow")));
+        register(AbilitySlot.UTILITY, "lightningrush",
+                deps -> new LightningRush(plugin, deps.cooldownManager(), deps.teamManager(),
+                        deps.debuffManager(), deps.speedBuffManager(), deps.combatUpgradeManager(),
+                        configManager.get("lightningrush")));
+        register(AbilitySlot.UTILITY, "purify",
+                deps -> new Purify(plugin, deps.cooldownManager(), deps.teamManager(),
+                        deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("purify")));
 
 
         // --- SUPPORT ---
@@ -323,6 +330,10 @@ public class AbilityRegistry {
                 deps -> new Safeguard(deps.cooldownManager(), deps.teamManager(),
                         deps.playerHealthManager(), deps.combatUpgradeManager(),
                         configManager.get("safeguard")));
+        register(AbilitySlot.SUPPORT, "laststand",
+                deps -> new LastStand(plugin, deps.cooldownManager(), deps.teamManager(),
+                        deps.playerHealthManager(), deps.shieldManager(), deps.combatUpgradeManager(),
+                        configManager.get("laststand")));
 
         // --- ULTIMATE ---
         register(AbilitySlot.ULTIMATE, "shieldwall",

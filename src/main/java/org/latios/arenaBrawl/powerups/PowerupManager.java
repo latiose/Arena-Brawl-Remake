@@ -3,18 +3,22 @@ package org.latios.arenaBrawl.powerups;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Display;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Transformation;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
+import org.latios.arenaBrawl.ArenaBrawlPlugin;
 import org.latios.arenaBrawl.general.EntityCleanupUtils;
 
 import java.util.*;
@@ -30,17 +34,34 @@ public class PowerupManager {
         List<Location> locations = List.of();
         ItemDisplay itemEntity;
         TextDisplay hologramEntity;
+        ItemDisplay energyItemEntity;
+        TextDisplay energyHologramEntity;
         Location spawnedAt;
         double rotationAngle = 0.0;
         long lastHandledCycleStart = -1;
         boolean pickedUpThisWindow = false;
         long spawnTimeInCycle = -1;
+        /**
+         * Whether each viewer is currently seeing the energy variant. Keyed by
+         * the Player instance rather than the UUID so a player who reconnects
+         * (a new entity/connection) is synced again instead of seeing both
+         * variants stacked on top of each other.
+         */
+        final Map<Player, Boolean> viewingEnergy = new IdentityHashMap<>();
     }
 
     private final Map<PowerupType, PowerupState> states = new EnumMap<>(PowerupType.class);
     private final Random random = new Random();
+    private final PowerupPreferenceManager preferenceManager;
 
     public PowerupManager() {
+        this(ArenaBrawlPlugin.getInstance() != null
+                ? ArenaBrawlPlugin.getInstance().getPowerupPreferenceManager()
+                : null);
+    }
+
+    public PowerupManager(PowerupPreferenceManager preferenceManager) {
+        this.preferenceManager = preferenceManager;
         for (PowerupType type : PowerupType.values()) {
             states.put(type, new PowerupState());
         }
@@ -96,7 +117,7 @@ public class PowerupManager {
                 }
             }
 
-            boolean entityStillAlive = state.itemEntity != null && !state.itemEntity.isDead();
+            boolean entityStillAlive = isAlive(state.itemEntity) || isAlive(state.energyItemEntity);
 
             if (!entityStillAlive && !state.pickedUpThisWindow && state.spawnTimeInCycle != -1) {
                 if (cyclePosition >= state.spawnTimeInCycle && schedule.isWithinWindow(cyclePosition)) {
@@ -111,15 +132,33 @@ public class PowerupManager {
     }
 
     public void tickRotation() {
-        for (PowerupState state : states.values()) {
-            if (state.itemEntity == null || state.itemEntity.isDead()) continue;
+        for (Map.Entry<PowerupType, PowerupState> entry : states.entrySet()) {
+            PowerupType type = entry.getKey();
+            PowerupState state = entry.getValue();
+
+            boolean hasDisplay = isAlive(state.itemEntity) || isAlive(state.energyItemEntity);
+            if (!hasDisplay) continue;
 
             state.rotationAngle += ROTATION_SPEED_PER_TICK;
+            applyRotation(state.itemEntity, state.rotationAngle);
+            applyRotation(state.energyItemEntity, state.rotationAngle);
 
-            Transformation transformation = state.itemEntity.getTransformation();
-            transformation.getLeftRotation().identity().rotateY((float) state.rotationAngle);
-            state.itemEntity.setTransformation(transformation);
+            if (state.spawnedAt != null) {
+                syncVisibility(type, state);
+            }
         }
+    }
+
+    private boolean isAlive(ItemDisplay display) {
+        return display != null && !display.isDead();
+    }
+
+    private void applyRotation(ItemDisplay display, double angle) {
+        if (!isAlive(display)) return;
+
+        Transformation transformation = display.getTransformation();
+        transformation.getLeftRotation().identity().rotateY((float) angle);
+        display.setTransformation(transformation);
     }
 
     private void spawn(PowerupType type, PowerupState state) {
@@ -127,8 +166,34 @@ public class PowerupManager {
         World world = location.getWorld();
         if (world == null) return;
 
+        state.itemEntity = null;
+        state.hologramEntity = null;
+        state.energyItemEntity = null;
+        state.energyHologramEntity = null;
+        state.viewingEnergy.clear();
+
+        spawnDisplay(type, location, state, false);
+
+        // The damage powerup has a personal energy variant that shares the
+        // same spawn point, schedule and pickup: only the visuals change.
+        if (type == PowerupType.DAMAGE) {
+            spawnDisplay(PowerupType.ENERGY, location, state, true);
+        }
+
+        state.spawnedAt = location;
+        state.rotationAngle = 0.0;
+
+        sendSpawnMessage(type, world);
+        scheduleInitialVisibility(type, state);
+    }
+
+    private void spawnDisplay(PowerupType visualType, Location location, PowerupState state,
+                              boolean energyVariant) {
+        World world = location.getWorld();
+        if (world == null) return;
+
         ItemDisplay itemDisplay = world.spawn(location, ItemDisplay.class, d -> {
-            d.setItemStack(new ItemStack(type.getMaterial()));
+            d.setItemStack(new ItemStack(visualType.getMaterial()));
             d.setBillboard(Display.Billboard.FIXED);
             d.setTransformation(new Transformation(
                     new Vector3f(0, 0, 0),
@@ -138,12 +203,9 @@ public class PowerupManager {
             ));
         });
 
-        NamedTextColor color = type == PowerupType.HEALTH ? NamedTextColor.GREEN : NamedTextColor.RED;
-        String label = type == PowerupType.HEALTH ? "HEALING" : "DAMAGE";
-
         Location hologramLoc = location.clone().add(0, HOLOGRAM_HEIGHT_OFFSET, 0);
         TextDisplay hologram = world.spawn(hologramLoc, TextDisplay.class, d -> {
-            d.text(Component.text(label, color));
+            d.text(Component.text(visualType.getLabel(), visualType.getColor()));
             d.setBillboard(Display.Billboard.CENTER);
             d.setSeeThrough(false);
             d.setShadowed(true);
@@ -152,19 +214,103 @@ public class PowerupManager {
 
         EntityCleanupUtils.markAsArenaEntity(itemDisplay);
         EntityCleanupUtils.markAsArenaEntity(hologram);
-        state.itemEntity = itemDisplay;
-        state.hologramEntity = hologram;
-        state.spawnedAt = location;
-        state.rotationAngle = 0.0;
 
-        NamedTextColor themeColor = type == PowerupType.HEALTH ? NamedTextColor.GREEN : NamedTextColor.RED;
+        if (energyVariant) {
+            state.energyItemEntity = itemDisplay;
+            state.energyHologramEntity = hologram;
+        } else {
+            state.itemEntity = itemDisplay;
+            state.hologramEntity = hologram;
+        }
+    }
 
-        Component spawnMessage = Component.text("The ", NamedTextColor.YELLOW)
-                .append(Component.text(type.getDisplayName(), themeColor, TextDecoration.BOLD))
-                .append(Component.text(" has spawned!", NamedTextColor.YELLOW));
-
+    private void sendSpawnMessage(PowerupType type, World world) {
         for (Player player : world.getPlayers()) {
+            PowerupType visual = getVisualType(type, player);
+            Component spawnMessage = Component.text("The ", NamedTextColor.YELLOW)
+                    .append(Component.text(visual.getDisplayName(), visual.getColor(), TextDecoration.BOLD))
+                    .append(Component.text(" has spawned!", NamedTextColor.YELLOW));
             player.sendMessage(spawnMessage);
+        }
+    }
+
+    /**
+     * The powerup each player should see/hear about. Only the damage powerup
+     * has a personal energy variant; every other type is unchanged.
+     */
+    public PowerupType getVisualType(PowerupType type, Player player) {
+        if (type == PowerupType.DAMAGE && preferenceManager != null
+                && preferenceManager.usesEnergyPowerup(player)) {
+            return PowerupType.ENERGY;
+        }
+        return type;
+    }
+
+    /**
+     * Entity tracking sends spawn packets during the world tick, which may
+     * happen after the first visibility sync. Re-applying once shortly after
+     * spawning makes sure the hidden variant never stays visible.
+     */
+    private void scheduleInitialVisibility(PowerupType type, PowerupState state) {
+        if (type != PowerupType.DAMAGE) return;
+
+        Plugin plugin = ArenaBrawlPlugin.getInstance();
+        if (plugin == null) return;
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (state.spawnedAt == null || state.energyItemEntity == null) return;
+            state.viewingEnergy.clear();
+            syncVisibility(type, state);
+        }, 2L);
+    }
+
+    private void syncVisibility(PowerupType type, PowerupState state) {
+        if (type != PowerupType.DAMAGE) return;
+        if (state.energyItemEntity == null || state.energyHologramEntity == null) return;
+
+        World world = state.spawnedAt != null ? state.spawnedAt.getWorld() : null;
+        if (world == null) return;
+
+        List<Player> viewers = world.getPlayers();
+        // Drop entries for players who left or changed worlds.
+        state.viewingEnergy.keySet().removeIf(player -> !player.isOnline() || !viewers.contains(player));
+
+        for (Player player : viewers) {
+            boolean energy = preferenceManager != null && preferenceManager.usesEnergyPowerup(player);
+            Boolean current = state.viewingEnergy.get(player);
+            if (current != null && current == energy) continue;
+
+            applyView(state, player, energy);
+            state.viewingEnergy.put(player, energy);
+        }
+    }
+
+    private void applyView(PowerupState state, Player player, boolean energy) {
+        Plugin plugin = ArenaBrawlPlugin.getInstance();
+        if (plugin == null) return;
+
+        if (energy) {
+            hide(player, plugin, state.itemEntity);
+            hide(player, plugin, state.hologramEntity);
+            show(player, plugin, state.energyItemEntity);
+            show(player, plugin, state.energyHologramEntity);
+        } else {
+            hide(player, plugin, state.energyItemEntity);
+            hide(player, plugin, state.energyHologramEntity);
+            show(player, plugin, state.itemEntity);
+            show(player, plugin, state.hologramEntity);
+        }
+    }
+
+    private void hide(Player player, Plugin plugin, Entity entity) {
+        if (entity != null) {
+            player.hideEntity(plugin, entity);
+        }
+    }
+
+    private void show(Player player, Plugin plugin, Entity entity) {
+        if (entity != null) {
+            player.showEntity(plugin, entity);
         }
     }
 
@@ -175,15 +321,22 @@ public class PowerupManager {
             }
         }
 
-        if (state.itemEntity != null) {
-            state.itemEntity.remove();
-            state.itemEntity = null;
-        }
-        if (state.hologramEntity != null) {
-            state.hologramEntity.remove();
-            state.hologramEntity = null;
-        }
+        remove(state.itemEntity);
+        state.itemEntity = null;
+        remove(state.hologramEntity);
+        state.hologramEntity = null;
+        remove(state.energyItemEntity);
+        state.energyItemEntity = null;
+        remove(state.energyHologramEntity);
+        state.energyHologramEntity = null;
+        state.viewingEnergy.clear();
         state.spawnedAt = null;
+    }
+
+    private void remove(Entity entity) {
+        if (entity != null) {
+            entity.remove();
+        }
     }
 
     public Map<PowerupType, Player> checkPickups(Collection<Player> players) {
@@ -192,7 +345,10 @@ public class PowerupManager {
         for (Map.Entry<PowerupType, PowerupState> entry : states.entrySet()) {
             PowerupState state = entry.getValue();
 
-            if (state.itemEntity == null || state.itemEntity.isDead() || state.spawnedAt == null) {
+            if (state.spawnedAt == null) {
+                continue;
+            }
+            if (!isAlive(state.itemEntity) && !isAlive(state.energyItemEntity)) {
                 continue;
             }
 
