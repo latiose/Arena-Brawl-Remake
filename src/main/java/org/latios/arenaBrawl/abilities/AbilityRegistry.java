@@ -240,6 +240,12 @@ public class AbilityRegistry {
         register(AbilitySlot.UTILITY, "glacialpath",
                 deps -> new GlacialPath(plugin, deps.cooldownManager(), deps.teamManager(),
                         deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("glacialpath")));
+        register(AbilitySlot.UTILITY, "luckystrikes",
+                deps -> new LuckyStrikes(deps.cooldownManager(), deps.runeManager(),
+                        deps.combatUpgradeManager(), configManager.get("luckystrikes")));
+        register(AbilitySlot.UTILITY, "flashback",
+                deps -> new Flashback(plugin, deps.cooldownManager(), deps.teamManager(),
+                        deps.debuffManager(), deps.combatUpgradeManager(), configManager.get("flashback")));
 
 
         // --- SUPPORT ---
@@ -432,6 +438,9 @@ public class AbilityRegistry {
         register(AbilitySlot.ULTIMATE, "unstoppableforce",
                 deps -> new UnstoppableForce(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
                         deps.combatService(), deps.debuffManager(), configManager.get("unstoppableforce")));
+        register(AbilitySlot.ULTIMATE, "paranoia",
+                deps -> new Paranoia(plugin, deps.cooldownManager(), deps.usageManager(), deps.teamManager(),
+                        deps.combatService(), deps.debuffManager(), deps.matchManager(), configManager.get("paranoia")));
 
 
         // --- DEFAULTS ---

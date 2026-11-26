@@ -125,6 +125,8 @@ public class AbilityIconRegistry {
         icons.put("lightningrush", Material.FIREWORK_STAR);
         icons.put("purify", Material.MILK_BUCKET);
         icons.put("glacialpath", Material.POWDER_SNOW_BUCKET);
+        icons.put("luckystrikes", Material.RABBIT_FOOT);
+        icons.put("flashback", Material.CLOCK);
 
         // --- SUPPORT ---
         icons.put("holywater", Material.POTION);
@@ -210,6 +212,7 @@ public class AbilityIconRegistry {
         icons.put("judgmentlance", Material.PRISMARINE_SHARD);
         icons.put("glacialstorm", Material.BLUE_ICE);
         icons.put("unstoppableforce", Material.DRIPSTONE_BLOCK);
+        icons.put("paranoia", Material.SCULK_SHRIEKER);
         icons.put("infernalghast", Material.GHAST_SPAWN_EGG);
         icons.put("caffeineshot", Material.SUGAR);
     }

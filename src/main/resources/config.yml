@@ -1442,6 +1442,17 @@ ability-values:
     immobilize-radius: 4.0
     immobilize-duration-ms: 1500
 
+  luckystrikes:
+    cooldown-ms: 40000
+    duration-ms: 6000
+    proc-multiplier: 1.5
+
+  flashback:
+    cooldown-ms: 30000
+    history-seconds: 6
+    radius: 4.0
+    immobilize-duration-ms: 1500
+
   # --- SUPPORT ---
   holywater:
     cooldown-ms: 30000
@@ -2009,6 +2020,15 @@ ability-values:
     damage: 350.0
     stun-duration-ms: 1500
     dash-ticks: 5
+
+  paranoia:
+    charge-time-millis: 60000
+    blindness-duration-ms: 4000
+    prime-window-ms: 6000
+    damage: 300.0
+    dash-ticks: 5
+    stop-distance: 1.2
+    max-range: 256.0
 
 rune-values:
   speed:

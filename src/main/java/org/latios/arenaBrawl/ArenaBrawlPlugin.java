@@ -292,7 +292,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 scavengerManager, skeletonEntityManager, swordSelectionManager,
                 cosmeticEffectManager, runeSelectionManager,
                 shadowCloakManager, soulLinkManager, guardianColossusEntityManager,
-                infernalGhastEntityManager, kingsGuardManager
+                infernalGhastEntityManager, kingsGuardManager, runeManager
         );
 
         this.queueManager = new QueueManager(this, partyManager, ratingManager, arenaManager, arenaMapManager);
@@ -331,7 +331,7 @@ public final class ArenaBrawlPlugin extends JavaPlugin implements Listener {
                 debuffManager, playerHealthManager, combatService, orbitShieldManager, combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,energyModifierManager,damageBuffManager,
                etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager,scavengerManager,skeletonEntityManager,
                shadowCloakManager,soulLinkManager,guardianColossusEntityManager,matchManager,kingsGuardManager,
-               infernalGhastEntityManager);
+               infernalGhastEntityManager, runeManager);
         abilityRegistry.setPreviewDependencies(abilityDependencies);
         abilitySelectorGUI.setPreviewDependencies(abilityDependencies);
 

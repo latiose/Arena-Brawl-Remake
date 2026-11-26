@@ -10,11 +10,16 @@ import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 public class RuneManager {
 
+    private record LuckyStrike(long until, double multiplier) {}
+    private static RuneManager instance;
     private final EnergyManager energyManager;
     private final RuneSelectionManager selectionManager;
     private final RuneConfigManager runeConfigManager;
@@ -23,10 +28,12 @@ public class RuneManager {
     private final SpeedBuffManager speedBuffManager;
     private final PlayerHealthManager healthManager;
     private final DamageVulnerabilityManager damageVulnerabilityManager;
+    private final Map<UUID, LuckyStrike> luckyStrikes = new HashMap<>();
     private CombatService combatService;
     private MatchManager matchManager;
-    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager, RuneConfigManager runeConfigManager, SpeedBuffManager speedBuffManager, PlayerHealthManager healthManager, DamageVulnerabilityManager damageVulnerabilityManager,
-                       CombatService combatService) {
+    public RuneManager(EnergyManager energyManager, RuneSelectionManager selectionManager, DebuffManager debuffManager,
+                       RuneConfigManager runeConfigManager, SpeedBuffManager speedBuffManager, PlayerHealthManager healthManager,
+                       DamageVulnerabilityManager damageVulnerabilityManager, CombatService combatService) {
         this.combatService = combatService;
         this.energyManager = energyManager;
         this.selectionManager = selectionManager;
@@ -35,8 +42,8 @@ public class RuneManager {
         this.speedBuffManager = speedBuffManager;
         this.healthManager = healthManager;
         this.damageVulnerabilityManager = damageVulnerabilityManager;
+        instance = this;
     }
-
     /**
      * Rolls the proc chance for whichever rune the attacker has equipped.
      * Returns the damage multiplier to apply to this hit (>1.0 if Rune of Damage procced, 1.0 otherwise).
@@ -49,7 +56,9 @@ public class RuneManager {
         }
         RuneConfig config = runeConfigManager.get(equipped.getConfigId());
 
-        double procChance = config.getDouble("proc-chance", getDefaultProcChance(equipped));
+        double procChance = Math.min(1.0,
+                config.getDouble("proc-chance", getDefaultProcChance(equipped))
+                        * getRuneProcMultiplier(attacker));
 
         if (random.nextDouble() >= procChance) {
             return 1.0; // did not proc
@@ -58,6 +67,32 @@ public class RuneManager {
         return applyRune(equipped, config, attacker, victim);
     }
 
+    public void grantLuckyStrikes(Player player, long durationMillis, double multiplier) {
+        luckyStrikes.put(player.getUniqueId(),
+                new LuckyStrike(System.currentTimeMillis() + durationMillis, multiplier));
+    }
+
+    public double getRuneProcMultiplier(Player player) {
+        LuckyStrike active = luckyStrikes.get(player.getUniqueId());
+        if (active == null) return 1.0;
+
+        if (System.currentTimeMillis() >= active.until()) {
+            luckyStrikes.remove(player.getUniqueId());
+            return 1.0;
+        }
+
+        return active.multiplier();
+    }
+
+    public static void clearLuckyStrikeStatic(Player player) {
+        if (player != null && instance != null) {
+            instance.clearLuckyStrike(player);
+        }
+    }
+
+    public void clearLuckyStrike(Player player) {
+        luckyStrikes.remove(player.getUniqueId());
+    }
     private double applyRune(RuneType rune, RuneConfig config, Player attacker, Player victim) {
 
         switch (rune) {
@@ -182,7 +217,9 @@ public class RuneManager {
         if (equipped != RuneType.THORNS) return;
 
         RuneConfig config = runeConfigManager.get(equipped.getConfigId());
-        double procChance = config.getDouble("proc-chance", getDefaultProcChance(equipped));
+        double procChance = Math.min(1.0,
+                config.getDouble("proc-chance", getDefaultProcChance(equipped))
+                        * getRuneProcMultiplier(victim));
         if (random.nextDouble() >= procChance) return;
 
         double reflectPercent = config.getDouble("reflect-percent", 20.0);

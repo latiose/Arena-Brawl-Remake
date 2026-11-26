@@ -31,6 +31,7 @@ import org.latios.arenaBrawl.hats.HatEquipUtils;
 import org.latios.arenaBrawl.hats.HatSelectionManager;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
 import org.latios.arenaBrawl.powerups.PowerupType;
+import org.latios.arenaBrawl.runes.RuneManager;
 import org.latios.arenaBrawl.runes.RuneSelectionManager;
 import org.latios.arenaBrawl.runes.RuneType;
 import org.latios.arenaBrawl.team.Team;
@@ -79,6 +80,7 @@ public class ArenaManager {
     private final SwordSelectionManager swordSelectionManager;
     private final CosmeticEffectManager cosmeticEffectManager;
     private final RuneSelectionManager runeSelectionManager;
+    private final RuneManager runeManager;
     private final ShadowCloakManager shadowCloakManager;
     private final SoulLinkManager soulLinkManager;
     private final GuardianColossusEntityManager guardianColossusEntityManager;
@@ -97,7 +99,8 @@ public class ArenaManager {
                         RuneSelectionManager runeSelectionManager, ShadowCloakManager shadowCloakManager,
                         SoulLinkManager soulLinkManager, GuardianColossusEntityManager guardianColossusEntityManager,
                         InfernalGhastEntityManager infernalGhastEntityManager,
-                        KingsGuardEntityManager kingsGuardEntityManager) {
+                        KingsGuardEntityManager kingsGuardEntityManager,
+                        RuneManager runeManager) {
         this.teamManager = teamManager;
         this.abilityManager = abilityManager;
         this.abilityRegistry = abilityRegistry;
@@ -140,6 +143,7 @@ public class ArenaManager {
         this.guardianColossusEntityManager = guardianColossusEntityManager;
         this.infernalGhastEntityManager = infernalGhastEntityManager;
         this.kingsGuardEntityManager = kingsGuardEntityManager;
+        this.runeManager = runeManager;
     }
 
     public void startMatch(Player p1, Player p2, Player p3, Player p4) {
@@ -214,7 +218,7 @@ public class ArenaManager {
         AbilityDependencies deps = new AbilityDependencies(cooldownManager, teamManager, usageManager, energyManager, shieldManager, debuffManager, playerHealthManager, combatService, orbitShieldManager,combatUpgradeManager,broodMotherEntityManager,structureManager,movementLockManager,songOfPowerManager,lifeLeechManager,demolitionService,
                 energyModifierManager,damageBuffManager,etherealBodyManager,damageVulnerabilityManager,speedBuffManager,zombieEntityManager,scavengerManager,skeletonEntityManager,
                 shadowCloakManager,soulLinkManager,guardianColossusEntityManager,matchManager,kingsGuardEntityManager,
-                infernalGhastEntityManager);
+                infernalGhastEntityManager, runeManager);
 
         for (Player player : allPlayers) {
             player.setCollidable(true);

@@ -21,6 +21,7 @@ import org.latios.arenaBrawl.debuffs.DebuffManager;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.*;
 import org.latios.arenaBrawl.powerups.DamageBuffManager;
+import org.latios.arenaBrawl.runes.RuneManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
 
@@ -54,5 +55,6 @@ public record AbilityDependencies(
         GuardianColossusEntityManager guardianColossusEntityManager,
         MatchManager matchManager,
         KingsGuardEntityManager kingsGuardManager,
-        InfernalGhastEntityManager infernalGhastEntityManager
+        InfernalGhastEntityManager infernalGhastEntityManager,
+        RuneManager runeManager
 ) {}

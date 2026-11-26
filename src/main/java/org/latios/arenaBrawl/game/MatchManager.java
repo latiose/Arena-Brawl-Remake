@@ -45,12 +45,7 @@ import org.latios.arenaBrawl.abilities.ultimate.UndyingRage;
 import org.latios.arenaBrawl.abilities.UsageManager;
 
 import org.latios.arenaBrawl.abilities.ultimate.ZombieEntityManager;
-import org.latios.arenaBrawl.abilities.utility.ScavengerManager;
-import org.latios.arenaBrawl.abilities.utility.ShadowCloakManager;
-import org.latios.arenaBrawl.abilities.utility.SleepDart;
-import org.latios.arenaBrawl.abilities.utility.SugarRush;
-import org.latios.arenaBrawl.abilities.utility.TauntingGlare;
-import org.latios.arenaBrawl.abilities.utility.Taunt;
+import org.latios.arenaBrawl.abilities.utility.*;
 import org.latios.arenaBrawl.cosmetics.ArmorTierManager;
 import org.latios.arenaBrawl.cosmetics.CosmeticEffectManager;
 import org.latios.arenaBrawl.cosmetics.SwordSelectionManager;
@@ -642,6 +637,7 @@ public class MatchManager {
         SleepDart.clear(player);
         SoulboundHealing.clear(player);
         TimeWarp.clear(player);
+        LuckyStrikes.clear(player);
         ThunderArmor.clear(player);
         TauntingGlare.clear(player);
         Premonition.clear(player);

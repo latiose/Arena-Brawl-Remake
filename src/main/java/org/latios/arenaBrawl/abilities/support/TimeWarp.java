@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.abilities.support;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -67,7 +68,7 @@ public class TimeWarp implements Ability {
 
             @Override
             public void run() {
-                if (!player.isOnline() || player.isDead()) {
+                if (!player.isOnline() || player.isDead() || player.getGameMode()== GameMode.SPECTATOR || !player.getWorld().equals(anchor.getWorld())) {
                     TimeWarp.cancel(player.getUniqueId());
                     return;
                 }
