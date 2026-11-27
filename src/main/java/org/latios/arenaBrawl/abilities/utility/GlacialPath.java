@@ -1,9 +1,6 @@
 package org.latios.arenaBrawl.abilities.utility;
 
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -33,7 +30,7 @@ public class GlacialPath implements Ability {
     private final double maxDistance;
     private final double immobilizeRadius;
     private final long immobilizeDurationMs;
-
+    private Location origin;
     private final CooldownCost delegate;
     private final AbilityCost cost;
     private final TeamManager teamManager;
@@ -137,6 +134,7 @@ public class GlacialPath implements Ability {
         final Vector step = direction.clone().multiply(speed);
 
         claw = player.getLocation().clone();
+        origin = claw.clone();
         traveled = 0;
         active = true;
         startedAt = System.currentTimeMillis();
@@ -161,8 +159,12 @@ public class GlacialPath implements Ability {
                     return;
                 }
 
-                claw.add(step);
-                traveled += speed;
+                Location next = nextClawPosition(claw, step);
+                if (next != null) {
+                    claw = next;
+                    traveled += speed;
+                }
+
                 drawClaw(claw);
 
                 if (traveled >= maxDistance) {
@@ -178,7 +180,7 @@ public class GlacialPath implements Ability {
             return false;
         }
 
-        Location destination = safeDestination(claw);
+        Location destination = resolveDestination();
         destination.setDirection(player.getLocation().getDirection());
 
         player.teleport(destination);
@@ -238,14 +240,55 @@ public class GlacialPath implements Ability {
         }
     }
 
-    private Location safeDestination(Location base) {
-        Location destination = base.clone();
+    private Location nextClawPosition(Location from, Vector step) {
+        Location flat = from.clone().add(step);
 
-        for (int i = 0; i < 4 && isBlocked(destination); i++) {
-            destination.add(0, 1, 0);
+        if (fits(flat)) {
+            Location result = flat;
+            for (int i = 0; i < 3; i++) {
+                Location lower = result.clone().add(0, -1, 0);
+                if (!fits(lower)) break;
+                result = lower;
+            }
+            return result;
         }
 
-        return destination;
+        Location raised = flat.clone().add(0, 1, 0);
+        return fits(raised) ? raised : null;
+    }
+
+    private Location resolveDestination() {
+        int[] verticalOffsets = {0, 1, 2};
+
+        for (double back = 0; back <= traveled; back += speed) {
+            Location base = claw.clone().subtract(direction.clone().multiply(back));
+            for (int dy : verticalOffsets) {
+                Location candidate = base.clone().add(0, dy, 0);
+                if (fits(candidate)) return candidate;
+            }
+        }
+        return origin.clone();
+    }
+
+    /** True if a player-sized body (0.6 x 1.8) at this location doesn't overlap any solid block. */
+    private boolean fits(Location loc) {
+        World world = loc.getWorld();
+        if (world == null) return false;
+
+        double[] horizontal = {-0.3, 0.0, 0.3};
+        double[] heights = {0.0, 0.9, 1.79};
+
+        for (double dx : horizontal) {
+            for (double dz : horizontal) {
+                for (double h : heights) {
+                    int bx = (int) Math.floor(loc.getX() + dx);
+                    int by = (int) Math.floor(loc.getY() + h);
+                    int bz = (int) Math.floor(loc.getZ() + dz);
+                    if (!world.getBlockAt(bx, by, bz).isPassable()) return false;
+                }
+            }
+        }
+        return true;
     }
 
     private boolean isBlocked(Location location) {

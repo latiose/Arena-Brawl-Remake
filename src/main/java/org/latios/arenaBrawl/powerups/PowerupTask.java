@@ -1,5 +1,6 @@
 package org.latios.arenaBrawl.powerups;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
@@ -9,7 +10,10 @@ import org.latios.arenaBrawl.game.Match;
 import org.latios.arenaBrawl.game.MatchManager;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class PowerupTask extends BukkitRunnable {
 
@@ -19,12 +23,14 @@ public class PowerupTask extends BukkitRunnable {
     private static final double ENERGY_MULTIPLIER = 1.5;
     private static final long ENERGY_DURATION_MILLIS = DAMAGE_DURATION_MILLIS;
     private static final String ENERGY_MODIFIER_ID = "energy_powerup";
+    private static final long ENERGY_PARTICLE_INTERVAL_MILLIS = 1_000L;
 
     private final MatchManager matchManager;
     private final PlayerHealthManager healthManager;
     private final DamageBuffManager damageBuffManager;
     private final EnergyModifierManager energyModifierManager;
-    private long lastParticleSecond = -1L;
+    /** Last one-second particle step shown to each buffed player. */
+    private final Map<UUID, Integer> energyParticleStep = new HashMap<>();
 
     public PowerupTask(MatchManager matchManager, PlayerHealthManager healthManager,
                        DamageBuffManager damageBuffManager,
@@ -38,9 +44,7 @@ public class PowerupTask extends BukkitRunnable {
     @Override
     public void run() {
         long now = System.currentTimeMillis();
-        long currentSecond = now / 1000L;
-        boolean particleTick = currentSecond != lastParticleSecond;
-        lastParticleSecond = currentSecond;
+        energyParticleStep.keySet().removeIf(id -> Bukkit.getPlayer(id) == null);
 
         for (Match match : matchManager.getActiveMatches()) {
             var players = match.getAllPlayers();
@@ -50,14 +54,7 @@ public class PowerupTask extends BukkitRunnable {
             PowerupManager powerupManager = match.getPowerupManager();
             powerupManager.tick(elapsed);
 
-            // Trail for players who currently have the energy buff.
-            if (particleTick) {
-                for (Player p : players) {
-                    if (p.isOnline() && energyModifierManager.hasModifier(p, ENERGY_MODIFIER_ID)) {
-                        spawnEnergyParticles(p);
-                    }
-                }
-            }
+            tickEnergyParticles(players);
 
             Map<PowerupType, Player> pickedUp = powerupManager.checkPickups(players);
             for (Map.Entry<PowerupType, Player> entry : pickedUp.entrySet()) {
@@ -114,17 +111,46 @@ public class PowerupTask extends BukkitRunnable {
     }
 
     /**
-     * Aqua sparks orbiting the player once per second while the energy
-     * powerup is active. Only the buffed player sees them, since the
-     * powerup is personal.
+     * Aqua sparks orbiting the player while the energy powerup is active.
+     * The rings are anchored to the buff itself (not to wall-clock seconds),
+     * so the visual covers the full 11 seconds instead of starting up to a
+     * second late and ending up to a second early.
      */
-    private void spawnEnergyParticles(Player player) {
+    private void tickEnergyParticles(Collection<Player> players) {
+        for (Player player : players) {
+            if (!player.isOnline()) continue;
+
+            UUID id = player.getUniqueId();
+            long remaining = energyModifierManager.getRemainingMillis(player, ENERGY_MODIFIER_ID);
+
+            if (remaining <= 0) {
+                Integer lastStep = energyParticleStep.remove(id);
+                if (lastStep != null) {
+                    // Closing pulse right as the buff runs out.
+                    spawnEnergyParticles(player, lastStep + 1);
+                }
+                continue;
+            }
+
+            long elapsed = ENERGY_DURATION_MILLIS - remaining;
+            int step = (int) (elapsed / ENERGY_PARTICLE_INTERVAL_MILLIS);
+            Integer lastStep = energyParticleStep.get(id);
+            if (lastStep == null || lastStep != step) {
+                energyParticleStep.put(id, step);
+                spawnEnergyParticles(player, step);
+            }
+        }
+    }
+
+    private void spawnEnergyParticles(Player player, int step) {
         Location base = player.getLocation().add(0, 1.0, 0);
         double radius = 0.65;
         int points = 8;
+        // Rotate the ring a little on every pulse so it reads as a live effect.
+        double phase = step * (Math.PI / 8);
 
         for (int i = 0; i < points; i++) {
-            double angle = (Math.PI * 2 / points) * i;
+            double angle = phase + (Math.PI * 2 / points) * i;
             Location point = base.clone().add(
                     Math.cos(angle) * radius,
                     0,

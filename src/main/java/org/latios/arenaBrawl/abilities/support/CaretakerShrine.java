@@ -15,11 +15,14 @@ import org.latios.arenaBrawl.abilities.AbilityStat;
 import org.latios.arenaBrawl.abilities.CooldownManager;
 import org.latios.arenaBrawl.abilities.config.AbilityConfig;
 import org.latios.arenaBrawl.abilities.cost.CooldownCost;
+import org.latios.arenaBrawl.general.MessageUtils;
 import org.latios.arenaBrawl.general.PlayerHealthManager;
 import org.latios.arenaBrawl.general.SpeedBuffManager;
 import org.latios.arenaBrawl.team.TeamManager;
 import org.latios.arenaBrawl.upgrades.CombatUpgradeManager;
-
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.World;
+import org.bukkit.util.RayTraceResult;
 import java.util.List;
 
 public class CaretakerShrine implements Ability {
@@ -34,7 +37,8 @@ public class CaretakerShrine implements Ability {
     private final double maxHeal;
     private final int speedAmplifier;
     private final long speedDurationMs;
-
+    private static final double WALL_CLEARANCE = 0.4;
+    private static final double MIN_PLACEMENT_DISTANCE = 0.8;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final PlayerHealthManager healthManager;
@@ -75,6 +79,10 @@ public class CaretakerShrine implements Ability {
     @Override
     public boolean activate(Player player) {
         Location center = resolveCenter(player);
+        if (center == null) {
+            player.sendMessage(MessageUtils.noValidBlock());
+            return false;
+        }
         long placedAt = System.currentTimeMillis();
 
         center.getWorld().playSound(center, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.3f);
@@ -109,14 +117,108 @@ public class CaretakerShrine implements Ability {
         return true;
     }
 
+
     private Location resolveCenter(Player player) {
-        Vector direction = player.getLocation().getDirection().setY(0);
-        if (direction.lengthSquared() <= 0) {
+        Location base = player.getLocation();
+        World world = base.getWorld();
+        if (world == null) return null;
+
+        Vector direction = base.getDirection().setY(0);
+
+        if (direction.lengthSquared() < 1e-6) {
             direction = new Vector(0, 0, 1);
         }
-        direction.normalize().multiply(placementDistance);
-        return player.getLocation().clone().add(direction);
+
+        direction.normalize();
+
+        Location chest = base.clone().add(0, 1.0, 0);
+
+        if (!base.getBlock().isPassable()
+                || !chest.getBlock().isPassable()) {
+            return null;
+        }
+
+        double distance = placementDistance;
+
+        RayTraceResult hit = world.rayTraceBlocks(
+                chest,
+                direction,
+                placementDistance + WALL_CLEARANCE,
+                FluidCollisionMode.NEVER,
+                true
+        );
+
+        if (hit != null) {
+            double hitDistance = hit.getHitPosition()
+                    .distance(chest.toVector());
+
+            distance = Math.min(
+                    distance,
+                    hitDistance - WALL_CLEARANCE
+            );
+        }
+
+        if (distance < MIN_PLACEMENT_DISTANCE) {
+            return null;
+        }
+
+        Location target = base.clone().add(direction.multiply(distance));
+
+        // Find solid ground beneath the placement position.
+        return findGround(target);
     }
+
+    /**
+     * Finds a valid grounded shrine placement.
+     * Searches downward a few blocks but never allows
+     * the shrine to be placed unsupported in the air.
+     */
+    private Location findGround(Location target) {
+        World world = target.getWorld();
+        if (world == null) return null;
+
+        final int maxDrop = 4;
+
+        int startY = target.getBlockY();
+
+        for (int drop = 0; drop <= maxDrop; drop++) {
+            int feetY = startY - drop;
+
+            Location feet = new Location(
+                    world,
+                    target.getX(),
+                    feetY,
+                    target.getZ()
+            );
+
+            Location head = feet.clone().add(0, 1, 0);
+            Location ground = feet.clone().subtract(0, 1, 0);
+
+            // Must have space for the shrine/player-sized pickup area.
+            if (!feet.getBlock().isPassable()
+                    || !head.getBlock().isPassable()) {
+                continue;
+            }
+
+            // Must have a solid block directly underneath.
+            if (!ground.getBlock().getType().isSolid()) {
+                continue;
+            }
+
+            // Avoid placing in liquids.
+            if (feet.getBlock().isLiquid()
+                    || head.getBlock().isLiquid()) {
+                continue;
+            }
+
+            // Valid grounded position.
+            return feet;
+        }
+
+        // No suitable ground found.
+        return null;
+    }
+
 
     private Player findCollector(Player caster, Location center) {
         for (Entity entity : center.getWorld().getNearbyEntities(center, pickupRadius, pickupRadius, pickupRadius)) {

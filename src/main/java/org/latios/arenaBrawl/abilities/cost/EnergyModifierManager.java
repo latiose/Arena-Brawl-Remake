@@ -65,6 +65,17 @@ public class EnergyModifierManager {
         return true;
     }
 
+    /** Remaining time of a modifier, or {@code 0} when it is missing or expired. */
+    public long getRemainingMillis(Player player, String id) {
+        Map<String, ModifierEntry> map = activeModifiers.get(player.getUniqueId());
+        if (map == null) return 0L;
+
+        ModifierEntry entry = map.get(id);
+        if (entry == null || entry.isExpired()) return 0L;
+
+        return entry.getRemainingMillis();
+    }
+
     public double getTotalMultiplier(Player player) {
         Map<String, ModifierEntry> map = activeModifiers.get(player.getUniqueId());
         if (map == null || map.isEmpty()) return 1.0;

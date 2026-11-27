@@ -51,7 +51,8 @@ public class FlowerBreath extends Breath {
     private final long witheredBlindDurationMs;
     private final EnergyManager energyManager;
     private final StructureManager structureManager;
-
+    private final double feetSpawnChance;
+    private int hitsThisCast;
     public FlowerBreath(Plugin plugin, EnergyManager energyManager, TeamManager teamManager,
                         CombatService combatService, DebuffManager debuffManager,
                         StructureManager structureManager, AbilityConfig config) {
@@ -67,6 +68,7 @@ public class FlowerBreath extends Breath {
         this.redFireIntervalMs = config.getLong("red-fire-interval-ms", 500L);
         this.yellowEnergyDrain = config.getDouble("yellow-energy-drain", 10.0);
         this.witheredBlindDurationMs = config.getLong("withered-blind-duration-ms", 1_000L);
+        this.feetSpawnChance = config.getDouble("feet-spawn-chance", 0.75);
         this.energyManager = energyManager;
         this.structureManager = structureManager;
     }
@@ -96,19 +98,38 @@ public class FlowerBreath extends Breath {
     protected void applyHitEffects(Player caster, Player target) {
         target.getWorld().spawnParticle(Particle.SPORE_BLOSSOM_AIR,
                 target.getLocation().add(0, 1.0, 0), 8, 0.3, 0.4, 0.3, 0.0);
+
+        hitsThisCast++;
+
+        Location spot = null;
+        if (ThreadLocalRandom.current().nextDouble() < feetSpawnChance) {
+            spot = findGroundBelow(target.getLocation());
+        }
+        if (spot == null) {
+            spot = findFlowerLocation(caster);
+        }
+        if (spot != null) {
+            growFlower(caster, spot);
+        }
     }
 
     @Override
     public boolean activate(Player player) {
+        hitsThisCast = 0;
+
         boolean cast = super.activate(player);
         if (!cast) return false;
 
-        growFlower(player);
+        // Nobody was hit: keep the original single random flower
+        if (hitsThisCast == 0) {
+            Location spot = findFlowerLocation(player);
+            if (spot != null) {
+                growFlower(player, spot);
+            }
+        }
         return true;
     }
-
-    private void growFlower(Player player) {
-        Location location = findFlowerLocation(player);
+    private void growFlower(Player player, Location location) {
         if (location == null) return;
 
         FlowerKind kind = FlowerKind.random();
@@ -126,6 +147,7 @@ public class FlowerBreath extends Breath {
         EntityCleanupUtils.markAsArenaEntity(display);
 
         location.getWorld().playSound(location, Sound.BLOCK_GRASS_BREAK, 1.0f, 1.3f);
+        location.getWorld().playSound(location, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.6f, 1.9f);
         location.getWorld().spawnParticle(Particle.SPORE_BLOSSOM_AIR,
                 location.clone().add(0, 0.4, 0), 18, 0.4, 0.4, 0.4, 0.0);
         location.getWorld().spawnParticle(Particle.DUST,
@@ -197,7 +219,7 @@ public class FlowerBreath extends Breath {
                 new AbilityStat("Blue Flower", "Slowness II (" + (blueSlowDurationMs / 1000L) + "s)"),
                 new AbilityStat("Red Flower", (int) redFireTickDamage + " fire damage (" + (redFireDurationMs / 1000L) + "s)"),
                 new AbilityStat("Yellow Flower", "-" + (int) yellowEnergyDrain + " energy"),
-                new AbilityStat("Withered Flower", "Blindness (" + (witheredBlindDurationMs / 1000L) + "s)"),
+                new AbilityStat("Withered Flower", "Stun (" + (witheredBlindDurationMs / 1000L) + "s)"),
                 new AbilityStat("Energy Cost", String.valueOf((int) energyCost))
         );
     }
@@ -350,7 +372,7 @@ public class FlowerBreath extends Breath {
                     target.getWorld().playSound(target.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 0.6f);
                 }
                 case WITHERED -> {
-                    debuffManager.tryApply(owner, target, DebuffType.BLINDNESS, witheredBlindDurationMs);
+                    debuffManager.tryApply(owner, target, DebuffType.STUN, witheredBlindDurationMs);
                     target.getWorld().spawnParticle(Particle.SQUID_INK,
                             target.getLocation().add(0, 1.6, 0), 18, 0.35, 0.35, 0.35, 0.02);
                     target.getWorld().playSound(target.getLocation(), Sound.ENTITY_WITHER_SHOOT, 0.5f, 1.8f);

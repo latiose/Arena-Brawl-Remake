@@ -16,12 +16,14 @@ import org.latios.arenaBrawl.debuffs.DebuffType;
 import org.latios.arenaBrawl.general.CombatService;
 import org.latios.arenaBrawl.general.EnergyManager;
 import org.latios.arenaBrawl.team.TeamManager;
-
+import org.bukkit.util.BoundingBox;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
 public class CosmicBinding implements Ability {
-    private static final double WALL_GRACE = 3.0;
+    private static final double WALL_GRACE = 4.0;
     private final Plugin plugin;
     private final double energyCost;
     private final double damage;
@@ -30,7 +32,7 @@ public class CosmicBinding implements Ability {
     private final double hitRadius;
     private final long slowDurationMs;
     private final long stunDurationMs;
-
+    private final double aoeRadius;
     private final AbilityCost cost;
     private final TeamManager teamManager;
     private final CombatService combatService;
@@ -46,7 +48,7 @@ public class CosmicBinding implements Ability {
         this.hitRadius = config.getDouble("hit-radius", 0.4);
         this.slowDurationMs = config.getLong("slow-duration-ms", 1000L);
         this.stunDurationMs = config.getLong("stun-duration-ms", 1300L);
-
+        this.aoeRadius = config.getDouble("aoe-radius", 2.0);
         this.cost = new EnergyCost(energyManager, energyCost);
         this.teamManager = teamManager;
         this.combatService = combatService;
@@ -109,7 +111,9 @@ public class CosmicBinding implements Ability {
                         hitAt = traveled + entityDistance;
                         debuffManager.tryApply(player, target, DebuffType.SLOW, slowDurationMs);
 
-                        if (blockHit != null && (blockDistance - entityDistance) <= WALL_GRACE) {
+                        if (isWallBehind(target, direction)
+                                ||(isWall(blockHit) && Math.abs(direction.getY()) <= MAX_WALL_PITCH
+                                && (blockDistance - entityDistance) <= WALL_GRACE)) {
                             stun(player, firstTarget);
                             cancel();
                             return;
@@ -121,10 +125,28 @@ public class CosmicBinding implements Ability {
                         return;
                     }
                 } else if (blockHit != null) {
-                    if (firstTarget != null && firstTarget.isOnline() && !firstTarget.isDead()
-                            && (traveled + blockDistance - hitAt) <= WALL_GRACE) {
-                        stun(player, firstTarget);
-                        current.getWorld().spawnParticle(Particle.FIREWORK, current, 12, 0.15, 0.15, 0.15, 0.05);
+                    if (firstTarget == null) {
+                        Location impact = blockHit.getHitPosition().toLocation(current.getWorld());
+                        List<Player> victims = findAoeTargets(player, impact);
+
+                        if (!victims.isEmpty()) {
+                            Player first = victims.get(0);
+                            hit(player, first, impact);
+                            debuffManager.tryApply(player, first, DebuffType.SLOW, slowDurationMs);
+
+                            if (victims.size() > 1) {
+                                Player second = victims.get(1);
+                                hit(player, second, impact);
+                                stun(player, first);
+                                stun(player, second);
+                            } else if (isWall(blockHit) && Math.abs(direction.getY()) <= MAX_WALL_PITCH) {
+                                stun(player, first);
+                            }
+
+                            drawBurst(impact);
+                            cancel();
+                            return;
+                        }
                     }
                     cancel();
                     return;
@@ -181,6 +203,71 @@ public class CosmicBinding implements Ability {
         return "Launches a cosmic binding that damages and slows the first enemy hit. "
                 + "If it then hits a second enemy or a wall, both targets are stunned.";
     }
+    private static final double MAX_WALL_PITCH = 0.5;
+    private boolean isWallBehind(Player target, Vector direction) {
+        // Steep up/down shots (about 30 degrees or more) never count as pushing into a wall
+        if (Math.abs(direction.getY()) > MAX_WALL_PITCH) return false;
+
+        Vector flat = direction.clone().setY(0);
+        if (flat.lengthSquared() < 1e-6) return false;
+        flat.normalize();
+
+        World world = target.getWorld();
+        for (double height : new double[]{0.3, 1.0, 1.7}) {
+            Location origin = target.getLocation().add(0, height, 0);
+            RayTraceResult result = world.rayTraceBlocks(origin, flat, WALL_GRACE, FluidCollisionMode.NEVER, true);
+            if (isWall(result)) return true;
+        }
+        return false;
+    }
+
+    private boolean isWall(RayTraceResult result) {
+        if (result == null || result.getHitBlockFace() == null) return false;
+        return switch (result.getHitBlockFace()) {
+            case NORTH, SOUTH, EAST, WEST -> true;
+            default -> false;
+        };
+    }
+
+    private List<Player> findAoeTargets(Player caster, Location impact) {
+        List<Player> found = new ArrayList<>();
+        Vector point = impact.toVector();
+
+        for (Player candidate : impact.getWorld().getPlayers()) {
+            if (candidate.equals(caster) || candidate.isDead()) continue;
+            if (candidate.getGameMode() == GameMode.SPECTATOR) continue;
+            if (!teamManager.isEnemy(caster, candidate)) continue;
+            if (distanceToBox(candidate.getBoundingBox(), point) <= aoeRadius) {
+                found.add(candidate);
+            }
+        }
+
+        found.sort(Comparator.comparingDouble(p -> distanceToBox(p.getBoundingBox(), point)));
+        return found;
+    }
+
+    /** Distance from a point to the closest point on a bounding box (0 if inside). */
+    private double distanceToBox(BoundingBox box, Vector p) {
+        double dx = Math.max(Math.max(box.getMinX() - p.getX(), 0), p.getX() - box.getMaxX());
+        double dy = Math.max(Math.max(box.getMinY() - p.getY(), 0), p.getY() - box.getMaxY());
+        double dz = Math.max(Math.max(box.getMinZ() - p.getZ(), 0), p.getZ() - box.getMaxZ());
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    private void drawBurst(Location impact) {
+        World world = impact.getWorld();
+        world.spawnParticle(Particle.FIREWORK, impact, 25, aoeRadius * 0.4, 0.2, aoeRadius * 0.4, 0.05);
+        world.spawnParticle(Particle.END_ROD, impact, 15, aoeRadius * 0.4, 0.2, aoeRadius * 0.4, 0.03);
+
+        int points = 16;
+        for (int i = 0; i < points; i++) {
+            double angle = (Math.PI * 2.0 / points) * i;
+            world.spawnParticle(Particle.DUST,
+                    impact.clone().add(Math.cos(angle) * aoeRadius, 0.1, Math.sin(angle) * aoeRadius),
+                    1, 0, 0, 0, new Particle.DustOptions(Color.fromRGB(255, 220, 130), 1.0f));
+        }
+        world.playSound(impact, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.2f, 1.5f);
+    }
 
     @Override
     public List<AbilityStat> getStats() {
@@ -189,7 +276,8 @@ public class CosmicBinding implements Ability {
                 new AbilityStat("Slow", (slowDurationMs / 1000.0) + "s"),
                 new AbilityStat("Stun", (stunDurationMs / 1000.0) + "s"),
                 new AbilityStat("Range", (int) maxRange + " blocks"),
-                new AbilityStat("Energy Cost", String.valueOf((int) energyCost))
+                new AbilityStat("Energy Cost", String.valueOf((int) energyCost)),
+                new AbilityStat("Impact Radius", aoeRadius + " blocks")
         );
     }
 }
